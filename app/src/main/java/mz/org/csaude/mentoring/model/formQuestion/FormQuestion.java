@@ -1,14 +1,13 @@
 package mz.org.csaude.mentoring.model.formQuestion;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
-
-
-import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.formQuestion.FormQuestionDAImpl;
-import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.dto.form.FormQuestionDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
@@ -16,44 +15,81 @@ import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.model.responseType.ResponseType;
 
-
-@DatabaseTable(tableName = FormQuestion.TABLE_NAME, daoClass = FormQuestionDAImpl.class)
-
+@Entity(tableName = FormQuestion.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Form.class,
+                        parentColumns = "id",
+                        childColumns = FormQuestion.COLUMN_FORM,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Question.class,
+                        parentColumns = "id",
+                        childColumns = FormQuestion.COLUMN_QUESTION,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = EvaluationType.class,
+                        parentColumns = "id",
+                        childColumns = FormQuestion.COLUMN_EVALUATION_TYPE,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = ResponseType.class,
+                        parentColumns = "id",
+                        childColumns = FormQuestion.COLUMN_RESPONSE_TYPE,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {FormQuestion.COLUMN_FORM}),
+                @Index(value = {FormQuestion.COLUMN_QUESTION}),
+                @Index(value = {FormQuestion.COLUMN_EVALUATION_TYPE}),
+                @Index(value = {FormQuestion.COLUMN_RESPONSE_TYPE})
+        })
 public class FormQuestion extends BaseModel {
 
     public static final String TABLE_NAME = "form_question";
     public static final String COLUMN_FORM = "form_id";
-
     public static final String COLUMN_QUESTION = "question_id";
     public static final String COLUMN_EVALUATION_TYPE = "evaluation_type_id";
     public static final String COLUMN_RESPONSE_TYPE = "response_type_id";
-
     public static final String COLUMN_MANDATORY = "mandatory";
-
     public static final String COLUMN_SEQUENCE = "sequence";
-
     public static final String COLUMN_APPLICABLE = "applicable";
 
-    @DatabaseField(columnName = COLUMN_FORM, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @ColumnInfo(name = COLUMN_FORM)
+    private int formId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
     private Form form;
 
-    @DatabaseField(columnName = COLUMN_QUESTION, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @ColumnInfo(name = COLUMN_QUESTION)
+    private int questionId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_QUESTION, entityColumn = "id")
     private Question question;
-    @DatabaseField(columnName = COLUMN_EVALUATION_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+
+    @ColumnInfo(name = COLUMN_EVALUATION_TYPE)
+    private int evaluationTypeId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_EVALUATION_TYPE, entityColumn = "id")
     private EvaluationType evaluationType;
-    @DatabaseField(columnName = COLUMN_RESPONSE_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+
+    @ColumnInfo(name = COLUMN_RESPONSE_TYPE)
+    private int responseTypeId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_RESPONSE_TYPE, entityColumn = "id")
     private ResponseType responseType;
 
-    @DatabaseField(columnName = COLUMN_MANDATORY)
+    @ColumnInfo(name = COLUMN_MANDATORY)
     private boolean mandatory;
 
-    private Answer answer;
-
-    @DatabaseField(columnName = COLUMN_SEQUENCE)
+    @ColumnInfo(name = COLUMN_SEQUENCE)
     private Integer sequence;
 
-    @DatabaseField(columnName = COLUMN_APPLICABLE)
+    @ColumnInfo(name = COLUMN_APPLICABLE)
     private Boolean applicable;
+
+    @Ignore
+    private Answer answer;
 
     public FormQuestion() {
     }
@@ -61,10 +97,10 @@ public class FormQuestion extends BaseModel {
     public FormQuestion(FormQuestionDTO formQuestionDTO) {
         super(formQuestionDTO);
         this.setSequence(formQuestionDTO.getSequence());
-        if(formQuestionDTO.getQuestion()!=null)  this.setQuestion(new Question(formQuestionDTO.getQuestion()));
-        if(formQuestionDTO.getEvaluationType()!=null) this.setEvaluationType(new EvaluationType(formQuestionDTO.getEvaluationType()));
-        if(formQuestionDTO.getResponseType()!=null) this.setResponseType(new ResponseType(formQuestionDTO.getResponseType()));
-        if(formQuestionDTO.getForm()!=null) this.setForm(new Form(formQuestionDTO.getForm()));
+        if (formQuestionDTO.getQuestion() != null) this.setQuestion(new Question(formQuestionDTO.getQuestion()));
+        if (formQuestionDTO.getEvaluationType() != null) this.setEvaluationType(new EvaluationType(formQuestionDTO.getEvaluationType()));
+        if (formQuestionDTO.getResponseType() != null) this.setResponseType(new ResponseType(formQuestionDTO.getResponseType()));
+        if (formQuestionDTO.getForm() != null) this.setForm(new Form(formQuestionDTO.getForm()));
     }
 
     public Form getForm() {
@@ -89,10 +125,12 @@ public class FormQuestion extends BaseModel {
 
     public void setForm(Form form) {
         this.form = form;
+        this.formId = form.getId();
     }
 
     public void setQuestion(Question question) {
         this.question = question;
+        this.questionId = question.getId();
     }
 
     public EvaluationType getEvaluationType() {
@@ -101,6 +139,7 @@ public class FormQuestion extends BaseModel {
 
     public void setEvaluationType(EvaluationType evaluationType) {
         this.evaluationType = evaluationType;
+        this.evaluationTypeId = evaluationType.getId();
     }
 
     public ResponseType getResponseType() {
@@ -109,6 +148,7 @@ public class FormQuestion extends BaseModel {
 
     public void setResponseType(ResponseType responseType) {
         this.responseType = responseType;
+        this.responseTypeId = responseType.getId();
     }
 
     public void setMandatory(boolean mandatory) {

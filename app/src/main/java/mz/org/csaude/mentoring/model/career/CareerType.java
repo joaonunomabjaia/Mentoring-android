@@ -1,42 +1,36 @@
 package mz.org.csaude.mentoring.model.career;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.career.CareerTypeDAOImpl;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
 
-
-@DatabaseTable(tableName = CareerType.COLUMN_TABLE_NAME, daoClass = CareerTypeDAOImpl.class)
-
+@Entity(tableName = CareerType.COLUMN_TABLE_NAME)
 public class CareerType extends BaseModel implements Listble {
 
     public static final String COLUMN_TABLE_NAME = "career_type";
-
     public static final String COLUMN_DESCRIPTION = "description";
-
     public static final String COLUMN_CODE = "code";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
-    @DatabaseField(columnName = COLUMN_CODE)
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
+
     public CareerType() {
         super();
     }
-
 
     public CareerType(String description, String code) {
         this.description = description;
         this.code = code;
     }
 
-    public CareerType(CareerTypeDTO careerTypeDTO){
+    public CareerType(CareerTypeDTO careerTypeDTO) {
         super(careerTypeDTO);
         this.setCode(careerTypeDTO.getCode());
         this.setDescription(careerTypeDTO.getDescription());

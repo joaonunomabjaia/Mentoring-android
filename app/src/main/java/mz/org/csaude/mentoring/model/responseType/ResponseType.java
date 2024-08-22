@@ -1,29 +1,26 @@
 package mz.org.csaude.mentoring.model.responseType;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.responseType.ResponseTypeDAOImpl;
 import mz.org.csaude.mentoring.dto.responseType.ResponseTypeDTO;
 
-
-@DatabaseTable(tableName = ResponseType.TABLE_NAME, daoClass = ResponseTypeDAOImpl.class)
-
+@Entity(tableName = ResponseType.TABLE_NAME,
+        indices = {
+                @Index(value = {ResponseType.COLUMN_CODE}, unique = true)
+        })
 public class ResponseType extends BaseModel {
 
     public static final String TABLE_NAME = "response_type";
-
     public static final String COLUMN_DESCRIPTION = "description";
-
     public static final String COLUMN_CODE = "code";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
-    @DatabaseField(columnName = COLUMN_CODE, unique = true)
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
     public ResponseType() {
@@ -34,10 +31,10 @@ public class ResponseType extends BaseModel {
         this.code = code;
     }
 
-    public ResponseType(ResponseTypeDTO responseType) {
-        super(responseType);
-        this.setCode(responseType.getCode());
-        this.setDescription(responseType.getDescription());
+    public ResponseType(ResponseTypeDTO responseTypeDTO) {
+        super(responseTypeDTO);
+        this.setCode(responseTypeDTO.getCode());
+        this.setDescription(responseTypeDTO.getDescription());
     }
 
     public String getDescription() {

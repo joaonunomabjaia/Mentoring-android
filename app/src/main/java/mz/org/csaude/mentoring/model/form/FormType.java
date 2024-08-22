@@ -1,36 +1,33 @@
 package mz.org.csaude.mentoring.model.form;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
-
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.form.FormTypeDAOImpl;
 
-
-
-@DatabaseTable(tableName = FormType.COLUMN_TABLE_NAME, daoClass = FormTypeDAOImpl.class)
-
+@Entity(tableName = FormType.COLUMN_TABLE_NAME,
+        indices = {
+                @Index(value = {FormType.COLUMN_CODE}, unique = true)
+        })
 public class FormType extends BaseModel {
 
-    public static final String COLUMN_TABLE_NAME = "career_type";
+    public static final String COLUMN_TABLE_NAME = "form_type";  // Corrected table name
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
-    private String descripion;
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
+    private String description;  // Corrected typo from 'descripion' to 'description'
 
-    @DatabaseField(columnName = COLUMN_CODE)
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
-    public String getDescripion() {
-        return descripion;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescripion(String descripion) {
-        this.descripion = descripion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getCode() {

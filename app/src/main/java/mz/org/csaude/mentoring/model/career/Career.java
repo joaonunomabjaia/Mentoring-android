@@ -1,28 +1,38 @@
 package mz.org.csaude.mentoring.model.career;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.career.CareerDAOImpl;
 import mz.org.csaude.mentoring.dto.career.CareerDTO;
 
-
-@DatabaseTable(tableName = Career.TABLE_NAME, daoClass = CareerDAOImpl.class)
-
+@Entity(tableName = Career.TABLE_NAME,
+        foreignKeys = @ForeignKey(entity = CareerType.class,
+                parentColumns = "id",
+                childColumns = "career_type_id",
+                onDelete = ForeignKey.CASCADE),
+        indices = @Index(value = {"career_type_id"})
+)
 public class Career extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "career";
     public static final String COLUMN_POSITION = "position";
     public static final String COLUMN_CAREER_TYPE = "career_type_id";
 
-    @DatabaseField(columnName = COLUMN_CAREER_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @ColumnInfo(name = COLUMN_CAREER_TYPE)
+    private int careerTypeId;
+
+    @Ignore
+    @Relation(parentColumn = "career_type_id", entityColumn = "id")
     private CareerType careerType;
 
-    @DatabaseField(columnName = COLUMN_POSITION)
+    @ColumnInfo(name = COLUMN_POSITION)
     private String position;
 
     public Career() {
@@ -32,7 +42,9 @@ public class Career extends BaseModel implements Listble {
     public Career(CareerDTO careerDTO) {
         this.setUuid(careerDTO.getUuid());
         this.setPosition(careerDTO.getPosition());
-        if(careerDTO.getCareerTypeDTO()!=null) this.setCareerType(new CareerType(careerDTO.getCareerTypeDTO()));
+        if (careerDTO.getCareerTypeDTO() != null) {
+            this.setCareerType(new CareerType(careerDTO.getCareerTypeDTO()));
+        }
     }
 
     public CareerType getCareerType() {
@@ -41,6 +53,7 @@ public class Career extends BaseModel implements Listble {
 
     public void setCareerType(CareerType careerType) {
         this.careerType = careerType;
+        this.careerTypeId = careerType.getId();
     }
 
     public String getPosition() {

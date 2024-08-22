@@ -1,29 +1,40 @@
 package mz.org.csaude.mentoring.model.location;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.location.DistrictDAOImpl;
 import mz.org.csaude.mentoring.dto.location.DistrictDTO;
 
-
-@DatabaseTable(tableName = District.TABLE_NAME, daoClass = DistrictDAOImpl.class)
-
+@Entity(tableName = District.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Province.class,
+                        parentColumns = "id",
+                        childColumns = District.COLUMN_PROVINCE,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {District.COLUMN_PROVINCE}),
+                @Index(value = {District.COLUMN_DISTRICT}, unique = true)
+        })
 public class District extends BaseModel {
 
     public static final String TABLE_NAME = "district";
-
     public static final String COLUMN_PROVINCE = "province_id";
-
     public static final String COLUMN_DISTRICT = "district";
 
-    @DatabaseField(columnName = COLUMN_PROVINCE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @ColumnInfo(name = COLUMN_PROVINCE)
+    private int provinceId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_PROVINCE, entityColumn = "id")
     private Province province;
 
-    @DatabaseField(columnName = COLUMN_DISTRICT, unique = true, canBeNull = false)
+    @ColumnInfo(name = COLUMN_DISTRICT)
     private String district;
 
     public District() {
@@ -31,13 +42,16 @@ public class District extends BaseModel {
 
     public District(Province province, String district) {
         this.province = province;
+        this.provinceId = province.getId();
         this.district = district;
     }
 
     public District(DistrictDTO districtDTO) {
         this.setUuid(districtDTO.getUuid());
         this.setDescription(districtDTO.getDescription());
-        if(districtDTO.getProvinceDTO() != null) this.setProvince(new Province(districtDTO.getProvinceDTO()));
+        if (districtDTO.getProvinceDTO() != null) {
+            this.setProvince(new Province(districtDTO.getProvinceDTO()));
+        }
     }
 
     public Province getProvince() {
@@ -46,6 +60,7 @@ public class District extends BaseModel {
 
     public void setProvince(Province province) {
         this.province = province;
+        this.provinceId = province.getId();
     }
 
     public String getDescription() {
@@ -65,5 +80,4 @@ public class District extends BaseModel {
     public void setDescription(String district) {
         this.district = district;
     }
-
 }

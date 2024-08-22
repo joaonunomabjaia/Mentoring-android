@@ -1,25 +1,22 @@
 package mz.org.csaude.mentoring.model.question;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Index;
 
-
-
-import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.question.QuestionsCategoryDAOImpl;
 import mz.org.csaude.mentoring.dto.question.QuestionCategoryDTO;
 
-
-@DatabaseTable(tableName = QuestionsCategory.TABLE_NAME, daoClass = QuestionsCategoryDAOImpl.class)
-
+@Entity(tableName = QuestionsCategory.TABLE_NAME,
+        indices = {
+                @Index(value = {QuestionsCategory.COLUMN_CATEGORY}, unique = true)
+        })
 public class QuestionsCategory extends BaseModel {
 
     public static final String TABLE_NAME = "question_category";
-
     public static final String COLUMN_CATEGORY = "category";
 
-    @DatabaseField(columnName = COLUMN_CATEGORY)
+    @ColumnInfo(name = COLUMN_CATEGORY)
     private String category;
 
     public QuestionsCategory() {
@@ -29,9 +26,9 @@ public class QuestionsCategory extends BaseModel {
         this.category = category;
     }
 
-    public QuestionsCategory(QuestionCategoryDTO questionCategory) {
-        super(questionCategory);
-        this.setCategory(questionCategory.getCategory());
+    public QuestionsCategory(QuestionCategoryDTO questionCategoryDTO) {
+        super(questionCategoryDTO);
+        this.setCategory(questionCategoryDTO.getCategory());
     }
 
     public String getCategory() {

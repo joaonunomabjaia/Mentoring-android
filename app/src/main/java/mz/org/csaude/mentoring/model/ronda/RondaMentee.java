@@ -1,25 +1,62 @@
 package mz.org.csaude.mentoring.model.ronda;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+import androidx.room.Relation;
 
 import java.util.Date;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.ronda.RondaMenteeDAOImpl;
 import mz.org.csaude.mentoring.dto.ronda.RondaMenteeDTO;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
 
-
-@DatabaseTable(tableName = RondaMentee.TABLE_NAME, daoClass = RondaMenteeDAOImpl.class)
+@Entity(tableName = RondaMentee.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Ronda.class,
+                        parentColumns = "id",
+                        childColumns = RondaMentee.COLUMN_RONDA,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutored.class,
+                        parentColumns = "id",
+                        childColumns = RondaMentee.COLUMN_MENTEE,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {RondaMentee.COLUMN_RONDA}),
+                @Index(value = {RondaMentee.COLUMN_MENTEE})
+        })
 public class RondaMentee extends BaseModel {
+
     public static final String TABLE_NAME = "ronda_mentee";
     public static final String COLUMN_RONDA = "ronda_id";
     public static final String COLUMN_MENTEE = "mentee_id";
     public static final String COLUMN_START_DATE = "start_date";
-
     public static final String COLUMN_END_DATE = "end_date";
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @ColumnInfo(name = COLUMN_RONDA)
+    private int rondaId;
+
+    @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
+    private Ronda ronda;
+
+    @ColumnInfo(name = COLUMN_MENTEE)
+    private int menteeId;
+
+    @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
+    private Tutored tutored;
+
+    @ColumnInfo(name = COLUMN_START_DATE)
+    private Date startDate;
+
+    @ColumnInfo(name = COLUMN_END_DATE)
+    private Date endDate;
 
     public RondaMentee() {
     }
@@ -28,35 +65,34 @@ public class RondaMentee extends BaseModel {
         this.ronda = ronda;
         this.tutored = tutored;
         this.startDate = startDate;
+        this.rondaId = ronda.getId();
+        this.menteeId = tutored.getId();
     }
-
-    @DatabaseField(columnName = COLUMN_RONDA, canBeNull = false, foreign = true, foreignAutoRefresh = true )
-    private Ronda ronda;
-
-    @DatabaseField(columnName = COLUMN_MENTEE, canBeNull = false, foreign = true, foreignAutoRefresh = true )
-    private Tutored tutored;
-
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
-    private Date startDate;
-
-    @DatabaseField(columnName = COLUMN_END_DATE)
-    private Date endDate;
 
     public RondaMentee(RondaMenteeDTO rondaMenteeDTO) {
         super(rondaMenteeDTO);
         this.setStartDate(rondaMenteeDTO.getStartDate());
         this.setEndDate(rondaMenteeDTO.getEndDate());
-        if(rondaMenteeDTO.getMentee()!=null) {
+        if (rondaMenteeDTO.getMentee() != null) {
             this.setTutored(new Tutored(rondaMenteeDTO.getMentee()));
+            this.menteeId = this.tutored.getId();
         }
-        if(rondaMenteeDTO.getRonda()!=null) {
+        if (rondaMenteeDTO.getRonda() != null) {
             this.setRonda(new Ronda(rondaMenteeDTO.getRonda()));
+            this.rondaId = this.ronda.getId();
         }
     }
 
-
     public static RondaMentee fastCreate(Ronda ronda, Tutored mentee) {
         return new RondaMentee(ronda, mentee, DateUtilities.getCurrentDate());
+    }
+
+    public int getRondaId() {
+        return rondaId;
+    }
+
+    public void setRondaId(int rondaId) {
+        this.rondaId = rondaId;
     }
 
     public Ronda getRonda() {
@@ -65,6 +101,14 @@ public class RondaMentee extends BaseModel {
 
     public void setRonda(Ronda ronda) {
         this.ronda = ronda;
+    }
+
+    public int getMenteeId() {
+        return menteeId;
+    }
+
+    public void setMenteeId(int menteeId) {
+        this.menteeId = menteeId;
     }
 
     public Tutored getTutored() {

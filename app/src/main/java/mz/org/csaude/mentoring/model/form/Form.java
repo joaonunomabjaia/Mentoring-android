@@ -1,53 +1,73 @@
 package mz.org.csaude.mentoring.model.form;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
 import java.util.Objects;
 
-
-
-
-import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.form.FormDAOImpl;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.programmaticArea.ProgrammaticArea;
 
-
-@DatabaseTable(tableName = Form.TABLE_NAME, daoClass = FormDAOImpl.class)
-
+@Entity(tableName = Form.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = ProgrammaticArea.class,
+                        parentColumns = "id",
+                        childColumns = Form.COLUMN_PROGRAMMATIC_AREA,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Partner.class,
+                        parentColumns = "id",
+                        childColumns = Form.COLUMN_PARTNER,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Form.COLUMN_CODE}, unique = true),
+                @Index(value = {Form.COLUMN_PROGRAMMATIC_AREA}),
+                @Index(value = {Form.COLUMN_PARTNER})
+        })
 public class Form extends BaseModel {
 
     public static final String TABLE_NAME = "form";
-    public static final String COLUMN_NAME= "name";
+    public static final String COLUMN_NAME = "name";
     public static final String COLUMN_CODE = "code";
     public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_PROGRAMMATIC_AREA= "programmatic_area_type_id";
+    public static final String COLUMN_PROGRAMMATIC_AREA = "programmatic_area_type_id";
     public static final String COLUMN_TARGET_PATIENT = "target_patient";
     public static final String COLUMN_TARGET_FILE = "target_file";
     public static final String COLUMN_PARTNER = "partner_id";
 
-    @DatabaseField(columnName = COLUMN_NAME)
+    @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
-    @DatabaseField(columnName = COLUMN_CODE)
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
-    @DatabaseField(columnName = COLUMN_PROGRAMMATIC_AREA, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+    @ColumnInfo(name = COLUMN_PROGRAMMATIC_AREA)
+    private int programmaticAreaId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_PROGRAMMATIC_AREA, entityColumn = "id")
     private ProgrammaticArea programmaticArea;
 
-    @DatabaseField(columnName = COLUMN_TARGET_PATIENT)
+    @ColumnInfo(name = COLUMN_TARGET_PATIENT)
     private int targetPatient;
 
-    @DatabaseField(columnName = COLUMN_TARGET_FILE)
+    @ColumnInfo(name = COLUMN_TARGET_FILE)
     private int targetFile;
 
-    @DatabaseField(columnName = COLUMN_PARTNER, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+    @ColumnInfo(name = COLUMN_PARTNER)
+    private int partnerId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_PARTNER, entityColumn = "id")
     private Partner partner;
 
     public Form() {
@@ -60,8 +80,12 @@ public class Form extends BaseModel {
         this.setName(formDTO.getName());
         this.setTargetFile(formDTO.getTargetFile());
         this.setTargetPatient(formDTO.getTargetPatient());
-        if (formDTO.getPartner() != null) this.setPartner(new Partner(formDTO.getPartner()));
-        if (formDTO.getProgrammaticArea() != null) this.setProgrammaticArea(new ProgrammaticArea(formDTO.getProgrammaticArea()));
+        if (formDTO.getPartner() != null) {
+            this.setPartner(new Partner(formDTO.getPartner()));
+        }
+        if (formDTO.getProgrammaticArea() != null) {
+            this.setProgrammaticArea(new ProgrammaticArea(formDTO.getProgrammaticArea()));
+        }
     }
 
     public String getName() {
@@ -94,6 +118,7 @@ public class Form extends BaseModel {
 
     public void setProgrammaticArea(ProgrammaticArea programmaticArea) {
         this.programmaticArea = programmaticArea;
+        this.programmaticAreaId = programmaticArea.getId();
     }
 
     public int getTargetPatient() {
@@ -118,6 +143,7 @@ public class Form extends BaseModel {
 
     public void setPartner(Partner partner) {
         this.partner = partner;
+        this.partnerId = partner.getId();
     }
 
     @Override

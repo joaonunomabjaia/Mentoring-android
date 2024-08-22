@@ -110,5 +110,8 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'com.itextpdf:itext7-core:7.2.3'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'net.zetetic:android-database-sqlcipher:4.5.0@aar'
+    implementation "androidx.room:room-runtime:2.5.0"
+    annotationProcessor "androidx.room:room-compiler:2.5.0"
+    implementation "net.zetetic:android-database-sqlcipher:4.5.0"
+
 }

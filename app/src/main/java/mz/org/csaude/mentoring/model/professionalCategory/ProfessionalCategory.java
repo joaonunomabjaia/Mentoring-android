@@ -1,31 +1,31 @@
 package mz.org.csaude.mentoring.model.professionalCategory;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Index;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.professionalCategoryDAO.ProfessionalCategoryDAOImpl;
 import mz.org.csaude.mentoring.dto.professionalcategory.ProfessionalCategoryDTO;
 
-
-@DatabaseTable(tableName = ProfessionalCategory.TABLE_NAME, daoClass = ProfessionalCategoryDAOImpl.class)
-public class ProfessionalCategory extends BaseModel implements Listble{
+@Entity(tableName = ProfessionalCategory.TABLE_NAME,
+        indices = {
+                @Index(value = {ProfessionalCategory.COLUMN_CODE}, unique = true)
+        })
+public class ProfessionalCategory extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "professional_category";
-
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
+
+    @ColumnInfo(name = COLUMN_CODE)
+    private String code;
 
     public ProfessionalCategory() {
     }
-
-    @DatabaseField(columnName = COLUMN_CODE)
-    private  String code;
-
 
     public ProfessionalCategory(ProfessionalCategoryDTO professionalCategoryDTO) {
         super(professionalCategoryDTO);
@@ -53,6 +53,6 @@ public class ProfessionalCategory extends BaseModel implements Listble{
 
     @Override
     public String getCode() {
-        return null;
+        return this.code;
     }
 }

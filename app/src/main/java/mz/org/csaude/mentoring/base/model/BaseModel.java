@@ -1,48 +1,53 @@
 package mz.org.csaude.mentoring.base.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.PrimaryKey;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
-
-
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 
-
-
 public abstract class BaseModel implements Serializable, Listble {
 
     public static final String COLUMN_ID = "id";
-
     public static final String COLUMN_UUID = "uuid";
-
     public static final String COLUMN_LIFE_CYCLE_STATUS = "life_cycle_status";
     public static final String COLUMN_SYNC_STATUS = "sync_status";
     public static final String COLUMN_CREATED_AT = "created_at";
     public static final String COLUMN_UPDATED_AT = "updated_at";
 
-    @DatabaseField(columnName = COLUMN_ID, canBeNull = false, generatedId = true, allowGeneratedIdInsert = true)
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = COLUMN_ID)
     private Integer id;
 
-    @DatabaseField(columnName = COLUMN_UUID, unique = true)
+    @ColumnInfo(name = COLUMN_UUID)
     private String uuid;
 
     protected String listTyp;
 
-    @DatabaseField(columnName = COLUMN_SYNC_STATUS, canBeNull = true)
+    @ColumnInfo(name = COLUMN_SYNC_STATUS)
     private SyncSatus syncStatus;
-    @DatabaseField(columnName = COLUMN_CREATED_AT, canBeNull = true)
+
+    @ColumnInfo(name = COLUMN_CREATED_AT)
     private Date createdAt;
-    @DatabaseField(columnName = COLUMN_UPDATED_AT, canBeNull = true)
+
+    @ColumnInfo(name = COLUMN_UPDATED_AT)
     private Date updatedAt;
 
     protected boolean selected;
+
+    @ColumnInfo(name = COLUMN_LIFE_CYCLE_STATUS)
+    private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
+
+    protected int listPosition;
+
     public BaseModel() {
     }
 
@@ -56,11 +61,6 @@ public abstract class BaseModel implements Serializable, Listble {
         this.setUpdatedAt(baseEntityDTO.getUpdatedAt());
         this.setLifeCycleStatus(baseEntityDTO.getLifeCycleStatus());
     }
-
-    @DatabaseField(columnName = COLUMN_LIFE_CYCLE_STATUS)
-    private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
-
-    protected int listPosition;
 
     public Integer getId() {
         return id;

@@ -1,10 +1,14 @@
 package mz.org.csaude.mentoring.model.employee;
 
 import androidx.core.util.PatternsCompat;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +20,6 @@ import java.util.Objects;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.employee.EmployeeDAOImpl;
 import mz.org.csaude.mentoring.dto.employee.EmployeeDTO;
 import mz.org.csaude.mentoring.dto.location.LocationDTO;
 import mz.org.csaude.mentoring.model.location.Location;
@@ -24,68 +27,86 @@ import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.util.Utilities;
 
-
-@DatabaseTable(tableName = Employee.TABLE_NAME, daoClass = EmployeeDAOImpl.class)
+@Entity(tableName = Employee.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = ProfessionalCategory.class,
+                        parentColumns = "id",
+                        childColumns = Employee.COLUMN_PROFESSIONAL_CATEGORY,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Partner.class,
+                        parentColumns = "id",
+                        childColumns = Employee.COLUMN_PARTNER,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Employee.COLUMN_PROFESSIONAL_CATEGORY}),
+                @Index(value = {Employee.COLUMN_PARTNER}),
+                @Index(value = {Employee.COLUMN_EMAIL}, unique = true),
+                @Index(value = {Employee.COLUMN_PHONE_NUMBER}, unique = true),
+                @Index(value = {Employee.COLUMN_NUIT}, unique = true)
+        })
 public class Employee extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "employee";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_SURNAME = "surname";
-
     public static final String COLUMN_NUIT = "nuit";
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_PROFESSIONAL_CATEGORY = "professional_category_id";
-
     public static final String COLUMN_TRAINING_YEAR = "training_year";
     public static final String COLUMN_PHONE_NUMBER = "phone_number";
     public static final String COLUMN_PARTNER = "partner_id";
 
-    @DatabaseField(columnName = COLUMN_NAME)
+    @ColumnInfo(name = COLUMN_NAME)
     private String name;
-    @DatabaseField(columnName = COLUMN_SURNAME)
+
+    @ColumnInfo(name = COLUMN_SURNAME)
     private String surname;
 
-    @DatabaseField(columnName = COLUMN_NUIT, unique = true)
+    @ColumnInfo(name = COLUMN_NUIT)
     private long nuit;
-    @DatabaseField(columnName = COLUMN_PROFESSIONAL_CATEGORY, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+
+    @ColumnInfo(name = COLUMN_PROFESSIONAL_CATEGORY)
+    private int professionalCategoryId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_PROFESSIONAL_CATEGORY, entityColumn = "id")
     private ProfessionalCategory professionalCategory;
 
-    @DatabaseField(columnName = COLUMN_TRAINING_YEAR)
+    @ColumnInfo(name = COLUMN_TRAINING_YEAR)
     private int trainingYear;
 
-    @DatabaseField(columnName = COLUMN_PHONE_NUMBER, unique = true)
+    @ColumnInfo(name = COLUMN_PHONE_NUMBER)
     private String phoneNumber;
 
-    @DatabaseField(columnName = COLUMN_EMAIL, unique = true)
+    @ColumnInfo(name = COLUMN_EMAIL)
     private String email;
 
-    @DatabaseField(columnName = COLUMN_PARTNER, foreign = true, foreignAutoRefresh = true)
+    @ColumnInfo(name = COLUMN_PARTNER)
+    private int partnerId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_PARTNER, entityColumn = "id")
     private Partner partner;
+
     @JsonIgnore
+    @Ignore
     private List<Location> locations;
 
     public Employee() {
     }
 
-    public Employee(String name, String surname, int nuit, ProfessionalCategory professionalCategory, int trainingYear, String phoneNumber, String email, Partner partner) {
+    public Employee(String name, String surname, long nuit, ProfessionalCategory professionalCategory, int trainingYear, String phoneNumber, String email, Partner partner) {
         this.name = name;
         this.surname = surname;
         this.nuit = nuit;
         this.professionalCategory = professionalCategory;
+        this.professionalCategoryId = professionalCategory.getId();
         this.trainingYear = trainingYear;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.partner = partner;
-    }
-
-    public Employee(String name, String surname, int nuit, ProfessionalCategory professionalCategory, int trainingYear, String phoneNumber, String email) {
-        this.name = name;
-        this.surname = surname;
-        this.nuit = nuit;
-        this.professionalCategory = professionalCategory;
-        this.trainingYear = trainingYear;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
+        this.partnerId = partner.getId();
     }
 
     public Employee(EmployeeDTO employeeDTO) {
@@ -96,12 +117,18 @@ public class Employee extends BaseModel implements Listble {
         this.setTrainingYear(employeeDTO.getTrainingYear());
         this.setEmail(employeeDTO.getEmail());
         this.setPhoneNumber(employeeDTO.getPhoneNumber());
-        if(employeeDTO.getLocationDTOSet()!=null) this.setLocations(retriveLocations(employeeDTO.getLocationDTOSet()));
-        if(employeeDTO.getProfessionalCategoryDTO() != null) this.setProfessionalCategory(new ProfessionalCategory(employeeDTO.getProfessionalCategoryDTO()));
-        if(employeeDTO.getPartnerDTO() != null) this.setPartner(new Partner(employeeDTO.getPartnerDTO()));
+        if(employeeDTO.getLocationDTOSet() != null) {
+            this.setLocations(retrieveLocations(employeeDTO.getLocationDTOSet()));
+        }
+        if(employeeDTO.getProfessionalCategoryDTO() != null) {
+            this.setProfessionalCategory(new ProfessionalCategory(employeeDTO.getProfessionalCategoryDTO()));
+        }
+        if(employeeDTO.getPartnerDTO() != null) {
+            this.setPartner(new Partner(employeeDTO.getPartnerDTO()));
+        }
     }
 
-    private List<Location> retriveLocations(List<LocationDTO> locationDTOSet) {
+    private List<Location> retrieveLocations(List<LocationDTO> locationDTOSet) {
         List<Location> locations = new ArrayList<>();
         for (LocationDTO locationDTO : locationDTOSet) {
             Location location = new Location(locationDTO);
@@ -141,10 +168,11 @@ public class Employee extends BaseModel implements Listble {
 
     public void setProfessionalCategory(ProfessionalCategory professionalCategory) {
         this.professionalCategory = professionalCategory;
+        this.professionalCategoryId = professionalCategory.getId();
     }
 
     public int getTrainingYear() {
-        return  trainingYear;
+        return trainingYear;
     }
 
     public void setTrainingYear(int trainingYear) {
@@ -173,9 +201,8 @@ public class Employee extends BaseModel implements Listble {
 
     public void setPartner(Partner partner) {
         this.partner = partner;
+        this.partnerId = partner.getId();
     }
-
-
 
     public List<Location> getLocations() {
         return locations;
@@ -206,20 +233,20 @@ public class Employee extends BaseModel implements Listble {
 
     @Override
     public String validade() {
-        if(StringUtils.isEmpty(getName())) return "Campo nome nao pode estar vazio ";
-        if(getName().length() <= 2 ) return "Campo nome tem que ter mais de dois caracteres";
-        if(StringUtils.isEmpty(getSurname())) return "Campo apelido nao pode estar vazio";
-        if(getSurname().length() <= 2 ) return "Campo apelido tem que ter mais de dois caracteres";
-        if(StringUtils.isEmpty(getPhoneNumber())) return "Campo Telefone nao pode estar vazio";
-        if(!(getPhoneNumber().startsWith("8") && getPhoneNumber().length()==9)) return "Por favor indica um Telefone valido";
-        if(StringUtils.isEmpty(getEmail())) return "Campo Email nao pode estar vazio";
-        if(!PatternsCompat.EMAIL_ADDRESS.matcher(getEmail()).matches()) return  "Por favor indica um endereco de Email valido";
-        if(this.getProfessionalCategory() == null) return "Campo Categoria Professional nao pode estar vazio";
-        if(!Utilities.listHasElements(this.locations)) return "Por favor indicar a unidade sanitária.";
-        if(getNuit()==0) return "Campo NUIT nao pode estar vazio";
-        if(Long.toString(getNuit()).length()!=9) return "Campo do NUIT tem que ter 9 digitos";
-        if(getTrainingYear() == 0) return "Campo Ano nao pode estar Vazio";
-        if(getTrainingYear() < 1960 || getTrainingYear() > Calendar.getInstance().get(Calendar.YEAR)) return "Por favor indica um ano valido";
+        if (StringUtils.isEmpty(getName())) return "Campo nome não pode estar vazio ";
+        if (getName().length() <= 2) return "Campo nome tem que ter mais de dois caracteres";
+        if (StringUtils.isEmpty(getSurname())) return "Campo apelido não pode estar vazio";
+        if (getSurname().length() <= 2) return "Campo apelido tem que ter mais de dois caracteres";
+        if (StringUtils.isEmpty(getPhoneNumber())) return "Campo Telefone não pode estar vazio";
+        if (!(getPhoneNumber().startsWith("8") && getPhoneNumber().length() == 9)) return "Por favor indique um Telefone válido";
+        if (StringUtils.isEmpty(getEmail())) return "Campo Email não pode estar vazio";
+        if (!PatternsCompat.EMAIL_ADDRESS.matcher(getEmail()).matches()) return "Por favor indique um endereço de Email válido";
+        if (this.getProfessionalCategory() == null) return "Campo Categoria Profissional não pode estar vazio";
+        if (!Utilities.listHasElements(this.locations)) return "Por favor indique a unidade sanitária.";
+        if (getNuit() == 0) return "Campo NUIT não pode estar vazio";
+        if (Long.toString(getNuit()).length() != 9) return "Campo do NUIT tem que ter 9 dígitos";
+        if (getTrainingYear() == 0) return "Campo Ano não pode estar vazio";
+        if (getTrainingYear() < 1960 || getTrainingYear() > Calendar.getInstance().get(Calendar.YEAR)) return "Por favor indique um ano válido";
         return super.validade();
     }
 

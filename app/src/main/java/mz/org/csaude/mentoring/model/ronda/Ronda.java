@@ -10,6 +10,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
+
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dao.ronda.RondaDAOImpl;
@@ -25,38 +32,67 @@ import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
 
-@DatabaseTable(tableName = Ronda.TABLE_NAME, daoClass = RondaDAOImpl.class)
+@Entity(tableName = Ronda.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = HealthFacility.class,
+                        parentColumns = "id",
+                        childColumns = Ronda.COLUMN_HEALTH_FACILITY,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = RondaType.class,
+                        parentColumns = "id",
+                        childColumns = Ronda.COLUMN_RONDA_TYPE,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Ronda.COLUMN_HEALTH_FACILITY}),
+                @Index(value = {Ronda.COLUMN_RONDA_TYPE})
+        })
 public class Ronda extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "ronda";
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
-
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_HEALTH_FACILITY = "health_facility_id";
     public static final String COLUMN_RONDA_TYPE = "ronda_type_id";
     public static final String COLUMN_MENTOR_TYPE = "mentor_type";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION,  canBeNull = false)
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
+
+    @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
-    @DatabaseField(columnName = COLUMN_END_DATE, canBeNull = true)
+    @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
-    @DatabaseField(columnName = COLUMN_HEALTH_FACILITY, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+
+    @ColumnInfo(name = COLUMN_HEALTH_FACILITY)
+    private int healthFacilityId;
+
+    @Relation(parentColumn = COLUMN_HEALTH_FACILITY, entityColumn = "id")
     private HealthFacility healthFacility;
-    @DatabaseField(columnName = COLUMN_RONDA_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+
+    @ColumnInfo(name = COLUMN_RONDA_TYPE)
+    private int rondaTypeId;
+
+    @Relation(parentColumn = COLUMN_RONDA_TYPE, entityColumn = "id")
     private RondaType rondaType;
 
-    @DatabaseField(columnName = COLUMN_MENTOR_TYPE, canBeNull = false)
+    @ColumnInfo(name = COLUMN_MENTOR_TYPE)
     private String mentorType;
+
+    @Ignore
     @JsonIgnore
     private List<Session> sessions;
+
+    @Ignore
     @JsonIgnore
     private List<RondaMentee> rondaMentees;
+
+    @Ignore
     @JsonIgnore
     private List<RondaMentor> rondaMentors;
+
     public Ronda () {
     }
 
