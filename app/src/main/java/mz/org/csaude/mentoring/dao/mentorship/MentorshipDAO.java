@@ -1,22 +1,40 @@
 package mz.org.csaude.mentoring.dao.mentorship;
 
-import android.app.Application;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+import androidx.room.Transaction;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.application.MentoringApplication;
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
-import mz.org.csaude.mentoring.model.ronda.Ronda;
-import mz.org.csaude.mentoring.model.session.Session;
 
-public interface MentorshipDAO extends MentoringBaseDao<Mentorship, Integer> {
-     List<Mentorship> getMentorshipByTutor(Application application, String uuidTutor)throws SQLException;
-     List<Mentorship> getAllNotSynced(Application application) throws SQLException;
+@Dao
+public interface MentorshipDAO {
 
-    List<Mentorship> getAllOfRonda(Ronda ronda, MentoringApplication application);
+    @Insert
+    void insertMentorship(Mentorship mentorship);
 
-    List<Mentorship> getAllOfSession(Session session) throws SQLException;
+    @Insert
+    void insertAll(List<Mentorship> mentorships);
 
+    @Update
+    void updateMentorship(Mentorship mentorship);
+
+    @Query("SELECT * FROM mentorship WHERE tutor_id = (SELECT id FROM tutor WHERE uuid = :uuidTutor)")
+    List<Mentorship> getMentorshipByTutor(String uuidTutor);
+
+    @Query("SELECT * FROM mentorship WHERE sync_status = :syncStatus AND end_date IS NOT NULL")
+    List<Mentorship> getAllNotSynced(String syncStatus);
+
+    @Transaction
+    @Query("SELECT * FROM mentorship WHERE session_id IN (SELECT id FROM session WHERE ronda_id = :rondaId)")
+    List<Mentorship> getAllOfRonda(int rondaId);
+
+    @Query("SELECT * FROM mentorship WHERE session_id = :sessionId")
+    List<Mentorship> getAllOfSession(int sessionId);
+
+    @Query("SELECT * FROM mentorship WHERE uuid = :uuid LIMIT 1")
+    Mentorship getByUuid(String uuid);
 }

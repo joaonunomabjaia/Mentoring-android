@@ -1,15 +1,26 @@
 package mz.org.csaude.mentoring.dao.location;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Query;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.location.Province;
-import mz.org.csaude.mentoring.model.tutor.Tutor;
 
-public interface ProvinceDAO extends MentoringBaseDao<Province, Integer> {
+@Dao
+public interface ProvinceDAO {
 
-    public boolean checkProvinceExistance(String uuid) throws SQLException;
+    @Query("SELECT COUNT(*) > 0 FROM province WHERE uuid = :uuid")
+    boolean checkProvinceExistance(String uuid);
 
-    List<Province> getAllOfTutor(Tutor tutor) throws SQLException;
+    @Query("SELECT * FROM province WHERE uuid IN (:provinceUuids)")
+    List<Province> getAllOfTutor(List<String> provinceUuids);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertProvince(Province province);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertProvinces(List<Province> provinces);
 }

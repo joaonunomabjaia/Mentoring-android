@@ -6,12 +6,13 @@ import java.sql.SQLException;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.databasehelper.MentoringDataBaseHelper;
+import mz.org.csaude.mentoring.base.databasehelper.MentoringDatabase;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.model.user.User;
 
 public abstract class BaseServiceImpl<T extends BaseModel> implements BaseService<T>{
 
-    protected MentoringDataBaseHelper dataBaseHelper;
+    protected MentoringDatabase dataBaseHelper;
 
     protected MentoringApplication application;
     public static MentoringApplication app;
@@ -26,7 +27,7 @@ public abstract class BaseServiceImpl<T extends BaseModel> implements BaseServic
     }
 
     public void init(Application application) throws SQLException {
-        this.dataBaseHelper = MentoringDataBaseHelper.getInstance(application);
+        this.dataBaseHelper = MentoringDatabase.getInstance(application);
         this.application= (MentoringApplication) application;
         BaseServiceImpl.app = (MentoringApplication) application;
     }

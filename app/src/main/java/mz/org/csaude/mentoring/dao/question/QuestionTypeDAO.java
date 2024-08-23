@@ -1,10 +1,33 @@
 package mz.org.csaude.mentoring.dao.question;
 
-import com.j256.ormlite.dao.Dao;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+import androidx.room.Delete;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
-import mz.org.csaude.mentoring.dao.mentorship.MentorshipDAO;
+import java.util.List;
+
 import mz.org.csaude.mentoring.model.question.QuestionType;
 
-public interface QuestionTypeDAO extends MentoringBaseDao<QuestionType, Integer> {
+@Dao
+public interface QuestionTypeDAO {
+
+    @Insert
+    void insert(QuestionType questionType);
+
+    @Update
+    void update(QuestionType questionType);
+
+    @Delete
+    void delete(QuestionType questionType);
+
+    @Query("SELECT * FROM question_type WHERE id = :id")
+    QuestionType getById(int id);
+
+    @Query("SELECT * FROM question_type WHERE uuid = :uuid LIMIT 1")
+    QuestionType getByUuid(String uuid);
+
+    @Query("SELECT * FROM question_type")
+    List<QuestionType> getAll();
 }

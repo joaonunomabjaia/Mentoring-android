@@ -57,6 +57,11 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
 
     @Override
     public List<Province> getAllOfTutor(Tutor tutor) throws SQLException {
+        List<String> provinceUuids = new ArrayList<>();
+        for (Location location : tutor.getEmployee().getLocations()) {
+            provinceUuids.add(location.getProvince().getUuid());
+        }
+        return provinceDAO.getAllOfTutor(provinceUuids);
         return this.provinceDAO.getAllOfTutor(tutor);
     }
 

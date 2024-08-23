@@ -2,13 +2,18 @@ package mz.org.csaude.mentoring.model.session;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
+import mz.org.csaude.mentoring.dto.session.SessionStatusDTO;
 
-@Entity(tableName = SessionStatus.TABLE_NAME)
+@Entity(
+        tableName = SessionStatus.TABLE_NAME,
+        indices = {@Index(value = SessionStatus.COLUMN_CODE, unique = true)}
+)
 public class SessionStatus extends BaseModel {
 
     public static final String COMPLETE = "COMPLETE";
@@ -28,16 +33,18 @@ public class SessionStatus extends BaseModel {
     public SessionStatus() {
     }
 
+    @Ignore
+    public SessionStatus(SessionStatusDTO sessionStatusDTO) {
+        super(sessionStatusDTO);
+        this.description = sessionStatusDTO.getDescription();
+        this.code = sessionStatusDTO.getCode();
+    }
+
+    @Ignore
     public SessionStatus(String description, String code) {
         this.description = description;
         this.code = code;
     }
-
-    // Removed the constructor using SessionStatusDTO since Room entities typically don't use DTOs directly.
-    // You would map a DTO to this entity in your repository or data layer.
-
-    // Getters and Setters
-
 
     public String getDescription() {
         return description;
@@ -55,8 +62,9 @@ public class SessionStatus extends BaseModel {
         this.code = code;
     }
 
+    @Ignore
     @JsonIgnore
     public boolean isCompleted() {
-        return COMPLETE.equals(this.code);
+        return this.code.equals(COMPLETE);
     }
 }

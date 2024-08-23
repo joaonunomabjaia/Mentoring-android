@@ -1,14 +1,21 @@
 package mz.org.csaude.mentoring.dao.partner;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Query;
+
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.partner.Partner;
 
-public interface PartnerDao extends MentoringBaseDao<Partner, Integer> {
-    Partner getMISAU() throws SQLException;
+@Dao
+public interface PartnerDao {
 
-    List<Partner> getNotMISAU() throws SQLException;
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner getPartnerByUuid(String uuid);
 
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner getMISAU(String uuid);
+
+    @Query("SELECT * FROM partner WHERE uuid != :misauUuid AND life_cycle_status = :activeStatus")
+    List<Partner> getNotMISAU(String misauUuid, String activeStatus);
 }

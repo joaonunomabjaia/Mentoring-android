@@ -61,7 +61,6 @@ import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormTarget;
 import mz.org.csaude.mentoring.model.form.FormType;
 import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
-import mz.org.csaude.mentoring.model.indicator.Indicator;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
@@ -70,7 +69,6 @@ import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.IterationType;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
-import mz.org.csaude.mentoring.model.mentorship.TimeOfDay;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.model.program.Program;
@@ -88,11 +86,9 @@ import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
-import mz.org.csaude.mentoring.model.setting.PartnerSetting;
 import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutor.TutorLocation;
-import mz.org.csaude.mentoring.model.tutor.TutorTutored;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
 
@@ -303,12 +299,6 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
         }
         return questionsCategoryDAO;
     }
-    public IndicatorDAO getIndicatorDAO() throws SQLException {
-        if(indicatorDAO == null){
-            indicatorDAO = getDao(Indicator.class);
-        }
-        return indicatorDAO;
-    }
     public AnswerDAO getAnswerDAO() throws SQLException {
         if(answerDAO == null){
             answerDAO = getDao(Answer.class);
@@ -352,12 +342,6 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
         }
         return doorDAO;
     }
-    public TimeOfDayDAO getTimeOfDayDAO() throws SQLException {
-        if(timeOfDayDAO == null){
-            timeOfDayDAO = getDao(TimeOfDay.class);
-        }
-        return timeOfDayDAO;
-    }
     public IterationTypeDAO getIterationTypeDAO() throws SQLException {
         if(iterationTypeDAO == null){
             iterationTypeDAO = getDao(IterationType.class);
@@ -386,12 +370,6 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
         return sessionStatusDAO;
     }
 
-    public TutorTutoredDao getTutorTutoredDao() throws SQLException {
-        if(tutorTutoredDao == null){
-            tutorTutoredDao = getDao(TutorTutored.class);
-        }
-        return tutorTutoredDao;
-    }
 
     public RondaTypeDAO getRondaTypeDAO() throws SQLException {
         if(rondaTypeDAO == null){
@@ -492,7 +470,6 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.createTableIfNotExists(connectionSource, Mentorship.class);
             TableUtils.createTableIfNotExists(connectionSource, Question.class);
             TableUtils.createTableIfNotExists(connectionSource, QuestionsCategory.class);
-            TableUtils.createTableIfNotExists(connectionSource, Indicator.class);
             TableUtils.createTableIfNotExists(connectionSource, Answer.class);
             TableUtils.createTableIfNotExists(connectionSource, FormQuestion.class);
             TableUtils.createTableIfNotExists(connectionSource, Setting.class);
@@ -503,12 +480,9 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.createTableIfNotExists(connectionSource, FormType.class);
             TableUtils.createTableIfNotExists(connectionSource, Door.class);
             TableUtils.createTableIfNotExists(connectionSource, IterationType.class);
-            TableUtils.createTableIfNotExists(connectionSource, TimeOfDay.class);
             TableUtils.createTableIfNotExists(connectionSource, Province.class);
             TableUtils.createTableIfNotExists(connectionSource, QuestionType.class);
             TableUtils.createTableIfNotExists(connectionSource, SessionStatus.class);
-            TableUtils.createTableIfNotExists(connectionSource, PartnerSetting.class);
-            TableUtils.createTableIfNotExists(connectionSource, TutorTutored.class);
             TableUtils.createTableIfNotExists(connectionSource, User.class);
             TableUtils.createTableIfNotExists(connectionSource, Ronda.class);
             TableUtils.createTableIfNotExists(connectionSource, RondaType.class);

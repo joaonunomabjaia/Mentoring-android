@@ -1,14 +1,29 @@
 package mz.org.csaude.mentoring.dao.ronda;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
-import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 
-public interface RondaMentorDAO extends MentoringBaseDao<RondaMentor, Integer> {
-    List<RondaMentor> getRondaMentors(Ronda ronda) throws SQLException;
+@Dao
+public interface RondaMentorDAO {
 
-    void deleteByRonda(Ronda ronda) throws SQLException;
+    @Insert
+    void insert(RondaMentor rondaMentor);
+
+    @Insert
+    void insertAll(List<RondaMentor> rondaMentors);
+
+    @Delete
+    void delete(RondaMentor rondaMentor);
+
+    @Query("SELECT * FROM ronda_mentor WHERE ronda_id = :rondaId")
+    List<RondaMentor> getRondaMentors(int rondaId);
+
+    @Query("DELETE FROM ronda_mentor WHERE ronda_id = :rondaId")
+    void deleteByRonda(int rondaId);
 }

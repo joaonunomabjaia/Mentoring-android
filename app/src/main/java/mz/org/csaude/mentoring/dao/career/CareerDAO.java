@@ -1,18 +1,39 @@
 package mz.org.csaude.mentoring.dao.career;
 
-import com.j256.ormlite.dao.Dao;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.model.career.Career;
-import mz.org.csaude.mentoring.model.career.CareerType;
 
-public interface CareerDAO extends Dao<Career, Integer> {
+@Dao
+public interface CareerDAO {
 
-    public boolean checkCareerExistance(final String uuid) throws SQLException;
+    @Query("SELECT * FROM career WHERE uuid = :uuid LIMIT 1")
+    Career findByUuid(String uuid);
 
-    List<Career> findByCareerType(CareerType careerType) throws SQLException;
+    @Query("SELECT * FROM career WHERE career_type_id = :careerTypeId")
+    List<Career> findByCareerType(int careerTypeId);
 
-    public Career findByUuid(String uuid) throws  SQLException;
+    @Query("SELECT COUNT(*) > 0 FROM career WHERE uuid = :uuid")
+    boolean checkCareerExistance(String uuid);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(Career career);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<Career> careers);
+
+    @Update
+    void update(Career career);
+
+    @Update
+    void updateAll(List<Career> careers);
+
+    @Query("SELECT * FROM career WHERE uuid = :uuid LIMIT 1")
+    Career getByUuid(String uuid);
 }

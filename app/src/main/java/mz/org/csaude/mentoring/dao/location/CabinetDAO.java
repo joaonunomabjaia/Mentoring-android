@@ -1,12 +1,30 @@
 package mz.org.csaude.mentoring.dao.location;
 
-import com.j256.ormlite.dao.Dao;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+import androidx.room.Delete;
 
-import java.sql.SQLException;
+import java.util.List;
 
 import mz.org.csaude.mentoring.model.location.Cabinet;
 
-public interface CabinetDAO extends Dao<Cabinet, Integer> {
+@Dao
+public interface CabinetDAO {
 
-    public boolean checkCabinetExistance(final String uuid) throws SQLException;
+    @Insert
+    void insert(Cabinet cabinet);
+
+    @Update
+    void update(Cabinet cabinet);
+
+    @Delete
+    void delete(Cabinet cabinet);
+
+    @Query("SELECT * FROM cabinet WHERE uuid = :uuid LIMIT 1")
+    Cabinet getByUuid(String uuid);
+
+    @Query("SELECT * FROM cabinet WHERE uuid = :uuid LIMIT 1")
+    boolean checkCabinetExistance(String uuid);
 }

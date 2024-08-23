@@ -1,11 +1,29 @@
 package mz.org.csaude.mentoring.dao.rondatype;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
+import java.util.List;
+
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 
-public interface RondaTypeDAO extends MentoringBaseDao<RondaType, Integer> {
-    RondaType getRondaTypeByCode(String code) throws SQLException;
-    public boolean checkRondaTypeExistance(final String uuid) throws SQLException;
+@Dao
+public interface RondaTypeDAO {
+
+    @Insert
+    void insert(RondaType rondaType);
+
+    @Update
+    void update(RondaType rondaType);
+
+    @Query("SELECT * FROM ronda_type WHERE code = :code LIMIT 1")
+    RondaType getRondaTypeByCode(String code);
+
+    @Query("SELECT * FROM ronda_type WHERE uuid = :uuid LIMIT 1")
+    RondaType getByUuid(String uuid);
+
+    @Query("SELECT EXISTS(SELECT 1 FROM ronda_type WHERE uuid = :uuid LIMIT 1)")
+    boolean checkRondaTypeExistance(String uuid);
 }

@@ -84,6 +84,14 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
 
     @Override
     public List<HealthFacility> getHealthFacilityByDistrictAndMentor(District district, Tutor mentor) throws SQLException {
+        List<String> uuids = new ArrayList<>();
+        for (Location location : mentor.getEmployee().getLocations()) {
+            uuids.add(location.getHealthFacility().getUuid());
+        }
+
+        // Call the DAO method
+        return healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district.getId(), uuids);
+
         return this.healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district, mentor);
     }
 }

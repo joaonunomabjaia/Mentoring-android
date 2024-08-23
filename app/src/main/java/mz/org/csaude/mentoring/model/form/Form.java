@@ -36,7 +36,7 @@ public class Form extends BaseModel {
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_CODE = "code";
     public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_PROGRAMMATIC_AREA = "programmatic_area_type_id";
+    public static final String COLUMN_PROGRAMMATIC_AREA = "programmatic_area_id";
     public static final String COLUMN_TARGET_PATIENT = "target_patient";
     public static final String COLUMN_TARGET_FILE = "target_file";
     public static final String COLUMN_PARTNER = "partner_id";
