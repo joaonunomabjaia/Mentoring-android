@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.ronda;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import com.j256.ormlite.misc.TransactionManager;
 
 import java.sql.SQLException;
@@ -31,6 +33,8 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
+import mz.org.csaude.mentoring.util.SyncSatus;
 
 public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaService {
     RondaDAO rondaDAO;
@@ -60,26 +64,26 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
 
     @Override
+    @Transaction
     public Ronda savedOrUpdateRonda(Ronda ronda) throws SQLException {
-        TransactionManager.callInTransaction(getDataBaseHelper().getConnectionSource(), (Callable<Void>) () -> {
             Ronda r = this.rondaDAO.getByUuid(ronda.getUuid());
             if(r!=null) {
                 ronda.setId(r.getId());
             }
             HealthFacility healthFacility = this.healthFacilityDAO.getByUuid(ronda.getHealthFacility().getUuid());
             if(healthFacility==null) {
-                this.healthFacilityDAO.create(healthFacility);
+                this.healthFacilityDAO.insert(healthFacility);
             }
             ronda.setHealthFacility(healthFacility);
             RondaType rondaType = this.rondaTypeDAO.getByUuid(ronda.getRondaType().getUuid());
             if(rondaType==null) {
-                this.rondaTypeDAO.create(rondaType);
+                this.rondaTypeDAO.insert(rondaType);
             }
             ronda.setRondaType(rondaType);
             this.rondaDAO.createOrUpdate(ronda);
 
-            this.rondaMentorDAO.deleteByRonda(ronda);
-            this.rondaMenteeDAO.deleteByRonda(ronda);
+            this.rondaMentorDAO.deleteByRonda(ronda.getId());
+            this.rondaMenteeDAO.deleteByRonda(ronda.getId());
 
             for (RondaMentor rondaMentor: ronda.getRondaMentors()) {
                 rondaMentor.setRonda(ronda);
@@ -105,19 +109,17 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
                 this.rondaMenteeDAO.createOrUpdate(rondaMentee);
             }
-            return null;
-        });
         return ronda;
     }
 
     @Override
     public List<Ronda> getAllByHealthFacilityAndMentor(HealthFacility healthFacility, Tutor tutor, MentoringApplication mentoringApplication) throws SQLException {
-        return this.rondaDAO.getAllByHealthFacilityAndMentor(healthFacility, tutor, mentoringApplication);
+        return this.rondaDAO.getAllByHealthFacilityAndMentor(healthFacility.getId(), tutor.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
     @Override
     public List<Ronda> getAllNotSynced() throws SQLException {
-        return this.rondaDAO.getAllNotSynced();
+        return this.rondaDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
     }
 
     @Override
@@ -132,7 +134,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public List<Ronda> getAllByRondaType(RondaType rondaType) throws SQLException {
-        return this.rondaDAO.getAllByRondaType(rondaType, this.getApplication());
+        return this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
     @Override
@@ -178,8 +180,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public Ronda getFullyLoadedRonda(Ronda ronda) throws SQLException {
         Ronda r = this.rondaDAO.getByUuid(ronda.getUuid());
-        r.setRondaMentors(this.rondaMentorDAO.getRondaMentors(r));
-        r.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(r));
+        r.setRondaMentors(this.rondaMentorDAO.getRondaMentors(r.getId()));
+        r.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(r.getId()));
         r.setSessions(getApplication().getSessionService().getAllOfRonda(r));
         return r;
     }
@@ -223,7 +225,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public Ronda save(Ronda record) throws SQLException {
-        this.rondaDAO.create(record);
+        this.rondaDAO.insert(record);
         return record;
     }
 
@@ -234,13 +236,11 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
 
     @Override
+    @Transaction
     public int delete(Ronda record) throws SQLException {
-        TransactionManager.callInTransaction(getDataBaseHelper().getConnectionSource(), (Callable<Void>) () -> {
-            this.rondaMentorDAO.deleteByRonda(record);
-            this.rondaMenteeDAO.deleteByRonda(record);
+            this.rondaMentorDAO.deleteByRonda(record.getId());
+            this.rondaMenteeDAO.deleteByRonda(record.getId());
             this.rondaDAO.delete(record);
-            return null;
-        });
         return record.getId();
     }
 
@@ -255,7 +255,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
     @Override
     public List<Ronda> getAllByMentor(Tutor tutor, MentoringApplication mentoringApplication) throws SQLException {
-        return this.rondaDAO.getAllByMentor(tutor, mentoringApplication);
+        return this.rondaDAO.getAllByMentor(tutor.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
 }

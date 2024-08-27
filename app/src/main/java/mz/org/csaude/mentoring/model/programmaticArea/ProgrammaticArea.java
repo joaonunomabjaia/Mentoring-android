@@ -43,12 +43,12 @@ public class ProgrammaticArea extends BaseModel {
     private int programId;
 
     @Ignore
-    @Relation(parentColumn = COLUMN_PROGRAM, entityColumn = "id")
     private Program program;
 
     public ProgrammaticArea() {
     }
 
+    @Ignore
     public ProgrammaticArea(ProgrammaticAreaDTO programmaticAreaDTO) {
         super(programmaticAreaDTO);
         this.setCode(programmaticAreaDTO.getCode());

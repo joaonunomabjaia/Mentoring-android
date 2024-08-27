@@ -156,4 +156,36 @@ public class Location extends BaseModel implements Listble {
     public String getCode() {
         return null;
     }
+
+    public int getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public int getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(int provinceId) {
+        this.provinceId = provinceId;
+    }
+
+    public int getDistrictId() {
+        return districtId;
+    }
+
+    public void setDistrictId(int districtId) {
+        this.districtId = districtId;
+    }
+
+    public int getHealthFacilityId() {
+        return healthFacilityId;
+    }
+
+    public void setHealthFacilityId(int healthFacilityId) {
+        this.healthFacilityId = healthFacilityId;
+    }
 }

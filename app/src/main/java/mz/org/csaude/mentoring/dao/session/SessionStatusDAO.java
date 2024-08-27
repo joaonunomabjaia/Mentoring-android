@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.session;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -19,7 +20,7 @@ public interface SessionStatusDAO {
     SessionStatus getByUuid(String uuid);
 
     @Insert
-    long insert(SessionStatus sessionStatus);
+    int insert(SessionStatus sessionStatus);
 
     @Update
     int update(SessionStatus sessionStatus);
@@ -29,4 +30,28 @@ public interface SessionStatusDAO {
 
     @Query("SELECT * FROM session_status")
     List<SessionStatus> getAllSessionStatuses();
+
+    @Query("SELECT * FROM session_status WHERE id = :id")
+    SessionStatus getSessionStatusById(int id);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(SessionStatus sessionStatus);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(List<SessionStatus> sessionStatuses);
+
+    @Query("DELETE FROM session_status")
+    int deleteAll();
+
+    @Query("DELETE FROM session_status WHERE id = :id")
+    int delete(int id);
+
+
+    @Query("SELECT * FROM session_status")
+    List<SessionStatus> queryForAll();
+
+    @Query("SELECT * FROM session_status WHERE id = :id")
+    SessionStatus queryForId(int id);
+
+
 }

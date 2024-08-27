@@ -24,7 +24,7 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public RondaMentee save(RondaMentee record) throws SQLException {
-        this.rondaMenteeDAO.create(record);
+        this.rondaMenteeDAO.insert(record);
         return record;
     }
 
@@ -61,7 +61,7 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public List<RondaMentee> getAllOfRonda(Ronda ronda) throws SQLException {
-        return rondaMenteeDAO.getAllOfRonda(ronda);
+        return rondaMenteeDAO.getAllOfRonda(ronda.getId());
     }
 
     @Override

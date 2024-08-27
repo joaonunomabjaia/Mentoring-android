@@ -27,7 +27,7 @@ implements QuestionsCategoryService{
     }
     @Override
     public QuestionsCategory save(QuestionsCategory record) throws SQLException {
-        this.questionsCategoryDAO.create(record);
+        this.questionsCategoryDAO.insert(record);
         return record;
     }
 

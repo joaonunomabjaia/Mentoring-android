@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.session;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -35,5 +36,16 @@ public interface SessionDAO {
     void update(Session session);
 
     @Query("DELETE FROM session WHERE id = :id")
-    void deleteById(Integer id);
+    int delete(Integer id);
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Session session);
+
+    @Query("SELECT * FROM session")
+    List<Session> queryForAll();
+
+    @Query("SELECT * FROM session WHERE id = :id")
+    Session queryForId(Integer id);
+
 }

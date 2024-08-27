@@ -78,4 +78,12 @@ public class Question extends BaseModel {
         this.questionsCategory = questionsCategory;
         this.questionCategoryId = questionsCategory.getId();
     }
+
+    public int getQuestionCategoryId() {
+        return questionCategoryId;
+    }
+
+    public void setQuestionCategoryId(int questionCategoryId) {
+        this.questionCategoryId = questionCategoryId;
+    }
 }

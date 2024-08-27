@@ -20,7 +20,7 @@ public interface QuestionTypeDAO {
     void update(QuestionType questionType);
 
     @Delete
-    void delete(QuestionType questionType);
+    int delete(QuestionType questionType);
 
     @Query("SELECT * FROM question_type WHERE id = :id")
     QuestionType getById(int id);
@@ -30,4 +30,12 @@ public interface QuestionTypeDAO {
 
     @Query("SELECT * FROM question_type")
     List<QuestionType> getAll();
+
+    @Query("SELECT * FROM question_type")
+    List<QuestionType> queryForAll();
+
+    @Query("SELECT * FROM question_type WHERE id = :id")
+    QuestionType queryForId(int id);
+
+
 }

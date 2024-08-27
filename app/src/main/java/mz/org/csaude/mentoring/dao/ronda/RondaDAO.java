@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.ronda;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
@@ -30,11 +31,11 @@ public interface RondaDAO {
             "AND rm.mentor_id = :mentorId " +
             "AND r.life_cycle_status = :status " +
             "ORDER BY r.id")
-    List<Ronda> getAllByHealthFacilityAndMentor(int healthFacilityId, int mentorId, int status);
+    List<Ronda> getAllByHealthFacilityAndMentor(int healthFacilityId, int mentorId, String status);
 
     // Get all Ronda not synced
     @Query("SELECT * FROM ronda WHERE sync_status = :syncStatus")
-    List<Ronda> getAllNotSynced(int syncStatus);
+    List<Ronda> getAllNotSynced(String syncStatus);
 
     // Get all Ronda by RondaType
     @Query("SELECT r.* FROM ronda r " +
@@ -42,7 +43,7 @@ public interface RondaDAO {
             "WHERE rt.code = :rondaTypeCode " +
             "AND r.life_cycle_status = :status " +
             "ORDER BY r.id")
-    List<Ronda> getAllByRondaType(String rondaTypeCode, int status);
+    List<Ronda> getAllByRondaType(String rondaTypeCode, String status);
 
     // Get all Ronda by Mentor
     @Query("SELECT r.* FROM ronda r " +
@@ -50,5 +51,20 @@ public interface RondaDAO {
             "WHERE rm.mentor_id = :mentorId " +
             "AND r.life_cycle_status = :status " +
             "ORDER BY r.start_date")
-    List<Ronda> getAllByMentor(int mentorId, int status);
+    List<Ronda> getAllByMentor(int mentorId, String status);
+
+    @Query("SELECT * FROM ronda WHERE id = :id")
+    Ronda queryForId(Integer id);
+
+    @Query("SELECT * FROM ronda WHERE uuid = :uuid LIMIT 1")
+    Ronda getByUuid(String uuid);
+
+    @Query("SELECT * FROM ronda")
+    List<Ronda> queryForAll();
+
+    @Query("DELETE FROM ronda WHERE id = :id")
+    void delete(Integer id);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Ronda ronda);
 }

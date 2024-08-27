@@ -8,6 +8,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.partner.PartnerDao;
 import mz.org.csaude.mentoring.model.partner.Partner;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
 
 public class PartnerServiceImpl extends BaseServiceImpl<Partner> implements PartnerService {
 
@@ -27,7 +28,7 @@ public class PartnerServiceImpl extends BaseServiceImpl<Partner> implements Part
 
     @Override
     public Partner save(Partner record) throws SQLException {
-        this.partnerDao.create(record);
+        this.partnerDao.insert(record);
         return record;
     }
 
@@ -39,12 +40,12 @@ public class PartnerServiceImpl extends BaseServiceImpl<Partner> implements Part
 
     @Override
     public int delete(Partner record) throws SQLException {
-        return this.partnerDao.delete(record);
+        return this.partnerDao.delete(record.getId());
     }
 
     @Override
     public List<Partner> getAll() throws SQLException {
-        return this.partnerDao.getNotMISAU();
+        return this.partnerDao.getNotMISAU(Partner.MISAU_UUID, String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
     @Override
@@ -58,7 +59,7 @@ public class PartnerServiceImpl extends BaseServiceImpl<Partner> implements Part
         Partner p = this.partnerDao.getByUuid(partner.getUuid());
 
        if(p == null){
-           this.partnerDao.create(partner);
+           this.partnerDao.insert(partner);
            return partner;
        } else {
            p.setName(partner.getName());

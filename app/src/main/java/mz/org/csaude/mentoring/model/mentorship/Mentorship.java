@@ -373,4 +373,60 @@ public class Mentorship extends BaseModel {
     public void setAnswers(List<Answer> answers) {
         this.answers = answers;
     }
+
+    public int getTutorId() {
+        return tutorId;
+    }
+
+    public void setTutorId(int tutorId) {
+        this.tutorId = tutorId;
+    }
+
+    public int getTutoredId() {
+        return tutoredId;
+    }
+
+    public void setTutoredId(int tutoredId) {
+        this.tutoredId = tutoredId;
+    }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
+    }
+
+    public int getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public int getCabinetId() {
+        return cabinetId;
+    }
+
+    public void setCabinetId(int cabinetId) {
+        this.cabinetId = cabinetId;
+    }
+
+    public int getEvaluationTypeId() {
+        return evaluationTypeId;
+    }
+
+    public void setEvaluationTypeId(int evaluationTypeId) {
+        this.evaluationTypeId = evaluationTypeId;
+    }
+
+    public int getDoorId() {
+        return doorId;
+    }
+
+    public void setDoorId(int doorId) {
+        this.doorId = doorId;
+    }
 }

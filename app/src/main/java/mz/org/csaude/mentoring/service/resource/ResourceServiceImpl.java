@@ -47,7 +47,7 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
     @Override
     public Resource save(Resource record) throws SQLException {
 
-        this.resourceDAO.create(record);
+        this.resourceDAO.insert(record);
         return record;
     }
 

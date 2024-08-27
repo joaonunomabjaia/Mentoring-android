@@ -27,4 +27,17 @@ public interface AnswerDAO {
 
     @Update
     void updateAll(List<Answer> answers);
+
+    @Query("SELECT * FROM answer WHERE uuid = :uuid LIMIT 1")
+    Answer getByUuid(String uuid);
+
+
+    @Query("SELECT * FROM answer WHERE id = :id LIMIT 1")
+    Answer queryForId(int id);
+
+    @Query("DELETE FROM answer WHERE id = :id")
+    int delete(int id);
+
+    @Query("SELECT * FROM answer")
+    List<Answer> queryForAll();
 }

@@ -23,7 +23,7 @@ public interface ProfessionalCategoryDAO {
 
     // Delete a ProfessionalCategory from the database
     @Delete
-    void delete(ProfessionalCategory professionalCategory);
+    int delete(ProfessionalCategory professionalCategory);
 
     // Get a ProfessionalCategory by its UUID
     @Query("SELECT * FROM professional_category WHERE uuid = :uuid LIMIT 1")
@@ -44,4 +44,16 @@ public interface ProfessionalCategoryDAO {
     // Delete all ProfessionalCategories
     @Query("DELETE FROM professional_category")
     void deleteAll();
+
+    // Get all ProfessionalCategories
+    @Query("SELECT * FROM professional_category")
+    List<ProfessionalCategory> queryForAll();
+
+    // Get a ProfessionalCategory by its ID
+    @Query("SELECT * FROM professional_category WHERE id = :id")
+    ProfessionalCategory queryForId(int id);
+
+    // Get a ProfessionalCategory by its name
+    @Query("SELECT * FROM professional_category WHERE description = :name")
+    ProfessionalCategory queryForName(String name);
 }

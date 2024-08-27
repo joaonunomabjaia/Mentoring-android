@@ -29,24 +29,24 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
 
     @Override
     public IterationType save(IterationType record) throws SQLException {
-        this.iterationTypeDAO.create(record);
+        this.iterationTypeDAO.insertIterationType(record);
         return record;
     }
 
     @Override
     public IterationType update(IterationType record) throws SQLException {
-        this.iterationTypeDAO.update(record);
+        this.iterationTypeDAO.updateIterationType(record);
         return record;
     }
 
     @Override
     public int delete(IterationType record) throws SQLException {
-        return this.iterationTypeDAO.delete(record);
+        return this.iterationTypeDAO.delete(record.getId());
     }
 
     @Override
     public List<IterationType> getAll() throws SQLException {
-        return this.iterationTypeDAO.queryForAll();
+        return this.iterationTypeDAO.getAllIterationTypes();
     }
 
     @Override

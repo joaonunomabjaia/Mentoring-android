@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.form;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -28,7 +29,7 @@ public interface FormDAO {
             "WHERE tpa.tutor_id = :tutorId")
     List<Form> getAllOfTutor(int tutorId);
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.FAIL)
     void insertForm(Form form);
 
     @Update
@@ -36,4 +37,21 @@ public interface FormDAO {
 
     @Query("SELECT * FROM form WHERE uuid = :uuid LIMIT 1")
     Form getByUuid(String uuid);
+
+    @Query("DELETE FROM form WHERE id = :id")
+    int delete(int id);
+
+    @Query("SELECT * FROM form WHERE id = :id LIMIT 1")
+    Form queryForId(int id);
+
+    @Query("SELECT * FROM form")
+    List<Form> queryForAll();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Form entity);
+
+    @Query("UPDATE form SET sync_status = :syncStatus WHERE id = :id")
+    void updateSyncStatus(int id, String syncStatus);
+
+
 }

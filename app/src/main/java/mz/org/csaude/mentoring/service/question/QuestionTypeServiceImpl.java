@@ -25,7 +25,7 @@ public class QuestionTypeServiceImpl extends BaseServiceImpl<QuestionType> imple
 
     @Override
     public QuestionType save(QuestionType record) throws SQLException {
-        this.questionTypeDAO.create(record);
+        this.questionTypeDAO.insert(record);
         return record;
     }
 

@@ -5,7 +5,6 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
-import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.programmaticArea.TutorProgrammaticAreaDTO;
@@ -35,20 +34,19 @@ public class TutorProgrammaticArea extends BaseModel {
     @ColumnInfo(name = COLUMN_TUTOR)
     private int tutorId;
 
-    @Ignore
-    @Relation(parentColumn = COLUMN_TUTOR, entityColumn = "id")
-    private Tutor tutor;
-
     @ColumnInfo(name = COLUMN_PROGRAMMATIC_AREA)
     private int programmaticAreaId;
 
     @Ignore
-    @Relation(parentColumn = COLUMN_PROGRAMMATIC_AREA, entityColumn = "id")
+    private Tutor tutor;
+
+    @Ignore
     private ProgrammaticArea programmaticArea;
 
     public TutorProgrammaticArea() {
     }
 
+    @Ignore
     public TutorProgrammaticArea(Tutor tutor, ProgrammaticArea programmaticArea) {
         this.tutor = tutor;
         this.tutorId = tutor.getId();
@@ -56,10 +54,27 @@ public class TutorProgrammaticArea extends BaseModel {
         this.programmaticAreaId = programmaticArea.getId();
     }
 
+    @Ignore
     public TutorProgrammaticArea(TutorProgrammaticAreaDTO tutorProgrammaticAreaDTO) {
         super(tutorProgrammaticAreaDTO);
         this.setTutor(new Tutor(tutorProgrammaticAreaDTO.getTutorDTO()));
         this.setProgrammaticArea(new ProgrammaticArea(tutorProgrammaticAreaDTO.getProgrammaticAreaDTO()));
+    }
+
+    public int getTutorId() {
+        return tutorId;
+    }
+
+    public void setTutorId(int tutorId) {
+        this.tutorId = tutorId;
+    }
+
+    public int getProgrammaticAreaId() {
+        return programmaticAreaId;
+    }
+
+    public void setProgrammaticAreaId(int programmaticAreaId) {
+        this.programmaticAreaId = programmaticAreaId;
     }
 
     public Tutor getTutor() {

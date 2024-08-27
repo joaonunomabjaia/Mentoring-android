@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.mentorship;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Transaction;
@@ -37,4 +38,23 @@ public interface MentorshipDAO {
 
     @Query("SELECT * FROM mentorship WHERE uuid = :uuid LIMIT 1")
     Mentorship getByUuid(String uuid);
+
+    @Query("SELECT * FROM mentorship")
+    List<Mentorship> queryForAll();
+
+    @Query("SELECT * FROM mentorship WHERE id = :id")
+    Mentorship queryForId(int id);
+
+    @Query("DELETE FROM mentorship WHERE uuid = :uuid")
+    void deleteMentorshipByUuid(String uuid);
+
+    @Query("DELETE FROM mentorship")
+    void deleteAll();
+
+
+    @Query("DELETE FROM mentorship WHERE id = :id")
+    int delete(int id);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Mentorship mentorship);
 }

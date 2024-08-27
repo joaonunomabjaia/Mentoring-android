@@ -31,19 +31,19 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     @Override
     public Form save(Form record) throws SQLException {
-        this.formDAO.create(record);
+        this.formDAO.insertForm(record);
         return record;
     }
 
     @Override
     public Form update(Form record) throws SQLException {
-        this.formDAO.update(record);
+        this.formDAO.updateForm(record);
         return record;
     }
 
     @Override
     public int delete(Form record) throws SQLException {
-        return this.formDAO.delete(record);
+        return this.formDAO.delete(record.getId());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     @Override
     public List<Form> getAllOfTutor(Tutor tutor) throws SQLException {
-        return formDAO.getAllOfTutor(tutor, application);
+        return formDAO.getAllOfTutor(tutor.getId());
     }
 
     @Override
@@ -85,7 +85,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     @Override
     public List<Form> getAllSynced(Application application) throws SQLException {
-        return this.formDAO.getAllSynced(application);
+        return this.formDAO.getAllSynced();
     }
 
     @Override

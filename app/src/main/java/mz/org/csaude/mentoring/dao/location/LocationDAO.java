@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Query;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -23,4 +24,21 @@ public interface LocationDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertLocations(List<Location> locations);
+
+    @Update
+    int update(Location location);
+
+    @Query("SELECT * FROM location")
+    List<Location> queryForAll();
+
+    @Query("SELECT * FROM location WHERE id = :id")
+    Location queryForId(int id);
+
+    @Query("SELECT * FROM location WHERE uuid = :uuid")
+    Location getByUuid(String uuid);
+
+    @Query("DELETE FROM location WHERE id = :id")
+    int delete(int id);
+
+
 }

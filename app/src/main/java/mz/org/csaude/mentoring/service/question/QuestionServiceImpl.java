@@ -26,7 +26,7 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
 
     @Override
     public Question save(Question record) throws SQLException {
-        this.questionDAO.create(record);
+        this.questionDAO.insert(record);
         return record;
     }
 

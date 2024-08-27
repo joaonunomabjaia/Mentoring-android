@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.service.location;
 import android.app.Application;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
@@ -11,6 +12,7 @@ import mz.org.csaude.mentoring.dto.location.DistrictDTO;
 import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
 import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
+import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
 
@@ -32,7 +34,7 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
     }
     @Override
     public HealthFacility save(HealthFacility record) throws SQLException {
-        this.healthFacilityDAO.create(record);
+        this.healthFacilityDAO.insert(record);
         return record;
     }
 
@@ -79,7 +81,7 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
 
     @Override
     public List<HealthFacility> getHealthFacilityByDistrict(District district) throws SQLException {
-        return this.healthFacilityDAO.getHealthFacilityByDistrict(district);
+        return this.healthFacilityDAO.getHealthFacilityByDistrict(district.getId());
     }
 
     @Override
@@ -92,6 +94,5 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
         // Call the DAO method
         return healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district.getId(), uuids);
 
-        return this.healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district, mentor);
     }
 }

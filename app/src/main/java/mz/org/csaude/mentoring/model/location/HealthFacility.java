@@ -75,4 +75,20 @@ public class HealthFacility extends BaseModel implements Listble {
     public String getCode() {
         return null;
     }
+
+    public int getDistrictId() {
+        return districtId;
+    }
+
+    public void setDistrictId(int districtId) {
+        this.districtId = districtId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

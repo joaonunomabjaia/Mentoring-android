@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.dao.tutored;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -75,4 +76,22 @@ public interface TutoredDao {
 
     @Query("SELECT * FROM tutored WHERE uuid = :uuid LIMIT 1")
     Tutored getByUuid(String uuid);
+
+    @Delete
+    int delete(Tutored record);
+
+    @Query("SELECT * FROM tutored WHERE id = :id")
+    Tutored queryForId(int id);
+
+    @Query("SELECT * FROM tutored")
+    List<Tutored> queryForAll();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Tutored tutored);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(List<Tutored> tutoredList);
+
+
+
 }

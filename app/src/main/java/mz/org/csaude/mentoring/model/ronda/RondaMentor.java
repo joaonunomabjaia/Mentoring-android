@@ -36,9 +36,6 @@ public class RondaMentor extends BaseModel {
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
     @ColumnInfo(name = COLUMN_RONDA)
     private int rondaId;
 

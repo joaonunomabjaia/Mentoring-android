@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.tutor;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
 
     @Override
     public Tutor save(Tutor record) throws SQLException {
-        this.tutorDAO.create(record);
+        this.tutorDAO.insert(record);
         return record;
     }
 
@@ -52,7 +54,7 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
 
     @Override
     public int delete(Tutor record) throws SQLException {
-        return this.tutorDAO.delete(record);
+        return this.tutorDAO.delete(record.getId());
     }
 
     @Override
@@ -84,16 +86,15 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
     }
 
     @Override
+    @Transaction
     public Tutor saveOrUpdate(Tutor tutor) throws SQLException {
-
         getApplication().getEmployeeService().saveOrUpdateEmployee(tutor.getEmployee());
-        //tutor.setEmployee(getApplication().getEmployeeService().getByuuid(tutor.getEmployee().getUuid()));
         this.tutorDAO.createOrUpdate(tutor);
         return tutor;
     }
 
     @Override
     public Tutor getByEmployee(Employee employee) throws SQLException {
-        return this.tutorDAO.getByEmployee(employee);
+        return this.tutorDAO.getByEmployee(employee.getId());
     }
 }

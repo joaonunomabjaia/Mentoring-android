@@ -170,4 +170,36 @@ public class FormQuestion extends BaseModel {
     public void setAnswer(Answer answer) {
         this.answer = answer;
     }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
+    }
+
+    public int getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
+    }
+
+    public int getEvaluationTypeId() {
+        return evaluationTypeId;
+    }
+
+    public void setEvaluationTypeId(int evaluationTypeId) {
+        this.evaluationTypeId = evaluationTypeId;
+    }
+
+    public int getResponseTypeId() {
+        return responseTypeId;
+    }
+
+    public void setResponseTypeId(int responseTypeId) {
+        this.responseTypeId = responseTypeId;
+    }
 }

@@ -36,7 +36,7 @@ public class EvaluationTypeServiceImpl extends BaseServiceImpl<EvaluationType> i
 
     @Override
     public int delete(EvaluationType record) throws SQLException {
-        return this.evaluationTypeDAO.delete(record);
+        return this.evaluationTypeDAO.delete(record.getId());
     }
 
     @Override

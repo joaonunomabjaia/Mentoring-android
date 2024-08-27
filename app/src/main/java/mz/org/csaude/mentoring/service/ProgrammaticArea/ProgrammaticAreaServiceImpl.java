@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.ProgrammaticArea;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class ProgrammaticAreaServiceImpl extends BaseServiceImpl<ProgrammaticAre
 
     @Override
     public ProgrammaticArea save(ProgrammaticArea record) throws SQLException {
-        this.programmaticAreaDAO.create(record);
+        this.programmaticAreaDAO.insert(record);
         return record;
     }
 
@@ -64,12 +66,13 @@ public class ProgrammaticAreaServiceImpl extends BaseServiceImpl<ProgrammaticAre
     }
 
     @Override
+    @Transaction
     public ProgrammaticArea saveOrUpdateProgrammaticArea(ProgrammaticAreaDTO programmaticAreaDTO) throws SQLException {
         ProgrammaticArea pa = this.programmaticAreaDAO.getByUuid(programmaticAreaDTO.getUuid());
         ProgrammaticArea programmaticArea = programmaticAreaDTO.getProgrammaticArea();
         Program p = programDAO.getByUuid(programmaticArea.getProgram().getUuid());
         if (p == null) {
-            programDAO.create(programmaticArea.getProgram());
+            programDAO.insert(programmaticArea.getProgram());
         } else programmaticArea.setProgram(p);
 
         if(pa!=null) {

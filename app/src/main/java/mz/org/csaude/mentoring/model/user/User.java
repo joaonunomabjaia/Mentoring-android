@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.model.user;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.Relation;
 
@@ -48,20 +49,17 @@ public class User extends BaseModel {
     @ColumnInfo(name = COLUMN_EMPLOYEE)
     private Integer employeeId;
 
-    @Relation(
-            parentColumn = COLUMN_EMPLOYEE,
-            entityColumn = "id"
-    )
+    @Ignore
     private Employee employee;
 
     public User() {
     }
-
+    @Ignore
     public User(String userName, String password) {
         this.userName = userName;
         this.password = password;
     }
-
+    @Ignore
     public User(UserDTO userDTO) {
         this.userName = userDTO.getUsername();
         this.password = userDTO.getPassword();

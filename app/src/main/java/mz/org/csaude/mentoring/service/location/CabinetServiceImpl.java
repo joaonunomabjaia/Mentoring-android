@@ -28,7 +28,7 @@ public class CabinetServiceImpl extends BaseServiceImpl<Cabinet> implements Cabi
 
     @Override
     public Cabinet save(Cabinet record) throws SQLException {
-        this.cabinetDAO.create(record);
+        this.cabinetDAO.insert(record);
         return record;
     }
 

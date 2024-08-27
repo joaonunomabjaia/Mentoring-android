@@ -284,4 +284,20 @@ public class Employee extends BaseModel implements Listble {
     public int hashCode() {
         return Objects.hash(super.hashCode(), nuit, phoneNumber, email);
     }
+
+    public int getProfessionalCategoryId() {
+        return professionalCategoryId;
+    }
+
+    public void setProfessionalCategoryId(int professionalCategoryId) {
+        this.professionalCategoryId = professionalCategoryId;
+    }
+
+    public int getPartnerId() {
+        return partnerId;
+    }
+
+    public void setPartnerId(int partnerId) {
+        this.partnerId = partnerId;
+    }
 }

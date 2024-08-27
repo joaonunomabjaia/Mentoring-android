@@ -3,12 +3,14 @@ package mz.org.csaude.mentoring.service.location;
 import android.app.Application;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.location.ProvinceDAO;
 import mz.org.csaude.mentoring.dto.location.ProvinceDTO;
+import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
@@ -30,7 +32,7 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
 
     @Override
     public Province save(Province record) throws SQLException {
-        this.provinceDAO.create(record);
+        this.provinceDAO.insertProvince(record);
         return record;
     }
 
@@ -42,7 +44,7 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
 
     @Override
     public int delete(Province record) throws SQLException {
-        return this.provinceDAO.delete(record);
+        return this.provinceDAO.delete(record.getId());
     }
 
     @Override
@@ -62,7 +64,6 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
             provinceUuids.add(location.getProvince().getUuid());
         }
         return provinceDAO.getAllOfTutor(provinceUuids);
-        return this.provinceDAO.getAllOfTutor(tutor);
     }
 
     @Override
@@ -76,13 +77,13 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
     @Override
     public Province savedOrUpdateProvince(ProvinceDTO provinceDTO) throws SQLException {
 
-        List<Province> provinces = this.provinceDAO.queryForEq("uuid", provinceDTO.getUuid());
-        if (provinces.isEmpty()){
+        Province provinces = this.provinceDAO.getByUuid(provinceDTO.getUuid());
+        if (provinces != null){
             Province province = new Province(provinceDTO);
-            this.provinceDAO.create(province);
+            this.provinceDAO.insertProvince(province);
             return province;
         }
-       return provinces.get(0);
+       return provinces;
     }
 
 

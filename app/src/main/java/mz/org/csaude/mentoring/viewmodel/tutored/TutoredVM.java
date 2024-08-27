@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
@@ -24,7 +25,6 @@ import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
-import mz.org.csaude.mentoring.model.career.Career;
 import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.location.District;
@@ -36,7 +36,6 @@ import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.service.career.CareerService;
 import mz.org.csaude.mentoring.service.professionalCategory.ProfessionalCategoryService;
 import mz.org.csaude.mentoring.service.session.SessionService;
 import mz.org.csaude.mentoring.service.tutored.TutoredService;
@@ -105,7 +104,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     public void setName(String name) {
         this.tutored.getEmployee().setName(name);
-        notifyPropertyChanged(BR.name);
+        notifyPropertyChanged(mz.org.csaude.mentoring.BR.name);
     }
     @Bindable
     public String getSurname(){

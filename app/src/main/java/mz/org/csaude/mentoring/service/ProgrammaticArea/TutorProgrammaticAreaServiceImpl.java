@@ -32,7 +32,7 @@ public class TutorProgrammaticAreaServiceImpl extends BaseServiceImpl<TutorProgr
 
     @Override
     public TutorProgrammaticArea save(TutorProgrammaticArea record) throws SQLException {
-        this.tutorProgrammaticAreaDAO.create(record);
+        this.tutorProgrammaticAreaDAO.insert(record);
         return record;
     }
 
@@ -73,7 +73,7 @@ public class TutorProgrammaticAreaServiceImpl extends BaseServiceImpl<TutorProgr
             tutorProgrammaticArea.setId(tpa.getId());
         }
         Employee employee = getApplication().getAuthenticatedUser().getEmployee();
-        Tutor tutor = tutorDAO.getByEmployee(employee);
+        Tutor tutor = tutorDAO.getByEmployee(employee.getId());
         tutorProgrammaticArea.setTutor(tutor);
         this.tutorProgrammaticAreaDAO.createOrUpdate(tutorProgrammaticArea);
         return tutorProgrammaticArea;

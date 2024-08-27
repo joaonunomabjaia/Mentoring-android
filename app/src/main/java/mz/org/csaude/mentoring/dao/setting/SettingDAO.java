@@ -1,7 +1,9 @@
 package mz.org.csaude.mentoring.dao.setting;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -26,4 +28,17 @@ public interface SettingDAO {
 
     @Query("SELECT * FROM setting")
     List<Setting> getAllSettings();
+
+    @Delete
+    int delete(Setting record);
+
+    @Query("SELECT * FROM setting WHERE id = :id")
+    Setting queryForId(int id);
+
+    @Query("SELECT * FROM setting")
+    List<Setting> queryForAll();
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(Setting setting);
 }

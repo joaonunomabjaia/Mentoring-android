@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.session;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import com.j256.ormlite.misc.TransactionManager;
 
 import java.sql.SQLException;
@@ -28,6 +30,8 @@ import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
+import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
 public class SessionServiceImpl extends BaseServiceImpl<Session> implements SessionService{
@@ -53,9 +57,9 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
+    @Transaction
     public Session save(Session record) throws SQLException {
-        TransactionManager.callInTransaction(getDataBaseHelper().getConnectionSource(), (Callable<Void>) () -> {
-            this.sessionDAO.create(record);
+            this.sessionDAO.insert(record);
             if (Utilities.listHasElements(record.getMentorships())) {
                 for (Mentorship mentorship : record.getMentorships()) {
                     Form form = getApplication().getFormService().getByuuid(mentorship.getForm().getUuid());
@@ -66,17 +70,15 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
                     mentorship.setTutor(getApplication().getTutorService().getByuuid(mentorship.getTutor().getUuid()));
                     mentorship.setTutored(getApplication().getTutoredService().getByuuid(mentorship.getTutored().getUuid()));
                     mentorship.setSession(record);
-                    this.mentorshipDAO.create(mentorship);
+                    this.mentorshipDAO.insertMentorship(mentorship);
                     for (Answer answer : mentorship.getAnswers()) {
                         answer.setMentorship(mentorship);
                         answer.setForm(form);
                         answer.setQuestion(getApplication().getQuestionService().getByuuid(answer.getQuestion().getUuid()));
-                        this.answerDAO.create(answer);
+                        this.answerDAO.insert(answer);
                     }
                 }
             }
-            return null;
-        });
         return record;
     }
 
@@ -88,7 +90,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public int delete(Session record) throws SQLException {
-        return this.sessionDAO.delete(record);
+        return this.sessionDAO.delete(record.getId());
     }
 
     @Override
@@ -103,18 +105,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public List<Session> getAllOfRondaAndMentee(Ronda currRonda, Tutored selectedMentee, long offset, long limit) throws SQLException {
-        List<Session> sessions = this.sessionDAO.queryForAllOfRondaAndMentee(currRonda, selectedMentee, getApplication());
+        List<Session> sessions = this.sessionDAO.queryForAllOfRondaAndMentee(currRonda.getId(), selectedMentee.getId());
         for (Session session : sessions) {
-            session.setMentorships(this.mentorshipDAO.getAllOfSession(session));
+            session.setMentorships(this.mentorshipDAO.getAllOfSession(session.getId()));
         }
         return sessions;
     }
 
     @Override
     public List<Session> getAllOfRonda(Ronda currRonda) throws SQLException {
-        List<Session> sessions = this.sessionDAO.queryForAllOfRonda(currRonda);
+        List<Session> sessions = this.sessionDAO.queryForAllOfRonda(currRonda.getId());
         for (Session session : sessions) {
-            session.setMentorships(this.mentorshipDAO.getAllOfSession(session));
+            session.setMentorships(this.mentorshipDAO.getAllOfSession(session.getId()));
             for (Mentorship mentorship : session.getMentorships()) {
                 if (mentorship.isPatientEvaluation()) {
                     mentorship.setAnswers(this.getApplication().getAnswerService().getAllOfMentorship(mentorship));
@@ -153,7 +155,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     @Override
     public void saveRecommendedResources(Session session, List<SessionRecommendedResource> recommendedResources) throws SQLException {
         for (SessionRecommendedResource recommendedResource : recommendedResources) {
-            this.sessionRecommendedResourceDAO.create(recommendedResource);
+            this.sessionRecommendedResourceDAO.insert(recommendedResource);
         }
     }
 
@@ -164,7 +166,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public List<SessionRecommendedResource> getPendingRecommendedResources() throws SQLException {
-        return this.sessionRecommendedResourceDAO.queryForAllPending();
+        return this.sessionRecommendedResourceDAO.queryForAllPending(String.valueOf(SyncSatus.PENDING));
     }
 
     private void doCountInCategory(String cat, List<SessionSummary> summaries, Answer answer) {
@@ -212,7 +214,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
         Date startDate = cal.getTime();
 
-        return this.sessionDAO.getAllOfRondaPending(ronda, startDate);
+        return this.sessionDAO.getAllOfRondaPending(ronda.getId(), startDate);
     }
 
     @Override
@@ -226,7 +228,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public List<Session> getAllNotSynced() throws SQLException {
-        return sessionDAO.getAllNotSynced();
+        return sessionDAO.getAllNotSynced(String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
     @Override

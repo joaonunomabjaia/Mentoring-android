@@ -22,6 +22,7 @@ import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 import mz.org.csaude.mentoring.model.responseType.ResponseType;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
 
 public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> implements FormQuestionService {
 
@@ -47,7 +48,7 @@ public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> imple
     }
     @Override
     public FormQuestion save(FormQuestion record) throws SQLException {
-        this.formQuestionDAO.create(record);
+        this.formQuestionDAO.insert(record);
         return record;
     }
 
@@ -139,7 +140,7 @@ public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> imple
     }
 
     @Override
-    public List<FormQuestion> getAllOfForm(Form form, String evaluationTipe) throws SQLException {
-        return formQuestionDAO.getAllOfForm(form, evaluationTipe, getApplication());
+    public List<FormQuestion> getAllOfForm(Form form, String evaluationType) {
+        return formQuestionDAO.getAllOfForm(form.getId(), evaluationType, String.valueOf(LifeCycleStatus.ACTIVE));
     }
 }

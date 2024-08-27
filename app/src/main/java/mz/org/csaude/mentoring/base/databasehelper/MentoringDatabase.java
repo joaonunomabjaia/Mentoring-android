@@ -4,13 +4,13 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SupportFactory;
 
 import mz.org.csaude.mentoring.dao.*;
 import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
-import mz.org.csaude.mentoring.dao.career.CareerDAO;
 import mz.org.csaude.mentoring.dao.career.CareerTypeDAO;
 import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
 import mz.org.csaude.mentoring.dao.evaluation.EvaluationTypeDAO;
@@ -45,9 +45,9 @@ import mz.org.csaude.mentoring.dao.session.SessionStatusDAO;
 import mz.org.csaude.mentoring.dao.setting.SettingDAO;
 import mz.org.csaude.mentoring.dao.tutor.TutorDAO;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
+import mz.org.csaude.mentoring.dao.user.UserDao;
 import mz.org.csaude.mentoring.model.*;
 import mz.org.csaude.mentoring.model.answer.Answer;
-import mz.org.csaude.mentoring.model.career.Career;
 import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
@@ -81,13 +81,13 @@ import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
-import mz.org.csaude.mentoring.model.tutor.TutorLocation;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.Converters;
 
 @Database(
         entities = {
-                Tutored.class, Partner.class, Career.class, Tutor.class, TutorLocation.class,
+                Tutored.class, Partner.class, Tutor.class,
                 Form.class, Session.class, HealthFacility.class, Cabinet.class,
                 District.class, Mentorship.class, Question.class, QuestionsCategory.class, Answer.class,
                 FormQuestion.class, Setting.class, Program.class, ProgrammaticArea.class, TutorProgrammaticArea.class,
@@ -99,13 +99,13 @@ import mz.org.csaude.mentoring.model.user.User;
         version = 1,
         exportSchema = false
 )
+@TypeConverters({Converters.class})
 public abstract class MentoringDatabase extends RoomDatabase {
 
     private static volatile MentoringDatabase INSTANCE;
 
     public abstract TutoredDao getTutoredDao();
     public abstract PartnerDao getPartnerDao();
-    public abstract CareerDAO getCareerDAO();
     public abstract TutorDAO getTutorDAO();
     public abstract ProgrammaticAreaDAO getProgrammaticAreaDAO();
     public abstract FormDAO getFormDAO();
@@ -138,6 +138,7 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract ResponseTypeDAO getResponseTypeDAO();
     public abstract ProgramDAO getProgramDAO();
     public abstract ResourceDAO getResourceDAO();
+    public abstract UserDao getUserDAO();
     public abstract SessionRecommendedResourceDAO getSessionRecommendedResourceDAO();
 
     public static MentoringDatabase getInstance(Context context, String passphrase) {

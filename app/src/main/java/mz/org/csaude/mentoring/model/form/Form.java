@@ -159,4 +159,20 @@ public class Form extends BaseModel {
     public int hashCode() {
         return Objects.hash(super.hashCode(), code);
     }
+
+    public int getProgrammaticAreaId() {
+        return programmaticAreaId;
+    }
+
+    public void setProgrammaticAreaId(int programmaticAreaId) {
+        this.programmaticAreaId = programmaticAreaId;
+    }
+
+    public int getPartnerId() {
+        return partnerId;
+    }
+
+    public void setPartnerId(int partnerId) {
+        this.partnerId = partnerId;
+    }
 }

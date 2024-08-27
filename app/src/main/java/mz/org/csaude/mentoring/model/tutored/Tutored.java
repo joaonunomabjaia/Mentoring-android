@@ -3,8 +3,7 @@ package mz.org.csaude.mentoring.model.tutored;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-import androidx.room.PrimaryKey;
-import androidx.room.Relation;
+import androidx.room.Ignore;
 
 import java.util.Objects;
 
@@ -26,13 +25,11 @@ public class Tutored extends BaseModel {
     public static final String COLUMN_ZERO_EVALUATION_STATUS = "zero_evaluation_status";
     public static final String COLUMN_ZERO_EVALUATION_SCORE = "zero_evaluation_score";
 
+
     @ColumnInfo(name = COLUMN_EMPLOYEE)
     private Integer employeeId;
 
-    @Relation(
-            parentColumn = COLUMN_EMPLOYEE,
-            entityColumn = "id"
-    )
+    @Ignore // Room will ignore this field since it's not stored directly in the Tutored table.
     private Employee employee;
 
     @ColumnInfo(name = COLUMN_ZERO_EVALUATION_STATUS)
@@ -48,11 +45,13 @@ public class Tutored extends BaseModel {
         this.employeeId = employeeId;
     }
 
+    @Ignore // This constructor should be ignored by Room because it involves complex object initialization.
     public Tutored(Employee employee) {
         this.employeeId = employee.getId();
         this.employee = employee;
     }
 
+    @Ignore // This constructor should be ignored by Room as it’s used for DTO to Entity conversion.
     public Tutored(TutoredDTO tutoredDTO) {
         super(tutoredDTO);
         this.zeroEvaluationDone = tutoredDTO.isZeroEvaluationDone();
@@ -102,7 +101,7 @@ public class Tutored extends BaseModel {
 
     @Override
     public String getDescription() {
-        return this.employee.getFullName();
+        return this.employee != null ? this.employee.getFullName() : "No Employee";
     }
 
     @Override

@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.responseType;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
@@ -20,7 +21,7 @@ public interface ResponseTypeDAO {
     void update(ResponseType responseType);
 
     @Delete
-    void delete(ResponseType responseType);
+    int delete(ResponseType responseType);
 
     @Query("SELECT * FROM response_type WHERE id = :id LIMIT 1")
     ResponseType getById(int id);
@@ -30,4 +31,14 @@ public interface ResponseTypeDAO {
 
     @Query("SELECT * FROM response_type")
     List<ResponseType> getAll();
+
+    @Query("SELECT * FROM response_type")
+    List<ResponseType> queryForAll();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    ResponseType createOrUpdate(ResponseType responseType);
+
+    @Query("SELECT * FROM response_type WHERE id = :id LIMIT 1")
+    ResponseType queryForId(int id);
+
 }

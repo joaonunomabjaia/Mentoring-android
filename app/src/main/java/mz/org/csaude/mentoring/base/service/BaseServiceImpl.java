@@ -5,7 +5,6 @@ import android.app.Application;
 import java.sql.SQLException;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
-import mz.org.csaude.mentoring.base.databasehelper.MentoringDataBaseHelper;
 import mz.org.csaude.mentoring.base.databasehelper.MentoringDatabase;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.model.user.User;
@@ -15,8 +14,7 @@ public abstract class BaseServiceImpl<T extends BaseModel> implements BaseServic
     protected MentoringDatabase dataBaseHelper;
 
     protected MentoringApplication application;
-    public static MentoringApplication app;
-    protected User currentUser;
+    //public static MentoringApplication app;
 
     public BaseServiceImpl(Application application) {
         try {
@@ -27,12 +25,13 @@ public abstract class BaseServiceImpl<T extends BaseModel> implements BaseServic
     }
 
     public void init(Application application) throws SQLException {
-        this.dataBaseHelper = MentoringDatabase.getInstance(application);
         this.application= (MentoringApplication) application;
-        BaseServiceImpl.app = (MentoringApplication) application;
+        this.dataBaseHelper = MentoringDatabase.getInstance(application, ((MentoringApplication) application).getEncryptedPassphrase());
+
+        //BaseServiceImpl.app = (MentoringApplication) application;
     }
 
-    public MentoringDataBaseHelper getDataBaseHelper() {
+    public MentoringDatabase getDataBaseHelper() {
         return dataBaseHelper;
     }
 
@@ -40,12 +39,9 @@ public abstract class BaseServiceImpl<T extends BaseModel> implements BaseServic
         return application;
     }
 
-    public static MentoringApplication getApp() {
-        return app;
-    }
 
     public User getCurrentUser() throws SQLException {
-        return ((MentoringApplication) this.application).getAuthenticatedUser();
+        return this.application.getAuthenticatedUser();
     }
 
     @Override

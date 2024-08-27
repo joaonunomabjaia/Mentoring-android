@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.programmaticArea;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
@@ -20,7 +21,7 @@ public interface ProgrammaticAreaDAO {
     void update(ProgrammaticArea programmaticArea);
 
     @Delete
-    void delete(ProgrammaticArea programmaticArea);
+    int delete(ProgrammaticArea programmaticArea);
 
     @Query("SELECT * FROM programmatic_area WHERE id = :id")
     ProgrammaticArea getById(int id);
@@ -30,4 +31,16 @@ public interface ProgrammaticAreaDAO {
 
     @Query("SELECT * FROM programmatic_area WHERE uuid = :uuid LIMIT 1")
     ProgrammaticArea getByUuid(String uuid);
+
+    @Query("SELECT * FROM programmatic_area")
+    List<ProgrammaticArea> queryForAll();
+
+    @Query("SELECT * FROM programmatic_area WHERE id = :id")
+    ProgrammaticArea queryForId(int id);
+
+    @Query("SELECT * FROM programmatic_area WHERE uuid = :uuid LIMIT 1")
+    ProgrammaticArea queryForUuid(String uuid);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(ProgrammaticArea programmaticArea);
 }

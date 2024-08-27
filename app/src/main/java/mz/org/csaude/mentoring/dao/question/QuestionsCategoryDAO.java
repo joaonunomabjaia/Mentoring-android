@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.dao.question;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
@@ -20,7 +21,7 @@ public interface QuestionsCategoryDAO {
     void update(QuestionsCategory questionsCategory);
 
     @Delete
-    void delete(QuestionsCategory questionsCategory);
+    int delete(QuestionsCategory questionsCategory);
 
     @Query("SELECT * FROM question_category WHERE id = :id")
     QuestionsCategory getById(int id);
@@ -30,4 +31,18 @@ public interface QuestionsCategoryDAO {
 
     @Query("SELECT * FROM question_category")
     List<QuestionsCategory> getAll();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(QuestionsCategory questionsCategory);
+
+    @Query("SELECT * FROM question_category WHERE id = :id LIMIT 1")
+    QuestionsCategory queryForId(int id);
+
+    @Query("SELECT * FROM question_category")
+    List<QuestionsCategory> queryForAll();
+
+    @Query("SELECT * FROM question_category WHERE uuid = :uuid LIMIT 1")
+    QuestionsCategory queryForUuid(String uuid);
+
+
 }

@@ -39,7 +39,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public Employee save(Employee record) throws SQLException {
-        this.employeeDAO.create(record);
+        this.employeeDAO.insert(record);
         return record;
     }
 
@@ -51,7 +51,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public int delete(Employee record) throws SQLException {
-        return this.employeeDAO.delete(record);
+        return this.employeeDAO.delete(record.getId());
     }
 
     @Override
@@ -103,7 +103,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             HealthFacility h =getDataBaseHelper().getHealthFacilityDAO().getByUuid(location.getHealthFacility().getUuid());
             if (h == null) {
                 location.getHealthFacility().setDistrict(getDataBaseHelper().getDistrictDAO().getByUuid(location.getHealthFacility().getDistrict().getUuid()));
-                getDataBaseHelper().getHealthFacilityDAO().create(location.getHealthFacility());
+                getDataBaseHelper().getHealthFacilityDAO().insert(location.getHealthFacility());
             } else {
                 location.getHealthFacility().setId(h.getId());
             }

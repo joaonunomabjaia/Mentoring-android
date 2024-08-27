@@ -3,7 +3,7 @@ package mz.org.csaude.mentoring.model.tutor;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 import androidx.room.Relation;
 
 import java.util.Objects;
@@ -17,7 +17,7 @@ import mz.org.csaude.mentoring.model.employee.Employee;
         foreignKeys = @ForeignKey(
                 entity = Employee.class,
                 parentColumns = "id",
-                childColumns = "employee_id",
+                childColumns = Tutor.COLUMN_EMPLOYEE,
                 onDelete = ForeignKey.CASCADE
         )
 )
@@ -29,12 +29,14 @@ public class Tutor extends BaseModel {
   @ColumnInfo(name = COLUMN_EMPLOYEE)
   private Integer employeeId;
 
+  @Ignore // This field is ignored because it represents a relationship.
   @Relation(parentColumn = COLUMN_EMPLOYEE, entityColumn = "id")
   private Employee employee;
 
   public Tutor() {
   }
 
+  @Ignore // This constructor should be ignored by Room.
   public Tutor(TutorDTO tutorDTO) {
     super(tutorDTO);
     if (tutorDTO.getEmployeeDTO() != null) {
@@ -43,6 +45,7 @@ public class Tutor extends BaseModel {
     }
   }
 
+  // Getters and Setters
   public Integer getEmployeeId() {
     return employeeId;
   }
@@ -57,7 +60,9 @@ public class Tutor extends BaseModel {
 
   public void setEmployee(Employee employee) {
     this.employee = employee;
-    this.employeeId = employee.getId();
+    if (employee != null) {
+      this.employeeId = employee.getId();
+    }
   }
 
   @Override

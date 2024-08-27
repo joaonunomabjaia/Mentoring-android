@@ -2,8 +2,11 @@ package mz.org.csaude.mentoring.dao.user;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+
+import java.util.List;
 
 import mz.org.csaude.mentoring.model.user.User;
 
@@ -24,4 +27,21 @@ public interface UserDao {
 
     @Query("SELECT * FROM user WHERE uuid = :uuid LIMIT 1")
     User getByUuid(String uuid);
+
+    @Query("SELECT * FROM user")
+    List<User> queryForAll();
+
+    @Query("SELECT * FROM user WHERE id = :id")
+    User queryForId(int id);
+
+    @Query("SELECT * FROM user WHERE uuid = :uuid")
+    User queryForUuid(String uuid);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createOrUpdate(User user);
+
+    @Query("SELECT * FROM user WHERE id = :id")
+    User queryForEq(int id);
+
+
 }

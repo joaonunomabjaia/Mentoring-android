@@ -41,7 +41,6 @@ import mz.org.csaude.mentoring.workSchedule.work.SessionPOSTWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionRecommendedResourceWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionStatusWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionGETWorker;
-import mz.org.csaude.mentoring.workSchedule.work.TimeOfDayWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutoredWorker;
 import mz.org.csaude.mentoring.workSchedule.work.UserWorker;
@@ -86,7 +85,6 @@ public class WorkerScheduleExecutor {
         OneTimeWorkRequest responseTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ResponseTypeWorker.class).addTag("ONE_TIME_RESPONSE_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest evaluationTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(EvaluationTypeWorker.class).addTag("ONE_TIME_EVALUATION_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest iterationTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(IterationTypeWorker.class).addTag("ONE_TIME_ITERATION_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest timesOfDayOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TimeOfDayWorker.class).addTag("ONE_TIME_TIME_OF_DAY_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest doorsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(DoorWorker.class).addTag("ONE_TIME_DOORS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest cabinetOneTimeWorkRequest = new OneTimeWorkRequest.Builder(CabinetWorker.class).addTag("ONE_TIME_CABINET_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest sessionStatusOneTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionStatusWorker.class).addTag("ONE_TIME_SESSION_STATUS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
@@ -97,7 +95,7 @@ public class WorkerScheduleExecutor {
                 .then(Arrays.asList(districtOneTimeWorkRequest, partnersOneTimeWorkRequest, cabinetOneTimeWorkRequest))
                 .then(Arrays.asList(rondaTypesOneTimeWorkRequest, responseTypesOneTimeWorkRequest,
                         evaluationTypesOneTimeWorkRequest, iterationTypesOneTimeWorkRequest,
-                        timesOfDayOneTimeWorkRequest, doorsOneTimeWorkRequest, sessionStatusOneTimeWorkRequest, programsOneTimeWorkRequest)).then(programmaticAreaOneTimeWorkRequest)
+                        doorsOneTimeWorkRequest, sessionStatusOneTimeWorkRequest, programsOneTimeWorkRequest)).then(programmaticAreaOneTimeWorkRequest)
                 .then(categoriesOneTimeWorkRequest).enqueue();
         return categoriesOneTimeWorkRequest;
 

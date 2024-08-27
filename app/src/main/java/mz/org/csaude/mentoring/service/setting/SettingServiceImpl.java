@@ -17,11 +17,7 @@ public class SettingServiceImpl extends BaseServiceImpl<Setting> implements Sett
 
     public SettingServiceImpl(Application application) {
         super(application);
-        try {
-            this.settingDAO = getDataBaseHelper().getSettingDAO();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        this.settingDAO = getDataBaseHelper().getSettingDAO();
     }
 
     @Override
@@ -31,7 +27,7 @@ public class SettingServiceImpl extends BaseServiceImpl<Setting> implements Sett
     }
     @Override
     public Setting save(Setting record) throws SQLException {
-        this.settingDAO.create(record);
+        this.settingDAO.insert(record);
         return record;
     }
 

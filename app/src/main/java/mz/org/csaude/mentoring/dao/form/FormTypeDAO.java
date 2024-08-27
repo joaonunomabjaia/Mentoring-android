@@ -20,7 +20,7 @@ public interface FormTypeDAO {
     void update(FormType formType);
 
     @Delete
-    void delete(FormType formType);
+    int delete(FormType formType);
 
     @Query("SELECT * FROM form_type WHERE id = :id")
     FormType getById(int id);

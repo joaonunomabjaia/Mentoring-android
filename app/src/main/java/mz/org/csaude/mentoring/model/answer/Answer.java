@@ -119,4 +119,28 @@ public class Answer extends BaseModel {
         this.question = question;
         this.questionId = question.getId();
     }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
+    }
+
+    public int getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
+    }
+
+    public int getMentorshipId() {
+        return mentorshipId;
+    }
+
+    public void setMentorshipId(int mentorshipId) {
+        this.mentorshipId = mentorshipId;
+    }
 }

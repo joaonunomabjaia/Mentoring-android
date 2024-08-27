@@ -62,24 +62,28 @@ public class Session extends BaseModel {
     private int statusId;
 
     @Relation(parentColumn = COLUMN_STATUS, entityColumn = "id")
+    @Ignore
     private SessionStatus status;
 
     @ColumnInfo(name = COLUMN_RONDA)
     private int rondaId;
 
     @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
+    @Ignore
     private Ronda ronda;
 
     @ColumnInfo(name = COLUMN_MENTEE)
     private int menteeId;
 
     @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
+    @Ignore
     private Tutored tutored;
 
     @ColumnInfo(name = COLUMN_FORM)
     private int formId;
 
     @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
+    @Ignore
     private Form form;
 
     @Ignore
@@ -100,6 +104,7 @@ public class Session extends BaseModel {
     public Session() {
     }
 
+    @Ignore
     public Session(SessionDTO sessionDTO) {
         super(sessionDTO);
         this.setStartDate(sessionDTO.getStartDate());
@@ -128,6 +133,8 @@ public class Session extends BaseModel {
             setMentorships(Utilities.parse(sessionDTO.getMentorships(), Mentorship.class));
         }
     }
+
+    // Getters and Setters
 
     public Ronda getRonda() {
         return ronda;
@@ -216,7 +223,7 @@ public class Session extends BaseModel {
 
     @JsonIgnore
     public boolean isCompleted() {
-        return this.status.isCompleted();
+        return this.status != null && this.status.isCompleted();
     }
 
     public boolean canBeClosed() {
@@ -296,5 +303,37 @@ public class Session extends BaseModel {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), ronda, tutored, form);
+    }
+
+    public int getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(int statusId) {
+        this.statusId = statusId;
+    }
+
+    public int getRondaId() {
+        return rondaId;
+    }
+
+    public void setRondaId(int rondaId) {
+        this.rondaId = rondaId;
+    }
+
+    public int getMenteeId() {
+        return menteeId;
+    }
+
+    public void setMenteeId(int menteeId) {
+        this.menteeId = menteeId;
+    }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
     }
 }
