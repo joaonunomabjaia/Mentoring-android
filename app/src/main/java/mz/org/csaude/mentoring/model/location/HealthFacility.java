@@ -41,6 +41,7 @@ public class HealthFacility extends BaseModel implements Listble {
     public HealthFacility() {
     }
 
+    @Ignore
     public HealthFacility(HealthFacilityDTO healthFacilityDTO) {
         this.setUuid(healthFacilityDTO.getUuid());
         this.setDescription(healthFacilityDTO.getHealthFacility());

@@ -48,7 +48,7 @@ public interface FormDAO {
     List<Form> queryForAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Form entity);
+    long createOrUpdate(Form entity);
 
     @Query("UPDATE form SET sync_status = :syncStatus WHERE id = :id")
     void updateSyncStatus(int id, String syncStatus);

@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.question.QuestionType;
 public interface QuestionTypeDAO {
 
     @Insert
-    void insert(QuestionType questionType);
+    long insert(QuestionType questionType);
 
     @Update
     void update(QuestionType questionType);

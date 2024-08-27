@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.rondatype.RondaType;
 public interface RondaTypeDAO {
 
     @Insert
-    void insert(RondaType rondaType);
+    long insert(RondaType rondaType);
 
     @Update
     void update(RondaType rondaType);
@@ -29,7 +29,7 @@ public interface RondaTypeDAO {
     boolean checkRondaTypeExistance(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(RondaType rondaType);
+    long createOrUpdate(RondaType rondaType);
 
     @Query("SELECT * FROM ronda_type")
     List<RondaType> queryForAll();

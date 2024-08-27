@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 public interface RondaDAO {
 
     @Insert
-    void insert(Ronda ronda);
+    long insert(Ronda ronda);
 
     @Update
     void update(Ronda ronda);
@@ -66,5 +66,5 @@ public interface RondaDAO {
     void delete(Integer id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Ronda ronda);
+    long createOrUpdate(Ronda ronda);
 }

@@ -56,5 +56,5 @@ public interface MentorshipDAO {
     int delete(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Mentorship mentorship);
+    long createOrUpdate(Mentorship mentorship);
 }

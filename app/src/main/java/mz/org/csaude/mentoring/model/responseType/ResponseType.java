@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.responseType;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -26,11 +27,13 @@ public class ResponseType extends BaseModel {
     public ResponseType() {
     }
 
+    @Ignore
     public ResponseType(String description, String code) {
         this.description = description;
         this.code = code;
     }
 
+    @Ignore
     public ResponseType(ResponseTypeDTO responseTypeDTO) {
         super(responseTypeDTO);
         this.setCode(responseTypeDTO.getCode());

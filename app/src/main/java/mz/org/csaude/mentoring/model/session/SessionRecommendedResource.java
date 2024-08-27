@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.model.session;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.Relation;
 
@@ -38,18 +39,21 @@ public class SessionRecommendedResource extends BaseModel {
     @ColumnInfo(name = COLUMN_SESSION_ID)
     private Integer sessionId;
 
+    @Ignore
     @Relation(parentColumn = COLUMN_SESSION_ID, entityColumn = "id")
     private Session session;
 
     @ColumnInfo(name = COLUMN_TUTORED_ID)
     private Integer tutoredId;
 
+    @Ignore
     @Relation(parentColumn = COLUMN_TUTORED_ID, entityColumn = "id")
     private Tutored tutored;
 
     @ColumnInfo(name = COLUMN_TUTOR_ID)
     private Integer tutorId;
 
+    @Ignore
     @Relation(parentColumn = COLUMN_TUTOR_ID, entityColumn = "id")
     private Tutor tutor;
 
@@ -66,6 +70,7 @@ public class SessionRecommendedResource extends BaseModel {
     public SessionRecommendedResource() {
     }
 
+    @Ignore
     public SessionRecommendedResource(Session session, Node node) {
         this.session = session;
         this.sessionId = session.getId();
@@ -85,6 +90,7 @@ public class SessionRecommendedResource extends BaseModel {
         this.setUuid(Utilities.getNewUUID().toString());
     }
 
+    @Ignore
     public SessionRecommendedResource(SessionRecommendedResourceDTO dto, Session session, Tutored tutored, Tutor tutor) {
         super(dto);
         this.session = session;

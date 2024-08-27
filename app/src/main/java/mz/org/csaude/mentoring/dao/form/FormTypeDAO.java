@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.form.FormType;
 public interface FormTypeDAO {
 
     @Insert
-    void insert(FormType formType);
+    long insert(FormType formType);
 
     @Update
     void update(FormType formType);

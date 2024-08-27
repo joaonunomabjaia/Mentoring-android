@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 public interface RondaMenteeDAO {
 
     @Insert
-    void insert(RondaMentee rondaMentee);
+    long insert(RondaMentee rondaMentee);
 
     @Insert
     void insertAll(List<RondaMentee> rondaMentees);
@@ -42,5 +42,5 @@ public interface RondaMenteeDAO {
     RondaMentee queryForId(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(RondaMentee rondaMentee);
+    long createOrUpdate(RondaMentee rondaMentee);
 }

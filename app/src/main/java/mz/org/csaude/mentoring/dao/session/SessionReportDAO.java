@@ -25,7 +25,7 @@ public interface SessionReportDAO {
     SessionReport getByUuid(String uuid);
 
     @Insert
-    void insert(SessionReport sessionReport);
+    long insert(SessionReport sessionReport);
 
     @Update
     void update(SessionReport sessionReport);

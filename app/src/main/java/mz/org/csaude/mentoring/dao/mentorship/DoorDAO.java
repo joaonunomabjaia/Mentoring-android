@@ -38,7 +38,7 @@ public interface DoorDAO {
     boolean checkDoorExistance(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Door door);
+    long createOrUpdate(Door door);
 
     @Query("DELETE FROM door WHERE id = :id")
     int delete(int id);

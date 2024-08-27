@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
-import mz.org.csaude.mentoring.dao.career.CareerDAO;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
@@ -20,7 +19,6 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     TutoredDao tutoredDao;
 
-    CareerDAO careerDAO;
 
     EmployeeService employeeService;
 
@@ -32,7 +30,6 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public void init(Application application) throws SQLException {
         super.init(application);
         this.tutoredDao = getDataBaseHelper().getTutoredDao();
-        this.careerDAO = getDataBaseHelper().getCareerDAO();
         this.employeeService = new EmployeeServiceImpl(application);
     }
 

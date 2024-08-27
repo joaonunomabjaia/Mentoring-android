@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.partner;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
@@ -28,11 +29,13 @@ public class Partner extends BaseModel implements Listble {
     public Partner() {
     }
 
+    @Ignore
     public Partner(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
+    @Ignore
     public Partner(PartnerDTO partnerDTO) {
         super(partnerDTO);
         this.setName(partnerDTO.getName());

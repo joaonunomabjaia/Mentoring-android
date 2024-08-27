@@ -20,7 +20,7 @@ public interface CareerTypeDAO {
     boolean checkCareerTypeExistance(String code);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(CareerType careerType);
+    long insert(CareerType careerType);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<CareerType> careerTypes);

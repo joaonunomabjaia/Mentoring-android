@@ -94,6 +94,7 @@ public class FormQuestion extends BaseModel {
     public FormQuestion() {
     }
 
+    @Ignore
     public FormQuestion(FormQuestionDTO formQuestionDTO) {
         super(formQuestionDTO);
         this.setSequence(formQuestionDTO.getSequence());

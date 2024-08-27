@@ -80,6 +80,7 @@ public class Location extends BaseModel implements Listble {
     public Location() {
     }
 
+    @Ignore
     public Location(Province province, District district, HealthFacility healthFacility, String locationLevel) {
         this.province = province;
         this.provinceId = province.getId();
@@ -90,6 +91,7 @@ public class Location extends BaseModel implements Listble {
         this.locationLevel = locationLevel;
     }
 
+    @Ignore
     public Location(LocationDTO locationDTO) {
         this.setUuid(locationDTO.getUuid());
         this.setLocationLevel(locationDTO.getLocationLevel());

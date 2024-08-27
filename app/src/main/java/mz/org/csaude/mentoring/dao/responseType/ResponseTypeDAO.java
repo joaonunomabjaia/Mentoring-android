@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.responseType.ResponseType;
 public interface ResponseTypeDAO {
 
     @Insert
-    void insert(ResponseType responseType);
+    long insert(ResponseType responseType);
 
     @Update
     void update(ResponseType responseType);
@@ -36,7 +36,7 @@ public interface ResponseTypeDAO {
     List<ResponseType> queryForAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    ResponseType createOrUpdate(ResponseType responseType);
+    long createOrUpdate(ResponseType responseType);
 
     @Query("SELECT * FROM response_type WHERE id = :id LIMIT 1")
     ResponseType queryForId(int id);

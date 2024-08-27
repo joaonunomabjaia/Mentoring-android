@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.question;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -22,10 +23,12 @@ public class QuestionsCategory extends BaseModel {
     public QuestionsCategory() {
     }
 
+    @Ignore
     public QuestionsCategory(String category) {
         this.category = category;
     }
 
+    @Ignore
     public QuestionsCategory(QuestionCategoryDTO questionCategoryDTO) {
         super(questionCategoryDTO);
         this.setCategory(questionCategoryDTO.getCategory());

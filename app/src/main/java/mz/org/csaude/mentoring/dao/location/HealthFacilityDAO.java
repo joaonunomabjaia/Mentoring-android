@@ -15,7 +15,7 @@ import androidx.room.Delete;
 public interface HealthFacilityDAO {
 
     @Insert
-    void insert(HealthFacility healthFacility);
+    long insert(HealthFacility healthFacility);
 
     @Update
     void update(HealthFacility healthFacility);
@@ -36,7 +36,7 @@ public interface HealthFacilityDAO {
     HealthFacility getByUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(HealthFacility healthFacility);
+    long createOrUpdate(HealthFacility healthFacility);
 
     @Query("SELECT * FROM health_facility")
     List<HealthFacility> queryForAll();

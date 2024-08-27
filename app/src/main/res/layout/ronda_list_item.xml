@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginTop="@dimen/dimen_5dp"
-                android:text="@{ronda.getRondaExuctionStatus()}"
+                android:text="@{ronda.rondaExecutionStatus}"
                 android:textSize="@dimen/dimen_12dp"
                 android:gravity="center_vertical"
                 android:textStyle="bold"/>

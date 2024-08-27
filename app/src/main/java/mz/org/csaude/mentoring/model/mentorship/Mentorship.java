@@ -155,6 +155,7 @@ public class Mentorship extends BaseModel {
     public Mentorship() {
     }
 
+    @Ignore
     public Mentorship(MentorshipDTO mentorshipDTO) {
         super(mentorshipDTO);
         this.setStartDate(mentorshipDTO.getStartDate());

@@ -18,7 +18,6 @@ import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.session.Session;
-import mz.org.csaude.mentoring.service.session.SessionClosureService;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.session.SessionClosureActivity;
 import mz.org.csaude.mentoring.view.session.SessionEAResourceActivity;

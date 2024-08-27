@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.program;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -27,12 +28,14 @@ public class Program extends BaseModel {
         super();
     }
 
+    @Ignore
     public Program(ProgramDTO programDTO) {
         super(programDTO);
         this.setDescription(programDTO.getDescription());
         this.setName(programDTO.getName());
     }
 
+    @Ignore
     public Program(String description, String name) {
         this.description = description;
         this.name = name;

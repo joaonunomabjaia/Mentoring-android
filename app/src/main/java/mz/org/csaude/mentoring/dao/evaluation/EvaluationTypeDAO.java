@@ -17,13 +17,13 @@ public interface EvaluationTypeDAO {
     EvaluationType getByCode(String code);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(EvaluationType evaluationType);
+    long insert(EvaluationType evaluationType);
 
     @Update
     void update(EvaluationType evaluationType);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(EvaluationType evaluationType);
+    long createOrUpdate(EvaluationType evaluationType);
 
     @Query("SELECT * FROM evaluation_type WHERE uuid = :uuid LIMIT 1")
     EvaluationType getByUuid(String uuid);

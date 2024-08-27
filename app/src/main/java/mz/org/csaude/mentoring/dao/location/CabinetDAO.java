@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.location.Cabinet;
 public interface CabinetDAO {
 
     @Insert
-    void insert(Cabinet cabinet);
+    long insert(Cabinet cabinet);
 
     @Update
     void update(Cabinet cabinet);
@@ -30,7 +30,7 @@ public interface CabinetDAO {
     boolean checkCabinetExistance(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Cabinet cabinet);
+    long createOrUpdate(Cabinet cabinet);
 
     @Query("SELECT * FROM cabinet")
     List<Cabinet> queryForAll();

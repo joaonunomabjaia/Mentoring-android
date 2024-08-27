@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.user.User;
 public interface UserDao {
 
     @Insert
-    void insert(User user);
+    long insert(User user);
 
     @Update
     void update(User user);
@@ -38,7 +38,7 @@ public interface UserDao {
     User queryForUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(User user);
+    long createOrUpdate(User user);
 
     @Query("SELECT * FROM user WHERE id = :id")
     User queryForEq(int id);

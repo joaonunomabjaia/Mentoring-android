@@ -15,7 +15,7 @@ public interface ProfessionalCategoryDAO {
 
     // Insert a ProfessionalCategory into the database
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(ProfessionalCategory professionalCategory);
+    long insert(ProfessionalCategory professionalCategory);
 
     // Update an existing ProfessionalCategory in the database
     @Update

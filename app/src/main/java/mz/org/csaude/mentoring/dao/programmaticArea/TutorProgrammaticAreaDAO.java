@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.programmaticArea.TutorProgrammaticArea;
 public interface TutorProgrammaticAreaDAO {
 
     @Insert
-    void insert(TutorProgrammaticArea tutorProgrammaticArea);
+    long insert(TutorProgrammaticArea tutorProgrammaticArea);
 
     @Update
     void update(TutorProgrammaticArea tutorProgrammaticArea);
@@ -42,5 +42,5 @@ public interface TutorProgrammaticAreaDAO {
     TutorProgrammaticArea queryForUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    TutorProgrammaticArea createOrUpdate(TutorProgrammaticArea tutorProgrammaticArea);
+    long createOrUpdate(TutorProgrammaticArea tutorProgrammaticArea);
 }

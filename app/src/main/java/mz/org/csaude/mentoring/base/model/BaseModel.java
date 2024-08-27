@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.base.model;
 
 import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +31,7 @@ public abstract class BaseModel implements Serializable, Listble {
     @ColumnInfo(name = COLUMN_UUID)
     private String uuid;
 
+    @Ignore
     protected String listTyp;
 
     @ColumnInfo(name = COLUMN_SYNC_STATUS)
@@ -41,20 +43,24 @@ public abstract class BaseModel implements Serializable, Listble {
     @ColumnInfo(name = COLUMN_UPDATED_AT)
     private Date updatedAt;
 
+    @Ignore
     protected boolean selected;
 
     @ColumnInfo(name = COLUMN_LIFE_CYCLE_STATUS)
     private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
 
+    @Ignore
     protected int listPosition;
 
     public BaseModel() {
     }
 
+    @Ignore
     public BaseModel(String uuid) {
         this.uuid = uuid;
     }
 
+    @Ignore
     public BaseModel(BaseEntityDTO baseEntityDTO) {
         this.uuid = baseEntityDTO.getUuid();
         this.setCreatedAt(baseEntityDTO.getCreatedAt());

@@ -34,7 +34,7 @@ public interface SessionRecommendedResourceDAO {
     SessionRecommendedResource getByUuid(String uuid);
 
     @Insert
-    void insert(SessionRecommendedResource sessionRecommendedResource);
+    long insert(SessionRecommendedResource sessionRecommendedResource);
 
     @Update
     void update(SessionRecommendedResource sessionRecommendedResource);

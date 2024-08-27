@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.career;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
@@ -25,11 +26,13 @@ public class CareerType extends BaseModel implements Listble {
         super();
     }
 
+    @Ignore
     public CareerType(String description, String code) {
         this.description = description;
         this.code = code;
     }
 
+    @Ignore
     public CareerType(CareerTypeDTO careerTypeDTO) {
         super(careerTypeDTO);
         this.setCode(careerTypeDTO.getCode());

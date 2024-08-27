@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.rondatype;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -23,6 +24,7 @@ public class RondaType extends BaseModel {
     public RondaType() {
     }
 
+    @Ignore
     public RondaType(RondaTypeDTO rondaTypeDTO) {
         super(rondaTypeDTO);
         this.setDescription(rondaTypeDTO.getDescription());

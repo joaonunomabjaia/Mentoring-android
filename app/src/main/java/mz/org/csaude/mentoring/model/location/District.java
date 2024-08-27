@@ -40,12 +40,14 @@ public class District extends BaseModel {
     public District() {
     }
 
+    @Ignore
     public District(Province province, String district) {
         this.province = province;
         this.provinceId = province.getId();
         this.district = district;
     }
 
+    @Ignore
     public District(DistrictDTO districtDTO) {
         this.setUuid(districtDTO.getUuid());
         this.setDescription(districtDTO.getDescription());

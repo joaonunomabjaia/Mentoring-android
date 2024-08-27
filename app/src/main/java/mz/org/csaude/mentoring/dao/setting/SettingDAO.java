@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.setting.Setting;
 public interface SettingDAO {
 
     @Insert
-    void insert(Setting setting);
+    long insert(Setting setting);
 
     @Update
     void update(Setting setting);
@@ -40,5 +40,5 @@ public interface SettingDAO {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Setting setting);
+    long createOrUpdate(Setting setting);
 }

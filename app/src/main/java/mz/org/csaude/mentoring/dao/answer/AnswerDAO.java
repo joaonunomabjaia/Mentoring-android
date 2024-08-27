@@ -17,7 +17,7 @@ public interface AnswerDAO {
     List<Answer> queryForMentorship(int mentorshipId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Answer answer);
+    long insert(Answer answer);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Answer> answers);

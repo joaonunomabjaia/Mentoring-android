@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.tutor.Tutor;
 public interface TutorDAO {
 
     @Insert
-    void insert(Tutor tutor);
+    long insert(Tutor tutor);
 
     @Update
     void update(Tutor tutor);
@@ -29,7 +29,7 @@ public interface TutorDAO {
     boolean checkTutorExistance(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Tutor tutor);
+    long createOrUpdate(Tutor tutor);
 
     @Query("SELECT * FROM tutor")
     List<Tutor> queryForAll();

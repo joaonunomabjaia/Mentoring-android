@@ -96,6 +96,7 @@ public class Employee extends BaseModel implements Listble {
     public Employee() {
     }
 
+    @Ignore
     public Employee(String name, String surname, long nuit, ProfessionalCategory professionalCategory, int trainingYear, String phoneNumber, String email, Partner partner) {
         this.name = name;
         this.surname = surname;
@@ -109,6 +110,7 @@ public class Employee extends BaseModel implements Listble {
         this.partnerId = partner.getId();
     }
 
+    @Ignore
     public Employee(EmployeeDTO employeeDTO) {
         super(employeeDTO);
         this.setName(employeeDTO.getName());

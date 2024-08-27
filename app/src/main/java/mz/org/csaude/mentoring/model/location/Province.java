@@ -47,4 +47,12 @@ public class Province extends BaseModel implements Listble {
         super(provinceDTO);
         this.setDescription(provinceDTO.getDesignation());
     }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
 }

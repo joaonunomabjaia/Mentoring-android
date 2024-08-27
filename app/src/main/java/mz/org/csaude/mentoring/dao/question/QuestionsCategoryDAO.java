@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 public interface QuestionsCategoryDAO {
 
     @Insert
-    void insert(QuestionsCategory questionsCategory);
+    long insert(QuestionsCategory questionsCategory);
 
     @Update
     void update(QuestionsCategory questionsCategory);
@@ -33,7 +33,7 @@ public interface QuestionsCategoryDAO {
     List<QuestionsCategory> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(QuestionsCategory questionsCategory);
+    long createOrUpdate(QuestionsCategory questionsCategory);
 
     @Query("SELECT * FROM question_category WHERE id = :id LIMIT 1")
     QuestionsCategory queryForId(int id);

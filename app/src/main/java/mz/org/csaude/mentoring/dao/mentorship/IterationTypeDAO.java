@@ -44,5 +44,5 @@ public interface IterationTypeDAO {
     int delete(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(IterationType iterationType);
+    long createOrUpdate(IterationType iterationType);
 }

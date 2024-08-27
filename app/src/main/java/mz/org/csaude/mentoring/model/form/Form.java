@@ -73,6 +73,7 @@ public class Form extends BaseModel {
     public Form() {
     }
 
+    @Ignore
     public Form(FormDTO formDTO) {
         super(formDTO);
         this.setCode(formDTO.getCode());

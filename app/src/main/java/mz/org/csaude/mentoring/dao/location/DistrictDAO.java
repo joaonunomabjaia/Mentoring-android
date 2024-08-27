@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.location.District;
 public interface DistrictDAO {
 
     @Insert
-    void insert(District district);
+    long insert(District district);
 
     @Update
     void update(District district);
@@ -36,7 +36,7 @@ public interface DistrictDAO {
     District getByUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(District district);
+    long createOrUpdate(District district);
 
     @Query("SELECT * FROM district")
     List<District> queryForAll();

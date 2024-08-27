@@ -16,7 +16,7 @@ import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
 public interface FormQuestionDAO {
 
     @Insert
-    void insert(FormQuestion formQuestion);
+    long insert(FormQuestion formQuestion);
 
     @Update
     void update(FormQuestion formQuestion);
@@ -33,7 +33,7 @@ public interface FormQuestionDAO {
     FormQuestion getByUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(FormQuestion fQuestion);
+    long createOrUpdate(FormQuestion fQuestion);
 
     @Query("SELECT * FROM form_question WHERE id = :id")
     FormQuestion queryForId(int id);

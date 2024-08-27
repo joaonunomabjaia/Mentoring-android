@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 public interface RondaMentorDAO {
 
     @Insert
-    void insert(RondaMentor rondaMentor);
+    long insert(RondaMentor rondaMentor);
 
     @Insert
     void insertAll(List<RondaMentor> rondaMentors);
@@ -45,5 +45,5 @@ public interface RondaMentorDAO {
     RondaMentor queryForId(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(RondaMentor record);
+    long createOrUpdate(RondaMentor record);
 }

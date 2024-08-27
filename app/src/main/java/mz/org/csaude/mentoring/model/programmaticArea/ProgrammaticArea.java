@@ -60,6 +60,7 @@ public class ProgrammaticArea extends BaseModel {
         }
     }
 
+    @Ignore
     public ProgrammaticArea(String description, String code, String name, Program program) {
         this.description = description;
         this.code = code;
@@ -100,5 +101,13 @@ public class ProgrammaticArea extends BaseModel {
     public void setProgram(Program program) {
         this.program = program;
         this.programId = program.getId();
+    }
+
+    public int getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(int programId) {
+        this.programId = programId;
     }
 }

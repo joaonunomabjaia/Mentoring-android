@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.resourceea;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
@@ -27,6 +28,7 @@ public class Resource extends BaseModel implements Listble {
     public Resource() {
     }
 
+    @Ignore
     public Resource(ResourceDTO resourceDTO) {
         super(resourceDTO);
         this.setResource(resourceDTO.getResource());

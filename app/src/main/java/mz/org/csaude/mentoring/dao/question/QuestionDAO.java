@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.question.Question;
 public interface QuestionDAO {
 
     @Insert(onConflict = OnConflictStrategy.FAIL)
-    void insert(Question question);
+    long insert(Question question);
 
     @Update
     void update(Question question);
@@ -33,7 +33,7 @@ public interface QuestionDAO {
     List<Question> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Question question);
+    long createOrUpdate(Question question);
 
     @Query("SELECT * FROM question WHERE id = :id LIMIT 1")
     Question queryForId(int id);

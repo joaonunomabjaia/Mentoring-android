@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.resourceea.Resource;
 public interface ResourceDAO {
 
     @Insert
-    void insert(Resource resource);
+    long insert(Resource resource);
 
     @Update
     void update(Resource resource);
@@ -33,7 +33,7 @@ public interface ResourceDAO {
     List<Resource> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Resource resource);
+    long createOrUpdate(Resource resource);
 
     @Query("SELECT * FROM resources")
     List<Resource> queryForAll();

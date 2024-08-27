@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.mentorship;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -26,11 +27,13 @@ public class IterationType extends BaseModel {
     public IterationType() {
     }
 
+    @Ignore
     public IterationType(String description, String code) {
         this.description = description;
         this.code = code;
     }
 
+    @Ignore
     public IterationType(IterationTypeDTO iterationTypeDTO) {
         super(iterationTypeDTO);
         this.setCode(iterationTypeDTO.getCode());

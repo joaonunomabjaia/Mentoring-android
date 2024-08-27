@@ -32,7 +32,7 @@ public interface ProvinceDAO {
     int update(Province record);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Province province);
+    long createOrUpdate(Province province);
 
     @Query("SELECT * FROM province")
     List<Province> queryForAll();

@@ -21,7 +21,7 @@ public interface EmployeeDAO {
     List<Employee> getAllEmployees();
 
     @Insert(onConflict = OnConflictStrategy.FAIL)
-    int insert(Employee employee);
+    long insert(Employee employee);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Employee> employees);
@@ -51,5 +51,5 @@ public interface EmployeeDAO {
     Employee queryForUuid(String uuid);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Employee entity);
+    long createOrUpdate(Employee entity);
 }

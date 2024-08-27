@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.professionalCategory;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
@@ -27,6 +28,7 @@ public class ProfessionalCategory extends BaseModel implements Listble {
     public ProfessionalCategory() {
     }
 
+    @Ignore
     public ProfessionalCategory(ProfessionalCategoryDTO professionalCategoryDTO) {
         super(professionalCategoryDTO);
         this.setDescription(professionalCategoryDTO.getDescription());

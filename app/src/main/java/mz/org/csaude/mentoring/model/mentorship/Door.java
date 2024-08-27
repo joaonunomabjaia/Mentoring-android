@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.model.mentorship;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -26,6 +27,7 @@ public class Door extends BaseModel {
     public Door() {
     }
 
+    @Ignore
     public Door(DoorDTO doorDTO) {
         super(doorDTO);
         this.setDescription(doorDTO.getDescription());

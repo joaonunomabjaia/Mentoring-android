@@ -44,6 +44,7 @@ public class Question extends BaseModel {
     public Question() {
     }
 
+    @Ignore
     public Question(QuestionDTO questionDTO) {
         super(questionDTO);
         this.setCode(questionDTO.getCode());

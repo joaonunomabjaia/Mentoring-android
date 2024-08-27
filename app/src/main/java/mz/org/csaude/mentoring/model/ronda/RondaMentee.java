@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.model.ronda;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Relation;
@@ -43,6 +44,7 @@ public class RondaMentee extends BaseModel {
     @ColumnInfo(name = COLUMN_RONDA)
     private int rondaId;
 
+    @Ignore
     @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
     private Ronda ronda;
 
@@ -50,6 +52,7 @@ public class RondaMentee extends BaseModel {
     private int menteeId;
 
     @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
+    @Ignore
     private Tutored tutored;
 
     @ColumnInfo(name = COLUMN_START_DATE)
@@ -61,6 +64,7 @@ public class RondaMentee extends BaseModel {
     public RondaMentee() {
     }
 
+    @Ignore
     public RondaMentee(Ronda ronda, Tutored tutored, Date startDate) {
         this.ronda = ronda;
         this.tutored = tutored;
@@ -69,6 +73,7 @@ public class RondaMentee extends BaseModel {
         this.menteeId = tutored.getId();
     }
 
+    @Ignore
     public RondaMentee(RondaMenteeDTO rondaMenteeDTO) {
         super(rondaMenteeDTO);
         this.setStartDate(rondaMenteeDTO.getStartDate());

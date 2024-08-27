@@ -63,7 +63,7 @@ public interface TutoredDao {
 
     // Insert, update, delete methods
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Tutored tutored);
+    long insert(Tutored tutored);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Tutored> tutoredList);
@@ -87,11 +87,6 @@ public interface TutoredDao {
     List<Tutored> queryForAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Tutored tutored);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(List<Tutored> tutoredList);
-
-
+    long createOrUpdate(Tutored tutored);
 
 }

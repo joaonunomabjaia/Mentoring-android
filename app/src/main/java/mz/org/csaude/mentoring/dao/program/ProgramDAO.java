@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.program.Program;
 public interface ProgramDAO {
 
     @Insert
-    void insert(Program program);
+    long insert(Program program);
 
     @Update
     void update(Program program);
@@ -45,5 +45,5 @@ public interface ProgramDAO {
     Program queryForName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Program program);
+    long createOrUpdate(Program program);
 }

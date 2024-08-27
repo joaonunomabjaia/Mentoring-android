@@ -30,7 +30,7 @@ public interface SessionDAO {
     Session getByUuid(String uuid);
 
     @Insert
-    void insert(Session session);
+    long insert(Session session);
 
     @Update
     void update(Session session);
@@ -40,7 +40,7 @@ public interface SessionDAO {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(Session session);
+    long createOrUpdate(Session session);
 
     @Query("SELECT * FROM session")
     List<Session> queryForAll();

@@ -2,9 +2,11 @@ package mz.org.csaude.mentoring.model.setting;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
+import mz.org.csaude.mentoring.dto.setting.SettingDTO;
 
 @Entity(tableName = Setting.TABLE_NAME)
 public class Setting extends BaseModel {
@@ -35,6 +37,7 @@ public class Setting extends BaseModel {
     public Setting() {
     }
 
+    @Ignore
     public Setting(String designation, String value, String description, String type, Boolean enabled) {
         this.designation = designation;
         this.value = value;
@@ -43,6 +46,17 @@ public class Setting extends BaseModel {
         this.enabled = enabled;
     }
 
+    @Ignore
+    public Setting(SettingDTO dto) {
+        this.setUuid(dto.getUuid());
+        this.setDescription(dto.getDescription());
+        this.setDesignation(dto.getDesignation());
+        this.setValue(dto.getValue());
+        this.setType(dto.getType());
+        this.setEnabled(dto.getEnabled());
+        this.setCreatedAt(dto.getCreatedAt());
+        this.setUpdatedAt(dto.getUpdatedAt());
+    }
     // Getters and Setters
     public String getDesignation() {
         return designation;

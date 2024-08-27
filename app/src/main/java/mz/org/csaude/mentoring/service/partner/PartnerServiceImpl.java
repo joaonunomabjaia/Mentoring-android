@@ -78,7 +78,7 @@ public class PartnerServiceImpl extends BaseServiceImpl<Partner> implements Part
 
     @Override
     public Partner getMISAU() throws SQLException {
-        return this.partnerDao.getMISAU();
+        return this.partnerDao.getMISAU(Partner.MISAU_UUID);
     }
 
     @Override

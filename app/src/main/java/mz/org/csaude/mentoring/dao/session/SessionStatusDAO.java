@@ -20,7 +20,7 @@ public interface SessionStatusDAO {
     SessionStatus getByUuid(String uuid);
 
     @Insert
-    int insert(SessionStatus sessionStatus);
+    long insert(SessionStatus sessionStatus);
 
     @Update
     int update(SessionStatus sessionStatus);
@@ -35,7 +35,7 @@ public interface SessionStatusDAO {
     SessionStatus getSessionStatusById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(SessionStatus sessionStatus);
+    long createOrUpdate(SessionStatus sessionStatus);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void createOrUpdate(List<SessionStatus> sessionStatuses);
