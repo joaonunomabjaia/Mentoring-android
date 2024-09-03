@@ -36,7 +36,7 @@ public class DistrictServiceImpl extends BaseServiceImpl<District> implements Di
 
     @Override
     public District save(District record) throws SQLException {
-        this.districtDAO.insert(record);
+        record.setId((int) this.districtDAO.insert(record));
         return record;
     }
 
@@ -81,17 +81,19 @@ public class DistrictServiceImpl extends BaseServiceImpl<District> implements Di
 
         District districts = this.districtDAO.getByUuid(district.getUuid());
         if(districts == null){
-
             Province province = this.provinceService.savedOrUpdateProvince(new ProvinceDTO(district.getProvince()));
             district.setProvince(province);
-            this.districtDAO.createOrUpdate(district);
+            this.save(district);
+            return district;
+        } else {
+            district.setId(districts.getId());
+            this.update(district);
             return district;
         }
-        return districts;
     }
 
     @Override
-    public List<District> getByProvince(Province selectedProvince) throws SQLException{
+    public List<District> getByProvince(Province selectedProvince) {
         return this.districtDAO.getByProvince(selectedProvince.getId());
     }
 

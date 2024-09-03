@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public interface EmployeeDAO {
     @Insert(onConflict = OnConflictStrategy.FAIL)
     long insert(Employee employee);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertAll(List<Employee> employees);
 
     @Update
@@ -50,6 +51,4 @@ public interface EmployeeDAO {
     @Query("SELECT * FROM employee WHERE uuid = :uuid LIMIT 1")
     Employee queryForUuid(String uuid);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Employee entity);
 }

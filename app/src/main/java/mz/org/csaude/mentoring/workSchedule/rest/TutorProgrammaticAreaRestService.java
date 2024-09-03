@@ -37,17 +37,19 @@ public class TutorProgrammaticAreaRestService extends BaseRestService {
                 List<TutorProgrammaticAreaDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        TutorProgrammaticAreaService tutorProgrammaticAreaService = getApplication().getTutorProgrammaticAreaService();
-                        List<TutorProgrammaticArea> tutorProgrammaticAreas = new ArrayList<>();
-                        for (TutorProgrammaticAreaDTO tutorProgrammaticAreaDTO : data){
-                            tutorProgrammaticAreas.add(tutorProgrammaticAreaDTO.getTutorProgrammaticArea());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            TutorProgrammaticAreaService tutorProgrammaticAreaService = getApplication().getTutorProgrammaticAreaService();
+                            List<TutorProgrammaticArea> tutorProgrammaticAreas = new ArrayList<>();
+                            for (TutorProgrammaticAreaDTO tutorProgrammaticAreaDTO : data) {
+                                tutorProgrammaticAreas.add(tutorProgrammaticAreaDTO.getTutorProgrammaticArea());
+                            }
+                            tutorProgrammaticAreaService.saveOrUpdateTutorProgrammaticAreas(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutorProgrammaticAreas);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        tutorProgrammaticAreaService.saveOrUpdateTutorProgrammaticAreas(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutorProgrammaticAreas);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

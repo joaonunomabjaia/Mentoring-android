@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -34,9 +35,6 @@ public interface ResponseTypeDAO {
 
     @Query("SELECT * FROM response_type")
     List<ResponseType> queryForAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(ResponseType responseType);
 
     @Query("SELECT * FROM response_type WHERE id = :id LIMIT 1")
     ResponseType queryForId(int id);

@@ -28,6 +28,8 @@ public class RondaMenteeDTO extends BaseEntityDTO {
             this.setRonda(new RondaDTO(rondaMentee.getRonda()));
         }
     }
+    public RondaMenteeDTO() {
+    }
 
     public Date getStartDate() {
         return startDate;

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.programmaticArea;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -31,11 +32,13 @@ public class TutorProgrammaticArea extends BaseModel {
     public static final String COLUMN_TUTOR = "tutor_id";
     public static final String COLUMN_PROGRAMMATIC_AREA = "programmatic_area_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTOR)
-    private int tutorId;
+    private Integer tutorId;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PROGRAMMATIC_AREA)
-    private int programmaticAreaId;
+    private Integer programmaticAreaId;
 
     @Ignore
     private Tutor tutor;
@@ -61,19 +64,19 @@ public class TutorProgrammaticArea extends BaseModel {
         this.setProgrammaticArea(new ProgrammaticArea(tutorProgrammaticAreaDTO.getProgrammaticAreaDTO()));
     }
 
-    public int getTutorId() {
+    public Integer getTutorId() {
         return tutorId;
     }
 
-    public void setTutorId(int tutorId) {
+    public void setTutorId(Integer tutorId) {
         this.tutorId = tutorId;
     }
 
-    public int getProgrammaticAreaId() {
+    public Integer getProgrammaticAreaId() {
         return programmaticAreaId;
     }
 
-    public void setProgrammaticAreaId(int programmaticAreaId) {
+    public void setProgrammaticAreaId(Integer programmaticAreaId) {
         this.programmaticAreaId = programmaticAreaId;
     }
 

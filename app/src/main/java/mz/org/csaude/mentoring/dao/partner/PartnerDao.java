@@ -25,10 +25,10 @@ public interface PartnerDao {
     @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
     Partner getByUuid(String uuid);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insert (Partner partner);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertAll(List<Partner> partners);
 
     @Query("SELECT * FROM partner")

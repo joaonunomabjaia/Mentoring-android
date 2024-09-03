@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.mentorship;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -82,6 +83,7 @@ public class Mentorship extends BaseModel {
     public static final String COLUMN_ITERATION_NUMBER = "iteration_number";
     public static final String COLUMN_DOOR = "door_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
@@ -91,53 +93,61 @@ public class Mentorship extends BaseModel {
     @ColumnInfo(name = COLUMN_PERFORMED_DATE)
     private Date performedDate;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTOR)
-    private int tutorId;
+    private Integer tutorId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_TUTOR, entityColumn = "id")
     private Tutor tutor;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTORED)
-    private int tutoredId;
+    private Integer tutoredId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_TUTORED, entityColumn = "id")
     private Tutored tutored;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_FORM)
-    private int formId;
+    private Integer formId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
     private Form form;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_SESSION)
-    private int sessionId;
+    private Integer sessionId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_SESSION, entityColumn = "id")
     private Session session;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CABINET)
-    private int cabinetId;
+    private Integer cabinetId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_CABINET, entityColumn = "id")
     private Cabinet cabinet;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_ITERATION_TYPE)
-    private int evaluationTypeId;
+    private Integer evaluationTypeId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_ITERATION_TYPE, entityColumn = "id")
     private EvaluationType evaluationType;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_ITERATION_NUMBER)
     private Integer iterationNumber;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DOOR)
-    private int doorId;
+    private Integer doorId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_DOOR, entityColumn = "id")
@@ -375,31 +385,31 @@ public class Mentorship extends BaseModel {
         this.answers = answers;
     }
 
-    public int getTutorId() {
+    public Integer getTutorId() {
         return tutorId;
     }
 
-    public void setTutorId(int tutorId) {
+    public void setTutorId(Integer tutorId) {
         this.tutorId = tutorId;
     }
 
-    public int getTutoredId() {
+    public Integer getTutoredId() {
         return tutoredId;
     }
 
-    public void setTutoredId(int tutoredId) {
+    public void setTutoredId(Integer tutoredId) {
         this.tutoredId = tutoredId;
     }
 
-    public int getFormId() {
+    public Integer getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(Integer formId) {
         this.formId = formId;
     }
 
-    public int getSessionId() {
+    public Integer getSessionId() {
         return sessionId;
     }
 

@@ -5,6 +5,7 @@ import androidx.room.Query;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -19,10 +20,10 @@ public interface LocationDAO {
     @Query("SELECT * FROM location WHERE employee_id = :employeeId")
     List<Location> getAllOfEmployee(int employeeId);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertLocation(Location location);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertLocations(List<Location> locations);
 
     @Update

@@ -42,7 +42,7 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
 
     @Override
     public Tutor save(Tutor record) throws SQLException {
-        this.tutorDAO.insert(record);
+        record.setId((int) this.tutorDAO.insert(record));
         return record;
     }
 
@@ -68,33 +68,55 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
     }
 
     @Override
+    public Tutor getByuuid(String uuid) throws SQLException {
+        return this.tutorDAO.getByUuid(uuid);
+    }
+
+    @Override
+    @Transaction
     public void saveOrUpdateTutors(List<TutorDTO> tutorDTOS) throws SQLException {
 
         for(TutorDTO tutorDTO : tutorDTOS){
             boolean doesTutorExiste = this.tutorDAO.checkTutorExistance(tutorDTO.getUuid());
+            Tutor tutor = tutorDTO.getTutor();
+            Employee employee = tutorDTO.getEmployeeDTO().getEmployee();
+            tutor.setEmployee(employee);
+            this.employeeService.saveOrUpdateEmployee(employee);
 
             if(!doesTutorExiste){
-
-                Tutor tutor = tutorDTO.getTutor();
-                Employee employee = tutorDTO.getEmployeeDTO().getEmployee();
-                tutor.setEmployee(employee);
-                this.employeeService.saveOrUpdateEmployee(employee);
-                this.tutorDAO.createOrUpdate(tutor);
+                this.save(tutor);
+            } else {
+                Tutor t = this.tutorDAO.getByUuid(tutorDTO.getUuid());
+                tutor.setId(t.getId());
+                this.update(tutor);
             }
         }
 
     }
 
     @Override
-    @Transaction
     public Tutor saveOrUpdate(Tutor tutor) throws SQLException {
-        getApplication().getEmployeeService().saveOrUpdateEmployee(tutor.getEmployee());
-        this.tutorDAO.createOrUpdate(tutor);
-        return tutor;
+        tutor.setEmployee(getApplication().getEmployeeService().getByuuid(tutor.getEmployee().getUuid()));
+        Tutor t = this.tutorDAO.getByUuid(tutor.getUuid());
+        if(t != null){
+            tutor.setId(t.getId());
+            this.tutorDAO.update(tutor);
+            return tutor;
+        } else {
+            this.tutorDAO.insert(tutor);
+            tutor.setId(this.tutorDAO.getByUuid(tutor.getUuid()).getId());
+            return tutor;
+        }
     }
 
     @Override
     public Tutor getByEmployee(Employee employee) throws SQLException {
-        return this.tutorDAO.getByEmployee(employee.getId());
+        Tutor tutor = this.tutorDAO.getByEmployee(employee.getId());
+        if(tutor != null){
+            tutor.setEmployee(employee);
+            return tutor;
+        } else {
+            return null;
+        }
     }
 }

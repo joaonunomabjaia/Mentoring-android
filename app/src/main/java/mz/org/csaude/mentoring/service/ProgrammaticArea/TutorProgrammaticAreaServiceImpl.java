@@ -58,6 +58,11 @@ public class TutorProgrammaticAreaServiceImpl extends BaseServiceImpl<TutorProgr
     }
 
     @Override
+    public TutorProgrammaticArea getByuuid(String uuid) throws SQLException {
+        return this.tutorProgrammaticAreaDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void saveOrUpdateTutorProgrammaticAreas(List<TutorProgrammaticAreaDTO> tutorProgrammaticAreaDTOS) throws SQLException {
         for (TutorProgrammaticAreaDTO tutorProgrammaticAreaDTO: tutorProgrammaticAreaDTOS) {
             this.saveOrUpdateTutorProgrammaticArea(tutorProgrammaticAreaDTO);
@@ -69,13 +74,16 @@ public class TutorProgrammaticAreaServiceImpl extends BaseServiceImpl<TutorProgr
         TutorProgrammaticArea tpa = this.tutorProgrammaticAreaDAO.getByUuid(tutorProgrammaticAreaDTO.getUuid());
         TutorProgrammaticArea tutorProgrammaticArea = tutorProgrammaticAreaDTO.getTutorProgrammaticArea();
         tutorProgrammaticArea.setProgrammaticArea(getApplication().getProgrammaticAreaService().getByuuid(tutorProgrammaticArea.getProgrammaticArea().getUuid()));
-        if(tpa!=null) {
-            tutorProgrammaticArea.setId(tpa.getId());
-        }
+
         Employee employee = getApplication().getAuthenticatedUser().getEmployee();
         Tutor tutor = tutorDAO.getByEmployee(employee.getId());
         tutorProgrammaticArea.setTutor(tutor);
-        this.tutorProgrammaticAreaDAO.createOrUpdate(tutorProgrammaticArea);
+        if(tpa!=null) {
+            tutorProgrammaticArea.setId(tpa.getId());
+            this.tutorProgrammaticAreaDAO.update(tutorProgrammaticArea);
+        } else {
+            tutorProgrammaticArea.setId((int) this.tutorProgrammaticAreaDAO.insert(tutorProgrammaticArea));
+        }
         return tutorProgrammaticArea;
     }
 }

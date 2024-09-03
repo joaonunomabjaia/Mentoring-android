@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.employee;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public Employee save(Employee record) throws SQLException {
-        this.employeeDAO.insert(record);
+        record.setId((int) this.employeeDAO.insert(record));
         return record;
     }
 
@@ -61,7 +63,12 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public Employee getById(int id) throws SQLException {
-        return this.employeeDAO.queryForId(id);
+        Employee employee = this.employeeDAO.queryForId(id);
+        employee.setProfessionalCategory(professionalCategoryDAO.queryForId(employee.getProfessionalCategoryId()));
+        employee.setPartner(partnerDao.queryForId(employee.getPartnerId()));
+
+        employee.setLocations(locationDAO.getAllOfEmployee(employee.getId()));
+        return employee;
     }
 
     @Override
@@ -76,22 +83,28 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     @Override
     public Employee saveOrUpdateEmployee(Employee e) throws SQLException {
 
-        Employee employee = this.employeeDAO.getByUuid(e.getUuid());
+        try {
+            Employee employee = this.employeeDAO.getByUuid(e.getUuid());
 
-        if(employee == null){
-            e.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
-            e.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
-            this.employeeDAO.createOrUpdate(e);
-            saveLocationFromEmplyee(e.getLocations());
-            return e;
-        } else {
-            e.setId(employee.getId());
-            employee.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
-            employee.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
-            employee.setLocations(e.getLocations());
-            this.employeeDAO.createOrUpdate(employee);
-            saveLocationFromEmplyee(employee.getLocations());
-            return employee;
+            if(employee == null){
+                e.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
+                e.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
+                this.employeeDAO.insert(e);
+                e.setId(this.employeeDAO.getByUuid(e.getUuid()).getId());
+                saveLocationFromEmplyee(e.getLocations());
+                return e;
+            } else {
+                e.setId(employee.getId());
+                employee.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
+                employee.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
+                employee.setLocations(e.getLocations());
+                this.employeeDAO.update(employee);
+                e.setId(this.employeeDAO.getByUuid(e.getUuid()).getId());
+                saveLocationFromEmplyee(employee.getLocations());
+                return employee;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -103,10 +116,12 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             HealthFacility h =getDataBaseHelper().getHealthFacilityDAO().getByUuid(location.getHealthFacility().getUuid());
             if (h == null) {
                 location.getHealthFacility().setDistrict(getDataBaseHelper().getDistrictDAO().getByUuid(location.getHealthFacility().getDistrict().getUuid()));
-                getDataBaseHelper().getHealthFacilityDAO().insert(location.getHealthFacility());
+                location.getHealthFacility().setId((int) getDataBaseHelper().getHealthFacilityDAO().insert(location.getHealthFacility()));
             } else {
                 location.getHealthFacility().setId(h.getId());
             }
+            location.setEmployee(location.getEmployee());
+            location.setHealthFacility(location.getHealthFacility());
             getApplication().getLocationService().saveOrUpdate(location);
         }
     }

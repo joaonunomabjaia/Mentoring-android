@@ -1,6 +1,8 @@
 package mz.org.csaude.mentoring.model.ronda;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -52,29 +54,34 @@ public class Ronda extends BaseModel implements Listble {
     public static final String COLUMN_RONDA_TYPE = "ronda_type_id";
     public static final String COLUMN_MENTOR_TYPE = "mentor_type";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
     @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_HEALTH_FACILITY)
-    private int healthFacilityId;
+    private Integer healthFacilityId;
 
     @Relation(parentColumn = COLUMN_HEALTH_FACILITY, entityColumn = "id")
     @Ignore
     private HealthFacility healthFacility;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RONDA_TYPE)
-    private int rondaTypeId;
+    private Integer rondaTypeId;
 
     @Relation(parentColumn = COLUMN_RONDA_TYPE, entityColumn = "id")
     @Ignore
     private RondaType rondaType;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_MENTOR_TYPE)
     private String mentorType;
 
@@ -143,6 +150,7 @@ public class Ronda extends BaseModel implements Listble {
 
     public void setHealthFacility(HealthFacility healthFacility) {
         this.healthFacility = healthFacility;
+        this.setHealthFacilityId(healthFacility.getId());
     }
 
     public RondaType getRondaType() {
@@ -151,6 +159,7 @@ public class Ronda extends BaseModel implements Listble {
 
     public void setRondaType(RondaType rondaType) {
         this.rondaType = rondaType;
+        this.setRondaTypeId(rondaType.getId());
     }
 
     public List<RondaMentee> getRondaMentees() {
@@ -319,19 +328,19 @@ public class Ronda extends BaseModel implements Listble {
         this.mentorType = mentorType;
     }
 
-    public int getHealthFacilityId() {
+    public Integer getHealthFacilityId() {
         return healthFacilityId;
     }
 
-    public void setHealthFacilityId(int healthFacilityId) {
+    public void setHealthFacilityId(Integer healthFacilityId) {
         this.healthFacilityId = healthFacilityId;
     }
 
-    public int getRondaTypeId() {
+    public Integer getRondaTypeId() {
         return rondaTypeId;
     }
 
-    public void setRondaTypeId(int rondaTypeId) {
+    public void setRondaTypeId(Integer rondaTypeId) {
         this.rondaTypeId = rondaTypeId;
     }
 }

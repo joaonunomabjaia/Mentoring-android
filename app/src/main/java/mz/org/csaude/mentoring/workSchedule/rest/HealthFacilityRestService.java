@@ -43,18 +43,20 @@ public class HealthFacilityRestService extends BaseRestService {
              if(datas == null){
 
              }
-                try {
+                getServiceExecutor().execute(()-> {
+                    try {
 
-                    List<HealthFacility> healthFacilities = Utilities.parse(datas, HealthFacility.class);
-                    for (HealthFacility healthFacility: healthFacilities) {
-                        healthFacility.setSyncStatus(SyncSatus.SENT);
+                        List<HealthFacility> healthFacilities = Utilities.parse(datas, HealthFacility.class);
+                        for (HealthFacility healthFacility : healthFacilities) {
+                            healthFacility.setSyncStatus(SyncSatus.SENT);
+                        }
+                        HealthFacilityService healthFacilityService = getApplication().getHealthFacilityService();
+                        healthFacilityService.savedOrUpdatHealthFacilitys(healthFacilities);
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, healthFacilities);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
-                    HealthFacilityService healthFacilityService = getApplication().getHealthFacilityService();
-                    healthFacilityService.savedOrUpdatHealthFacilitys(healthFacilities);
-                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, healthFacilities);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                });
             }
 
             @Override

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.form;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -41,30 +42,37 @@ public class Form extends BaseModel {
     public static final String COLUMN_TARGET_FILE = "target_file";
     public static final String COLUMN_PARTNER = "partner_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PROGRAMMATIC_AREA)
-    private int programmaticAreaId;
+    private Integer programmaticAreaId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PROGRAMMATIC_AREA, entityColumn = "id")
     private ProgrammaticArea programmaticArea;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TARGET_PATIENT)
-    private int targetPatient;
+    private Integer targetPatient;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TARGET_FILE)
-    private int targetFile;
+    private Integer targetFile;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PARTNER)
-    private int partnerId;
+    private Integer partnerId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PARTNER, entityColumn = "id")
@@ -122,19 +130,19 @@ public class Form extends BaseModel {
         this.programmaticAreaId = programmaticArea.getId();
     }
 
-    public int getTargetPatient() {
+    public Integer getTargetPatient() {
         return targetPatient;
     }
 
-    public void setTargetPatient(int targetPatient) {
+    public void setTargetPatient(Integer targetPatient) {
         this.targetPatient = targetPatient;
     }
 
-    public int getTargetFile() {
+    public Integer getTargetFile() {
         return targetFile;
     }
 
-    public void setTargetFile(int targetFile) {
+    public void setTargetFile(Integer targetFile) {
         this.targetFile = targetFile;
     }
 
@@ -161,19 +169,19 @@ public class Form extends BaseModel {
         return Objects.hash(super.hashCode(), code);
     }
 
-    public int getProgrammaticAreaId() {
+    public Integer getProgrammaticAreaId() {
         return programmaticAreaId;
     }
 
-    public void setProgrammaticAreaId(int programmaticAreaId) {
+    public void setProgrammaticAreaId(Integer programmaticAreaId) {
         this.programmaticAreaId = programmaticAreaId;
     }
 
-    public int getPartnerId() {
+    public Integer getPartnerId() {
         return partnerId;
     }
 
-    public void setPartnerId(int partnerId) {
+    public void setPartnerId(Integer partnerId) {
         this.partnerId = partnerId;
     }
 }

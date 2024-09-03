@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -62,10 +63,10 @@ public interface TutoredDao {
     List<Tutored> getAllForMentoringRound(final int healthFacilityId, final String lifeCycleStatus, final boolean zeroEvaluation);
 
     // Insert, update, delete methods
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     long insert(Tutored tutored);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertAll(List<Tutored> tutoredList);
 
     @Update
@@ -85,8 +86,5 @@ public interface TutoredDao {
 
     @Query("SELECT * FROM tutored")
     List<Tutored> queryForAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Tutored tutored);
 
 }

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.tutored;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -25,7 +26,7 @@ public class Tutored extends BaseModel {
     public static final String COLUMN_ZERO_EVALUATION_STATUS = "zero_evaluation_status";
     public static final String COLUMN_ZERO_EVALUATION_SCORE = "zero_evaluation_score";
 
-
+    @NonNull
     @ColumnInfo(name = COLUMN_EMPLOYEE)
     private Integer employeeId;
 

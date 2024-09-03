@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.employee;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.PatternsCompat;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -57,33 +58,41 @@ public class Employee extends BaseModel implements Listble {
     public static final String COLUMN_PHONE_NUMBER = "phone_number";
     public static final String COLUMN_PARTNER = "partner_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_SURNAME)
     private String surname;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NUIT)
     private long nuit;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PROFESSIONAL_CATEGORY)
-    private int professionalCategoryId;
+    private Integer professionalCategoryId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PROFESSIONAL_CATEGORY, entityColumn = "id")
     private ProfessionalCategory professionalCategory;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TRAINING_YEAR)
-    private int trainingYear;
+    private Integer trainingYear;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PHONE_NUMBER)
     private String phoneNumber;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_EMAIL)
     private String email;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PARTNER)
-    private int partnerId;
+    private Integer partnerId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PARTNER, entityColumn = "id")
@@ -287,19 +296,19 @@ public class Employee extends BaseModel implements Listble {
         return Objects.hash(super.hashCode(), nuit, phoneNumber, email);
     }
 
-    public int getProfessionalCategoryId() {
+    public Integer getProfessionalCategoryId() {
         return professionalCategoryId;
     }
 
-    public void setProfessionalCategoryId(int professionalCategoryId) {
+    public void setProfessionalCategoryId(Integer professionalCategoryId) {
         this.professionalCategoryId = professionalCategoryId;
     }
 
-    public int getPartnerId() {
+    public Integer getPartnerId() {
         return partnerId;
     }
 
-    public void setPartnerId(int partnerId) {
+    public void setPartnerId(Integer partnerId) {
         this.partnerId = partnerId;
     }
 }

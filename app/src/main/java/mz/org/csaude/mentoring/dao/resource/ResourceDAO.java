@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -31,9 +32,6 @@ public interface ResourceDAO {
 
     @Query("SELECT * FROM resources")
     List<Resource> getAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Resource resource);
 
     @Query("SELECT * FROM resources")
     List<Resource> queryForAll();

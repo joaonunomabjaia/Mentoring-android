@@ -55,7 +55,12 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
     public Location getById(int id) throws SQLException {
         return this.locationDAO.queryForId(id);
     }
-    
+
+    @Override
+    public Location getByuuid(String uuid) throws SQLException {
+        return this.locationDAO.getByUuid(uuid);
+    }
+
     @Override
     public void saveOrUpdates(List<LocationDTO> locationDTOS) throws SQLException {
         for (LocationDTO locationDTO : locationDTOS){
@@ -80,6 +85,13 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
 
     @Override
     public List<Location> getAllOfEmploee(Employee employee) throws SQLException {
-        return this.locationDAO.getAllOfEmployee(employee.getId());
+        List<Location> locations = this.locationDAO.getAllOfEmployee(employee.getId());
+        for (Location location : locations){
+            location.setEmployee(employee);
+            location.setProvince(getApplication().getProvinceService().getById(location.getProvinceId()));
+            location.setDistrict(getApplication().getDistrictService().getById(location.getDistrictId()));
+            location.setHealthFacility(getApplication().getHealthFacilityService().getById(location.getHealthFacilityId()));
+        }
+        return locations;
     }
 }

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.form;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
@@ -16,9 +17,11 @@ public class FormType extends BaseModel {
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
-    private String description;  // Corrected typo from 'descripion' to 'description'
+    private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 

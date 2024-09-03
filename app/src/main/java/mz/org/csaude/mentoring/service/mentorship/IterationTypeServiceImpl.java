@@ -29,7 +29,7 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
 
     @Override
     public IterationType save(IterationType record) throws SQLException {
-        this.iterationTypeDAO.insertIterationType(record);
+        record.setId((int) this.iterationTypeDAO.insertIterationType(record));
         return record;
     }
 
@@ -55,6 +55,11 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
     }
 
     @Override
+    public IterationType getByuuid(String uuid) throws SQLException {
+        return this.iterationTypeDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void saveOrUpdateIterationTypes(List<IterationTypeDTO> iterationTypeDTOS) throws SQLException {
         for (IterationTypeDTO iterationTypeDTO: iterationTypeDTOS) {
             this.saveOrUpdateIterationType(iterationTypeDTO);
@@ -67,8 +72,11 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
         IterationType iterationType = iterationTypeDTO.getIterationType();
         if(it!=null) {
             iterationType.setId(it.getId());
+            this.iterationTypeDAO.updateIterationType(iterationType);
+        } else {
+            this.iterationTypeDAO.insertIterationType(iterationType);
+            iterationType.setId(this.iterationTypeDAO.getByUuid(iterationType.getUuid()).getId());
         }
-        this.iterationTypeDAO.createOrUpdate(iterationType);
         return iterationType;
     }
 

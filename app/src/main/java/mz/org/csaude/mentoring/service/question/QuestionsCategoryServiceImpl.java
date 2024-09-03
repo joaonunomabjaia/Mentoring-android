@@ -27,7 +27,7 @@ implements QuestionsCategoryService{
     }
     @Override
     public QuestionsCategory save(QuestionsCategory record) throws SQLException {
-        this.questionsCategoryDAO.insert(record);
+        record.setId((int) this.questionsCategoryDAO.insert(record));
         return record;
     }
 
@@ -61,18 +61,18 @@ implements QuestionsCategoryService{
 
     @Override
     public QuestionsCategory saveOrUpdateQuestionCategory(QuestionCategoryDTO questionCategoryDTO) throws SQLException {
-        QuestionsCategory qc = this.questionsCategoryDAO.getByUuid(questionCategoryDTO.getUuid());
-        QuestionsCategory questionsCategory = questionCategoryDTO.getQuestionCategory();
-        if(qc!=null) {
-            questionsCategory.setId(qc.getId());
-        }
-        this.questionsCategoryDAO.createOrUpdate(questionsCategory);
-        return questionsCategory;
+        return saveOrUpdateQuestionCategory(questionCategoryDTO.getQuestionCategory());
     }
 
     @Override
     public QuestionsCategory saveOrUpdateQuestionCategory(QuestionsCategory questionCategory) throws SQLException {
-        this.questionsCategoryDAO.createOrUpdate(questionCategory);
+        QuestionsCategory qc = this.questionsCategoryDAO.getByUuid(questionCategory.getUuid());
+        if(qc!=null) {
+            questionCategory.setId(qc.getId());
+            this.update(questionCategory);
+        } else {
+            this.save(questionCategory);
+        }
         return questionCategory;
     }
 

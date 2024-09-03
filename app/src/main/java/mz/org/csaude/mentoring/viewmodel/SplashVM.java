@@ -48,9 +48,7 @@ public class SplashVM extends BaseViewModel implements RestResponseListener, Ser
     }
 
     public void initAppConfiguration() {
-        //OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runInitialSync();
         if (getApplication().isInitialSetupComplete()) {
-            //try {Thread.sleep(3000);} catch (InterruptedException e) {throw new RuntimeException(e);}
             scheduleSyncDataTasks();
             goToLogin();
         } else {

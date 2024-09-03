@@ -2,7 +2,6 @@ package mz.org.csaude.mentoring.dao.mentorship;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -14,7 +13,7 @@ import mz.org.csaude.mentoring.model.mentorship.Door;
 public interface DoorDAO {
 
     @Insert
-    void insertDoor(Door door);
+    long insertDoor(Door door);
 
     @Insert
     void insertDoors(List<Door> doors);
@@ -36,9 +35,6 @@ public interface DoorDAO {
 
     @Query("SELECT * FROM door WHERE uuid = :uuid LIMIT 1")
     boolean checkDoorExistance(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Door door);
 
     @Query("DELETE FROM door WHERE id = :id")
     int delete(int id);

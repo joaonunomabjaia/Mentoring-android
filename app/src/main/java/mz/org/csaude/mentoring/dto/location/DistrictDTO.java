@@ -21,6 +21,9 @@ public class DistrictDTO extends BaseEntityDTO {
         if (district.getProvince() != null)  this.setProvinceDTO(new ProvinceDTO(district.getProvince()));
     }
 
+    public DistrictDTO() {
+    }
+
     public String getDescription() {
         return description;
     }

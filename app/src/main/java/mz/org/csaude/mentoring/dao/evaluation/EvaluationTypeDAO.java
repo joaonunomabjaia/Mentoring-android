@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -16,14 +17,11 @@ public interface EvaluationTypeDAO {
     @Query("SELECT * FROM evaluation_type WHERE code = :code LIMIT 1")
     EvaluationType getByCode(String code);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     long insert(EvaluationType evaluationType);
 
     @Update
     void update(EvaluationType evaluationType);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(EvaluationType evaluationType);
 
     @Query("SELECT * FROM evaluation_type WHERE uuid = :uuid LIMIT 1")
     EvaluationType getByUuid(String uuid);

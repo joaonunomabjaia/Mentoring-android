@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.location;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -27,13 +28,15 @@ public class District extends BaseModel {
     public static final String COLUMN_PROVINCE = "province_id";
     public static final String COLUMN_DISTRICT = "district";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PROVINCE)
-    private int provinceId;
+    private Integer provinceId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PROVINCE, entityColumn = "id")
     private Province province;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DISTRICT)
     private String district;
 
@@ -83,11 +86,11 @@ public class District extends BaseModel {
         this.district = district;
     }
 
-    public int getProvinceId() {
+    public Integer getProvinceId() {
         return provinceId;
     }
 
-    public void setProvinceId(int provinceId) {
+    public void setProvinceId(Integer provinceId) {
         this.provinceId = provinceId;
     }
 

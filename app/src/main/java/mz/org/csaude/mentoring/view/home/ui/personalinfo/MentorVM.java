@@ -1,6 +1,8 @@
 package mz.org.csaude.mentoring.view.home.ui.personalinfo;
 
 import android.app.Application;
+import android.app.Dialog;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
@@ -73,14 +76,16 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
 
     @Override
     public void preInit() {
-        this.tutor = getApplication().getCurrMentor();
-        List<Location> locations;
-        try {
-            locations = getApplication().getLocationService().getAllOfEmploee(this.tutor.getEmployee());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        this.location = locations.get(0);
+        getExecutorService().execute(()->{
+            this.tutor = getApplication().getCurrMentor();
+            List<Location> locations;
+            try {
+                locations = getApplication().getLocationService().getAllOfEmploee(this.tutor.getEmployee());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            this.location = locations.get(0);
+        });
     }
 
     @Bindable
@@ -216,17 +221,21 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
     }
     public void setProvince(Listble province) {
         this.location.setProvince((Province) province);
-        try {
-            this.districts.clear();
-            this.healthFacilities.clear();
-            if (province.getId() == null) return;
-            //this.districts.add(new District());
-            if (province.getId() == null) return;
-            this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.location.getProvince(), getApplication().getCurrMentor()));
-            getPersonalInfoFragment().reloadDistrcitAdapter();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        getExecutorService().execute(()-> {
+            try {
+                this.districts.clear();
+                this.healthFacilities.clear();
+                if (province.getId() == null) return;
+                //this.districts.add(new District());
+                if (province.getId() == null) return;
+                this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.location.getProvince(), getApplication().getCurrMentor()));
+                getRelatedActivity().runOnUiThread(()-> {
+                    getPersonalInfoFragment().reloadDistrcitAdapter();
+                });
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Bindable
@@ -234,16 +243,20 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
         return this.location.getDistrict();
     }
     public void setDistrict(Listble district){
-        try {
-            this.location.setDistrict((District) district);
-            this.healthFacilities.clear();
-            if (district.getId() == null) return;
-            //this.healthFacilities.add(new HealthFacility());
-            this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor((District) district, getApplication().getCurrMentor()));
-            getPersonalInfoFragment().reloadHealthFacility();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        getExecutorService().execute(()-> {
+            try {
+                this.location.setDistrict((District) district);
+                this.healthFacilities.clear();
+                if (district.getId() == null) return;
+                //this.healthFacilities.add(new HealthFacility());
+                this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor((District) district, getApplication().getCurrMentor()));
+                getRelatedActivity().runOnUiThread(()-> {
+                    getPersonalInfoFragment().reloadHealthFacility();
+                });
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public List<District> getDistricts() {
@@ -313,18 +326,22 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
     }
 
     public void setMenteeLabor(Listble menteeLabor){
-        if (this.tutor.getEmployee() == null) return;
-        SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
-        if (selectSimpleValue.getDescription().equals("ONG")){
-            setONGEmployee(true);
-        } else {
-            setONGEmployee(false);
-            try {
-                this.tutor.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        getExecutorService().execute(()-> {
+            if (this.tutor.getEmployee() == null) return;
+            SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
+            if (selectSimpleValue.getDescription().equals("ONG")) {
+                setONGEmployee(true);
+            } else {
+                setONGEmployee(false);
+                getExecutorService().execute(() -> {
+                    try {
+                        this.tutor.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
-        }
+        });
     }
 
     @Bindable
@@ -341,7 +358,7 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
         return (PersonalInfoFragment) super.getRelatedFragment();
     }
 
-    public List getAllPartners() {
+    public List<Partner> getAllPartners() {
         try {
             return getApplication().getPartnerService().getAll();
         } catch (SQLException e) {
@@ -356,14 +373,25 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
 
     @Override
     public void doOnResponse(String flag, List<Tutor> objects) {
-        try {
-            getApplication().getEmployeeService().saveOrUpdateEmployee(tutor.getEmployee());
-            this.tutorService.saveOrUpdate(tutor);
-            this.getApplication().getLocationService().saveOrUpdate(location);
-            Utilities.displayAlertDialog(getRelatedActivity(), "Dados actualizados com sucesso.").show();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Dialog loadingDialog =Utilities.showLoadingDialog(getRelatedActivity(), "Processando...");
+        getExecutorService().execute(()-> {
+
+            try {
+                getApplication().getEmployeeService().saveOrUpdateEmployee(tutor.getEmployee());
+                this.tutorService.saveOrUpdate(tutor);
+                this.getApplication().getLocationService().saveOrUpdate(location);
+
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+                Utilities.displayAlertDialog(getRelatedActivity(), "Dados actualizados com sucesso.").show();
+            } catch (SQLException e) {
+                if (loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+                Log.e("MentorVM", e.getMessage());
+            }
+        });
     }
 
     @Override

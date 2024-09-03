@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.Date;
 import java.util.List;
@@ -37,10 +38,6 @@ public interface SessionDAO {
 
     @Query("DELETE FROM session WHERE id = :id")
     int delete(Integer id);
-
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Session session);
 
     @Query("SELECT * FROM session")
     List<Session> queryForAll();

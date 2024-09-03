@@ -1,7 +1,9 @@
 package mz.org.csaude.mentoring.base.model;
 
 import androidx.room.ColumnInfo;
+import androidx.room.Entity;
 import androidx.room.Ignore;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +17,7 @@ import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 
+@Entity(indices = {@Index(value = "uuid", unique = true)})
 public abstract class BaseModel implements Serializable, Listble {
 
     public static final String COLUMN_ID = "id";
@@ -184,5 +187,15 @@ public abstract class BaseModel implements Serializable, Listble {
     @Override
     public int hashCode() {
         return Objects.hash(id, uuid);
+    }
+
+    @Override
+    public String toString() {
+        return "BaseModel{" +
+                "id=" + id +
+                ", uuid='" + uuid + '\'' +
+                ", lifeCycleStatus=" + lifeCycleStatus +
+                ", syncStatus=" + syncStatus +
+                '}';
     }
 }

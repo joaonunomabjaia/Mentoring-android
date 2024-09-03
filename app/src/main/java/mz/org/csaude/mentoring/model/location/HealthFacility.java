@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.location;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -28,13 +29,15 @@ public class HealthFacility extends BaseModel implements Listble {
     public static final String COLUMN_DISTRICT = "district_id";
     public static final String COLUMN_NAME = "name";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DISTRICT)
-    private int districtId;
+    private Integer districtId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_DISTRICT, entityColumn = "id")
     private District district;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
@@ -77,11 +80,11 @@ public class HealthFacility extends BaseModel implements Listble {
         return null;
     }
 
-    public int getDistrictId() {
+    public Integer getDistrictId() {
         return districtId;
     }
 
-    public void setDistrictId(int districtId) {
+    public void setDistrictId(Integer districtId) {
         this.districtId = districtId;
     }
 

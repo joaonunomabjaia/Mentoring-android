@@ -60,18 +60,20 @@ public class FormRestService extends BaseRestService {
             public void onResponse(Call<List<FormDTO>> call, Response<List<FormDTO>> response) {
                 List<FormDTO> data = response.body();
                 if (Utilities.listHasElements(data)) {
-                    try {
-                        List<Form> forms = Utilities.parse(data, Form.class);
-                        for (Form form : forms) {
-                            form.setSyncStatus(SyncSatus.SENT);
-                            form.setPartner(getApplication().getPartnerService().getByuuid(form.getPartner().getUuid()));
-                            form.setProgrammaticArea(getApplication().getProgrammaticAreaService().getByuuid(form.getProgrammaticArea().getUuid()));
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            List<Form> forms = Utilities.parse(data, Form.class);
+                            for (Form form : forms) {
+                                form.setSyncStatus(SyncSatus.SENT);
+                                form.setPartner(getApplication().getPartnerService().getByuuid(form.getPartner().getUuid()));
+                                form.setProgrammaticArea(getApplication().getProgrammaticAreaService().getByuuid(form.getProgrammaticArea().getUuid()));
+                            }
+                            formService.savedOrUpdateForms(forms);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, forms);
+                        } catch (SQLException e) {
+                            Log.e("METADATA LOAD --", e.getMessage(), e);
                         }
-                        formService.savedOrUpdateForms(forms);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, forms);
-                    } catch (SQLException e) {
-                        Log.e("METADATA LOAD --", e.getMessage(), e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
                 }

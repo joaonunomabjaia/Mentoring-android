@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.partner;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -20,9 +21,11 @@ public class Partner extends BaseModel implements Listble {
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String MISAU_UUID = "398f0ffeb8fe11edafa10242ac120002";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 

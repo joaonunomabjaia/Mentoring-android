@@ -118,14 +118,22 @@ public class WorkerScheduleExecutor {
         OneTimeWorkRequest resourceTimeWorkRequest = new OneTimeWorkRequest.Builder(Resourceworker.class).addTag("ONE_RESOURCE_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest mentorSessionsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionGETWorker.class).addTag("ONE_TIME_MENTOR_SESSIONS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
 
-        workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, hfOneTimeWorkRequest)
-                .then(Arrays.asList(menteesOneTimeWorkRequest, mentorFormsOneTimeWorkRequest))
+        //workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, hfOneTimeWorkRequest)
+
+        workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, mentorFormsOneTimeWorkRequest)
+                .then(hfOneTimeWorkRequest)
+                .then(mentorFormsQuestionsOneTimeWorkRequest)
+                .then(resourceTimeWorkRequest)
+                .then(menteesOneTimeWorkRequest)
+                .then(mentorRondasOneTimeWorkRequest)
+                .then(mentorSessionsOneTimeWorkRequest)
+                /*.then(Arrays.asList(menteesOneTimeWorkRequest, mentorFormsOneTimeWorkRequest))
                 .then(mentorFormsQuestionsOneTimeWorkRequest)
                 .then(mentorRondasOneTimeWorkRequest)
                 .then(resourceTimeWorkRequest)
-                .then(mentorSessionsOneTimeWorkRequest)
+                .then(mentorSessionsOneTimeWorkRequest)*/
                 .enqueue();
-        return mentorRondasOneTimeWorkRequest;
+        return resourceTimeWorkRequest;
     }
 
     public OneTimeWorkRequest uploadMentees() {

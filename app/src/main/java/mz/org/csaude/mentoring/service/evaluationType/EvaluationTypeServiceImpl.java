@@ -62,9 +62,13 @@ public class EvaluationTypeServiceImpl extends BaseServiceImpl<EvaluationType> i
         EvaluationType evaluationType = evaluationTypeDTO.getEvaluationType();
         if(et!=null) {
             evaluationType.setId(et.getId());
+            this.evaluationTypeDAO.update(evaluationType);
+            return evaluationType;
+        } else {
+            this.evaluationTypeDAO.insert(evaluationType);
+            evaluationType.setId(this.evaluationTypeDAO.getByUuid(evaluationTypeDTO.getUuid()).getId());
+            return evaluationType;
         }
-        this.evaluationTypeDAO.createOrUpdate(evaluationType);
-        return evaluationType;
     }
 
     @Override

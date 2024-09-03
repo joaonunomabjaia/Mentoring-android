@@ -72,13 +72,17 @@ public class ProgrammaticAreaServiceImpl extends BaseServiceImpl<ProgrammaticAre
         ProgrammaticArea programmaticArea = programmaticAreaDTO.getProgrammaticArea();
         Program p = programDAO.getByUuid(programmaticArea.getProgram().getUuid());
         if (p == null) {
-            programDAO.insert(programmaticArea.getProgram());
-        } else programmaticArea.setProgram(p);
+            programmaticArea.getProgram().setId((int) programDAO.insert(programmaticArea.getProgram()));
+        } else {
+            programmaticArea.setProgram(p);
+        }
 
         if(pa!=null) {
             programmaticArea.setId(pa.getId());
+            programmaticAreaDAO.update(programmaticArea);
+        } else {
+            programmaticArea.setId((int) programmaticAreaDAO.insert(programmaticArea));
         }
-        this.programmaticAreaDAO.createOrUpdate(programmaticArea);
         return programmaticArea;
     }
 

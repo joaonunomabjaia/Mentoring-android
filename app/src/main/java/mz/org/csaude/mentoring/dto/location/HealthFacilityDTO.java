@@ -23,6 +23,9 @@ public class HealthFacilityDTO extends BaseEntityDTO {
 
     }
 
+    public HealthFacilityDTO() {
+    }
+
     public String getHealthFacility() {
         return healthFacility;
     }

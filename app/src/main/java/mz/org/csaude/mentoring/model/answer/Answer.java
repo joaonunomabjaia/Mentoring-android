@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.answer;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -44,14 +45,17 @@ public class Answer extends BaseModel {
     public static final String COLUMN_QUESTION = "question_id";
     public static final String COLUMN_VALUE = "value";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_FORM)
-    private int formId;
+    private Integer formId;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_MENTORSHIP)
-    private int mentorshipId;
+    private Integer mentorshipId;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_QUESTION)
-    private int questionId;
+    private Integer questionId;
 
     @ColumnInfo(name = COLUMN_VALUE)
     private String value;
@@ -120,27 +124,27 @@ public class Answer extends BaseModel {
         this.questionId = question.getId();
     }
 
-    public int getFormId() {
+    public Integer getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(Integer formId) {
         this.formId = formId;
     }
 
-    public int getQuestionId() {
+    public Integer getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(int questionId) {
+    public void setQuestionId(Integer questionId) {
         this.questionId = questionId;
     }
 
-    public int getMentorshipId() {
+    public Integer getMentorshipId() {
         return mentorshipId;
     }
 
-    public void setMentorshipId(int mentorshipId) {
+    public void setMentorshipId(Integer mentorshipId) {
         this.mentorshipId = mentorshipId;
     }
 }

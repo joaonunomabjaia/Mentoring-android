@@ -23,6 +23,9 @@ public class TutoredDTO extends BaseEntityDTO {
 
     private Double zeroEvaluationScore;
 
+    public TutoredDTO() {
+    }
+
     public TutoredDTO(Tutored tutored) {
         super(tutored);
         setZeroEvaluationScore(tutored.getZeroEvaluationScore());

@@ -7,6 +7,7 @@ import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
 import androidx.room.Transaction;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -15,11 +16,11 @@ import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
 @Dao
 public interface FormQuestionDAO {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insert(FormQuestion formQuestion);
 
     @Update
-    void update(FormQuestion formQuestion);
+    int update(FormQuestion formQuestion);
 
     @Delete
     int delete(FormQuestion formQuestion);
@@ -31,9 +32,6 @@ public interface FormQuestionDAO {
 
     @Query("SELECT * FROM form_question WHERE uuid = :uuid LIMIT 1")
     FormQuestion getByUuid(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(FormQuestion fQuestion);
 
     @Query("SELECT * FROM form_question WHERE id = :id")
     FormQuestion queryForId(int id);

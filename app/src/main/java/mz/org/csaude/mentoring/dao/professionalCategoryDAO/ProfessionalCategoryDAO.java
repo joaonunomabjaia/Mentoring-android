@@ -14,7 +14,7 @@ import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 public interface ProfessionalCategoryDAO {
 
     // Insert a ProfessionalCategory into the database
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     long insert(ProfessionalCategory professionalCategory);
 
     // Update an existing ProfessionalCategory in the database

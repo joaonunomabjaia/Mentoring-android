@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -37,8 +38,4 @@ public interface SettingDAO {
 
     @Query("SELECT * FROM setting")
     List<Setting> queryForAll();
-
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Setting setting);
 }

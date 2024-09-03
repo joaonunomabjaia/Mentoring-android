@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import mz.org.csaude.mentoring.model.mentorship.IterationType;
 public interface IterationTypeDAO {
 
     @Insert
-    void insertIterationType(IterationType iterationType);
+    long insertIterationType(IterationType iterationType);
 
     @Insert
     void insertIterationTypes(List<IterationType> iterationTypes);
@@ -42,7 +43,4 @@ public interface IterationTypeDAO {
 
     @Query("DELETE FROM iteration_type WHERE id = :id")
     int delete(int id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(IterationType iterationType);
 }

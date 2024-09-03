@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.program;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -18,9 +19,11 @@ public class Program extends BaseModel {
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_DESCRIPTION = "description";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_NAME)
     private String name;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 

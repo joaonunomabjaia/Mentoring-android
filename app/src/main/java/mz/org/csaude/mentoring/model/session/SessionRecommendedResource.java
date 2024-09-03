@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.session;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -36,6 +37,7 @@ public class SessionRecommendedResource extends BaseModel {
     public static final String COLUMN_RESOURCE_NAME = "resource_name";
     public static final String COLUMN_DATE_RECOMMENDED = "date_recommended";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_SESSION_ID)
     private Integer sessionId;
 
@@ -43,6 +45,7 @@ public class SessionRecommendedResource extends BaseModel {
     @Relation(parentColumn = COLUMN_SESSION_ID, entityColumn = "id")
     private Session session;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTORED_ID)
     private Integer tutoredId;
 
@@ -50,6 +53,7 @@ public class SessionRecommendedResource extends BaseModel {
     @Relation(parentColumn = COLUMN_TUTORED_ID, entityColumn = "id")
     private Tutored tutored;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTOR_ID)
     private Integer tutorId;
 
@@ -57,12 +61,15 @@ public class SessionRecommendedResource extends BaseModel {
     @Relation(parentColumn = COLUMN_TUTOR_ID, entityColumn = "id")
     private Tutor tutor;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RESOURCE_LINK)
     private String resourceLink;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RESOURCE_NAME)
     private String resourceName;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DATE_RECOMMENDED)
     private Date dateRecommended;
 

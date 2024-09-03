@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -64,7 +65,4 @@ public interface RondaDAO {
 
     @Query("DELETE FROM ronda WHERE id = :id")
     void delete(Integer id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Ronda ronda);
 }

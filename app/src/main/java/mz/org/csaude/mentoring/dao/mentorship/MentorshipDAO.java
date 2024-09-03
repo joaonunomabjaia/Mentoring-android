@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Transaction;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -54,7 +55,4 @@ public interface MentorshipDAO {
 
     @Query("DELETE FROM mentorship WHERE id = :id")
     int delete(int id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Mentorship mentorship);
 }

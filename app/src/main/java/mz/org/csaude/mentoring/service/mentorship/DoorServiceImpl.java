@@ -27,7 +27,7 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
 
     @Override
     public Door save(Door record) throws SQLException {
-        this.doorDAO.insertDoor(record);
+        record.setId((int) this.doorDAO.insertDoor(record));
         return record;
     }
 
@@ -53,6 +53,11 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
     }
 
     @Override
+    public Door getByuuid(String uuid) throws SQLException {
+        return this.doorDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void saveOrUpdateDoors(List<DoorDTO> doorDTOS) throws SQLException {
         for (DoorDTO doorDTO: doorDTOS) {
             this.saveOrUpdateDoor(doorDTO);
@@ -65,8 +70,10 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
         Door door = doorDTO.getDoor();
         if(d!=null) {
            door.setId(d.getId());
+           this.update(door);
+        } else {
+            this.save(door);
         }
-        this.doorDAO.createOrUpdate(door);
         return door;
     }
 }

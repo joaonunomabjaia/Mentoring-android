@@ -29,10 +29,10 @@ public class SessionReport extends BaseModel {
     private String category;
 
     @ColumnInfo(name = "yes_points")
-    private int yesPoints;
+    private Integer yesPoints;
 
     @ColumnInfo(name = "no_points")
-    private int noPoints;
+    private Integer noPoints;
 
     @ColumnInfo(name = "score")
     private double score;

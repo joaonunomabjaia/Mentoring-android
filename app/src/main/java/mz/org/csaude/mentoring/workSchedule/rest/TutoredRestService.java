@@ -47,14 +47,18 @@ public class TutoredRestService extends BaseRestService {
             public void onResponse(Call<List<TutoredDTO>> call, Response<List<TutoredDTO>> response) {
                 List<TutoredDTO> data = response.body();
                 if (Utilities.listHasElements(data)) {
-                    try {
-                        List<Tutored> tutoreds = Utilities.parse(data, Tutored.class);
-                        for (Tutored tutored : tutoreds) { tutored.setSyncStatus(SyncSatus.SENT);}
-                        getApplication().getTutoredService().savedOrUpdateTutoreds(tutoreds);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutoreds);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            List<Tutored> tutoreds = Utilities.parse(data, Tutored.class);
+                            for (Tutored tutored : tutoreds) {
+                                tutored.setSyncStatus(SyncSatus.SENT);
+                            }
+                            getApplication().getTutoredService().savedOrUpdateTutoreds(tutoreds);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutoreds);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
                     listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
                 }
@@ -80,17 +84,19 @@ public class TutoredRestService extends BaseRestService {
                 public void onResponse(Call<List<TutoredDTO>> call, Response<List<TutoredDTO>> response) {
                     List<TutoredDTO> data = response.body();
                     if (response.code() == 201) {
-                        try {
-                            List<Tutored> tutoreds = getApplication().getTutoredService().getAllNotSynced();
-                            for (Tutored tutored : tutoreds) {
-                                tutored.setSyncStatus(SyncSatus.SENT);
-                                getApplication().getTutoredService().update(tutored);
-                            }
+                        getServiceExecutor().execute(()-> {
+                            try {
+                                List<Tutored> tutoreds = getApplication().getTutoredService().getAllNotSynced();
+                                for (Tutored tutored : tutoreds) {
+                                    tutored.setSyncStatus(SyncSatus.SENT);
+                                    getApplication().getTutoredService().update(tutored);
+                                }
 
-                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutoreds);
-                        } catch (SQLException  e) {
-                            throw new RuntimeException(e);
-                        }
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutoreds);
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     } else listener.doOnRestErrorResponse(response.message());
                 }
 
@@ -115,13 +121,15 @@ public class TutoredRestService extends BaseRestService {
             public void onResponse(Call<TutoredDTO> call, Response<TutoredDTO> response) {
                 TutoredDTO data = response.body();
                 if (response.code() == 201) {
-                    try {
-                        getApplication().getTutoredService().savedOrUpdateTutored(tutored);
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            getApplication().getTutoredService().savedOrUpdateTutored(tutored);
 
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(tutored));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(tutored));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response

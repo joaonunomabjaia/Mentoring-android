@@ -652,6 +652,34 @@ public class Utilities {
         return dialog;
     }
 
+    public static Dialog showLoadingDialog(final BaseActivity mContext, final String message) {
+        if (mContext == null || mContext.isFinishing()) {
+            return null; // Return early if the context is invalid
+        }
+
+        // Step 1: Create the dialog and inflate the layout
+        Dialog dialog = new Dialog(mContext);
+        LayoutInflater inflater = mContext.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
+        dialog.setContentView(dialogView);
+
+        // Step 2: Set up the message
+        TextView loadingMessage = dialogView.findViewById(R.id.loadingMessage);
+        if (message != null && !message.isEmpty()) {
+            loadingMessage.setText(message);
+        } else {
+            loadingMessage.setText("Loading..."); // Default message
+        }
+
+        // Step 3: Make the dialog non-cancelable to prevent accidental dismiss
+        dialog.setCancelable(false);
+
+        // Step 4: Show the dialog
+        dialog.show();
+
+        return dialog;
+    }
+
     private static void showTimePickerDialog(EditText viewTe, BaseActivity activity) {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);

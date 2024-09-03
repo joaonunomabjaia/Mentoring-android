@@ -31,7 +31,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     @Override
     public Form save(Form record) throws SQLException {
-        this.formDAO.insertForm(record);
+        record.setId((int) this.formDAO.insertForm(record));
         return record;
     }
 
@@ -73,8 +73,10 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
         Form f = this.formDAO.getByUuid(form.getUuid());
         if(f!=null) {
             form.setId(f.getId());
+            this.update(form);
+        } else {
+            this.save(form);
         }
-        this.formDAO.createOrUpdate(form);
         return form;
     }
 

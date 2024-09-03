@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -36,9 +37,6 @@ public interface SessionStatusDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long createOrUpdate(SessionStatus sessionStatus);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void createOrUpdate(List<SessionStatus> sessionStatuses);
 
     @Query("DELETE FROM session_status")
     int deleteAll();

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.evaluationType;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
@@ -22,9 +23,11 @@ public class EvaluationType extends BaseModel {
     public static final String CONSULTA = "Consulta";
     public static final String FICHA = "Ficha";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 

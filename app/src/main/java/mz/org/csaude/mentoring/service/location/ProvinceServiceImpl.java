@@ -68,7 +68,6 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
 
     @Override
     public void savedOrUpdateProvince(List<ProvinceDTO> provinceDTOs) throws SQLException {
-
         for (ProvinceDTO provinceDTO : provinceDTOs) {
            this.savedOrUpdateProvince(provinceDTO);
         }
@@ -76,15 +75,17 @@ public class ProvinceServiceImpl extends BaseServiceImpl<Province> implements Pr
 
     @Override
     public Province savedOrUpdateProvince(ProvinceDTO provinceDTO) throws SQLException {
-
         Province provinces = this.provinceDAO.getByUuid(provinceDTO.getUuid());
-        if (provinces != null){
+        if (provinces == null){
             Province province = new Province(provinceDTO);
             this.provinceDAO.insertProvince(province);
             return province;
         }
-       return provinces;
+        return provinces;
     }
 
-
+    @Override
+    public Province getByuuid(String uuid) throws SQLException {
+        return this.provinceDAO.getByUuid(uuid);
+    }
 }

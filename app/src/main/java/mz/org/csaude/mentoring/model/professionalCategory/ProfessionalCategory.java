@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.professionalCategory;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -19,9 +20,11 @@ public class ProfessionalCategory extends BaseModel implements Listble {
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 

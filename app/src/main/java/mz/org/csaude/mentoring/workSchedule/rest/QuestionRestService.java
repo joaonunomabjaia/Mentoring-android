@@ -36,18 +36,20 @@ public class QuestionRestService extends BaseRestService {
                 List<QuestionDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        QuestionService questionService = getApplication().getQuestionService();
-                        List<Question> questions = new ArrayList<>();
-                        for (QuestionDTO questionDTO : data){
-                            questionDTO.getQuestionObj().setSyncStatus(SyncSatus.SENT);
-                            questions.add(questionDTO.getQuestionObj());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            QuestionService questionService = getApplication().getQuestionService();
+                            List<Question> questions = new ArrayList<>();
+                            for (QuestionDTO questionDTO : data) {
+                                questionDTO.getQuestionObj().setSyncStatus(SyncSatus.SENT);
+                                questions.add(questionDTO.getQuestionObj());
+                            }
+                            questionService.saveOrUpdateQuestions(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, questions);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        questionService.saveOrUpdateQuestions(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, questions);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

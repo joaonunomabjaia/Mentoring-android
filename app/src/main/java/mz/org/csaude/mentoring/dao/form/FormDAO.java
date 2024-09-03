@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public interface FormDAO {
     List<Form> getAllOfTutor(int tutorId);
 
     @Insert(onConflict = OnConflictStrategy.FAIL)
-    void insertForm(Form form);
+    long insertForm(Form form);
 
     @Update
     void updateForm(Form form);
@@ -46,9 +47,6 @@ public interface FormDAO {
 
     @Query("SELECT * FROM form")
     List<Form> queryForAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Form entity);
 
     @Query("UPDATE form SET sync_status = :syncStatus WHERE id = :id")
     void updateSyncStatus(int id, String syncStatus);

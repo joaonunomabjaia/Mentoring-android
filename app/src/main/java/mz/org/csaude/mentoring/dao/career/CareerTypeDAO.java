@@ -19,10 +19,10 @@ public interface CareerTypeDAO {
     @Query("SELECT COUNT(*) > 0 FROM career_type WHERE code = :code")
     boolean checkCareerTypeExistance(String code);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     long insert(CareerType careerType);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertAll(List<CareerType> careerTypes);
 
     @Update

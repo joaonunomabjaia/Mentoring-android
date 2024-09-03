@@ -36,21 +36,22 @@ public class ProfessionalCategoryRestService extends BaseRestService {
                if ( data == null){
 
                          }
-                   try {
-                   ProfessionalCategoryService professionalCategoryService = getApplication().getProfessionalCategoryService();
+                getServiceExecutor().execute(()-> {
+                    try {
+                        ProfessionalCategoryService professionalCategoryService = getApplication().getProfessionalCategoryService();
 
-                   List<ProfessionalCategory> professionalCategories = new ArrayList<>();
+                        List<ProfessionalCategory> professionalCategories = new ArrayList<>();
 
-                   for (ProfessionalCategoryDTO professionalCategoryDTO : data){
-                       professionalCategoryDTO.getProfessionalCategory().setSyncStatus(SyncSatus.SENT);
-                       professionalCategories.add(professionalCategoryDTO.getProfessionalCategory());
-                   }
-                       professionalCategoryService.saveOrUpdateProfessionalCategorys(data);
-                       listener.doOnResponse(BaseRestService.REQUEST_SUCESS, professionalCategories);
-                   } catch (SQLException e) {
-                       throw new RuntimeException(e);
-                   }
-
+                        for (ProfessionalCategoryDTO professionalCategoryDTO : data) {
+                            professionalCategoryDTO.getProfessionalCategory().setSyncStatus(SyncSatus.SENT);
+                            professionalCategories.add(professionalCategoryDTO.getProfessionalCategory());
+                        }
+                        professionalCategoryService.saveOrUpdateProfessionalCategorys(data);
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, professionalCategories);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
             }
 

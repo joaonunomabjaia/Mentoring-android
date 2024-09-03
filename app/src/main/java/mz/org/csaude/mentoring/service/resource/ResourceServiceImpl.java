@@ -33,8 +33,10 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
           Resource r = this.resourceDAO.getByUuid(resource.getUuid());
           if(r!=null) {
               resource.setId(r.getId());
+              this.update(resource);
+          } else {
+              this.save(resource);
           }
-          this.resourceDAO.createOrUpdate(resource);
     }
 
     @Override
@@ -46,8 +48,7 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
 
     @Override
     public Resource save(Resource record) throws SQLException {
-
-        this.resourceDAO.insert(record);
+        record.setId((int) this.resourceDAO.insert(record));
         return record;
     }
 
@@ -70,6 +71,11 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
     @Override
     public Resource getById(int id) throws SQLException {
         return this.resourceDAO.queryForId(id);
+    }
+
+    @Override
+    public Resource getByuuid(String uuid) throws SQLException {
+        return this.resourceDAO.getByUuid(uuid);
     }
 
 

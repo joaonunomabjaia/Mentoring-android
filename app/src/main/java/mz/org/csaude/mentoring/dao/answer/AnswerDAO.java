@@ -16,10 +16,10 @@ public interface AnswerDAO {
     @Query("SELECT * FROM answer WHERE mentorship_id = :mentorshipId")
     List<Answer> queryForMentorship(int mentorshipId);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     long insert(Answer answer);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertAll(List<Answer> answers);
 
     @Update

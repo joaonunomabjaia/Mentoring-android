@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -41,6 +42,4 @@ public interface ProgrammaticAreaDAO {
     @Query("SELECT * FROM programmatic_area WHERE uuid = :uuid LIMIT 1")
     ProgrammaticArea queryForUuid(String uuid);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(ProgrammaticArea programmaticArea);
 }

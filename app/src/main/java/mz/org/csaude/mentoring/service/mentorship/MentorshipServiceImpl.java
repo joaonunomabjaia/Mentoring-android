@@ -134,6 +134,11 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
+    public Mentorship getByuuid(String uuid) throws SQLException {
+        return this.mentorshipDAO.getByUuid(uuid);
+    }
+
+    @Override
     public List<Mentorship> getMentorshipByTutor(String uuidTutor) throws SQLException {
         return this.mentorshipDAO.getMentorshipByTutor(uuidTutor);
     }
@@ -147,6 +152,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
+    @Transaction
     public Mentorship saveOrUpdateMentorship(MentorshipDTO mentorshipDTO) throws SQLException {
         SessionDTO sessionDTO = mentorshipDTO.getSession();
 
@@ -162,15 +168,21 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
         Session session = sessionDTO.getSession();
         if(s!=null) {
             session.setId(s.getId());
+            this.sessionDAO.update(session);
+        } else {
+            this.sessionDAO.insert(session);
+            session.setId(this.sessionDAO.getByUuid(session.getUuid()).getId());
         }
-        this.sessionDAO.createOrUpdate(session);
 
         Mentorship m = this.mentorshipDAO.getByUuid(mentorshipDTO.getUuid());
         Mentorship mentorship = mentorshipDTO.getMentorship();
         if(m!=null) {
             mentorship.setId(m.getId());
+            this.mentorshipDAO.updateMentorship(mentorship);
+        } else {
+            this.mentorshipDAO.insertMentorship(mentorship);
+            mentorship.setId(this.mentorshipDAO.getByUuid(mentorship.getUuid()).getId());
         }
-        this.mentorshipDAO.createOrUpdate(mentorship);
 
         return mentorship;
     }
@@ -199,12 +211,16 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
-    public void saveOrUpdate(Mentorship mentorship) throws SQLException {
+    public Mentorship saveOrUpdate(Mentorship mentorship) throws SQLException {
         Mentorship mm = this.mentorshipDAO.getByUuid(mentorship.getUuid());
         if(mm!=null) {
             mentorship.setId(mm.getId());
+            this.mentorshipDAO.updateMentorship(mentorship);
+        } else {
+            this.mentorshipDAO.insertMentorship(mentorship);
+            mentorship.setId(this.mentorshipDAO.getByUuid(mentorship.getUuid()).getId());
         }
-        this.mentorshipDAO.createOrUpdate(mentorship);
+        return mentorship;
     }
 
 }

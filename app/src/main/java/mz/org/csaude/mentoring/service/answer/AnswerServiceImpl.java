@@ -52,6 +52,11 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
     }
 
     @Override
+    public Answer getByuuid(String uuid) throws SQLException {
+        return this.answerDAO.getByUuid(uuid);
+    }
+
+    @Override
     public List<Answer> getAllOfMentorship(Mentorship mentorship) throws SQLException {
         return this.answerDAO.queryForMentorship(mentorship.getId());
     }

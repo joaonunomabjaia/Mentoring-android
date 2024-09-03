@@ -9,7 +9,6 @@ import androidx.room.TypeConverters;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SupportFactory;
 
-import mz.org.csaude.mentoring.dao.*;
 import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
 import mz.org.csaude.mentoring.dao.career.CareerTypeDAO;
 import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
@@ -46,7 +45,6 @@ import mz.org.csaude.mentoring.dao.setting.SettingDAO;
 import mz.org.csaude.mentoring.dao.tutor.TutorDAO;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.dao.user.UserDao;
-import mz.org.csaude.mentoring.model.*;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
@@ -96,7 +94,7 @@ import mz.org.csaude.mentoring.util.Converters;
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
                 Resource.class, SessionRecommendedResource.class
         },
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 @TypeConverters({Converters.class})

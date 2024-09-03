@@ -218,12 +218,16 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
-    public void saveOrUpdate(Session session) throws SQLException {
+    public Session saveOrUpdate(Session session) throws SQLException {
         Session ss = this.sessionDAO.getByUuid(session.getUuid());
         if(ss!=null) {
             session.setId(ss.getId());
+            sessionDAO.update(session);
+        } else {
+            sessionDAO.insert(session);
+            session.setId(sessionDAO.getByUuid(session.getUuid()).getId());
         }
-        this.sessionDAO.createOrUpdate(session);
+        return session;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.tutor;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -26,6 +27,7 @@ public class Tutor extends BaseModel {
   public static final String TABLE_NAME = "tutor";
   public static final String COLUMN_EMPLOYEE = "employee_id";
 
+  @NonNull
   @ColumnInfo(name = COLUMN_EMPLOYEE)
   private Integer employeeId;
 

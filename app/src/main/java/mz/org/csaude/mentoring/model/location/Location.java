@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.location;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -46,33 +47,38 @@ public class Location extends BaseModel implements Listble {
     public static final String COLUMN_HEALTH_FACILITY = "health_facility_id"; // Corrected typo from "health_hacility_id" to "health_facility_id"
     public static final String COLUMN_LOCATION_LEVEL = "location_level";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_EMPLOYEE)
-    private int employeeId;
+    private Integer employeeId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_EMPLOYEE, entityColumn = "id")
     private Employee employee;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PROVINCE)
-    private int provinceId;
+    private Integer provinceId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_PROVINCE, entityColumn = "id")
     private Province province;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DISTRICT)
-    private int districtId;
+    private Integer districtId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_DISTRICT, entityColumn = "id")
     private District district;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_HEALTH_FACILITY)
-    private int healthFacilityId;
+    private Integer healthFacilityId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_HEALTH_FACILITY, entityColumn = "id")
     private HealthFacility healthFacility;
+
 
     @ColumnInfo(name = COLUMN_LOCATION_LEVEL)
     private String locationLevel;
@@ -159,35 +165,35 @@ public class Location extends BaseModel implements Listble {
         return null;
     }
 
-    public int getEmployeeId() {
+    public Integer getEmployeeId() {
         return employeeId;
     }
 
-    public void setEmployeeId(int employeeId) {
+    public void setEmployeeId(Integer employeeId) {
         this.employeeId = employeeId;
     }
 
-    public int getProvinceId() {
+    public Integer getProvinceId() {
         return provinceId;
     }
 
-    public void setProvinceId(int provinceId) {
+    public void setProvinceId(Integer provinceId) {
         this.provinceId = provinceId;
     }
 
-    public int getDistrictId() {
+    public Integer getDistrictId() {
         return districtId;
     }
 
-    public void setDistrictId(int districtId) {
+    public void setDistrictId(Integer districtId) {
         this.districtId = districtId;
     }
 
-    public int getHealthFacilityId() {
+    public Integer getHealthFacilityId() {
         return healthFacilityId;
     }
 
-    public void setHealthFacilityId(int healthFacilityId) {
+    public void setHealthFacilityId(Integer healthFacilityId) {
         this.healthFacilityId = healthFacilityId;
     }
 }

@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.tutored;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     }
 
     public Tutored save(Tutored tutored) throws SQLException {
-        this.tutoredDao.insert(tutored);
+        tutored.setId((int) this.tutoredDao.insert(tutored));
         return tutored;
 
     }
@@ -61,6 +63,12 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     }
 
     @Override
+    public Tutored getByuuid(String uuid) throws SQLException {
+        return this.tutoredDao.getByUuid(uuid);
+    }
+
+    @Override
+    @Transaction
     public void savedOrUpdateTutoreds(List<Tutored> tutoreds) throws SQLException {
         for (Tutored tutored: tutoreds) {
             savedOrUpdateTutored(tutored);
@@ -71,11 +79,14 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public Tutored savedOrUpdateTutored(Tutored tutored) throws SQLException {
 
         Tutored t = this.tutoredDao.getByUuid(tutored.getUuid());
+        tutored.setEmployee(getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee()));
         if (t != null) {
             tutored.setId(t.getId());
+            this.update(tutored);
+        } else {
+            this.save(tutored);
         }
-        getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
-        this.tutoredDao.createOrUpdate(tutored);
+
         return tutored;
     }
 

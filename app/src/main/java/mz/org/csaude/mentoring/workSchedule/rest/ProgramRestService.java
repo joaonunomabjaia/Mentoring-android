@@ -35,17 +35,19 @@ public class ProgramRestService extends BaseRestService {
                 List<ProgramDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        ProgramService programService = getApplication().getProgramService();
-                        List<Program> programs = new ArrayList<>();
-                        for (ProgramDTO programDTO : data){
-                            programs.add(programDTO.getProgram());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            ProgramService programService = getApplication().getProgramService();
+                            List<Program> programs = new ArrayList<>();
+                            for (ProgramDTO programDTO : data) {
+                                programs.add(programDTO.getProgram());
+                            }
+                            programService.saveOrUpdatePrograms(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, programs);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        programService.saveOrUpdatePrograms(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, programs);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

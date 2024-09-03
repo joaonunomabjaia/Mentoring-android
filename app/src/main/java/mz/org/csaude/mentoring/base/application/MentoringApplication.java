@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.R;
@@ -100,6 +102,7 @@ import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.rest.FormQuestionRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.FormRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.MentorshipRestService;
@@ -215,6 +218,9 @@ public class MentoringApplication  extends Application {
     private String encryptedPassphrase;
 
 
+    private ExecutorService serviceExecutor;
+
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -234,6 +240,8 @@ public class MentoringApplication  extends Application {
         } catch (GeneralSecurityException | IOException e) {
             e.printStackTrace();
         }
+
+        serviceExecutor = ExecutorThreadProvider.getInstance().getExecutorService();
 
     }
 
@@ -482,9 +490,20 @@ public class MentoringApplication  extends Application {
     }
 
     public void init() throws SQLException {
-        this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
-        setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
-        getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
+        try {
+            getServiceExecutor().submit(()->{
+                try {
+                    this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
+                    if (getAuthenticatedUser().getEmployee() == null) getAuthenticatedUser().setEmployee(getEmployeeService().getById(getAuthenticatedUser().getEmployeeId()));
+                    setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
+                    getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SharedPreferences getMentoringSharedPreferences() {
@@ -590,4 +609,38 @@ public class MentoringApplication  extends Application {
         return encryptedPassphrase;
     }
 
+    /**
+     * Gracefully shuts down the ExecutorService.
+     */
+    public void shutdownExecutorService() {
+        serviceExecutor.shutdown(); // Disable new tasks from being submitted
+
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                serviceExecutor.shutdownNow(); // Cancel currently executing tasks
+
+                // Wait a while for tasks to respond to being cancelled
+                if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.err.println("ExecutorService did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            serviceExecutor.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
+    public ExecutorService getServiceExecutor() {
+        return serviceExecutor;
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        shutdownExecutorService();
+    }
 }

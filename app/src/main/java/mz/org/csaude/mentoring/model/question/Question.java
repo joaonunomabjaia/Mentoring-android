@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.question;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -28,14 +29,17 @@ public class Question extends BaseModel {
     public static final String COLUMN_QUESTION = "question";
     public static final String COLUMN_QUESTION_CATEGORY = "question_category_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_QUESTION)
     private String question;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_QUESTION_CATEGORY)
-    private int questionCategoryId;
+    private Integer questionCategoryId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_QUESTION_CATEGORY, entityColumn = "id")
@@ -80,11 +84,12 @@ public class Question extends BaseModel {
         this.questionCategoryId = questionsCategory.getId();
     }
 
-    public int getQuestionCategoryId() {
+    public Integer getQuestionCategoryId() {
         return questionCategoryId;
     }
 
-    public void setQuestionCategoryId(int questionCategoryId) {
+    public void setQuestionCategoryId(Integer questionCategoryId) {
         this.questionCategoryId = questionCategoryId;
     }
+
 }

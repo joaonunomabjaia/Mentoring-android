@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -28,9 +29,6 @@ public interface CabinetDAO {
 
     @Query("SELECT * FROM cabinet WHERE uuid = :uuid LIMIT 1")
     boolean checkCabinetExistance(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Cabinet cabinet);
 
     @Query("SELECT * FROM cabinet")
     List<Cabinet> queryForAll();

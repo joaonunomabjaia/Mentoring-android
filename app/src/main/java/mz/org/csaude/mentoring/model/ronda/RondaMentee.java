@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.ronda;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -38,23 +39,23 @@ public class RondaMentee extends BaseModel {
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
+    @NonNull
     @ColumnInfo(name = COLUMN_RONDA)
-    private int rondaId;
+    private Integer rondaId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
     private Ronda ronda;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_MENTEE)
-    private int menteeId;
+    private Integer menteeId;
 
     @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
     @Ignore
     private Tutored tutored;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
@@ -92,11 +93,11 @@ public class RondaMentee extends BaseModel {
         return new RondaMentee(ronda, mentee, DateUtilities.getCurrentDate());
     }
 
-    public int getRondaId() {
+    public Integer getRondaId() {
         return rondaId;
     }
 
-    public void setRondaId(int rondaId) {
+    public void setRondaId(Integer rondaId) {
         this.rondaId = rondaId;
     }
 
@@ -106,13 +107,14 @@ public class RondaMentee extends BaseModel {
 
     public void setRonda(Ronda ronda) {
         this.ronda = ronda;
+        this.rondaId = ronda.getId();
     }
 
-    public int getMenteeId() {
+    public Integer getMenteeId() {
         return menteeId;
     }
 
-    public void setMenteeId(int menteeId) {
+    public void setMenteeId(Integer menteeId) {
         this.menteeId = menteeId;
     }
 
@@ -122,6 +124,7 @@ public class RondaMentee extends BaseModel {
 
     public void setTutored(Tutored tutored) {
         this.tutored = tutored;
+        this.menteeId = tutored.getId();
     }
 
     public Date getStartDate() {

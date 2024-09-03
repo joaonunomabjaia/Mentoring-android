@@ -20,6 +20,9 @@ public class SessionStatusDTO extends BaseEntityDTO implements Syncable {
         this.setDescription(sessionStatus.getDescription());
     }
 
+    public SessionStatusDTO() {
+    }
+
     public String getCode() {
         return code;
     }

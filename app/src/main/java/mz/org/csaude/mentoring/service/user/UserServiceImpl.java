@@ -27,7 +27,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public User save(User record) throws SQLException {
-        this.userDao.insert(record);
+        record.setId((int) this.userDao.insert(record));
         return record;
     }
 
@@ -53,6 +53,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    public User getByuuid(String uuid) throws SQLException {
+        return this.userDao.getByUuid(uuid);
+    }
+
+    @Override
     public User login(User user) throws SQLException {
         User u = this.userDao.getByUserName(user.getUserName());
         if (u != null) {
@@ -68,8 +73,14 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
        if(u == null){
            getApplication().getEmployeeService().saveOrUpdateEmployee(user.getEmployee());
-           this.userDao.createOrUpdate(user);
+           user.setEmployee(getApplication().getEmployeeService().getByuuid(user.getEmployee().getUuid()));
+           this.save(user);
            return user;
+       } else {
+           user.setId(u.getId());
+           getApplication().getEmployeeService().saveOrUpdateEmployee(user.getEmployee());
+           user.setEmployee(getApplication().getEmployeeService().getByuuid(user.getEmployee().getUuid()));
+           this.update(user);
        }
         return u;
     }

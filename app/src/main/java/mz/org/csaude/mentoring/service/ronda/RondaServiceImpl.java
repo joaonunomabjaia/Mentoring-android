@@ -67,20 +67,16 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Transaction
     public Ronda savedOrUpdateRonda(Ronda ronda) throws SQLException {
             Ronda r = this.rondaDAO.getByUuid(ronda.getUuid());
+
+            ronda.setHealthFacility(this.healthFacilityDAO.getByUuid(ronda.getHealthFacility().getUuid()));
+            ronda.setRondaType(this.rondaTypeDAO.getByUuid(ronda.getRondaType().getUuid()));
             if(r!=null) {
                 ronda.setId(r.getId());
+                this.rondaDAO.update(ronda);
+            } else {
+                this.rondaDAO.insert(ronda);
+                ronda.setId(this.rondaDAO.getByUuid(ronda.getUuid()).getId());
             }
-            HealthFacility healthFacility = this.healthFacilityDAO.getByUuid(ronda.getHealthFacility().getUuid());
-            if(healthFacility==null) {
-                this.healthFacilityDAO.insert(healthFacility);
-            }
-            ronda.setHealthFacility(healthFacility);
-            RondaType rondaType = this.rondaTypeDAO.getByUuid(ronda.getRondaType().getUuid());
-            if(rondaType==null) {
-                this.rondaTypeDAO.insert(rondaType);
-            }
-            ronda.setRondaType(rondaType);
-            this.rondaDAO.createOrUpdate(ronda);
 
             this.rondaMentorDAO.deleteByRonda(ronda.getId());
             this.rondaMenteeDAO.deleteByRonda(ronda.getId());
@@ -89,25 +85,17 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
                 rondaMentor.setRonda(ronda);
                 rondaMentor.setSyncStatus(ronda.getSyncStatus());
                 rondaMentor.setStartDate(ronda.getStartDate());
+                rondaMentor.setTutor(this.tutorDAO.getByUuid(rondaMentor.getTutor().getUuid()));
 
-                Tutor mentor = this.tutorDAO.getByUuid(rondaMentor.getTutor().getUuid());
-                if(mentor!=null) {
-                    rondaMentor.setTutor(mentor);
-                }
-
-                this.rondaMentorDAO.createOrUpdate(rondaMentor);
+                this.rondaMentorDAO.insert(rondaMentor);
             }
             for (RondaMentee rondaMentee: ronda.getRondaMentees()) {
                 rondaMentee.setRonda(ronda);
                 rondaMentee.setSyncStatus(ronda.getSyncStatus());
                 rondaMentee.setStartDate(ronda.getStartDate());
+                rondaMentee.setTutored(this.tutoredDao.getByUuid(rondaMentee.getTutored().getUuid()));
 
-                Tutored mentee = this.tutoredDao.getByUuid(rondaMentee.getTutored().getUuid());
-                if(mentee!=null) {
-                    rondaMentee.setTutored(mentee);
-                }
-
-                this.rondaMenteeDAO.createOrUpdate(rondaMentee);
+                this.rondaMenteeDAO.insert(rondaMentee);
             }
         return ronda;
     }
@@ -146,29 +134,19 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public Ronda saveOrUpdateRonda(RondaDTO rondaDTO) throws SQLException {
-        HealthFacilityDTO healthFacilityDTO = rondaDTO.getHealthFacility();
-        HealthFacility hf = this.healthFacilityDAO.getByUuid(healthFacilityDTO.getUuid());
-        HealthFacility healthFacility = healthFacilityDTO.getHealthFacilityObj();
-        if(hf!=null) {
-            healthFacility.setId(hf.getId());
-        }
-        District district = districtDAO.getByUuid(healthFacilityDTO.getDistrictDTO().getUuid());
-        if(district!=null) {
-            healthFacility.setDistrict(district);
-        }
-        this.healthFacilityDAO.createOrUpdate(healthFacility);
-
         Ronda r = this.rondaDAO.getByUuid(rondaDTO.getUuid());
         Ronda ronda = rondaDTO.getRonda();
+
+        ronda.setHealthFacility(this.healthFacilityDAO.getByUuid(rondaDTO.getHealthFacility().getUuid()));
+        ronda.setRondaType(this.rondaTypeDAO.getByUuid(rondaDTO.getRondaType().getUuid()));
+
         if(r!=null) {
             ronda.setId(r.getId());
+            this.rondaDAO.update(ronda);
+        } else {
+            this.rondaDAO.insert(ronda);
+            ronda.setId(this.rondaDAO.getByUuid(ronda.getUuid()).getId());
         }
-        ronda.setHealthFacility(healthFacility);
-        RondaType rondaType = this.rondaTypeDAO.getByUuid(rondaDTO.getRondaType().getUuid());
-        if(rondaType!=null) {
-            ronda.setRondaType(rondaType);
-        }
-        this.rondaDAO.createOrUpdate(ronda);
 
         saveRondaMentors(rondaDTO.getRondaMentors(), ronda);
 
@@ -191,15 +169,16 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         for (RondaMentorDTO rondaMentorDTO: rondaMentorDTOS) {
             RondaMentor rm = this.rondaMentorDAO.getByUuid(rondaMentorDTO.getUuid());
             RondaMentor rondaMentor = rondaMentorDTO.getRondaMentor();
+
+            rondaMentor.setRonda(ronda);
+            rondaMentor.setTutor(this.tutorDAO.getByUuid(rondaMentorDTO.getMentor().getUuid()));
             if(rm!=null) {
                 rondaMentor.setId(rm.getId());
+                this.rondaMentorDAO.update(rondaMentor);
+            } else {
+                this.rondaMentorDAO.insert(rondaMentor);
+                rondaMentor.setId(this.rondaMentorDAO.getByUuid(rondaMentor.getUuid()).getId());
             }
-            rondaMentor.setRonda(ronda);
-            Tutor mentor = this.tutorDAO.getByUuid(rondaMentorDTO.getMentor().getUuid());
-            if(mentor!=null) {
-                rondaMentor.setTutor(mentor);
-            }
-            this.rondaMentorDAO.createOrUpdate(rondaMentor);
             rondaMentors.add(rondaMentor);
         }
         ronda.setRondaMentors(rondaMentors);
@@ -209,23 +188,25 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         for (RondaMenteeDTO rondaMenteeDTO: rondaMenteeDTOS) {
             RondaMentee rm = this.rondaMenteeDAO.getByUuid(rondaMenteeDTO.getUuid());
             RondaMentee rondaMentee = rondaMenteeDTO.getRondaMentee();
+
+            rondaMentee.setRonda(ronda);
+            rondaMentee.setTutored(this.tutoredDao.getByUuid(rondaMenteeDTO.getMentee().getUuid()));
+
             if(rm!=null) {
                 rondaMentee.setId(rm.getId());
+                this.rondaMenteeDAO.update(rondaMentee);
+            } else {
+                this.rondaMenteeDAO.insert(rondaMentee);
+                rondaMentee.setId(this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid()).getId());
             }
-            rondaMentee.setRonda(ronda);
-            Tutored mentee = this.tutoredDao.getByUuid(rondaMenteeDTO.getMentee().getUuid());
-            if(mentee!=null) {
-                rondaMentee.setTutored(mentee);
-            }
-            this.rondaMenteeDAO.createOrUpdate(rondaMentee);
             rondaMentees.add(rondaMentee);
         }
-            ronda.setRondaMentees(rondaMentees);
+        ronda.setRondaMentees(rondaMentees);
     }
 
     @Override
     public Ronda save(Ronda record) throws SQLException {
-        this.rondaDAO.insert(record);
+        record.setId((int) this.rondaDAO.insert(record));
         return record;
     }
 
@@ -253,6 +234,12 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     public Ronda getById(int id) throws SQLException {
         return this.rondaDAO.queryForId(id);
     }
+
+    @Override
+    public Ronda getByuuid(String uuid) throws SQLException {
+        return this.rondaDAO.getByUuid(uuid);
+    }
+
     @Override
     public List<Ronda> getAllByMentor(Tutor tutor, MentoringApplication mentoringApplication) throws SQLException {
         return this.rondaDAO.getAllByMentor(tutor.getId(), String.valueOf(LifeCycleStatus.ACTIVE));

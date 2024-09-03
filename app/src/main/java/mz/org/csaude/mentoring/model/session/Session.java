@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.session;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -49,6 +50,7 @@ public class Session extends BaseModel {
     public static final String COLUMN_WORK_PLAN = "work_plan";
     public static final String COLUMN_OBSERVATIONS = "observations";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
@@ -58,29 +60,33 @@ public class Session extends BaseModel {
     @ColumnInfo(name = COLUMN_PERFORMED_DATE)
     private Date performedDate;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_STATUS)
-    private int statusId;
+    private Integer statusId;
 
     @Relation(parentColumn = COLUMN_STATUS, entityColumn = "id")
     @Ignore
     private SessionStatus status;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RONDA)
-    private int rondaId;
+    private Integer rondaId;
 
     @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
     @Ignore
     private Ronda ronda;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_MENTEE)
-    private int menteeId;
+    private Integer menteeId;
 
     @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
     @Ignore
     private Tutored tutored;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_FORM)
-    private int formId;
+    private Integer formId;
 
     @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
     @Ignore
@@ -305,15 +311,15 @@ public class Session extends BaseModel {
         return Objects.hash(super.hashCode(), ronda, tutored, form);
     }
 
-    public int getStatusId() {
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(int statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
     }
 
-    public int getRondaId() {
+    public Integer getRondaId() {
         return rondaId;
     }
 

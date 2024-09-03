@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -43,7 +44,4 @@ public interface RondaMentorDAO {
 
     @Query("SELECT * FROM ronda_mentor WHERE id = :id LIMIT 1")
     RondaMentor queryForId(int id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(RondaMentor record);
 }

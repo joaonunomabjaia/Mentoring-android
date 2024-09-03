@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.location;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -18,6 +19,7 @@ public class Province extends BaseModel implements Listble {
     public static final String COLUMN_TABLE_NAME = "province";
     public static final String COLUMN_DESIGNATION = "designation";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESIGNATION)
     private String designation;
 

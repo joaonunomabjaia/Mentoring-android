@@ -60,6 +60,11 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
     }
 
     @Override
+    public HealthFacility getByuuid(String uuid) throws SQLException {
+        return this.healthFacilityDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void savedOrUpdatHealthFacilitys(List<HealthFacility> healthFacilityDTOs) throws SQLException {
 
         for(HealthFacility healthFacility : healthFacilityDTOs){
@@ -74,8 +79,11 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
         healthFacility.setDistrict(getApplication().getDistrictService().getByuuid(healthFacility.getDistrict().getUuid()));
         if(h != null){
             healthFacility.setId(h.getId());
+            this.healthFacilityDAO.update(healthFacility);
+        } else {
+            this.healthFacilityDAO.insert(healthFacility);
         }
-        this.healthFacilityDAO.createOrUpdate(healthFacility);
+
         return healthFacility;
     }
 

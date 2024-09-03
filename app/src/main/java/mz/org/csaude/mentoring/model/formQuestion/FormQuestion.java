@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.formQuestion;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -51,39 +52,46 @@ public class FormQuestion extends BaseModel {
     public static final String COLUMN_SEQUENCE = "sequence";
     public static final String COLUMN_APPLICABLE = "applicable";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_FORM)
-    private int formId;
+    private Integer formId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
     private Form form;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_QUESTION)
-    private int questionId;
+    private Integer questionId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_QUESTION, entityColumn = "id")
     private Question question;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_EVALUATION_TYPE)
-    private int evaluationTypeId;
+    private Integer evaluationTypeId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_EVALUATION_TYPE, entityColumn = "id")
     private EvaluationType evaluationType;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RESPONSE_TYPE)
-    private int responseTypeId;
+    private Integer responseTypeId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_RESPONSE_TYPE, entityColumn = "id")
     private ResponseType responseType;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_MANDATORY)
     private boolean mandatory;
 
+
     @ColumnInfo(name = COLUMN_SEQUENCE)
     private Integer sequence;
+
 
     @ColumnInfo(name = COLUMN_APPLICABLE)
     private Boolean applicable;
@@ -172,31 +180,31 @@ public class FormQuestion extends BaseModel {
         this.answer = answer;
     }
 
-    public int getFormId() {
+    public Integer getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(Integer formId) {
         this.formId = formId;
     }
 
-    public int getQuestionId() {
+    public Integer getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(int questionId) {
+    public void setQuestionId(Integer questionId) {
         this.questionId = questionId;
     }
 
-    public int getEvaluationTypeId() {
+    public Integer getEvaluationTypeId() {
         return evaluationTypeId;
     }
 
-    public void setEvaluationTypeId(int evaluationTypeId) {
+    public void setEvaluationTypeId(Integer evaluationTypeId) {
         this.evaluationTypeId = evaluationTypeId;
     }
 
-    public int getResponseTypeId() {
+    public Integer getResponseTypeId() {
         return responseTypeId;
     }
 

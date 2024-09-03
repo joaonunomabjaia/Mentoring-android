@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -27,9 +28,6 @@ public interface RondaTypeDAO {
 
     @Query("SELECT EXISTS(SELECT 1 FROM ronda_type WHERE uuid = :uuid LIMIT 1)")
     boolean checkRondaTypeExistance(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(RondaType rondaType);
 
     @Query("SELECT * FROM ronda_type")
     List<RondaType> queryForAll();

@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -36,9 +37,6 @@ public interface UserDao {
 
     @Query("SELECT * FROM user WHERE uuid = :uuid")
     User queryForUuid(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(User user);
 
     @Query("SELECT * FROM user WHERE id = :id")
     User queryForEq(int id);

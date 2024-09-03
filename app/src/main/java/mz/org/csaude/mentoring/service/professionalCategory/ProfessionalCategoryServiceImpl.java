@@ -39,7 +39,7 @@ public class ProfessionalCategoryServiceImpl extends BaseServiceImpl<Professiona
 
         ProfessionalCategory professionalCategories = this.professionalCategoryDAO.getByUuid(professionalCategory.getUuid());
 
-       if(professionalCategories != null){
+       if(professionalCategories == null){
 
            ProfessionalCategory professionalCategoryEntity = new ProfessionalCategory(professionalCategory);
            this.professionalCategoryDAO.insert(professionalCategoryEntity);
@@ -74,5 +74,10 @@ public class ProfessionalCategoryServiceImpl extends BaseServiceImpl<Professiona
     @Override
     public ProfessionalCategory getById(int id) throws SQLException {
         return this.professionalCategoryDAO.queryForId(id);
+    }
+
+    @Override
+    public ProfessionalCategory getByuuid(String uuid) throws SQLException {
+        return this.professionalCategoryDAO.getByUuid(uuid);
     }
 }

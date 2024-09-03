@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -14,11 +15,11 @@ import mz.org.csaude.mentoring.model.question.Question;
 @Dao
 public interface QuestionDAO {
 
-    @Insert(onConflict = OnConflictStrategy.FAIL)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insert(Question question);
 
     @Update
-    void update(Question question);
+    int update(Question question);
 
     @Delete
     int delete(Question question);
@@ -31,9 +32,6 @@ public interface QuestionDAO {
 
     @Query("SELECT * FROM question")
     List<Question> getAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Question question);
 
     @Query("SELECT * FROM question WHERE id = :id LIMIT 1")
     Question queryForId(int id);

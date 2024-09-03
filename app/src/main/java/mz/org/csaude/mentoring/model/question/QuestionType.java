@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.question;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -18,9 +19,11 @@ public class QuestionType extends BaseModel {
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 

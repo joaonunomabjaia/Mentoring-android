@@ -2,7 +2,6 @@ package mz.org.csaude.mentoring.dao.tutor;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -27,9 +26,6 @@ public interface TutorDAO {
 
     @Query("SELECT COUNT(*) > 0 FROM tutor WHERE uuid = :uuid")
     boolean checkTutorExistance(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Tutor tutor);
 
     @Query("SELECT * FROM tutor")
     List<Tutor> queryForAll();

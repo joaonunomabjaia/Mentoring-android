@@ -34,6 +34,8 @@ public class FormDTO extends BaseEntityDTO {
             this.setProgrammaticArea(new ProgrammaticAreaDTO(form.getProgrammaticArea()));
         }
     }
+    public FormDTO() {
+    }
 
     public String getName() {
         return name;

@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -40,7 +41,4 @@ public interface RondaMenteeDAO {
 
     @Query("SELECT * FROM ronda_mentee WHERE id = :id LIMIT 1")
     RondaMentee queryForId(int id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(RondaMentee rondaMentee);
 }

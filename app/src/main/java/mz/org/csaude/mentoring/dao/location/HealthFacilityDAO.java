@@ -10,6 +10,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 @Dao
 public interface HealthFacilityDAO {
@@ -34,9 +35,6 @@ public interface HealthFacilityDAO {
 
     @Query("SELECT * FROM health_facility WHERE uuid = :uuid LIMIT 1")
     HealthFacility getByUuid(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(HealthFacility healthFacility);
 
     @Query("SELECT * FROM health_facility")
     List<HealthFacility> queryForAll();

@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.ronda;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -37,20 +38,23 @@ public class RondaMentor extends BaseModel {
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_RONDA)
-    private int rondaId;
+    private Integer rondaId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
     private Ronda ronda;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_TUTOR)
-    private int tutorId;
+    private Integer tutorId;
 
     @Ignore
     @Relation(parentColumn = COLUMN_TUTOR, entityColumn = "id")
     private Tutor tutor;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
@@ -75,11 +79,11 @@ public class RondaMentor extends BaseModel {
         }
     }
 
-    public int getRondaId() {
+    public Integer getRondaId() {
         return rondaId;
     }
 
-    public void setRondaId(int rondaId) {
+    public void setRondaId(Integer rondaId) {
         this.rondaId = rondaId;
     }
 
@@ -89,13 +93,14 @@ public class RondaMentor extends BaseModel {
 
     public void setRonda(Ronda ronda) {
         this.ronda = ronda;
+        this.rondaId = ronda.getId();
     }
 
-    public int getTutorId() {
+    public Integer getTutorId() {
         return tutorId;
     }
 
-    public void setTutorId(int tutorId) {
+    public void setTutorId(Integer tutorId) {
         this.tutorId = tutorId;
     }
 
@@ -105,6 +110,7 @@ public class RondaMentor extends BaseModel {
 
     public void setTutor(Tutor tutor) {
         this.tutor = tutor;
+        this.tutorId = tutor.getId();
     }
 
     public Date getStartDate() {

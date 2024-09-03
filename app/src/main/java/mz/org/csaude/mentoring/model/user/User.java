@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.user;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -31,12 +32,15 @@ public class User extends BaseModel {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_EMPLOYEE = "employee_id";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_USER_NAME)
     private String userName;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_PASSWORD)
     private String password;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_SALT)
     private String salt;
 
@@ -46,6 +50,7 @@ public class User extends BaseModel {
     @ColumnInfo(name = COLUMN_TYPE)
     private String type;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_EMPLOYEE)
     private Integer employeeId;
 

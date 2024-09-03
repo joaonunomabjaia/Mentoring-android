@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.model.setting;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -19,12 +20,15 @@ public class Setting extends BaseModel {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_ENABLED = "enabled";
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESIGNATION)
     private String designation;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_VALUE)
     private String value;
 
+    @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 

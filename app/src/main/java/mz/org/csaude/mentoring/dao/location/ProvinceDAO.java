@@ -5,6 +5,7 @@ import androidx.room.Query;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public interface ProvinceDAO {
     @Query("SELECT * FROM province WHERE uuid IN (:provinceUuids)")
     List<Province> getAllOfTutor(List<String> provinceUuids);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     void insertProvince(Province province);
 
     @Insert(onConflict = OnConflictStrategy.FAIL)
@@ -30,9 +31,6 @@ public interface ProvinceDAO {
 
     @Update
     int update(Province record);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(Province province);
 
     @Query("SELECT * FROM province")
     List<Province> queryForAll();

@@ -37,21 +37,21 @@ public class SettingRestService extends BaseRestService {
                if(data == null){
 
                }
+               getServiceExecutor().execute(()-> {
+                   try {
+                       SettingService settingService = getApplication().getSettingService();
+                       List<Setting> settings = new ArrayList<>();
 
-               try {
-                   SettingService settingService = getApplication().getSettingService();
-                   List<Setting> settings = new ArrayList<>();
-
-                   for(SettingDTO settingDTO : data){
-                       settingDTO.getSetting().setSyncStatus(SyncSatus.SENT);
-                       settings.add(settingDTO.getSetting());
+                       for (SettingDTO settingDTO : data) {
+                           settingDTO.getSetting().setSyncStatus(SyncSatus.SENT);
+                           settings.add(settingDTO.getSetting());
+                       }
+                       settingService.savedOrUpdateSettings(data);
+                       listener.doOnResponse(BaseRestService.REQUEST_SUCESS, settings);
+                   } catch (SQLException e) {
+                       throw new RuntimeException(e);
                    }
-                   settingService.savedOrUpdateSettings(data);
-                   listener.doOnResponse(BaseRestService.REQUEST_SUCESS, settings);
-               } catch (SQLException e) {
-                   throw new RuntimeException(e);
-               }
-
+               });
            }
 
            @Override

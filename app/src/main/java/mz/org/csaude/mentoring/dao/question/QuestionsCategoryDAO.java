@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -31,9 +32,6 @@ public interface QuestionsCategoryDAO {
 
     @Query("SELECT * FROM question_category")
     List<QuestionsCategory> getAll();
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(QuestionsCategory questionsCategory);
 
     @Query("SELECT * FROM question_category WHERE id = :id LIMIT 1")
     QuestionsCategory queryForId(int id);

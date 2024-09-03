@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -34,9 +35,6 @@ public interface DistrictDAO {
 
     @Query("SELECT * FROM district WHERE uuid = :uuid LIMIT 1")
     District getByUuid(String uuid);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long createOrUpdate(District district);
 
     @Query("SELECT * FROM district")
     List<District> queryForAll();
