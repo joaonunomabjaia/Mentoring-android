@@ -77,5 +77,11 @@
     <string name="health_facility_required">A unidade sanitária é obrigatória</string>
     <string name="mentees_required">Deve seleccionar mentorandos para compora aronda.</string>
     <string name="permission_print_error">Não foi possivel imprimir o relatório por falta de permissão</string>
+    <string name="processando">Processando...</string>
+    <string name="no_resource_selected_error">Não foram selecionados recursos recomendados.</string>
+    <string name="session_update_error">Erro ao tentar salvar recursos recomendados.</string>
+    <string name="no_doors_available">Não foram encontrados registos de portas.</string>
+    <string name="no_categories_available">Não foram encontradas categorias.</string>
+    <string name="no_forms_available">Não foram encontadas tabelas de competências.</string>
 </resources>
 

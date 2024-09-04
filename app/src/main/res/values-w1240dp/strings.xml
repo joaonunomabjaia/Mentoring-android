@@ -3,4 +3,5 @@
     <string name="lista_de_mentorandos_seleccionados">Lista de Mentorandos Seleccionados</string>
     <string name="nome_nuit">Nome/NUIT</string>
     <string name="iniciar_ronda_mentorados">Iniciar Ronda - Mentorados</string>
+    <string name="processando">Processando...</string>
 </resources>

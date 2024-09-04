@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.viewmodel.session;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 import android.view.View;
 
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mz.org.csaude.mentoring.BR;
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.session.Session;
@@ -102,25 +104,51 @@ public class SessionClosureVM extends BaseViewModel {
 
 
     public void nextStep() {
-        try {
-            if (session.getEndDate().before(session.getStartDate())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data de início").show();
-                return;
-            }
+        Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
-            if (sessionCloseDateBeforeLastMentorship()) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data final da última avaliação").show();
-                return;
+        getExecutorService().execute(() -> {
+            try {
+                // Validation logic
+                if (session.getEndDate().before(session.getStartDate())) {
+                    getRelatedActivity().runOnUiThread(() -> {
+                        if (progress != null && progress.isShowing()) progress.dismiss();
+                        Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data de início").show();
+                    });
+                    return;
+                }
+
+                if (sessionCloseDateBeforeLastMentorship()) {
+                    getRelatedActivity().runOnUiThread(() -> {
+                        if (progress != null && progress.isShowing()) progress.dismiss();
+                        Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data final da última avaliação").show();
+                    });
+                    return;
+                }
+
+                // Perform updates in the background
+                getApplication().getSessionService().update(session);
+                session.getRonda().setRondaMentors(getApplication().getRondaMentorService().getRondaMentors(session.getRonda()));
+
+                // UI transition must be done on the main thread
+                getRelatedActivity().runOnUiThread(() -> {
+                    if (progress != null && progress.isShowing()) progress.dismiss();
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("session", session);
+                    getRelatedActivity().nextActivity(SessionEAResourceActivity.class, params);
+                });
+
+            } catch (SQLException e) {
+                Log.e(TAG, e.getMessage());
+
+                // Handle error on the main thread
+                getRelatedActivity().runOnUiThread(() -> {
+                    if (progress != null && progress.isShowing()) progress.dismiss();
+                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao tentar atualizar a sessão").show();
+                });
             }
-            getApplication().getSessionService().update(session);
-            session.getRonda().setRondaMentors(getApplication().getRondaMentorService().getRondaMentors(session.getRonda()));
-            Map<String, Object> params = new HashMap<>();
-            params.put("session", session);
-            getRelatedActivity().nextActivity(SessionEAResourceActivity.class, params);
-        } catch (SQLException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        });
     }
+
 
     private boolean sessionCloseDateBeforeLastMentorship() {
         for (Mentorship mentorship : session.getMentorships()) {

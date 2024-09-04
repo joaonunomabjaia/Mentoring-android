@@ -59,7 +59,9 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public Tutored getById(int id) throws SQLException {
-        return this.tutoredDao.queryForId(id);
+        Tutored tutored = this.tutoredDao.queryForId(id);
+        tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        return tutored;
     }
 
     @Override
@@ -92,7 +94,11 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public List<Tutored> getAllOfRonda(Ronda currRonda) throws SQLException {
-        return  this.tutoredDao.getAllOfRonda(currRonda.getId());
+        List<Tutored> tutoreds =  this.tutoredDao.getAllOfRonda(currRonda.getId());
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
     @Override

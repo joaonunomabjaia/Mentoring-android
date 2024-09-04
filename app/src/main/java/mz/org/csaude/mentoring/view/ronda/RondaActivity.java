@@ -48,9 +48,9 @@ public class RondaActivity extends BaseActivity {
             getRelatedViewModel().setTitle((String) intent.getExtras().get("title"));
             getRelatedViewModel().setRondaType((RondaType) intent.getExtras().get("rondaType"));
             setUpToolbar(getRelatedViewModel().getTitle());
-            //getRelatedViewModel().initSearch();
         }
         getRelatedViewModel().initSearch();
+
     }
 
     @Override
@@ -77,15 +77,16 @@ public class RondaActivity extends BaseActivity {
         getRelatedViewModel().setViewListRemoveButton(false);
     }
 
-    public void populateRecyclerView(){
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        rondasRecyclerView.setLayoutManager(mLayoutManager);
-        rondasRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        rondasRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+    public void populateRecyclerView() {
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+            rondasRecyclerView.setLayoutManager(mLayoutManager);
+            rondasRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            rondasRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
 
-        rondaAdapter = new RondaAdapter(rondasRecyclerView, getRelatedViewModel().getSearchResults(), this);
-        rondasRecyclerView.setAdapter(rondaAdapter);
+            rondaAdapter = new RondaAdapter(rondasRecyclerView, getRelatedViewModel().getSearchResults(), this);
+            rondasRecyclerView.setAdapter(rondaAdapter);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

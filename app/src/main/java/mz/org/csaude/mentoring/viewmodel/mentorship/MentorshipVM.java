@@ -362,15 +362,40 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     public void setEvaluationType(String evaluationType) {
-        try {
-            this.mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getByCode(evaluationType));
-            if (!determineIterationNumber()) this.mentorship.setEvaluationType(null);
-            notifyPropertyChanged(BR.consultaEvaluation);
-            notifyPropertyChanged(BR.fichaEvaluation);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        // Perform the database operation in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Fetch evaluation type from the database
+                EvaluationType evaluation = getApplication().getEvaluationTypeService().getByCode(evaluationType);
+
+                // Switch back to the main thread to update the UI and other properties
+                runOnMainThread(() -> {
+                    this.mentorship.setEvaluationType(evaluation);
+
+                    // Continue with the other logic on the main thread, move determineIterationNumber to background
+                    getExecutorService().execute(() -> {
+                        try {
+                            if (!determineIterationNumber()) {
+                                runOnMainThread(() -> this.mentorship.setEvaluationType(null));
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        // Notify that the properties have changed on the main thread
+                        runOnMainThread(() -> {
+                            notifyPropertyChanged(BR.consultaEvaluation);
+                            notifyPropertyChanged(BR.fichaEvaluation);
+                        });
+                    });
+                });
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
+
+
     public void determineMentorshipType() {
         try {
             if (this.mentorship == null) this.mentorship = new Mentorship();

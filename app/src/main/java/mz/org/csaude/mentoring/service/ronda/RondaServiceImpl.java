@@ -122,7 +122,15 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public List<Ronda> getAllByRondaType(RondaType rondaType) throws SQLException {
-        return this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE));
+        List<Ronda> rondas = this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE));
+        for (Ronda ronda: rondas) {
+            ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
+            ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
+            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
+            ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
+            ronda.setHealthFacility(this.healthFacilityDAO.queryForId(ronda.getHealthFacilityId()));
+        }
+        return rondas;
     }
 
     @Override
@@ -232,7 +240,10 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public Ronda getById(int id) throws SQLException {
-        return this.rondaDAO.queryForId(id);
+        Ronda ronda = this.rondaDAO.queryForId(id);
+        ronda.setHealthFacility(this.healthFacilityDAO.queryForId(ronda.getHealthFacilityId()));
+        ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
+        return ronda;
     }
 
     @Override

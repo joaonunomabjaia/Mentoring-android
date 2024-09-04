@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.base.viewModel;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -201,5 +202,15 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
 
     public ExecutorService getExecutorService() {
         return getApplication().getServiceExecutor();
+    }
+
+    protected void runOnMainThread(Runnable task) {
+        getRelatedActivity().runOnUiThread(task);
+    }
+
+    protected void dismissProgress(Dialog progress) {
+        if (progress != null && progress.isShowing()) {
+            progress.dismiss();
+        }
     }
 }

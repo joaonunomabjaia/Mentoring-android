@@ -108,6 +108,13 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         List<Session> sessions = this.sessionDAO.queryForAllOfRondaAndMentee(currRonda.getId(), selectedMentee.getId());
         for (Session session : sessions) {
             session.setMentorships(this.mentorshipDAO.getAllOfSession(session.getId()));
+            session.setForm(getApplication().getFormService().getById(session.getFormId()));
+            session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
+            session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+            for (Mentorship mentorship : session.getMentorships()) {
+                mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
+                mentorship.setAnswers(this.getApplication().getAnswerService().getAllOfMentorship(mentorship));
+            }
         }
         return sessions;
     }
@@ -117,7 +124,12 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         List<Session> sessions = this.sessionDAO.queryForAllOfRonda(currRonda.getId());
         for (Session session : sessions) {
             session.setMentorships(this.mentorshipDAO.getAllOfSession(session.getId()));
+            session.setForm(getApplication().getFormService().getById(session.getFormId()));
+            session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
+            session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+
             for (Mentorship mentorship : session.getMentorships()) {
+                mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
                 if (mentorship.isPatientEvaluation()) {
                     mentorship.setAnswers(this.getApplication().getAnswerService().getAllOfMentorship(mentorship));
                 }

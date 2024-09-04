@@ -41,6 +41,7 @@ import mz.org.csaude.mentoring.workSchedule.work.SessionPOSTWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionRecommendedResourceWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionStatusWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionGETWorker;
+import mz.org.csaude.mentoring.workSchedule.work.TutorProgrammaticAreaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutoredWorker;
 import mz.org.csaude.mentoring.workSchedule.work.UserWorker;
@@ -117,23 +118,18 @@ public class WorkerScheduleExecutor {
         OneTimeWorkRequest mentorRondasOneTimeWorkRequest = new OneTimeWorkRequest.Builder(RondaWorker.class).addTag("ONE_TIME_MENTOR_RONDAS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest resourceTimeWorkRequest = new OneTimeWorkRequest.Builder(Resourceworker.class).addTag("ONE_RESOURCE_ID" + ONE_TIME_REQUEST_JOB_ID).build();
         OneTimeWorkRequest mentorSessionsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionGETWorker.class).addTag("ONE_TIME_MENTOR_SESSIONS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-
-        //workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, hfOneTimeWorkRequest)
+        OneTimeWorkRequest tutorProgramaticAreaOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TutorProgrammaticAreaWorker.class).addTag("ONE_TIME_TUTOR_PROGRAMMATIC_AREA_ID" + ONE_TIME_REQUEST_JOB_ID).build();
 
         workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, mentorFormsOneTimeWorkRequest)
                 .then(hfOneTimeWorkRequest)
+                .then(tutorProgramaticAreaOneTimeWorkRequest)
                 .then(mentorFormsQuestionsOneTimeWorkRequest)
                 .then(resourceTimeWorkRequest)
                 .then(menteesOneTimeWorkRequest)
                 .then(mentorRondasOneTimeWorkRequest)
                 .then(mentorSessionsOneTimeWorkRequest)
-                /*.then(Arrays.asList(menteesOneTimeWorkRequest, mentorFormsOneTimeWorkRequest))
-                .then(mentorFormsQuestionsOneTimeWorkRequest)
-                .then(mentorRondasOneTimeWorkRequest)
-                .then(resourceTimeWorkRequest)
-                .then(mentorSessionsOneTimeWorkRequest)*/
                 .enqueue();
-        return resourceTimeWorkRequest;
+        return mentorSessionsOneTimeWorkRequest;
     }
 
     public OneTimeWorkRequest uploadMentees() {

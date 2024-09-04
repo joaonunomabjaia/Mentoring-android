@@ -11,7 +11,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 import mz.org.csaude.mentoring.R;
+import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.adapter.recyclerview.mentorship.ZeroMentorshipAdapter;
 import mz.org.csaude.mentoring.adapter.recyclerview.session.SessionAdapter;
 import mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter;
@@ -48,9 +51,14 @@ public class SessionListActivity extends BaseActivity {
     }
 
     private void initAdapters() {
-        menteeAdapter = new ListableSpinnerAdapter(SessionListActivity.this, R.layout.simple_auto_complete_item, getRelatedViewModel().getRondaMentees());
-        sessionListBinding.spnMentees.setAdapter(menteeAdapter);
-        sessionListBinding.setMenteesAdapter(menteeAdapter);
+        getRelatedViewModel().getExecutorService().execute(()->{
+            List<Listble> mentees = getRelatedViewModel().getRondaMentees();
+            runOnUiThread(()-> {
+                menteeAdapter = new ListableSpinnerAdapter(SessionListActivity.this, R.layout.simple_auto_complete_item, mentees);
+                sessionListBinding.spnMentees.setAdapter(menteeAdapter);
+                sessionListBinding.setMenteesAdapter(menteeAdapter);
+            });
+        });
     }
 
     @Override
@@ -72,13 +80,14 @@ public class SessionListActivity extends BaseActivity {
     }
 
     public void populateSessions() {
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        sessionListBinding.rcvSessions.setLayoutManager(mLayoutManager);
-        sessionListBinding.rcvSessions.setItemAnimator(new DefaultItemAnimator());
-        sessionListBinding.rcvSessions.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+            sessionListBinding.rcvSessions.setLayoutManager(mLayoutManager);
+            sessionListBinding.rcvSessions.setItemAnimator(new DefaultItemAnimator());
+            sessionListBinding.rcvSessions.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
 
-        sessionAdapter = new SessionAdapter(sessionListBinding.rcvSessions, getRelatedViewModel().getSearchResults(), this);
-        sessionListBinding.rcvSessions.setAdapter(sessionAdapter);
+            sessionAdapter = new SessionAdapter(sessionListBinding.rcvSessions, getRelatedViewModel().getSearchResults(), this);
+            sessionListBinding.rcvSessions.setAdapter(sessionAdapter);
+
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
