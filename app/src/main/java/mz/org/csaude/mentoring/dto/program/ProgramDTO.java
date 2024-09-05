@@ -16,6 +16,7 @@ public class ProgramDTO extends BaseEntityDTO {
         this.setName(program.getName());
     }
 
+
     public String getDescription() {
         return description;
     }

@@ -1,14 +1,56 @@
 package mz.org.csaude.mentoring.dao.partner;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
+
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.partner.Partner;
 
-public interface PartnerDao extends MentoringBaseDao<Partner, Integer> {
-    Partner getMISAU() throws SQLException;
+@Dao
+public interface PartnerDao {
 
-    List<Partner> getNotMISAU() throws SQLException;
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner getPartnerByUuid(String uuid);
+
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner getMISAU(String uuid);
+
+    @Query("SELECT * FROM partner WHERE uuid != :misauUuid AND life_cycle_status = :activeStatus")
+    List<Partner> getNotMISAU(String misauUuid, String activeStatus);
+
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner getByUuid(String uuid);
+
+    @Insert
+    void insert (Partner partner);
+
+    @Insert
+    void insertAll(List<Partner> partners);
+
+    @Query("SELECT * FROM partner")
+    List<Partner> getAll();
+
+    @Update
+    void update(Partner partner);
+
+    @Query("DELETE FROM partner WHERE id = :id")
+    int delete(int id);
+
+    @Query("DELETE FROM partner")
+    void deleteAll();
+
+    @Query("SELECT * FROM partner WHERE id = :id")
+    Partner queryForId(int id);
+
+    @Query("SELECT * FROM partner WHERE uuid = :uuid LIMIT 1")
+    Partner queryForUuid(String uuid);
+
+    @Query("SELECT * FROM partner WHERE name = :name LIMIT 1")
+    Partner queryForName(String name);
+
 
 }

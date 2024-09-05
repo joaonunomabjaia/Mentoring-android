@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
+import java.util.List;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.form.FormAdapter;
@@ -24,10 +25,12 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivitySessionBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
+import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.ronda.CreateRondaActivity;
 import mz.org.csaude.mentoring.viewmodel.session.SessionVM;
 
@@ -82,13 +85,30 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
     }
 
     private void populateFormList() {
-        this.formAdapter = new FormAdapter(sessionBinding.rcvForms, getRelatedViewModel().getTutorForms(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        sessionBinding.rcvForms.setLayoutManager(mLayoutManager);
-        sessionBinding.rcvForms.setItemAnimator(new DefaultItemAnimator());
-        sessionBinding.rcvForms.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-        sessionBinding.rcvForms.setAdapter(formAdapter);
+        // Fetch forms in a background thread
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            List<Form> tutorForms = getRelatedViewModel().getTutorForms();
+
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                if (tutorForms != null && !tutorForms.isEmpty()) {
+                    // Initialize the adapter with the fetched forms
+                    formAdapter = new FormAdapter(sessionBinding.rcvForms, tutorForms, this);
+
+                    // Set up the RecyclerView layout manager and other properties
+                    RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    sessionBinding.rcvForms.setLayoutManager(mLayoutManager);
+                    sessionBinding.rcvForms.setItemAnimator(new DefaultItemAnimator());
+                    sessionBinding.rcvForms.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+                    sessionBinding.rcvForms.setAdapter(formAdapter);
+                } else {
+                    // Handle the case where there are no forms to display (optional)
+                    Utilities.displayAlertDialog(this, getString(R.string.no_forms_available)).show();
+                }
+            });
+        });
     }
+
 
     @Override
     public BaseViewModel initViewModel() {

@@ -26,7 +26,7 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
 
     @Override
     public Answer save(Answer record) throws SQLException {
-        this.answerDAO.create(record);
+        this.answerDAO.insert(record);
         return record;
     }
 
@@ -38,7 +38,7 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
 
     @Override
     public int delete(Answer record) throws SQLException {
-        return this.answerDAO.delete(record);
+        return this.answerDAO.delete(record.getId());
     }
 
     @Override
@@ -52,8 +52,13 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
     }
 
     @Override
+    public Answer getByuuid(String uuid) throws SQLException {
+        return this.answerDAO.getByUuid(uuid);
+    }
+
+    @Override
     public List<Answer> getAllOfMentorship(Mentorship mentorship) throws SQLException {
-        return this.answerDAO.queryForMentorship(mentorship);
+        return this.answerDAO.queryForMentorship(mentorship.getId());
     }
 
     @Override
@@ -61,7 +66,9 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
         Answer ans = this.answerDAO.getByUuid(answer.getUuid());
         if(ans!=null) {
             answer.setId(ans.getId());
+            this.answerDAO.update(answer);
+        } else {
+            this.answerDAO.insert(answer);
         }
-        this.answerDAO.createOrUpdate(answer);
     }
 }

@@ -17,6 +17,10 @@ public class ResponseTypeDTO extends BaseEntityDTO {
         this.setDescription(responseType.getDescription());
     }
 
+    public ResponseTypeDTO() {
+        super();
+    }
+
     public String getCode() {
         return code;
     }

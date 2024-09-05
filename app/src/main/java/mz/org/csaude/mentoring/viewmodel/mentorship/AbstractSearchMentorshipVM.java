@@ -27,15 +27,18 @@ public abstract class AbstractSearchMentorshipVM extends SearchVM<Mentorship> im
     }
 
     public void edit(Mentorship mentorship) {
-        try {
-            mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSession().getId()));
-            mentorship.getSession().getRonda().addSession(getApplication().getSessionService().getAllOfRonda(mentorship.getSession().getRonda()));
-            mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
-            this.selectedMentorship = mentorship;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            try {
+                // Fetch session, Ronda sessions, and mentorship answers in the background
+                mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSessionId()));
+                mentorship.getSession().setRonda(getApplication().getRondaService().getById(mentorship.getSession().getRondaId()));
+                mentorship.getSession().getRonda().addSession(getApplication().getSessionService().getAllOfRonda(mentorship.getSession().getRonda()));
+                mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+                this.selectedMentorship = mentorship;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
     }
+
 
     public void delete(Mentorship mentorship) {
         this.selectedMentorship = mentorship;

@@ -59,18 +59,20 @@ public class SessionRecommendedResourceRestService extends BaseRestService {
             @Override
             public void onResponse(Call<List<SessionRecommendedResourceDTO>> call, Response<List<SessionRecommendedResourceDTO>> response) {
                 if (response.isSuccessful()) {
-                    try {
+                    getServiceExecutor().execute(()-> {
+                        try {
 
-                        List<SessionRecommendedResource> resources = convertFromSessionRecommendedResourceDTO(response.body());
-                        for (SessionRecommendedResource resource : resources) {
-                            resource.setSyncStatus(SyncSatus.SENT);
-                            getApplication().getSessionService().updateRecommendedResources(resource);
+                            List<SessionRecommendedResource> resources = convertFromSessionRecommendedResourceDTO(response.body());
+                            for (SessionRecommendedResource resource : resources) {
+                                resource.setSyncStatus(SyncSatus.SENT);
+                                getApplication().getSessionService().updateRecommendedResources(resource);
+                            }
+
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+                        } catch (SQLException e) {
+                            Log.e("SessionRecommendedResourceRestService", "Failed to update recommended resources", e);
                         }
-
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
-                    } catch (SQLException e) {
-                        Log.e("SessionRecommendedResourceRestService", "Failed to update recommended resources", e);
-                    }
+                    });
                 } else {
                     listener.doOnRestErrorResponse("Failed to save session recommended resource: " + response.message());
                 }

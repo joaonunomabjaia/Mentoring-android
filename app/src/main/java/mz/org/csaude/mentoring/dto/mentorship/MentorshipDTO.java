@@ -46,6 +46,9 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
     private String demonstrationDetails;
     private List<AnswerDTO> answers;
     private Date performedDate;
+
+    public MentorshipDTO() {
+    }
     public MentorshipDTO(Mentorship mentorship) {
         super(mentorship);
         this.setStartDate(mentorship.getStartDate());

@@ -1,17 +1,46 @@
 package mz.org.csaude.mentoring.dao.location;
 
-import java.sql.SQLException;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
+import androidx.room.Delete;
+import androidx.room.Upsert;
+
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.location.District;
-import mz.org.csaude.mentoring.model.location.Province;
-import mz.org.csaude.mentoring.model.tutor.Tutor;
 
-public interface DistrictDAO extends MentoringBaseDao<District, Integer> {
+@Dao
+public interface DistrictDAO {
 
-    public boolean checkDistrictxistance(final String uuid) throws SQLException;
-    List<District> getByProvince(Province province) throws SQLException;
+    @Insert
+    long insert(District district);
 
-    List<District> getByProvinceAndMentor(Province province, Tutor mentor) throws SQLException;
+    @Update
+    void update(District district);
+
+    @Delete
+    int delete(District district);
+
+    @Query("SELECT * FROM district WHERE uuid = :uuid LIMIT 1")
+    boolean checkDistrictExistence(String uuid);
+
+    @Query("SELECT * FROM district WHERE province_id = :provinceId")
+    List<District> getByProvince(int provinceId);
+
+    @Query("SELECT * FROM district WHERE province_id = :provinceId AND uuid IN (:districtUuids)")
+    List<District> getByProvinceAndMentor(int provinceId, List<String> districtUuids);
+
+    @Query("SELECT * FROM district WHERE uuid = :uuid LIMIT 1")
+    District getByUuid(String uuid);
+
+    @Query("SELECT * FROM district")
+    List<District> queryForAll();
+
+    @Query("SELECT * FROM district WHERE id = :id")
+    District queryForId(int id);
+
+
 }

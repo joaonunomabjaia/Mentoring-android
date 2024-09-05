@@ -1,42 +1,62 @@
 package mz.org.csaude.mentoring.model.question;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.question.QuestionDAOImpl;
 import mz.org.csaude.mentoring.dto.question.QuestionDTO;
 
-@DatabaseTable(tableName = Question.TABLE_NAME, daoClass = QuestionDAOImpl.class)
+@Entity(tableName = Question.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = QuestionsCategory.class,
+                        parentColumns = "id",
+                        childColumns = Question.COLUMN_QUESTION_CATEGORY,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Question.COLUMN_CODE}),
+                @Index(value = {Question.COLUMN_QUESTION_CATEGORY})
+        })
 public class Question extends BaseModel {
 
     public static final String TABLE_NAME = "question";
-
     public static final String COLUMN_CODE = "code";
-
     public static final String COLUMN_QUESTION = "question";
-
-    public static final String COLUMN_QUESTION_TYPE = "question_type_id";
-
     public static final String COLUMN_QUESTION_CATEGORY = "question_category_id";
 
-    @DatabaseField(columnName = COLUMN_CODE, unique = false, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
-    @DatabaseField(columnName = COLUMN_QUESTION, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_QUESTION)
     private String question;
 
-    @DatabaseField(columnName = COLUMN_QUESTION_CATEGORY, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_QUESTION_CATEGORY)
+    private Integer questionCategoryId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_QUESTION_CATEGORY, entityColumn = "id")
     private QuestionsCategory questionsCategory;
 
     public Question() {
     }
 
+    @Ignore
     public Question(QuestionDTO questionDTO) {
         super(questionDTO);
         this.setCode(questionDTO.getCode());
-        if(questionDTO.getQuestion()!=null) this.setQuestion(questionDTO.getQuestion());
-        if(questionDTO.getQuestionCategory()!=null) this.setQuestionsCategory(new QuestionsCategory(questionDTO.getQuestionCategory()));
+        if (questionDTO.getQuestion() != null) this.setQuestion(questionDTO.getQuestion());
+        if (questionDTO.getQuestionCategory() != null) {
+            this.setQuestionsCategory(new QuestionsCategory(questionDTO.getQuestionCategory()));
+            this.questionCategoryId = this.questionsCategory.getId();
+        }
     }
 
     public String getCode() {
@@ -61,5 +81,15 @@ public class Question extends BaseModel {
 
     public void setQuestionsCategory(QuestionsCategory questionsCategory) {
         this.questionsCategory = questionsCategory;
+        this.questionCategoryId = questionsCategory.getId();
     }
+
+    public Integer getQuestionCategoryId() {
+        return questionCategoryId;
+    }
+
+    public void setQuestionCategoryId(Integer questionCategoryId) {
+        this.questionCategoryId = questionCategoryId;
+    }
+
 }

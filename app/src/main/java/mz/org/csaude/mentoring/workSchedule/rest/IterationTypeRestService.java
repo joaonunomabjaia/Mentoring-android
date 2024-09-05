@@ -36,18 +36,20 @@ public class IterationTypeRestService extends BaseRestService {
                 List<IterationTypeDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        IterationTypeService evaluationTypeService = getApplication().getIterationTypeService();
-                        List<IterationType> iterationTypes = new ArrayList<>();
-                        for (IterationTypeDTO iterationTypeDTO : data){
-                            iterationTypeDTO.getIterationType().setSyncStatus(SyncSatus.SENT);
-                            iterationTypes.add(iterationTypeDTO.getIterationType());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            IterationTypeService evaluationTypeService = getApplication().getIterationTypeService();
+                            List<IterationType> iterationTypes = new ArrayList<>();
+                            for (IterationTypeDTO iterationTypeDTO : data) {
+                                iterationTypeDTO.getIterationType().setSyncStatus(SyncSatus.SENT);
+                                iterationTypes.add(iterationTypeDTO.getIterationType());
+                            }
+                            evaluationTypeService.saveOrUpdateIterationTypes(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, iterationTypes);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        evaluationTypeService.saveOrUpdateIterationTypes(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, iterationTypes);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

@@ -53,24 +53,29 @@ public class UserRestService extends BaseRestService implements UserSyncService 
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.code() == 200) {
                     LoginResponse data = response.body();
-                    try {
-                        if (!Utilities.listHasElements(data.getUserDTO().getUserRoleDTOS())) {
-                            listener.doOnRestErrorResponse("O utilizador não tem perfil associado");
-                        } else if (!isMentor(data.getUserDTO())) {
-                            listener.doOnRestErrorResponse("O utilizador não tem perfil de mentor associado");
-                        } else if (data.getUserDTO().getLifeCycleStatus().equals(LifeCycleStatus.INACTIVE)) {
-                            listener.doOnRestErrorResponse("O utilizador está inativo, contacte o administrador.");
-                        } else {
-                            getApplication().setAuthenticatedUser(getApplication().getUserService().savedOrUpdateUser(new User(data.getUserDTO())), remeberMe);
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            if (!Utilities.listHasElements(data.getUserDTO().getUserRoleDTOS())) {
+                                listener.doOnRestErrorResponse("O utilizador não tem perfil associado");
+                            } else if (!isMentor(data.getUserDTO())) {
+                                listener.doOnRestErrorResponse("O utilizador não tem perfil de mentor associado");
+                            } else if (data.getUserDTO().getLifeCycleStatus().equals(LifeCycleStatus.INACTIVE)) {
+                                listener.doOnRestErrorResponse("O utilizador está inativo, contacte o administrador.");
+                            } else {
+                                getApplication().getUserService().savedOrUpdateUser(new User(data.getUserDTO()));
+                                User user = getApplication().getUserService().getByuuid(data.getUserDTO().getUuid());
+                                user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
+                                getApplication().setAuthenticatedUser(user, remeberMe);
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
 
-                    if (Utilities.stringHasValue(data.getAccess_token())) {
-                        sessionManager.saveAuthToken(data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
-                        listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
-                    }
+                        if (Utilities.stringHasValue(data.getAccess_token())) {
+                            sessionManager.saveAuthToken(data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
+                            listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
+                        }
+                    });
                 } else {
                     listener.doOnRestErrorResponse(response.message());
                 }
@@ -104,16 +109,17 @@ public class UserRestService extends BaseRestService implements UserSyncService 
                 public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                     if (response.code() == 200) {
                         UserDTO data = response.body();
-
-                        try {
-                            User user1 = new User(data);
-                            UserService userService = getApplication().getUserService();
-                            userService.savedOrUpdateUser(user1);
-                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(user1));
-                        } catch (SQLException e) {
-                            Log.e("USER FETCH --", e.getMessage(), e);
-                            listener.doOnRestErrorResponse(e.getMessage());
-                        }
+                        getServiceExecutor().execute(()-> {
+                            try {
+                                User user1 = new User(data);
+                                UserService userService = getApplication().getUserService();
+                                userService.savedOrUpdateUser(user1);
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(user1));
+                            } catch (SQLException e) {
+                                Log.e("USER FETCH --", e.getMessage(), e);
+                                listener.doOnRestErrorResponse(e.getMessage());
+                            }
+                        });
                     }
 
                 }

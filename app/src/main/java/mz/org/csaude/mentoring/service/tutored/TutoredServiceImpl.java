@@ -2,23 +2,25 @@ package mz.org.csaude.mentoring.service.tutored;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
-import mz.org.csaude.mentoring.dao.career.CareerDAO;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.employee.EmployeeServiceImpl;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
+import mz.org.csaude.mentoring.util.SyncSatus;
 
 public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements TutoredService{
 
     TutoredDao tutoredDao;
 
-    CareerDAO careerDAO;
 
     EmployeeService employeeService;
 
@@ -30,12 +32,11 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public void init(Application application) throws SQLException {
         super.init(application);
         this.tutoredDao = getDataBaseHelper().getTutoredDao();
-        this.careerDAO = getDataBaseHelper().getCareerDAO();
         this.employeeService = new EmployeeServiceImpl(application);
     }
 
     public Tutored save(Tutored tutored) throws SQLException {
-        this.tutoredDao.create(tutored);
+        tutored.setId((int) this.tutoredDao.insert(tutored));
         return tutored;
 
     }
@@ -58,10 +59,18 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public Tutored getById(int id) throws SQLException {
-        return this.tutoredDao.queryForId(id);
+        Tutored tutored = this.tutoredDao.queryForId(id);
+        tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        return tutored;
     }
 
     @Override
+    public Tutored getByuuid(String uuid) throws SQLException {
+        return this.tutoredDao.getByUuid(uuid);
+    }
+
+    @Override
+    @Transaction
     public void savedOrUpdateTutoreds(List<Tutored> tutoreds) throws SQLException {
         for (Tutored tutored: tutoreds) {
             savedOrUpdateTutored(tutored);
@@ -72,33 +81,40 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public Tutored savedOrUpdateTutored(Tutored tutored) throws SQLException {
 
         Tutored t = this.tutoredDao.getByUuid(tutored.getUuid());
+        tutored.setEmployee(getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee()));
         if (t != null) {
             tutored.setId(t.getId());
+            this.update(tutored);
+        } else {
+            this.save(tutored);
         }
-        getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
-        this.tutoredDao.createOrUpdate(tutored);
+
         return tutored;
     }
 
     @Override
     public List<Tutored> getAllOfRonda(Ronda currRonda) throws SQLException {
-        return  this.tutoredDao.getAllOfRonda(currRonda, getApplication());
+        List<Tutored> tutoreds =  this.tutoredDao.getAllOfRonda(currRonda.getId());
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
     @Override
     public List<Tutored> getAllOfRondaForZeroEvaluation(Ronda currRonda) throws SQLException {
-        return  this.tutoredDao.getAllOfRondaForZeroEvaluation(currRonda, getApplication());
+        return  this.tutoredDao.getAllOfRondaForZeroEvaluation(currRonda.getId());
     }
 
     @Override
     public List<Tutored> getAllOfHealthFacility(HealthFacility healthFacility) throws SQLException {
-        return this.tutoredDao.getAllOfHealthFacility(healthFacility, getApplication());
+        return this.tutoredDao.getAllOfHealthFacility(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
 
     @Override
     public List<Tutored> getAllNotSynced() throws SQLException {
-        List<Tutored> tutoreds = this.tutoredDao.getAllNotSynced();
+        List<Tutored> tutoreds = this.tutoredDao.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
         for (Tutored tutored : tutoreds) {
             tutored.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(tutored.getEmployee()));
         }
@@ -107,12 +123,12 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public List<Tutored> getAllForMentoringRound(HealthFacility healthFacility, boolean zeroEvaluation) throws SQLException {
-        return this.tutoredDao.getAllForMentoringRound(healthFacility, zeroEvaluation, getApplication());
+        return this.tutoredDao.getAllForMentoringRound(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE), zeroEvaluation);
     }
 
     @Override
     public List<Tutored> getAllOfRondaForNewRonda(HealthFacility healthFacility) throws SQLException {
-        return this.tutoredDao.getAllOfHealthFacilityForNewRonda(healthFacility, getApplication());
+        return this.tutoredDao.getAllOfHealthFacilityForNewRonda(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
 

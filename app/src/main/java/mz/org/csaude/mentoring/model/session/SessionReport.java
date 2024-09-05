@@ -1,74 +1,69 @@
 package mz.org.csaude.mentoring.model.session;
-
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import java.util.Date;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.ColumnInfo;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.session.SessionReportDaoImpl;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
-@DatabaseTable(tableName = SessionReport.TABLE_NAME, daoClass = SessionReportDaoImpl.class)
+@Entity(tableName = "session_report",
+        foreignKeys = {
+                @ForeignKey(entity = Session.class, parentColumns = "id", childColumns = "session_id", onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutored.class, parentColumns = "id", childColumns = "tutored_id", onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Form.class, parentColumns = "id", childColumns = "form_id", onDelete = ForeignKey.CASCADE)
+        })
 public class SessionReport extends BaseModel {
 
-    public static final String TABLE_NAME = "session_report";
-    public static final String COLUMN_SESSION_ID = "session_id";
-    public static final String COLUMN_TUTORED_ID = "tutored_id";
-    public static final String COLUMN_FORM_ID = "form_id";
-    public static final String COLUMN_CATEGORY = "category";
-    public static final String COLUMN_YES_POINTS = "yes_points";
-    public static final String COLUMN_NO_POINTS = "no_points";
-    public static final String COLUMN_SCORE = "score";
+    @ColumnInfo(name = "session_id", index = true)
+    private Integer sessionId;
 
-    @DatabaseField(columnName = COLUMN_SESSION_ID, canBeNull = false, foreign = true)
-    private Session session;
+    @ColumnInfo(name = "tutored_id", index = true)
+    private Integer tutoredId;
 
-    @DatabaseField(columnName = COLUMN_TUTORED_ID, canBeNull = false, foreign = true)
-    private Tutored tutored;
+    @ColumnInfo(name = "form_id", index = true)
+    private Integer formId;
 
-    @DatabaseField(columnName = COLUMN_FORM_ID, canBeNull = false, foreign = true)
-    private Form form;
-
-    @DatabaseField(columnName = COLUMN_CATEGORY, canBeNull = false)
+    @ColumnInfo(name = "category")
     private String category;
 
-    @DatabaseField(columnName = COLUMN_YES_POINTS, canBeNull = false)
-    private int yesPoints;
+    @ColumnInfo(name = "yes_points")
+    private Integer yesPoints;
 
-    @DatabaseField(columnName = COLUMN_NO_POINTS, canBeNull = false)
-    private int noPoints;
+    @ColumnInfo(name = "no_points")
+    private Integer noPoints;
 
-    @DatabaseField(columnName = COLUMN_SCORE, canBeNull = false)
+    @ColumnInfo(name = "score")
     private double score;
 
-    // Default constructor is needed by ORMLite
+    // Default constructor is needed by Room
     public SessionReport() {
     }
 
     // Getters and Setters
-    public Session getSession() {
-        return session;
+    public Integer getSessionId() {
+        return sessionId;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
+    public void setSessionId(Integer sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public Tutored getTutored() {
-        return tutored;
+    public Integer getTutoredId() {
+        return tutoredId;
     }
 
-    public void setTutored(Tutored tutored) {
-        this.tutored = tutored;
+    public void setTutoredId(Integer tutoredId) {
+        this.tutoredId = tutoredId;
     }
 
-    public Form getForm() {
-        return form;
+    public Integer getFormId() {
+        return formId;
     }
 
-    public void setForm(Form form) {
-        this.form = form;
+    public void setFormId(Integer formId) {
+        this.formId = formId;
     }
 
     public String getCategory() {

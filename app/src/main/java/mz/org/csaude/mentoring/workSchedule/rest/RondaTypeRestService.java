@@ -36,18 +36,20 @@ public class RondaTypeRestService extends BaseRestService {
                 List<RondaTypeDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        RondaTypeService rondaTypeService = getApplication().getRondaTypeService();
-                        List<RondaType> rondaTypes = new ArrayList<>();
-                        for (RondaTypeDTO rondaTypeDTO : data){
-                            rondaTypeDTO.getRondaType().setSyncStatus(SyncSatus.SENT);
-                            rondaTypes.add(rondaTypeDTO.getRondaType());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            RondaTypeService rondaTypeService = getApplication().getRondaTypeService();
+                            List<RondaType> rondaTypes = new ArrayList<>();
+                            for (RondaTypeDTO rondaTypeDTO : data) {
+                                rondaTypeDTO.getRondaType().setSyncStatus(SyncSatus.SENT);
+                                rondaTypes.add(rondaTypeDTO.getRondaType());
+                            }
+                            rondaTypeService.saveOrUpdateRondaTypes(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondaTypes);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        rondaTypeService.saveOrUpdateRondaTypes(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondaTypes);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

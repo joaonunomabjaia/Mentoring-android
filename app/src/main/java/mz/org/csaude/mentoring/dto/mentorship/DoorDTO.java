@@ -15,7 +15,8 @@ public class DoorDTO extends BaseEntityDTO {
         this.setCode(door.getCode());
         this.setDescription(door.getDescription());
     }
-
+    public DoorDTO() {
+    }
     public String getCode() {
         return code;
     }

@@ -13,6 +13,10 @@ public class QuestionCategoryDTO extends BaseEntityDTO {
         this.setCategory(questionsCategory.getCategory());
     }
 
+    public QuestionCategoryDTO() {
+        super();
+    }
+
     public String getCategory() {
         return category;
     }

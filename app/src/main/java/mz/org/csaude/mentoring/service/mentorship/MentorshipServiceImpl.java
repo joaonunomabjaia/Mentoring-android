@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.mentorship;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import com.j256.ormlite.misc.TransactionManager;
 
 import java.sql.SQLException;
@@ -58,58 +60,68 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
-    public Mentorship save(Mentorship record) throws SQLException {
-        TransactionManager.callInTransaction(getDataBaseHelper().getConnectionSource(), (Callable<Void>) () -> {
-            if (record.getSession().getRonda().isRondaZero()) {
-                record.getTutored().setSyncStatus(SyncSatus.PENDING);
-                tutoredDao.update(record.getTutored());
-            }
-            if(record.getSession().getRonda().isRondaCompleted()) {
-                rondaDAO.update(record.getSession().getRonda());
-            }
-            if (record.getSession().getRonda().isRondaZero()) {
-                if (record.getSession().getId() == null) {
-                    sessionDAO.create(record.getSession());
-                } else {
-                    sessionDAO.update(record.getSession());
-                }
-            } else if (record.getSession().isCompleted()) {
+    @Transaction
+    public Mentorship save(Mentorship record) {
+        // Check if the Ronda associated with the Session is Ronda Zero
+        if (record.getSession().getRonda().isRondaZero()) {
+            // Set the SyncStatus of the Tutored entity to PENDING and update it
+            record.getTutored().setSyncStatus(SyncSatus.PENDING);
+            tutoredDao.update(record.getTutored());
+        }
+
+        // If the Ronda is completed, update the Ronda
+        if(record.getSession().getRonda().isRondaCompleted()) {
+            rondaDAO.update(record.getSession().getRonda());
+        }
+
+        // If the Ronda is Ronda Zero, insert or update the Session
+        if (record.getSession().getRonda().isRondaZero()) {
+            if (record.getSession().getId() == null) {
+                record.getSession().setId((int) sessionDAO.insert(record.getSession()));
+            } else {
                 sessionDAO.update(record.getSession());
             }
+        }
+        // If the Session is completed, update the Session
+        else if (record.getSession().isCompleted()) {
+            sessionDAO.update(record.getSession());
+        }
 
-            if (record.getId() == null) {
-                mentorshipDAO.create(record);
+        // Insert or update the Mentorship
+        if (record.getId() == null) {
+            record.setId((int) mentorshipDAO.insertMentorship(record));
+        } else {
+            mentorshipDAO.updateMentorship(record);
+        }
+
+        // Insert or update each Answer associated with the Mentorship
+        for (Answer answer : record.getAnswers()) {
+            if (answer.getId() == null) {
+                answer.setId((int) answerDAO.insert(answer));
             } else {
-                mentorshipDAO.update(record);
+                answerDAO.update(answer);
             }
-            for (Answer answer : record.getAnswers()) {
-                if (answer.getId() == null) {
-                    answerDAO.create(answer);
-                } else {
-                    answerDAO.update(answer);
-                }
-            }
-
-            return null;
-        });
+        }
 
         return record;
     }
+
 
     @Override
     public Mentorship update(Mentorship record) throws SQLException {
-        mentorshipDAO.update(record);
+        mentorshipDAO.updateMentorship(record);
         return record;
     }
 
     @Override
+    @Transaction
     public int delete(Mentorship record) throws SQLException {
         if (record.getSession().getRonda().isRondaZero()) {
             record.getTutored().setZeroEvaluationDone(false);
             tutoredDao.update(record.getTutored());
-            sessionDAO.delete(record.getSession());
+            sessionDAO.delete(record.getSession().getId());
         }
-        return this.mentorshipDAO.delete(record);
+        return this.mentorshipDAO.delete(record.getId());
     }
 
     @Override
@@ -123,8 +135,13 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
+    public Mentorship getByuuid(String uuid) throws SQLException {
+        return this.mentorshipDAO.getByUuid(uuid);
+    }
+
+    @Override
     public List<Mentorship> getMentorshipByTutor(String uuidTutor) throws SQLException {
-        return this.mentorshipDAO.getMentorshipByTutor(application ,uuidTutor);
+        return this.mentorshipDAO.getMentorshipByTutor(uuidTutor);
     }
 
     @Override
@@ -136,6 +153,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
+    @Transaction
     public Mentorship saveOrUpdateMentorship(MentorshipDTO mentorshipDTO) throws SQLException {
         SessionDTO sessionDTO = mentorshipDTO.getSession();
 
@@ -151,27 +169,33 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
         Session session = sessionDTO.getSession();
         if(s!=null) {
             session.setId(s.getId());
+            this.sessionDAO.update(session);
+        } else {
+            this.sessionDAO.insert(session);
+            session.setId(this.sessionDAO.getByUuid(session.getUuid()).getId());
         }
-        this.sessionDAO.createOrUpdate(session);
 
         Mentorship m = this.mentorshipDAO.getByUuid(mentorshipDTO.getUuid());
         Mentorship mentorship = mentorshipDTO.getMentorship();
         if(m!=null) {
             mentorship.setId(m.getId());
+            this.mentorshipDAO.updateMentorship(mentorship);
+        } else {
+            this.mentorshipDAO.insertMentorship(mentorship);
+            mentorship.setId(this.mentorshipDAO.getByUuid(mentorship.getUuid()).getId());
         }
-        this.mentorshipDAO.createOrUpdate(mentorship);
 
         return mentorship;
     }
 
     @Override
     public List<Mentorship> getAllNotSynced(Application application) throws SQLException {
-        return this.mentorshipDAO.getAllNotSynced(application);
+        return this.mentorshipDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
     }
 
     @Override
     public List<Mentorship> getAllOfRonda(Ronda ronda) throws SQLException {
-        List<Mentorship> mentorships = this.mentorshipDAO.getAllOfRonda(ronda, getApplication());
+        List<Mentorship> mentorships = this.mentorshipDAO.getAllOfRonda(ronda.getId());
         for (Mentorship mentorship : mentorships) {
             mentorship.getSession().setRonda(this.rondaDAO.queryForId(mentorship.getSession().getRonda().getId()));
         }
@@ -180,20 +204,29 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
 
     @Override
     public List<Mentorship> getAllOfSession(Session session) throws SQLException {
-        List<Mentorship> mentorships = mentorshipDAO.getAllOfSession(session);
+        List<Mentorship> mentorships = mentorshipDAO.getAllOfSession(session.getId());
         for (Mentorship mentorship : mentorships) {
-            mentorship.getSession().setRonda(this.rondaDAO.queryForId(mentorship.getSession().getRonda().getId()));
+            mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
+            mentorship.setTutored(session.getTutored());
+            mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
+            mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+            mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
+            mentorship.setSession(session);
         }
         return mentorships;
     }
 
     @Override
-    public void saveOrUpdate(Mentorship mentorship) throws SQLException {
+    public Mentorship saveOrUpdate(Mentorship mentorship) throws SQLException {
         Mentorship mm = this.mentorshipDAO.getByUuid(mentorship.getUuid());
         if(mm!=null) {
             mentorship.setId(mm.getId());
+            this.mentorshipDAO.updateMentorship(mentorship);
+        } else {
+            this.mentorshipDAO.insertMentorship(mentorship);
+            mentorship.setId(this.mentorshipDAO.getByUuid(mentorship.getUuid()).getId());
         }
-        this.mentorshipDAO.createOrUpdate(mentorship);
+        return mentorship;
     }
 
 }

@@ -76,9 +76,6 @@
             android:name=".view.tutored.TutoredActivity"
             android:exported="false" />
         <activity
-            android:name=".view.career.CareerActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.home.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main" />

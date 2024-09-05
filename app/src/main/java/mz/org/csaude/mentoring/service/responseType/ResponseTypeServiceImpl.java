@@ -27,7 +27,7 @@ public class ResponseTypeServiceImpl extends BaseServiceImpl<ResponseType> imple
 
     @Override
     public ResponseType save(ResponseType record) throws SQLException {
-        this.responseTypeDAO.create(record);
+        record.setId((int) this.responseTypeDAO.insert(record));
         return record;
     }
 
@@ -65,8 +65,10 @@ public class ResponseTypeServiceImpl extends BaseServiceImpl<ResponseType> imple
         ResponseType responseType = responseTypeDTO.getResponseType();
         if(rt!=null) {
             responseType.setId(rt.getId());
+            this.update(responseType);
+        } else {
+            this.save(responseType);
         }
-        this.responseTypeDAO.createOrUpdate(responseType);
         return responseType;
     }
 

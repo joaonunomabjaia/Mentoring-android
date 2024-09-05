@@ -1,13 +1,7 @@
 package mz.org.csaude.mentoring.dto.location;
 
-
-
-
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.model.location.Province;
-
-
-
 
 public class ProvinceDTO extends BaseEntityDTO {
 
@@ -30,5 +24,8 @@ public class ProvinceDTO extends BaseEntityDTO {
         province.setDescription(this.getDesignation());
         province.setUpdatedAt(this.getUpdatedAt());
         return province;
+    }
+
+    public ProvinceDTO() {
     }
 }

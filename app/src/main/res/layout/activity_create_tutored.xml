@@ -16,7 +16,6 @@
         <variable
             name="professionalCategoryAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
-        <variable name="careerAdapter" type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
         <variable
             name="provinceAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />

@@ -29,29 +29,34 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
 
     @Override
     public IterationType save(IterationType record) throws SQLException {
-        this.iterationTypeDAO.create(record);
+        record.setId((int) this.iterationTypeDAO.insertIterationType(record));
         return record;
     }
 
     @Override
     public IterationType update(IterationType record) throws SQLException {
-        this.iterationTypeDAO.update(record);
+        this.iterationTypeDAO.updateIterationType(record);
         return record;
     }
 
     @Override
     public int delete(IterationType record) throws SQLException {
-        return this.iterationTypeDAO.delete(record);
+        return this.iterationTypeDAO.delete(record.getId());
     }
 
     @Override
     public List<IterationType> getAll() throws SQLException {
-        return this.iterationTypeDAO.queryForAll();
+        return this.iterationTypeDAO.getAllIterationTypes();
     }
 
     @Override
     public IterationType getById(int id) throws SQLException {
         return this.iterationTypeDAO.queryForId(id);
+    }
+
+    @Override
+    public IterationType getByuuid(String uuid) throws SQLException {
+        return this.iterationTypeDAO.getByUuid(uuid);
     }
 
     @Override
@@ -67,8 +72,11 @@ public class IterationTypeServiceImpl extends BaseServiceImpl<IterationType> imp
         IterationType iterationType = iterationTypeDTO.getIterationType();
         if(it!=null) {
             iterationType.setId(it.getId());
+            this.iterationTypeDAO.updateIterationType(iterationType);
+        } else {
+            this.iterationTypeDAO.insertIterationType(iterationType);
+            iterationType.setId(this.iterationTypeDAO.getByUuid(iterationType.getUuid()).getId());
         }
-        this.iterationTypeDAO.createOrUpdate(iterationType);
         return iterationType;
     }
 

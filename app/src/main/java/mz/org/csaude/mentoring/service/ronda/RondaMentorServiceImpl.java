@@ -24,7 +24,7 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
 
     @Override
     public RondaMentor save(RondaMentor record) throws SQLException {
-        this.rondaMentorDAO.create(record);
+        record.setId((int) this.rondaMentorDAO.insert(record));
         return record;
     }
 
@@ -50,17 +50,24 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
     }
 
     @Override
+    public RondaMentor getByuuid(String uuid) throws SQLException {
+        return this.rondaMentorDAO.getByUuid(uuid);
+    }
+
+    @Override
     public RondaMentor savedOrUpdateRondaMentor(RondaMentor rondaMentor) throws SQLException {
-        RondaMentor rm = this.rondaMentorDAO.getByUuid(rondaMentor.getUuid());
+        RondaMentor rm = this.getByuuid(rondaMentor.getUuid());
         if(rm!=null) {
             rondaMentor.setId(rm.getId());
+            this.update(rondaMentor);
+        } else {
+            this.save(rondaMentor);
         }
-        this.rondaMentorDAO.createOrUpdate(rondaMentor);
         return rondaMentor;
     }
 
     @Override
     public List<RondaMentor> getRondaMentors(Ronda ronda) throws SQLException {
-        return this.rondaMentorDAO.getRondaMentors(ronda);
+        return this.rondaMentorDAO.getRondaMentors(ronda.getId());
     }
 }

@@ -1,3 +1,4 @@
+/*
 package mz.org.csaude.mentoring.workSchedule.work;
 
 import android.content.Context;
@@ -20,10 +21,8 @@ import mz.org.csaude.mentoring.dao.career.CareerDAO;
 import mz.org.csaude.mentoring.dao.career.CareerTypeDAO;
 import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
-import mz.org.csaude.mentoring.dao.form.FormTargetDAO;
 import mz.org.csaude.mentoring.dao.form.FormTypeDAO;
 import mz.org.csaude.mentoring.dao.formQuestion.FormQuestionDAO;
-import mz.org.csaude.mentoring.dao.indicator.IndicatorDAO;
 import mz.org.csaude.mentoring.dao.location.CabinetDAO;
 import mz.org.csaude.mentoring.dao.location.DistrictDAO;
 import mz.org.csaude.mentoring.dao.location.HealthFacilityDAO;
@@ -32,7 +31,6 @@ import mz.org.csaude.mentoring.dao.location.ProvinceDAO;
 import mz.org.csaude.mentoring.dao.mentorship.DoorDAO;
 import mz.org.csaude.mentoring.dao.mentorship.IterationTypeDAO;
 import mz.org.csaude.mentoring.dao.mentorship.MentorshipDAO;
-import mz.org.csaude.mentoring.dao.mentorship.TimeOfDayDAO;
 import mz.org.csaude.mentoring.dao.partner.PartnerDao;
 import mz.org.csaude.mentoring.dao.professionalCategoryDAO.ProfessionalCategoryDAO;
 import mz.org.csaude.mentoring.dao.programmaticArea.ProgrammaticAreaDAO;
@@ -537,3 +535,4 @@ public class MentoringDataBaseHelper extends OrmLiteSqliteOpenHelper {
     }
 
 }
+*/

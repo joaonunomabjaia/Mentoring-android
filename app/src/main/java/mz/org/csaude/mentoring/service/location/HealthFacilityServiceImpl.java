@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.service.location;
 import android.app.Application;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
@@ -11,6 +12,7 @@ import mz.org.csaude.mentoring.dto.location.DistrictDTO;
 import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
 import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
+import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
 
@@ -32,7 +34,7 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
     }
     @Override
     public HealthFacility save(HealthFacility record) throws SQLException {
-        this.healthFacilityDAO.create(record);
+        this.healthFacilityDAO.insert(record);
         return record;
     }
 
@@ -58,6 +60,11 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
     }
 
     @Override
+    public HealthFacility getByuuid(String uuid) throws SQLException {
+        return this.healthFacilityDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void savedOrUpdatHealthFacilitys(List<HealthFacility> healthFacilityDTOs) throws SQLException {
 
         for(HealthFacility healthFacility : healthFacilityDTOs){
@@ -72,18 +79,28 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
         healthFacility.setDistrict(getApplication().getDistrictService().getByuuid(healthFacility.getDistrict().getUuid()));
         if(h != null){
             healthFacility.setId(h.getId());
+            this.healthFacilityDAO.update(healthFacility);
+        } else {
+            this.healthFacilityDAO.insert(healthFacility);
         }
-        this.healthFacilityDAO.createOrUpdate(healthFacility);
+
         return healthFacility;
     }
 
     @Override
     public List<HealthFacility> getHealthFacilityByDistrict(District district) throws SQLException {
-        return this.healthFacilityDAO.getHealthFacilityByDistrict(district);
+        return this.healthFacilityDAO.getHealthFacilityByDistrict(district.getId());
     }
 
     @Override
     public List<HealthFacility> getHealthFacilityByDistrictAndMentor(District district, Tutor mentor) throws SQLException {
-        return this.healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district, mentor);
+        List<String> uuids = new ArrayList<>();
+        for (Location location : mentor.getEmployee().getLocations()) {
+            uuids.add(location.getHealthFacility().getUuid());
+        }
+
+        // Call the DAO method
+        return healthFacilityDAO.getHealthFacilityByDistrictAndMentor(district.getId(), uuids);
+
     }
 }

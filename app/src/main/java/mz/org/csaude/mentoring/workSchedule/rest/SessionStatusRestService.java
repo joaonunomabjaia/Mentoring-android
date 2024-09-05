@@ -36,19 +36,21 @@ public class SessionStatusRestService extends BaseRestService {
                 List<SessionStatusDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        SessionStatusService sessionStatusService = getApplication().getSessionStatusService();
-                        List<SessionStatus> sessionStatuses = new ArrayList<>();
-                        for (SessionStatusDTO sessionStatusDTO : data){
-                            sessionStatusDTO.setSyncSatus(SyncSatus.SENT);
-                            sessionStatusDTO.getSessionStatus().setSyncStatus(SyncSatus.SENT);
-                            sessionStatuses.add(sessionStatusDTO.getSessionStatus());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            SessionStatusService sessionStatusService = getApplication().getSessionStatusService();
+                            List<SessionStatus> sessionStatuses = new ArrayList<>();
+                            for (SessionStatusDTO sessionStatusDTO : data) {
+                                sessionStatusDTO.setSyncSatus(SyncSatus.SENT);
+                                sessionStatusDTO.getSessionStatus().setSyncStatus(SyncSatus.SENT);
+                                sessionStatuses.add(sessionStatusDTO.getSessionStatus());
+                            }
+                            sessionStatusService.saveOrUpdateSessionStatuses(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessionStatuses);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        sessionStatusService.saveOrUpdateSessionStatuses(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessionStatuses);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

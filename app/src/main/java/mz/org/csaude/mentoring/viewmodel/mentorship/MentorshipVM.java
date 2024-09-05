@@ -227,28 +227,48 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 return;
             }
             setCurrMentorshipStep(CURR_MENTORSHIP_STEP_MENTEE_SELECTION);
+
         } else if (isMenteeSelectionStep()) {
             if (this.mentorship.getTutored() == null) {
                 Utilities.displayAlertDialog(getRelatedActivity(), "Por favor selecionar o mentorando.").show();
                 return;
             }
             setCurrMentorshipStep(CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
+
         } else if (isPeriodSelectionStep()) {
             if (!isValidPeriod()) return;
-            loadQuestion();
-            for (Listble listble : categories) {
-                int responded = 0;
-                for (FormQuestion formQuestion : questionMap.get(listble)) {
-                    if (Utilities.stringHasValue(formQuestion.getAnswer().getValue())) responded++;
+
+            // Perform background operations (like loadQuestion and initial save) in a background thread
+            getExecutorService().execute(() -> {
+                loadQuestion();
+
+                // Prepare questions and categories
+                for (Listble listble : categories) {
+                    int responded = 0;
+                    for (FormQuestion formQuestion : questionMap.get(listble)) {
+                        if (Utilities.stringHasValue(formQuestion.getAnswer().getValue())) responded++;
+                    }
+                    ((SimpleValue) listble).setExtraInfo(responded + "/" + questionMap.get(listble).size());
                 }
-                ((SimpleValue) listble).setExtraInfo(responded+"/"+questionMap.get(listble).size());
-            }
-            getRelatedActivity().loadCategoryAdapter();
-            getRelatedActivity().populateQuestionList();
-            if (mentorship.getId() == null) {
-                doMentorshipInitialSave();
-            }
-            setCurrMentorshipStep(CURR_MENTORSHIP_STEP_QUESTION_SELECTION);
+
+                // Update UI on the main thread
+                runOnMainThread(() -> {
+                    getRelatedActivity().loadCategoryAdapter();
+                    getRelatedActivity().populateQuestionList();
+
+                    // Save the mentorship if it's not already saved
+                    if (mentorship.getId() == null) {
+                        // Save the mentorship in the background
+                        getExecutorService().execute(() -> {
+                            doMentorshipInitialSave();
+                        });
+                    }
+
+                    setCurrMentorshipStep(CURR_MENTORSHIP_STEP_QUESTION_SELECTION);
+                    notifyPropertyChanged(BR.currMentorshipStep);
+                });
+            });
+
         } else if (isQuestionSelectionStep()) {
             if (!allQuestionsResponded()) {
                 Utilities.displayAlertDialog(getRelatedActivity(), "Tem uma ou mais Competências sem a resposta indicada.").show();
@@ -260,11 +280,14 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             } else {
                 finnalizeMentorship();
             }
+
         } else if (isDemostrationSelectionStep()) {
             finnalizeMentorship();
         }
+
         notifyPropertyChanged(BR.currMentorshipStep);
     }
+
 
     public void setMentorship(Mentorship mentorship) {
         this.mentorship = mentorship;
@@ -362,15 +385,40 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     public void setEvaluationType(String evaluationType) {
-        try {
-            this.mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getByCode(evaluationType));
-            if (!determineIterationNumber()) this.mentorship.setEvaluationType(null);
-            notifyPropertyChanged(BR.consultaEvaluation);
-            notifyPropertyChanged(BR.fichaEvaluation);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        // Perform the database operation in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Fetch evaluation type from the database
+                EvaluationType evaluation = getApplication().getEvaluationTypeService().getByCode(evaluationType);
+
+                // Switch back to the main thread to update the UI and other properties
+                runOnMainThread(() -> {
+                    this.mentorship.setEvaluationType(evaluation);
+
+                    // Continue with the other logic on the main thread, move determineIterationNumber to background
+                    getExecutorService().execute(() -> {
+                        try {
+                            if (!determineIterationNumber()) {
+                                runOnMainThread(() -> this.mentorship.setEvaluationType(null));
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        // Notify that the properties have changed on the main thread
+                        runOnMainThread(() -> {
+                            notifyPropertyChanged(BR.consultaEvaluation);
+                            notifyPropertyChanged(BR.fichaEvaluation);
+                        });
+                    });
+                });
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
+
+
     public void determineMentorshipType() {
         try {
             if (this.mentorship == null) this.mentorship = new Mentorship();

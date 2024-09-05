@@ -1,25 +1,27 @@
 package mz.org.csaude.mentoring.model.autority;
 
-import com.j256.ormlite.field.DatabaseField;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 
-
+@Entity(tableName = Authority.TABLE_NAME)
 public class Authority extends BaseModel {
 
     public static final String TABLE_NAME = "authority";
-
-    public static final String COLUMN_MODULE = "name";
-    public static final String COLUMN_DESCRIPTION = "module";
+    public static final String COLUMN_MODULE = "module";
+    public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
-    @DatabaseField(columnName = COLUMN_MODULE, canBeNull = false)
-    private  String module;
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION, canBeNull = false)
+    @ColumnInfo(name = COLUMN_MODULE)
+    private String module;
+
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
-    @DatabaseField(columnName = COLUMN_MODULE, canBeNull = false)
-    private  String code;
+    @ColumnInfo(name = COLUMN_CODE)
+    private String code;
 
     public String getModule() {
         return module;

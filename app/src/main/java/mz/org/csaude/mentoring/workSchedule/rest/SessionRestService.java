@@ -55,28 +55,27 @@ public class SessionRestService extends BaseRestService {
             public void onResponse(Call<List<SessionDTO>> call, Response<List<SessionDTO>> response) {
                 List<SessionDTO> data = response.body();
                 if (Utilities.listHasElements(data)) {
-                    try {
-                        List<Session> sessions = new ArrayList<>();
-                        for (SessionDTO sessionDTO: data) {
-                            Session session = new Session(sessionDTO);
-                            session.setSyncStatus(SyncSatus.SENT);
-                            Ronda ronda = (Ronda) Utilities.extractElementByUuid(getApplication().getRondaService().getAll(), sessionDTO.getRonda().getUuid());
-                            session.setRonda(ronda);
-                            Form form = getApplication().getFormService().getByuuid(sessionDTO.getForm().getUuid());
-                            session.setForm(form);
-                            Tutored mentee = (Tutored) Utilities.extractElementByUuid(getApplication().getTutoredService().getAll(), sessionDTO.getMentee().getUuid());
-                            session.setTutored(mentee);
-                            session.setStatus(getApplication().getSessionStatusService().getByuuid(sessionDTO.getSessionStatus().getUuid()));
-                            getApplication().getSessionService().saveOrUpdate(session);
-                            List<MentorshipDTO> mentorships = sessionDTO.getMentorships();
-                            if (Utilities.listHasElements(mentorships)) {
-                                updateMentorships(mentorships, form, mentee, session);
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            List<Session> sessions = new ArrayList<>();
+                            for (SessionDTO sessionDTO : data) {
+                                Session session = new Session(sessionDTO);
+                                session.setSyncStatus(SyncSatus.SENT);
+                                session.setRonda(getApplication().getRondaService().getByuuid(sessionDTO.getRonda().getUuid()));
+                                session.setForm(getApplication().getFormService().getByuuid(sessionDTO.getForm().getUuid()));
+                                session.setTutored(getApplication().getTutoredService().getByuuid(sessionDTO.getMentee().getUuid()));
+                                session.setStatus(getApplication().getSessionStatusService().getByuuid(sessionDTO.getSessionStatus().getUuid()));
+                                session = getApplication().getSessionService().saveOrUpdate(session);
+                                List<MentorshipDTO> mentorships = sessionDTO.getMentorships();
+                                if (Utilities.listHasElements(mentorships)) {
+                                    updateMentorships(mentorships, session);
+                                }
                             }
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessions);
+                        } catch (SQLException e) {
+                            Log.e("SessionRestService", e.getMessage());
                         }
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessions);
-                    } catch (SQLException e) {
-                        Log.e("SessionRestService", e.getMessage());
-                    }
+                    });
                 } else {
                     listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
                 }
@@ -92,7 +91,7 @@ public class SessionRestService extends BaseRestService {
         }
     }
 
-    private void updateMentorships(List<MentorshipDTO> mentorships, Form form, Tutored mentee, Session session) throws SQLException {
+    private void updateMentorships(List<MentorshipDTO> mentorships, Session session) throws SQLException {
         for (MentorshipDTO mentorshipDTO : mentorships) {
             Mentorship mentorship = new Mentorship();
             mentorship.setUuid(mentorshipDTO.getUuid());
@@ -105,29 +104,26 @@ public class SessionRestService extends BaseRestService {
             mentorship.setDemonstration(mentorshipDTO.isDemonstration());
             mentorship.setDemonstrationDetails(mentorshipDTO.getDemonstrationDetails());
             mentorship.setPerformedDate(mentorshipDTO.getPerformedDate());
-            mentorship.setTutored(mentee);
-            Tutor mentor = (Tutor) Utilities.extractElementByUuid(getApplication().getTutorService().getAll(), mentorshipDTO.getMentor().getUuid());
-            mentorship.setTutor(mentor);
-            mentorship.setForm(form);
+            mentorship.setTutored(session.getTutored());
+            mentorship.setTutor(getApplication().getTutorService().getByuuid( mentorshipDTO.getMentor().getUuid()));
+            mentorship.setForm(session.getForm());
             mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getByuuid(mentorshipDTO.getEvaluationType().getUuid()));
-            Door door = (Door) Utilities.extractElementByUuid(getApplication().getDoorService().getAll(), mentorshipDTO.getDoor().getUuid());
-            mentorship.setDoor(door);
-            Cabinet cabinet = (Cabinet) Utilities.extractElementByUuid(getApplication().getCabinetService().getAll(), mentorshipDTO.getCabinet().getUuid());
-            mentorship.setCabinet(cabinet);
+            mentorship.setDoor(getApplication().getDoorService().getByuuid(mentorshipDTO.getDoor().getUuid()));
+            mentorship.setCabinet(getApplication().getCabinetService().getByuuid(mentorshipDTO.getCabinet().getUuid()));
             mentorship.setSyncStatus(SyncSatus.SENT);
             mentorship.setSession(session);
-            getApplication().getMentorshipService().saveOrUpdate(mentorship);
+            mentorship = getApplication().getMentorshipService().saveOrUpdate(mentorship);
             List<AnswerDTO> answers = mentorshipDTO.getAnswers();
-            updateAnswers(answers, mentorship, form);
+            updateAnswers(answers, mentorship);
         }
     }
 
-    private void updateAnswers(List<AnswerDTO> answers, Mentorship mentorship, Form form) throws SQLException {
+    private void updateAnswers(List<AnswerDTO> answers, Mentorship mentorship) throws SQLException {
         for (AnswerDTO answerDTO: answers) {
             Answer answer = new Answer();
             answer.setMentorship(mentorship);
             answer.setQuestion(getApplication().getQuestionService().getByuuid(answerDTO.getQuestion().getUuid()));
-            answer.setForm(form);
+            answer.setForm(mentorship.getForm());
             answer.setSyncStatus(SyncSatus.SENT);
             answer.setUuid(answerDTO.getUuid());
             answer.setCreatedAt(answerDTO.getCreatedAt());
@@ -149,18 +145,20 @@ public class SessionRestService extends BaseRestService {
                     public void onResponse(Call<List<SessionDTO>> call, Response<List<SessionDTO>> response) {
                         List<SessionDTO> data = response.body();
                         if (Utilities.listHasElements(data)) {
-                            try {
-                                List<Session> sessionList = Utilities.parse(data, Session.class);
-                                for (Session session : sessionList) {
-                                    session = getApplication().getSessionService().getByuuid(session.getUuid());
-                                    session.setSyncStatus(SyncSatus.SENT);
-                                    getApplication().getSessionService().update(session);
-                                }
+                            getServiceExecutor().execute(()-> {
+                                try {
+                                    List<Session> sessionList = Utilities.parse(data, Session.class);
+                                    for (Session session : sessionList) {
+                                        session = getApplication().getSessionService().getByuuid(session.getUuid());
+                                        session.setSyncStatus(SyncSatus.SENT);
+                                        getApplication().getSessionService().update(session);
+                                    }
 
-                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessionList);
-                            } catch (SQLException  e) {
-                                throw new RuntimeException(e);
-                            }
+                                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessionList);
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
                         } else listener.doOnRestErrorResponse(response.message());
                     }
 

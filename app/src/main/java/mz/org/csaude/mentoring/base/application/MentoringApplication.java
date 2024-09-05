@@ -13,6 +13,11 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.R;
@@ -59,8 +66,6 @@ import mz.org.csaude.mentoring.service.mentorship.IterationTypeService;
 import mz.org.csaude.mentoring.service.mentorship.IterationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.mentorship.MentorshipService;
 import mz.org.csaude.mentoring.service.mentorship.MentorshipServiceImpl;
-import mz.org.csaude.mentoring.service.mentorship.TimeOfDayService;
-import mz.org.csaude.mentoring.service.mentorship.TimeOfDayServiceImpl;
 import mz.org.csaude.mentoring.service.partner.PartnerService;
 import mz.org.csaude.mentoring.service.partner.PartnerServiceImpl;
 import mz.org.csaude.mentoring.service.professionalCategory.ProfessionalCategoryService;
@@ -97,6 +102,7 @@ import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.rest.FormQuestionRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.FormRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.MentorshipRestService;
@@ -123,6 +129,7 @@ public class MentoringApplication  extends Application {
     private Tutor tutor;
 
     private Retrofit retrofit;
+    
     private ObjectMapper mapper;
 
     private RondaService rondaService;
@@ -182,7 +189,6 @@ public class MentoringApplication  extends Application {
 
     private SettingService settingService;
 
-    private TimeOfDayService timeOfDayService;
 
     private TutorProgrammaticAreaService tutorProgrammaticAreaService;
 
@@ -209,6 +215,11 @@ public class MentoringApplication  extends Application {
     private SessionRestService sessionRestService;
     private SessionRecommendedResourceRestService sessionRecommendedResourceRestService;
 
+    private String encryptedPassphrase;
+
+
+    private ExecutorService serviceExecutor;
+
 
     @Override
     public void onCreate() {
@@ -222,6 +233,15 @@ public class MentoringApplication  extends Application {
         setUpRetrofit();
 
         Locale.setDefault(new Locale("en_ZA"));
+
+        // Initialize the passphrase storage
+        try {
+            initEncryptedPassphraseStorage();
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+        }
+
+        serviceExecutor = ExecutorThreadProvider.getInstance().getExecutorService();
 
     }
 
@@ -433,10 +453,7 @@ public class MentoringApplication  extends Application {
         if (settingService == null) this.settingService = new SettingServiceImpl(this);
         return settingService;
     }
-    public TimeOfDayService getTimeOfDayService() {
-        if (timeOfDayService == null) this.timeOfDayService = new TimeOfDayServiceImpl(this);
-        return timeOfDayService;
-    }
+
     public TutorProgrammaticAreaService getTutorProgrammaticAreaService() {
         if (tutorProgrammaticAreaService == null) this.tutorProgrammaticAreaService = new TutorProgrammaticAreaServiceImpl(this);
         return tutorProgrammaticAreaService;
@@ -473,9 +490,20 @@ public class MentoringApplication  extends Application {
     }
 
     public void init() throws SQLException {
-        this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
-        setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
-        getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
+        try {
+            getServiceExecutor().submit(()->{
+                try {
+                    this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
+                    if (getAuthenticatedUser().getEmployee() == null) getAuthenticatedUser().setEmployee(getEmployeeService().getById(getAuthenticatedUser().getEmployeeId()));
+                    setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
+                    getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SharedPreferences getMentoringSharedPreferences() {
@@ -547,5 +575,72 @@ public class MentoringApplication  extends Application {
         return getMentoringSharedPreferences().getInt(SESSION_SYNC_TIME, 2);
     }
 
+    private void initEncryptedPassphraseStorage() throws GeneralSecurityException, IOException {
+        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
+        SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                "mentoring_encrypted_prefs",
+                masterKeyAlias,
+                this,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        );
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        // Check if the passphrase is already stored
+        encryptedPassphrase = sharedPreferences.getString("db_passphrase", null);
+
+        if (encryptedPassphrase == null) {
+            // If not stored, generate and store the passphrase
+            encryptedPassphrase = generatePassphrase();
+            editor.putString("db_passphrase", encryptedPassphrase);
+            editor.apply();
+        }
+    }
+
+    private String generatePassphrase() {
+        // Generate a secure random passphrase
+        // In a real application, you might use a more complex passphrase generation method
+        return Utilities.generateSalt(); // Replace with actual passphrase generation logic
+    }
+
+    public String getEncryptedPassphrase() {
+        return encryptedPassphrase;
+    }
+
+    /**
+     * Gracefully shuts down the ExecutorService.
+     */
+    public void shutdownExecutorService() {
+        serviceExecutor.shutdown(); // Disable new tasks from being submitted
+
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                serviceExecutor.shutdownNow(); // Cancel currently executing tasks
+
+                // Wait a while for tasks to respond to being cancelled
+                if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.err.println("ExecutorService did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            serviceExecutor.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
+    public ExecutorService getServiceExecutor() {
+        return serviceExecutor;
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        shutdownExecutorService();
+    }
 }

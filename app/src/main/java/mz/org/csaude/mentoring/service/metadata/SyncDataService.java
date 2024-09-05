@@ -2,7 +2,6 @@ package mz.org.csaude.mentoring.service.metadata;
 
 import mz.org.csaude.mentoring.base.auth.LoginResponse;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
-import mz.org.csaude.mentoring.dto.career.CareerDTO;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
@@ -14,7 +13,6 @@ import mz.org.csaude.mentoring.dto.location.ProvinceDTO;
 import mz.org.csaude.mentoring.dto.mentorship.DoorDTO;
 import mz.org.csaude.mentoring.dto.mentorship.IterationTypeDTO;
 import mz.org.csaude.mentoring.dto.mentorship.MentorshipDTO;
-import mz.org.csaude.mentoring.dto.mentorship.TimeOfDayDTO;
 import mz.org.csaude.mentoring.dto.partner.PartnerDTO;
 import mz.org.csaude.mentoring.dto.professionalcategory.ProfessionalCategoryDTO;
 import mz.org.csaude.mentoring.dto.program.ProgramDTO;
@@ -67,9 +65,6 @@ public interface SyncDataService {
 
     @GET("careers/careerTypes")
     Call<List<CareerTypeDTO>> getCareerTypes(@Query("offset") long offset, @Query("limit") long limit);
-
-    @GET("careers/getall")
-    Call<List<CareerDTO>> getCareers(@Query("offset") long offset, @Query("limit") long limit);
 
     @GET("tutored/getTutoreds")
     Call<List<TutoredDTO>> getTutoreds(@Query("uuids") List<String> uuids, @Query("offset") long offset, @Query("limit") long limit);
@@ -127,8 +122,6 @@ public interface SyncDataService {
     Call<List<IterationTypeDTO>> getIterationTypes();
     @GET("utils/doors")
     Call<List<DoorDTO>> getDoors();
-    @GET("utils/timesOfDay")
-    Call<List<TimeOfDayDTO>> getTimesOfDay();
     @GET("questions/getAll")
     Call<List<QuestionDTO>> getAllQuestions();
     @GET("formQuestions/getByFormsUuids")

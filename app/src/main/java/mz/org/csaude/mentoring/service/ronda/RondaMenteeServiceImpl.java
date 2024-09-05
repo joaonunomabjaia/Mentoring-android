@@ -24,7 +24,7 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public RondaMentee save(RondaMentee record) throws SQLException {
-        this.rondaMenteeDAO.create(record);
+        record.setId((int) this.rondaMenteeDAO.insert(record));
         return record;
     }
 
@@ -54,14 +54,17 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
         RondaMentee rm = this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid());
         if(rm!=null) {
             rondaMentee.setId(rm.getId());
+            rondaMenteeDAO.update(rondaMentee);
+        } else {
+            this.rondaMenteeDAO.insert(rondaMentee);
+            rondaMentee.setId(this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid()).getId());
         }
-        this.rondaMenteeDAO.createOrUpdate(rondaMentee);
         return rondaMentee;
     }
 
     @Override
     public List<RondaMentee> getAllOfRonda(Ronda ronda) throws SQLException {
-        return rondaMenteeDAO.getAllOfRonda(ronda);
+        return rondaMenteeDAO.getAllOfRonda(ronda.getId());
     }
 
     @Override

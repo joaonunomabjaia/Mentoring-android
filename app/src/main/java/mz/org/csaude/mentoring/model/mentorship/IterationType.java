@@ -1,39 +1,42 @@
 package mz.org.csaude.mentoring.model.mentorship;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-
-
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.mentorship.IterationTypeDAOImpl;
 import mz.org.csaude.mentoring.dto.mentorship.IterationTypeDTO;
 
-
-@DatabaseTable(tableName = IterationType.TABLE_NAME, daoClass = IterationTypeDAOImpl.class)
-
+@Entity(tableName = IterationType.TABLE_NAME,
+        indices = {
+                @Index(value = {IterationType.COLUMN_CODE}, unique = true)
+        })
 public class IterationType extends BaseModel {
 
     public static final String TABLE_NAME = "iteration_type";
-
     public static final String COLUMN_DESCRIPTION = "description";
-
     public static final String COLUMN_CODE = "code";
 
-
-    @DatabaseField(columnName = COLUMN_DESCRIPTION)
+    @NonNull
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
 
-    @DatabaseField(columnName = COLUMN_CODE, unique = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
     public IterationType() {
     }
 
+    @Ignore
     public IterationType(String description, String code) {
         this.description = description;
         this.code = code;
     }
+
+    @Ignore
     public IterationType(IterationTypeDTO iterationTypeDTO) {
         super(iterationTypeDTO);
         this.setCode(iterationTypeDTO.getCode());
@@ -49,11 +52,11 @@ public class IterationType extends BaseModel {
         this.description = description;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getCode() {
         return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

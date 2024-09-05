@@ -1,8 +1,14 @@
 package mz.org.csaude.mentoring.model.ronda;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +18,6 @@ import java.util.stream.Collectors;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.ronda.RondaDAOImpl;
 import mz.org.csaude.mentoring.dto.ronda.RondaDTO;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
@@ -24,50 +29,86 @@ import mz.org.csaude.mentoring.util.RondaStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
-
-@DatabaseTable(tableName = Ronda.TABLE_NAME, daoClass = RondaDAOImpl.class)
+@Entity(tableName = Ronda.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = HealthFacility.class,
+                        parentColumns = "id",
+                        childColumns = Ronda.COLUMN_HEALTH_FACILITY,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = RondaType.class,
+                        parentColumns = "id",
+                        childColumns = Ronda.COLUMN_RONDA_TYPE,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Ronda.COLUMN_HEALTH_FACILITY}),
+                @Index(value = {Ronda.COLUMN_RONDA_TYPE})
+        })
 public class Ronda extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "ronda";
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
-
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_HEALTH_FACILITY = "health_facility_id";
     public static final String COLUMN_RONDA_TYPE = "ronda_type_id";
     public static final String COLUMN_MENTOR_TYPE = "mentor_type";
 
-    @DatabaseField(columnName = COLUMN_DESCRIPTION,  canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_DESCRIPTION)
     private String description;
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
-    @DatabaseField(columnName = COLUMN_END_DATE, canBeNull = true)
+    @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
-    @DatabaseField(columnName = COLUMN_HEALTH_FACILITY, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_HEALTH_FACILITY)
+    private Integer healthFacilityId;
+
+    @Relation(parentColumn = COLUMN_HEALTH_FACILITY, entityColumn = "id")
+    @Ignore
     private HealthFacility healthFacility;
-    @DatabaseField(columnName = COLUMN_RONDA_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_RONDA_TYPE)
+    private Integer rondaTypeId;
+
+    @Relation(parentColumn = COLUMN_RONDA_TYPE, entityColumn = "id")
+    @Ignore
     private RondaType rondaType;
 
-    @DatabaseField(columnName = COLUMN_MENTOR_TYPE, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_MENTOR_TYPE)
     private String mentorType;
+
+    @Ignore
     @JsonIgnore
     private List<Session> sessions;
+
+    @Ignore
     @JsonIgnore
     private List<RondaMentee> rondaMentees;
+
+    @Ignore
     @JsonIgnore
     private List<RondaMentor> rondaMentors;
-    public Ronda () {
+
+    public Ronda() {
     }
 
+    @Ignore
     public Ronda(RondaDTO rondaDTO) {
         super(rondaDTO);
         this.setDescription(rondaDTO.getDescription());
         this.setStartDate(rondaDTO.getStartDate());
         this.setEndDate(rondaDTO.getEndDate());
-        if(rondaDTO.getRondaType()!=null) this.setRondaType(new RondaType(rondaDTO.getRondaType()));
-        if(rondaDTO.getMentorType()!=null) this.setMentorType(rondaDTO.getMentorType());
-        if(rondaDTO.getHealthFacility()!=null) {
+        if (rondaDTO.getRondaType() != null) this.setRondaType(new RondaType(rondaDTO.getRondaType()));
+        if (rondaDTO.getMentorType() != null) this.setMentorType(rondaDTO.getMentorType());
+        if (rondaDTO.getHealthFacility() != null) {
             this.setHealthFacility(new HealthFacility(rondaDTO.getHealthFacility()));
         }
         if (Utilities.listHasElements(rondaDTO.getRondaMentors())) {
@@ -85,30 +126,42 @@ public class Ronda extends BaseModel implements Listble {
         }
     }
 
+    // Getters and Setters
+
     public Date getStartDate() {
         return startDate;
     }
+
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
+
     public Date getEndDate() {
         return endDate;
     }
+
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
+
     public HealthFacility getHealthFacility() {
         return healthFacility;
     }
+
     public void setHealthFacility(HealthFacility healthFacility) {
         this.healthFacility = healthFacility;
+        this.setHealthFacilityId(healthFacility.getId());
     }
+
     public RondaType getRondaType() {
         return rondaType;
     }
+
     public void setRondaType(RondaType rondaType) {
         this.rondaType = rondaType;
+        this.setRondaTypeId(rondaType.getId());
     }
+
     public List<RondaMentee> getRondaMentees() {
         return rondaMentees;
     }
@@ -124,10 +177,12 @@ public class Ronda extends BaseModel implements Listble {
     public void setRondaMentors(List<RondaMentor> rondaMentors) {
         this.rondaMentors = rondaMentors;
     }
+
     @Override
     public String getDescription() {
         return this.description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -143,12 +198,11 @@ public class Ronda extends BaseModel implements Listble {
     }
 
     public String getRondaPeriod() {
-        String period = this.getEndDate() == null ? DateUtilities.parseDateToDDMMYYYYString(this.getStartDate())
+        return this.getEndDate() == null ? DateUtilities.parseDateToDDMMYYYYString(this.getStartDate())
                 : DateUtilities.parseDateToDDMMYYYYString(this.getStartDate()).concat(" - ").concat(DateUtilities.parseDateToDDMMYYYYString(this.getEndDate()));
-        return period;
     }
 
-    public String getRondaExuctionStatus() {
+    public String getRondaExecutionStatus() {
         return !this.isRondaCompleted() ? RondaStatus.ON_GOING.toString() : RondaStatus.FINISHED.toString();
     }
 
@@ -156,6 +210,7 @@ public class Ronda extends BaseModel implements Listble {
     public boolean isClosed() {
         return this.getEndDate() != null;
     }
+
     public List<Session> getSessions() {
         return sessions;
     }
@@ -170,7 +225,7 @@ public class Ronda extends BaseModel implements Listble {
     }
 
     public void addSession(Session session) {
-        if(this.sessions == null) this.sessions = new ArrayList<>();
+        if (this.sessions == null) this.sessions = new ArrayList<>();
         if (!Utilities.listHasElements(this.sessions)) {
             this.sessions.add(session);
         } else {
@@ -189,10 +244,12 @@ public class Ronda extends BaseModel implements Listble {
             this.addSession(session);
         }
     }
+
     public void removeSession(Session session) {
-        if(this.sessions == null) return;
+        if (this.sessions == null) return;
         this.sessions.remove(session);
     }
+
     public void tryToCloseRonda() {
         boolean allSessionsClosed = true;
 
@@ -243,7 +300,9 @@ public class Ronda extends BaseModel implements Listble {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Ronda ronda = (Ronda) o;
-        return Objects.equals(startDate, ronda.startDate) && Objects.equals(healthFacility, ronda.healthFacility) && Objects.equals(rondaType, ronda.rondaType);
+        return Objects.equals(startDate, ronda.startDate) &&
+                Objects.equals(healthFacility, ronda.healthFacility) &&
+                Objects.equals(rondaType, ronda.rondaType);
     }
 
     @Override
@@ -252,7 +311,7 @@ public class Ronda extends BaseModel implements Listble {
     }
 
     public Tutor getActiveMentor() {
-        if(this.getRondaMentors() == null) return null;
+        if (this.getRondaMentors() == null) return null;
         for (RondaMentor rondaMentor : rondaMentors) {
             if (rondaMentor.isActive()) {
                 return rondaMentor.getTutor();
@@ -267,5 +326,21 @@ public class Ronda extends BaseModel implements Listble {
 
     public void setMentorType(String mentorType) {
         this.mentorType = mentorType;
+    }
+
+    public Integer getHealthFacilityId() {
+        return healthFacilityId;
+    }
+
+    public void setHealthFacilityId(Integer healthFacilityId) {
+        this.healthFacilityId = healthFacilityId;
+    }
+
+    public Integer getRondaTypeId() {
+        return rondaTypeId;
+    }
+
+    public void setRondaTypeId(Integer rondaTypeId) {
+        this.rondaTypeId = rondaTypeId;
     }
 }

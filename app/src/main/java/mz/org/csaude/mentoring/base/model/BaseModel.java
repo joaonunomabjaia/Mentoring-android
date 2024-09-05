@@ -1,66 +1,75 @@
 package mz.org.csaude.mentoring.base.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
-
-
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 
-
-
+@Entity(indices = {@Index(value = "uuid", unique = true)})
 public abstract class BaseModel implements Serializable, Listble {
 
     public static final String COLUMN_ID = "id";
-
     public static final String COLUMN_UUID = "uuid";
-
     public static final String COLUMN_LIFE_CYCLE_STATUS = "life_cycle_status";
     public static final String COLUMN_SYNC_STATUS = "sync_status";
     public static final String COLUMN_CREATED_AT = "created_at";
     public static final String COLUMN_UPDATED_AT = "updated_at";
 
-    @DatabaseField(columnName = COLUMN_ID, canBeNull = false, generatedId = true, allowGeneratedIdInsert = true)
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = COLUMN_ID)
     private Integer id;
 
-    @DatabaseField(columnName = COLUMN_UUID, unique = true)
+    @ColumnInfo(name = COLUMN_UUID)
     private String uuid;
 
+    @Ignore
     protected String listTyp;
 
-    @DatabaseField(columnName = COLUMN_SYNC_STATUS, canBeNull = true)
+    @ColumnInfo(name = COLUMN_SYNC_STATUS)
     private SyncSatus syncStatus;
-    @DatabaseField(columnName = COLUMN_CREATED_AT, canBeNull = true)
+
+    @ColumnInfo(name = COLUMN_CREATED_AT)
     private Date createdAt;
-    @DatabaseField(columnName = COLUMN_UPDATED_AT, canBeNull = true)
+
+    @ColumnInfo(name = COLUMN_UPDATED_AT)
     private Date updatedAt;
 
+    @Ignore
     protected boolean selected;
+
+    @ColumnInfo(name = COLUMN_LIFE_CYCLE_STATUS)
+    private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
+
+    @Ignore
+    protected int listPosition;
+
     public BaseModel() {
     }
 
+    @Ignore
     public BaseModel(String uuid) {
         this.uuid = uuid;
     }
 
+    @Ignore
     public BaseModel(BaseEntityDTO baseEntityDTO) {
         this.uuid = baseEntityDTO.getUuid();
         this.setCreatedAt(baseEntityDTO.getCreatedAt());
         this.setUpdatedAt(baseEntityDTO.getUpdatedAt());
         this.setLifeCycleStatus(baseEntityDTO.getLifeCycleStatus());
     }
-
-    @DatabaseField(columnName = COLUMN_LIFE_CYCLE_STATUS)
-    private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
-
-    protected int listPosition;
 
     public Integer getId() {
         return id;
@@ -178,5 +187,15 @@ public abstract class BaseModel implements Serializable, Listble {
     @Override
     public int hashCode() {
         return Objects.hash(id, uuid);
+    }
+
+    @Override
+    public String toString() {
+        return "BaseModel{" +
+                "id=" + id +
+                ", uuid='" + uuid + '\'' +
+                ", lifeCycleStatus=" + lifeCycleStatus +
+                ", syncStatus=" + syncStatus +
+                '}';
     }
 }

@@ -26,7 +26,7 @@ public class ProgramServiceImpl extends BaseServiceImpl<Program> implements Prog
 
     @Override
     public Program save(Program record) throws SQLException {
-        this.programDAO.create(record);
+        this.programDAO.insert(record);
         return record;
     }
 
