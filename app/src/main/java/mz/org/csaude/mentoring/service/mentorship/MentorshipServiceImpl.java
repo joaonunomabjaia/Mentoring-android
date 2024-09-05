@@ -77,7 +77,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
         // If the Ronda is Ronda Zero, insert or update the Session
         if (record.getSession().getRonda().isRondaZero()) {
             if (record.getSession().getId() == null) {
-                sessionDAO.insert(record.getSession());
+                record.getSession().setId((int) sessionDAO.insert(record.getSession()));
             } else {
                 sessionDAO.update(record.getSession());
             }
@@ -89,7 +89,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
 
         // Insert or update the Mentorship
         if (record.getId() == null) {
-            mentorshipDAO.insertMentorship(record);
+            record.setId((int) mentorshipDAO.insertMentorship(record));
         } else {
             mentorshipDAO.updateMentorship(record);
         }
@@ -97,7 +97,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
         // Insert or update each Answer associated with the Mentorship
         for (Answer answer : record.getAnswers()) {
             if (answer.getId() == null) {
-                answerDAO.insert(answer);
+                answer.setId((int) answerDAO.insert(answer));
             } else {
                 answerDAO.update(answer);
             }
@@ -114,6 +114,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     }
 
     @Override
+    @Transaction
     public int delete(Mentorship record) throws SQLException {
         if (record.getSession().getRonda().isRondaZero()) {
             record.getTutored().setZeroEvaluationDone(false);
@@ -205,7 +206,12 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     public List<Mentorship> getAllOfSession(Session session) throws SQLException {
         List<Mentorship> mentorships = mentorshipDAO.getAllOfSession(session.getId());
         for (Mentorship mentorship : mentorships) {
-            mentorship.getSession().setRonda(this.rondaDAO.queryForId(mentorship.getSession().getRonda().getId()));
+            mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
+            mentorship.setTutored(session.getTutored());
+            mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
+            mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+            mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
+            mentorship.setSession(session);
         }
         return mentorships;
     }

@@ -112,11 +112,23 @@ public class MentorshipSearchVM extends AbstractSearchMentorshipVM {
 
     @Override
     public void edit(Mentorship mentorship) {
-        super.edit(mentorship);
-        Map<String, Object> params = new HashMap<>();
-        params.put("mentorship", mentorship);
-        params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
-        getApplication().getApplicationStep().changeToEdit();
-        getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
+        // Perform the database operations from the parent class in a background thread
+        getExecutorService().execute(() -> {
+            // Call the parent edit method (which performs the database operations)
+            super.edit(mentorship);
+
+            // After the parent method is done, switch to the main thread for UI updates
+            runOnMainThread(() -> {
+                // Prepare the params for the next activity
+                Map<String, Object> params = new HashMap<>();
+                params.put("mentorship", mentorship);
+                params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
+
+                // Change the application step to edit and start the next activity
+                getApplication().getApplicationStep().changeToEdit();
+                getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
+            });
+        });
     }
+
 }

@@ -16,7 +16,7 @@ import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 public interface MentorshipDAO {
 
     @Insert
-    void insertMentorship(Mentorship mentorship);
+    long insertMentorship(Mentorship mentorship);
 
     @Insert
     void insertAll(List<Mentorship> mentorships);

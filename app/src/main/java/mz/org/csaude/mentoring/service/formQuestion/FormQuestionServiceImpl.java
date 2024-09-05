@@ -102,6 +102,14 @@ public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> imple
 
     @Override
     public List<FormQuestion> getAllOfForm(Form form, String evaluationType) {
-        return formQuestionDAO.getAllOfForm(form.getId(), evaluationType, String.valueOf(LifeCycleStatus.ACTIVE));
+        List<FormQuestion> formQuestions = formQuestionDAO.getAllOfForm(form.getId(), evaluationType, String.valueOf(LifeCycleStatus.ACTIVE));
+        for (FormQuestion formQuestion : formQuestions) {
+            formQuestion.setQuestion(questionDAO.queryForId(formQuestion.getQuestionId()));
+            formQuestion.getQuestion().setQuestionsCategory(questionsCategoryDAO.queryForId(formQuestion.getQuestion().getQuestionCategoryId()));
+            formQuestion.setForm(formDAO.queryForId(formQuestion.getFormId()));
+            formQuestion.setResponseType(responseTypeDAO.queryForId(formQuestion.getResponseTypeId()));
+            formQuestion.setEvaluationType(evaluationTypeDAO.queryForId(formQuestion.getEvaluationTypeId()));
+        }
+        return formQuestions;
     }
 }
