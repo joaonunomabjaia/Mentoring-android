@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Define custom attributes here -->
+    <declare-styleable name="MentoringTheme">
+        <attr name="textColorPrimary" format="color" />
+    </declare-styleable>
+</resources>

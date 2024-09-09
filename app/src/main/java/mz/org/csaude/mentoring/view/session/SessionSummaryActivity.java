@@ -54,7 +54,9 @@ public class SessionSummaryActivity extends BaseActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Resumo");
 
-        getRelatedViewModel().generateSessionSummary();
+        getRelatedViewModel().getExecutorService().execute(()->{
+            getRelatedViewModel().generateSessionSummary();
+        });
 
         Intent finishIntent = new Intent("FINISH_ACTIVITY");
         LocalBroadcastManager.getInstance(this).sendBroadcast(finishIntent);

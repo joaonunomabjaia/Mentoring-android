@@ -58,7 +58,13 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
 
     @Override
     public List<Answer> getAllOfMentorship(Mentorship mentorship) throws SQLException {
-        return this.answerDAO.queryForMentorship(mentorship.getId());
+        List<Answer> answers = this.answerDAO.queryForMentorship(mentorship.getId());
+        for (Answer answer : answers) {
+            answer.setMentorship(mentorship);
+            answer.setQuestion(getApplication().getQuestionService().getById(answer.getQuestionId()));
+            answer.setForm(getApplication().getFormService().getById(answer.getFormId()));
+        }
+        return answers;
     }
 
     @Override

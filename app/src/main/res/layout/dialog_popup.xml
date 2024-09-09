@@ -23,6 +23,7 @@
         android:layout_below="@id/alertTitle"
         android:layout_marginTop="16dp"
         android:layout_marginHorizontal="16dp"
+        android:textColor="?attr/textColorPrimary"
         android:text="Confirma Terminar a Avaliação?"
         android:textSize="16sp" />
 

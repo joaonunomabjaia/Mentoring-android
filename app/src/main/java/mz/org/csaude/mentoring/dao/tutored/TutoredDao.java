@@ -58,7 +58,6 @@ public interface TutoredDao {
             "AND l.life_cycle_status = :lifeCycleStatus " +
             "AND t.life_cycle_status = :lifeCycleStatus " +
             "AND t.zero_evaluation_status = :zeroEvaluation " +
-            "AND (:zeroEvaluation = 0 OR t.zero_evaluation_score IS NOT NULL) " +
             "ORDER BY e.id")
     List<Tutored> getAllForMentoringRound(final int healthFacilityId, final String lifeCycleStatus, final boolean zeroEvaluation);
 

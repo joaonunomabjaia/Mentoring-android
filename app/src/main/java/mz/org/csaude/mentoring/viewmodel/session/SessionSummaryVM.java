@@ -66,7 +66,7 @@ public class SessionSummaryVM extends BaseViewModel {
     public void generateSessionSummary() {
         sessionSummaryList = getApplication().getSessionService().generateSessionSummary(session);
         if (Utilities.listHasElements(sessionSummaryList)) {
-            getRelatedActivity().displaySearchResults();
+            runOnMainThread(()->getRelatedActivity().displaySearchResults());
             if (session.getRonda().isRondaZero()) {
                 determineAndUpdateMenteeScore();
             }

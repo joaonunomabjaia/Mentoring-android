@@ -43,6 +43,7 @@
             android:text="@{ronda.getRondaPeriod()}"
             android:drawableLeft="@drawable/baseline_calendar_month_24"
             android:textSize="@dimen/dimen_12dp"
+            android:textColor="?attr/textColorPrimary"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
             />
@@ -59,6 +60,7 @@
                 android:text="@{ronda.healthFacility.description}"
                 android:drawableLeft="@drawable/baseline_local_hospital_24"
                 android:textSize="@dimen/dimen_12dp"
+                android:textColor="?attr/textColorPrimary"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"
                 />
@@ -70,6 +72,7 @@
                 android:layout_marginTop="@dimen/dimen_5dp"
                 android:text="@{ronda.rondaExecutionStatus}"
                 android:textSize="@dimen/dimen_12dp"
+                android:textColor="?attr/textColorPrimary"
                 android:gravity="center_vertical"
                 android:textStyle="bold"/>
         </LinearLayout>
