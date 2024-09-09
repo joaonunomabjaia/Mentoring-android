@@ -123,7 +123,11 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public List<Tutored> getAllForMentoringRound(HealthFacility healthFacility, boolean zeroEvaluation) throws SQLException {
-        return this.tutoredDao.getAllForMentoringRound(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE), zeroEvaluation);
+        List<Tutored> tutoreds = this.tutoredDao.getAllForMentoringRound(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE), zeroEvaluation);
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
     @Override

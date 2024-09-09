@@ -51,7 +51,9 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
 
     @Override
     public Question getById(int id) throws SQLException {
-        return this.questionDAO.queryForId(id);
+        Question question = this.questionDAO.queryForId(id);
+        question.setQuestionsCategory(getApplication().getQuestionsCategoryService().getById(question.getQuestionCategoryId()));
+        return question;
     }
 
     @Override

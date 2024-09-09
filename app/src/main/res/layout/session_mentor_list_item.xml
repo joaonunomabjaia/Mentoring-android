@@ -49,6 +49,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:drawablePadding="8dp"
+                    android:textColor="?attr/textColorPrimary"
                     android:gravity="center_vertical"
                     android:drawableStart="@drawable/ic_calendar"
                     android:text="@{DateUtilities.formatToDDMMYYYY(session.startDate)}"

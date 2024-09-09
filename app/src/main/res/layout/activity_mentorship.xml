@@ -355,6 +355,7 @@
                                 android:checked="@{viewModel.demostrationMade}"
                                 android:onClick="@{() -> viewModel.changeDemostrationStatus()}"
                                 android:text="Houve necessidade de demonstração"
+                                android:textColor="?attr/textColorPrimary"
                                 android:padding="8dp" />
 
                             <TextView

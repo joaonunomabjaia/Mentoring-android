@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.view.ronda;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -142,22 +143,42 @@ public class CreateRondaActivity extends BaseActivity {
 
     }
 
-    private void initAdapters(){
-        try {
-            List<SimpleValue> mentorTypes = new ArrayList<>();
-            mentorTypes.add(new SimpleValue(1, "Interno"));
-            mentorTypes.add(new SimpleValue(2, "Externo"));
-            mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
-            rondaBinding.spnMentorType.setAdapter(mentorTypeAdapter);
-
-            List<Province> provinces = getRelatedViewModel().getAllProvince();
-            provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-            rondaBinding.spnProvince.setAdapter(provinceAdapter);
-            rondaBinding.setProvinceAdapter(provinceAdapter);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    private void initAdapters() {
+        setupMentorTypeAdapter();
+        // Fetch provinces in a background thread
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+                List<Province> provinces = getRelatedViewModel().getAllProvince();
+                // Update the UI on the main thread
+                runOnUiThread(() -> {
+                    // Initialize the adapter with the fetched provinces
+                    provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
+                    rondaBinding.spnProvince.setAdapter(provinceAdapter);
+                    rondaBinding.setProvinceAdapter(provinceAdapter);
+                });
+            } catch (SQLException e) {
+                runOnUiThread(() -> handleSQLException(e));
+            }
+        });
     }
+
+    private void setupMentorTypeAdapter() {
+        List<SimpleValue> mentorTypes = getMentorTypes();
+        mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
+        rondaBinding.spnMentorType.setAdapter(mentorTypeAdapter);
+    }
+
+    private List<SimpleValue> getMentorTypes() {
+        List<SimpleValue> mentorTypes = new ArrayList<>();
+        mentorTypes.add(new SimpleValue(1, getString(R.string.interno)));
+        mentorTypes.add(new SimpleValue(2, getString(R.string.externo)));
+        return mentorTypes;
+    }
+
+    private void handleSQLException(SQLException e) {
+        Log.e("Database Error", "Error while initializing adapters: ", e);
+    }
+
     public void displaySelectedMentees(){
         if (tutoredAdapter != null) {
             tutoredAdapter.notifyDataSetChanged();

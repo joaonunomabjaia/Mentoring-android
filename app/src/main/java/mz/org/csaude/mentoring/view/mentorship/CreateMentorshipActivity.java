@@ -70,10 +70,13 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
         Intent intent = this.getIntent();
         if (intent != null && intent.getExtras() != null) {
+
             getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
 
             // Execute determineMentorshipType() on a background thread
             getRelatedViewModel().getExecutorService().execute(() -> {
+                loadSectorAdapter();
+                loadDoorAdapter();
                 if (getRelatedViewModel().getMentorship() == null) {
                     getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
                     getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
@@ -115,15 +118,14 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                         getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? "Avaliação" : "Sessão Zero");
 
                         mentorshipBinding.setViewModel(getRelatedViewModel());
-                        loadSectorAdapter();
-                        loadDoorAdapter();
+                        //loadSectorAdapter();
+                        //loadDoorAdapter();
 
                         getRelatedViewModel().setCurrMentorshipStep((String) intent.getExtras().get("CURR_MENTORSHIP_STEP"));
                     });
                 }
             });
-            loadSectorAdapter();
-            loadDoorAdapter();
+
         }
 
         // Date picker listener
@@ -253,7 +255,6 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
     public void loadDoorAdapter() {
         // Fetch the doors in a background thread
-        getRelatedViewModel().getExecutorService().execute(() -> {
             // Access the database in the background thread
             List<Door> doors = getRelatedViewModel().getDoors();
 
@@ -268,14 +269,12 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                     Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_doors_available)).show();
                 }
             });
-        });
     }
 
 
 
     public void loadCategoryAdapter() {
         // Fetch the categories in a background thread
-        getRelatedViewModel().getExecutorService().execute(() -> {
             List<Listble> categories = getRelatedViewModel().getCategories();
 
             // Update the UI on the main thread
@@ -289,7 +288,6 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                     Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_categories_available)).show();
                 }
             });
-        });
     }
 
 
@@ -361,7 +359,8 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                getRelatedViewModel().tryToUpdateMentorship();
+                //getRelatedViewModel().tryToUpdateMentorship();
+                super.onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

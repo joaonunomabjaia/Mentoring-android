@@ -50,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@{tutored.employee.fullName}"
+                android:textColor="?attr/textColorPrimary"
                 android:textSize="14dp"
                 android:textStyle="bold"/>
             <TextView
@@ -58,6 +59,7 @@
                 android:layout_marginTop="@dimen/dimen_6dp"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:textColor="?attr/textColorPrimary"
                 android:text="@{tutored.employee.professionalCategory.description}" />
 
             <LinearLayout
@@ -71,6 +73,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_height="match_parent"
                     android:text="@{tutored.employee.phoneNumber}"
+                    android:textColor="?attr/textColorPrimary"
                     android:drawablePadding="@dimen/dimen_5dp"
                     bind:drawableLeftCompat="@drawable/baseline_call_24" />
 
@@ -79,6 +82,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
+                    android:textColor="?attr/textColorPrimary"
                     android:layout_height="match_parent"
                     android:text='@{Utilities.concatStrings("NUIT", Utilities.parseLongToString(tutored.employee.nuit), ": ")}'/>
             </LinearLayout>

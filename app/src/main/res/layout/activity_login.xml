@@ -87,6 +87,12 @@
             android:layout_height="wrap_content"
             style="@style/login_text_style"
             android:text="Senha"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_lock"
+            app:passwordToggleEnabled="true">
         <EditText
             android:id="@+id/inPassword"
             android:layout_width="match_parent"
@@ -97,6 +103,7 @@
             android:layout_marginBottom="@dimen/dimen_10dp"
             android:drawableLeft="@drawable/ic_lock"
             android:text="@={viewModel.userPassword}"/>
+        </com.google.android.material.textfield.TextInputLayout>
         <CheckBox
             android:id="@+id/cbx_remember_me"
             android:layout_width="wrap_content"

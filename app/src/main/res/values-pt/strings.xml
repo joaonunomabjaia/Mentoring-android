@@ -84,5 +84,7 @@
     <string name="no_doors_available">Não foram encontrados registos de portas.</string>
     <string name="no_categories_available">Não foram encontradas categorias.</string>
     <string name="no_forms_available">Não foram encontadas tabelas de competências.</string>
+    <string name="interno">Interno</string>
+    <string name="externo">Externo</string>
 </resources>
 

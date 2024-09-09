@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.mentorship;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -530,7 +531,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     public void setSelectedDoor(Listble selectedDoor) {
-        if (selectedDoor == null) return;
+        if (selectedDoor == null || !Utilities.stringHasValue(selectedDoor.getDescription())) return;
 
         this.mentorship.setDoor((Door) selectedDoor);
         notifyPropertyChanged(BR.selectedDoor);
@@ -667,13 +668,53 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     @Override
     public void doOnConfirmed() {
+        // Show a progress dialog while the mentorship operations are performed
+        Dialog progressDialog = Utilities.showLoadingDialog(getRelatedActivity(), "Processando...");
+
         if (allQuestionsResponded()) {
-            doSaveMentorship();
-            showMentorshipSummary();
+            // Perform mentorship save operation in the background
+            getExecutorService().execute(() -> {
+                try {
+                    doSaveMentorship(); // Save mentorship in the background
+
+                    // Update the UI on the main thread after saving
+                    runOnMainThread(() -> {
+                        // Dismiss the progress dialog after saving
+                        dismissProgress(progressDialog);
+                        showMentorshipSummary();
+                    });
+
+                } catch (Exception e) {
+                    // Handle any exception and dismiss the progress dialog
+                    runOnMainThread(() -> {
+                        dismissProgress(progressDialog);
+                        Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar a avaliação de mentoria").show();
+                    });
+                }
+            });
         } else {
-            doMentorshipStateSave();
+            // Perform mentorship state save operation in the background
+            getExecutorService().execute(() -> {
+                try {
+                    doMentorshipStateSave(); // Save mentorship state in the background
+
+                    // Dismiss the progress dialog after saving the state
+                    runOnMainThread(() -> {
+                        dismissProgress(progressDialog);
+                    });
+
+                } catch (Exception e) {
+                    // Handle any exception and dismiss the progress dialog
+                    runOnMainThread(() -> {
+                        Log.e("MentorshipStateSave", e.getMessage());
+                        dismissProgress(progressDialog);
+                        Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar o estado da mentoria").show();
+                    });
+                }
+            });
         }
     }
+
 
     private void showMentorshipSummary() {
     }
@@ -687,6 +728,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 }
             }
 
+            if (this.session.getTutored() == null) {
+                this.session.setTutored(getApplication().getTutoredService().getById(this.session.getMenteeId()));
+            }
             this.mentorship.setEndDate(DateUtilities.getCurrentDate());
             if (ronda.isRondaZero()) {
                 this.mentorship.getTutored().setZeroEvaluationDone(true);
@@ -695,11 +739,15 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 this.mentorship.getSession().setStartDate(this.mentorship.getStartDate());
                 this.mentorship.getSession().setSyncStatus(SyncSatus.PENDING);
             } else {
-                this.mentorship.setTutored(this.session.getTutored());
+                if (mentorship.getTutored() == null) {
+                    this.mentorship.setTutored(this.session.getTutored());
+                }
             }
 
             if (this.mentorship.getStartDate().before(this.mentorship.getSession().getStartDate())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "A data de início não pode ser anterior a data de início da sessão.").show();
+                runOnMainThread(()->{
+                    Utilities.displayAlertDialog(getRelatedActivity(), "A data de início não pode ser anterior a data de início da sessão.").show();
+                });
                 return;
             }
 
@@ -725,15 +773,15 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             Log.i("Saved Mentorship", this.mentorship.toString());
             if (isMentoringMentorship()) {
                 if (this.mentorship.getSession().isCompleted()) {
-                    initSessionClosure(this.mentorship.getSession());
+                    runOnMainThread(()->initSessionClosure(this.mentorship.getSession()));
                 } else {
                     if (this.mentorship.isPatientEvaluation()) {
-                        goToMentorshipSummary();
+                        runOnMainThread(this::goToMentorshipSummary);
                     }
-                    getRelatedActivity().finish();
+                    runOnMainThread(()->getRelatedActivity().finish());
                 }
             } else {
-                goToMentorshipSummary();
+                runOnMainThread(this::goToMentorshipSummary);
             }
         getCurrentStep().changeToList();
         } catch (SQLException e) {
@@ -798,20 +846,27 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     public void setQuestionAnswer(FormQuestion formQuestion, String answerValue) {
-        formQuestion.getAnswer().setValue(answerValue);
-        int i=0;
-        List<FormQuestion> formQuestionList= questionMap.get(this.currQuestionCategory);
-
-        for (FormQuestion fq : formQuestionList) {
-            if (Utilities.stringHasValue(fq.getAnswer().getValue()) && fq.getAnswer().getValue().length() > 1) i++;
-        }
-        for (Listble listble : categories) {
-            if (listble.equals(this.currQuestionCategory)) {
-                ((SimpleValue) listble).setExtraInfo(i + "/" + formQuestionList.size());
+        getExecutorService().execute(()->{
+            formQuestion.getAnswer().setValue(answerValue);
+            try {
+                getApplication().getAnswerService().update(formQuestion.getAnswer());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        }
-        ((SimpleValue) currQuestionCategory).setExtraInfo(i + "/" + formQuestionList.size());
-        getRelatedActivity().reloadCategoryAdapter();
+            int i=0;
+            List<FormQuestion> formQuestionList= questionMap.get(this.currQuestionCategory);
+
+            for (FormQuestion fq : formQuestionList) {
+                if (Utilities.stringHasValue(fq.getAnswer().getValue()) && fq.getAnswer().getValue().length() > 1) i++;
+            }
+            for (Listble listble : categories) {
+                if (listble.equals(this.currQuestionCategory)) {
+                    ((SimpleValue) listble).setExtraInfo(i + "/" + formQuestionList.size());
+                }
+            }
+            ((SimpleValue) currQuestionCategory).setExtraInfo(i + "/" + formQuestionList.size());
+            runOnMainThread(()->getRelatedActivity().reloadCategoryAdapter());
+        });
     }
 
     public String getStartTime() {
@@ -853,7 +908,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             }
             getApplication().getMentorshipService().save(this.mentorship);
             Log.i("Mentorship state save", this.mentorship.toString());
-            getRelatedActivity().onBackPressed();
+            runOnMainThread(()->getRelatedActivity().onBackPressed());
         } catch (SQLException e) {
             Log.e("MentorshipVM", e.getMessage());
         }
@@ -870,7 +925,6 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     @Override
     public void doOnConfirmed(String value) {
         Log.i("MentorshipVM", value);
-
-        doSaveMentorship();
+        getExecutorService().execute(this::doSaveMentorship);
     }
 }
