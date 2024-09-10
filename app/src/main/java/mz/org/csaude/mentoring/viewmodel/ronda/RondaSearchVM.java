@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
@@ -174,37 +175,77 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     public void edit(Ronda ronda) {
-        try {
-            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
-            if (Utilities.listHasElements(ronda.getSessions())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma ronda com sessões registadas.").show();
-                return;
-            }
-        } catch (SQLException e) {
-            Log.e("Ronda Search VM", "Exception: " + e.getMessage());
-        }
+        // Perform the database query in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Fetch sessions in the background thread
+                ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
 
+                // Check if the Ronda has sessions and update the UI on the main thread
+                runOnMainThread(() -> {
+                    if (Utilities.listHasElements(ronda.getSessions())) {
+                        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.ronda_edit_error_msg)).show();
+                        return;
+                    }
+
+                    // Proceed to edit if there are no sessions
+                    navigateToEditRonda(ronda);
+                });
+
+            } catch (SQLException e) {
+                // Handle SQL exceptions on the main thread
+                runOnMainThread(() -> {
+                    Log.e("Ronda Search VM", "Exception: " + e.getMessage());
+                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao verificar sessões da Ronda.").show();
+                });
+            }
+        });
+    }
+
+    private void navigateToEditRonda(Ronda ronda) {
+        // Prepare the parameters for the next activity
         Map<String, Object> params = new HashMap<>();
         params.put("ronda", ronda);
-        getApplication().getApplicationStep().changeToEdit();
-        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
 
+        // Change the application step to "edit"
+        getApplication().getApplicationStep().changeToEdit();
+
+        // Navigate to the CreateRondaActivity
+        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
     }
+
 
     public void delete(Ronda ronda) {
         this.selectedRonda = ronda;
-        try {
-            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
-            if (Utilities.listHasElements(ronda.getSessions())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível apagar uma ronda com sessões registadas.").show();
-                return;
-            }
-        } catch (SQLException e) {
-            Log.e("Ronda Search VM", "Exception: " + e.getMessage());
-        }
 
-        Utilities.displayConfirmationDialog(getRelatedActivity(), "Deseja realmente excluir a ronda?", "Sim", "Não", this).show();
+        // Perform the database query in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Fetch sessions for the selected Ronda in the background
+                List<Session> sessions = getApplication().getSessionService().getAllOfRonda(ronda);
+                ronda.setSessions(sessions);
+
+                // Check if there are any sessions and update the UI on the main thread
+                runOnMainThread(() -> {
+                    if (Utilities.listHasElements(ronda.getSessions())) {
+                        Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível apagar uma ronda com sessões registadas.").show();
+                        return;
+                    }
+
+                    // If no sessions exist, show the confirmation dialog
+                    Utilities.displayConfirmationDialog(getRelatedActivity(), "Deseja realmente excluir a ronda?", "Sim", "Não", this).show();
+                });
+
+            } catch (SQLException e) {
+                // Handle SQL exceptions on the main thread
+                runOnMainThread(() -> {
+                    Log.e("Ronda Search VM", "Exception: " + e.getMessage());
+                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao verificar sessões da Ronda.").show();
+                });
+            }
+        });
     }
+
 
     @Override
     public void doOnConfirmed() {

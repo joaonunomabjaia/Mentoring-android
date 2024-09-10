@@ -121,6 +121,7 @@ public class SessionVM extends BaseViewModel {
                 // After saving, dismiss progress dialog and finish the activity on the main thread
                 runOnMainThread(() -> {
                     progress.dismiss(); // Dismiss the progress dialog
+                    getCurrentStep().changeToList();
                     getRelatedActivity().finish(); // Finish the activity
                 });
 
@@ -153,6 +154,7 @@ public class SessionVM extends BaseViewModel {
         for (Form form : this.forms) {
             if (form.equals(this.session.getForm())) {
                 form.setItemSelected(true);
+                break;
             }
         }
     }

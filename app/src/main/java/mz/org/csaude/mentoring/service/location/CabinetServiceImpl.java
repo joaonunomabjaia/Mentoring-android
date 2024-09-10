@@ -61,11 +61,13 @@ public class CabinetServiceImpl extends BaseServiceImpl<Cabinet> implements Cabi
     @Override
     public void saveOrUpdateCabinets(List<CabinetDTO> cabinets) throws SQLException {
         for (CabinetDTO dto: cabinets) {
-            boolean doesCabinetExist = this.cabinetDAO.checkCabinetExistance(dto.getUuid());
-            if(!doesCabinetExist){
+            Cabinet cabinet = this.cabinetDAO.getByUuid(dto.getUuid());
+            if(cabinet == null){
                 this.save(dto.getCabinet());
             } else {
-                this.update(dto.getCabinet());
+                Cabinet newCabinet = dto.getCabinet();
+                newCabinet.setId(cabinet.getId());
+                this.update(newCabinet);
             }
         }
     }

@@ -80,13 +80,14 @@ public class DistrictServiceImpl extends BaseServiceImpl<District> implements Di
     public District savedOrUpdateDistrict(District district) throws SQLException {
 
         District districts = this.districtDAO.getByUuid(district.getUuid());
+        Province province = this.provinceService.savedOrUpdateProvince(new ProvinceDTO(district.getProvince()));
         if(districts == null){
-            Province province = this.provinceService.savedOrUpdateProvince(new ProvinceDTO(district.getProvince()));
             district.setProvince(province);
             this.save(district);
             return district;
         } else {
             district.setId(districts.getId());
+            district.setProvince(province);
             this.update(district);
             return district;
         }
