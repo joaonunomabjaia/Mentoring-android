@@ -12,4 +12,5 @@
     <string name="no_forms_available">Não foram encontadas tabelas de competências.</string>
     <string name="interno">Interno</string>
     <string name="externo">Externo</string>
+    <string name="ronda_edit_error_msg">Não é possível editar uma ronda com sessões registadas.</string>
 </resources>

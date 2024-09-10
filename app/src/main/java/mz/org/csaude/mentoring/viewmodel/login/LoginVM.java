@@ -199,11 +199,13 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
     @Override
     public void doOnRestErrorResponse(String errormsg) {
-        if (Utilities.stringHasValue(errormsg)) {
-            Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
-        } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Utilizador ou senha inválida").show();
-        }
-        setAuthenticating(false);
+        runOnMainThread(()->{
+            if (Utilities.stringHasValue(errormsg)) {
+                Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
+            } else {
+                Utilities.displayAlertDialog(getRelatedActivity(), "Utilizador ou senha inválida").show();
+            }
+            setAuthenticating(false);
+        });
     }
 }

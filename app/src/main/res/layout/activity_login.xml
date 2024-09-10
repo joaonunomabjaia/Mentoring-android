@@ -77,7 +77,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/dimen_10dp"
             android:background="@drawable/edit_text_border"
-            android:drawableLeft="@drawable/ic_person"
+            android:drawableStart="@drawable/ic_person"
+            app:startIconTint="@color/colorPrimaryDark"
             android:inputType="text"
             android:padding="8dp"
             android:text="@={viewModel.userName}" />
@@ -91,8 +92,10 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_lock"
-            app:passwordToggleEnabled="true">
+            app:startIconDrawable="@drawable/ic_lock"
+            app:passwordToggleEnabled="true"
+            app:startIconTint="@color/colorPrimaryDark"
+            app:passwordToggleTint="@color/colorPrimaryDark">
         <EditText
             android:id="@+id/inPassword"
             android:layout_width="match_parent"
@@ -101,7 +104,6 @@
             android:inputType="textPassword"
             android:padding="8dp"
             android:layout_marginBottom="@dimen/dimen_10dp"
-            android:drawableLeft="@drawable/ic_lock"
             android:text="@={viewModel.userPassword}"/>
         </com.google.android.material.textfield.TextInputLayout>
         <CheckBox

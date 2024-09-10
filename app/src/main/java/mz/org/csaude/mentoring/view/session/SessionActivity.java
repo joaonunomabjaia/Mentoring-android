@@ -48,17 +48,19 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
 
         Intent intent = this.getIntent();
 
-        populateFormList();
+        getRelatedViewModel().getExecutorService().execute(()->{
+            populateFormList();
 
-        if (getApplicationStep().isApplicationStepEdit()) {
-            getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
-            getRelatedViewModel().setCurrRonda(getRelatedViewModel().getSession().getRonda());
-            getRelatedViewModel().setMentee(getRelatedViewModel().getSession().getTutored());
-            getRelatedViewModel().setSelectedForm();
-        } else {
-            getRelatedViewModel().setCurrRonda((Ronda) intent.getExtras().get("ronda"));
-            getRelatedViewModel().setMentee((Tutored) intent.getExtras().get("mentee"));
-        }
+            if (getApplicationStep().isApplicationStepEdit()) {
+                getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
+                getRelatedViewModel().setCurrRonda(getRelatedViewModel().getSession().getRonda());
+                getRelatedViewModel().setMentee(getRelatedViewModel().getSession().getTutored());
+                getRelatedViewModel().setSelectedForm();
+            } else {
+                getRelatedViewModel().setCurrRonda((Ronda) intent.getExtras().get("ronda"));
+                getRelatedViewModel().setMentee((Tutored) intent.getExtras().get("mentee"));
+            }
+        });
 
 
         setSupportActionBar(sessionBinding.toolbar.toolbar);
@@ -85,27 +87,24 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
     }
 
     private void populateFormList() {
-        // Fetch forms in a background thread
-        getRelatedViewModel().getExecutorService().execute(() -> {
-            List<Form> tutorForms = getRelatedViewModel().getTutorForms();
+        List<Form> tutorForms = getRelatedViewModel().getTutorForms();
 
-            // Update the UI on the main thread
-            runOnUiThread(() -> {
-                if (tutorForms != null && !tutorForms.isEmpty()) {
-                    // Initialize the adapter with the fetched forms
-                    formAdapter = new FormAdapter(sessionBinding.rcvForms, tutorForms, this);
+        // Update the UI on the main thread
+        runOnUiThread(() -> {
+            if (tutorForms != null && !tutorForms.isEmpty()) {
+                // Initialize the adapter with the fetched forms
+                formAdapter = new FormAdapter(sessionBinding.rcvForms, tutorForms, this);
 
-                    // Set up the RecyclerView layout manager and other properties
-                    RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                    sessionBinding.rcvForms.setLayoutManager(mLayoutManager);
-                    sessionBinding.rcvForms.setItemAnimator(new DefaultItemAnimator());
-                    sessionBinding.rcvForms.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-                    sessionBinding.rcvForms.setAdapter(formAdapter);
-                } else {
-                    // Handle the case where there are no forms to display (optional)
-                    Utilities.displayAlertDialog(this, getString(R.string.no_forms_available)).show();
-                }
-            });
+                // Set up the RecyclerView layout manager and other properties
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                sessionBinding.rcvForms.setLayoutManager(mLayoutManager);
+                sessionBinding.rcvForms.setItemAnimator(new DefaultItemAnimator());
+                sessionBinding.rcvForms.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+                sessionBinding.rcvForms.setAdapter(formAdapter);
+            } else {
+                // Handle the case where there are no forms to display (optional)
+                Utilities.displayAlertDialog(this, getString(R.string.no_forms_available)).show();
+            }
         });
     }
 
@@ -149,5 +148,11 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        getApplicationStep().changeToList();
+        super.onBackPressed();
     }
 }
