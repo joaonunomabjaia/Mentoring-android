@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.view.tutored.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,11 +55,22 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     }
 
     public void initAdapter() {
-        this.tutoreds = getRelatedViewModel().getAllTutoreds();
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+                 getRelatedViewModel().getTutoredsList();
+                this.tutoreds = getRelatedViewModel().getTutoreds();
+                        getActivity().runOnUiThread(() -> {
         if (Utilities.listHasElements(this.tutoreds)) {
             this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
             displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
         }
+                });
+            } catch (Exception e) {
+                // Log the error or handle it as necessary
+                Log.e("TutoredFragment", "Error loading data", e);
+
+            }
+        });
     }
 
 
@@ -67,7 +79,12 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
         super.onResume();
         this.rcvTutoreds = fragmentTutoredBinding.rcvTutoreds;
 
-        this.tutoreds = getRelatedViewModel().getAllTutoreds();
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+
+                getRelatedViewModel().getTutoredsList();
+                this.tutoreds = getRelatedViewModel().getTutoreds();
+                        getActivity().runOnUiThread(() -> {
 
         if (Utilities.listHasElements(tutoreds)) {
             initAdapter();
@@ -76,6 +93,13 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
             tutoredItemAdapter.notifyItemRangeRemoved(0, tutoreds.size());
 
         }
+                });
+            } catch (Exception e) {
+                // Log the error or handle it as necessary
+                Log.e("PersonalInfoFragment", "Error loading data", e);
+
+            }
+        });
     }
 
     @Override
