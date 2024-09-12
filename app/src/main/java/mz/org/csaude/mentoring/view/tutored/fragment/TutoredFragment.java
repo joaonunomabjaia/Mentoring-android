@@ -59,11 +59,12 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
             try {
                  getRelatedViewModel().getTutoredsList();
                 this.tutoreds = getRelatedViewModel().getTutoreds();
+                getRelatedViewModel().getAssociatedEmployees(this.tutoreds);
                         getActivity().runOnUiThread(() -> {
         if (Utilities.listHasElements(this.tutoreds)) {
-            this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
-            displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
-        }
+                this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
+                displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
+                }
                 });
             } catch (Exception e) {
                 // Log the error or handle it as necessary
@@ -135,6 +136,4 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     public BaseViewModel initViewModel() {
         return new ViewModelProvider(this).get(TutoredVM.class);
     }
-
-
 }
