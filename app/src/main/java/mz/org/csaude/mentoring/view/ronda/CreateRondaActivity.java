@@ -62,22 +62,25 @@ public class CreateRondaActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         Intent intent = this.getIntent();
-        if(intent!=null && intent.getExtras()!=null) {
-            title = (String) intent.getExtras().get("title");
-            if (getApplicationStep().isApplicationstepCreate()) {
-                rondaTypeOption = (RondaType) intent.getExtras().get("rondaType");
-                getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
-            } else {
-                Ronda ronda = (Ronda) intent.getExtras().get("ronda");
-                getRelatedViewModel().setRonda(ronda);
-                getRelatedViewModel().initRondaEdition();
-            }
-        }
 
+        getRelatedViewModel().getExecutorService().execute(()->{
+            initAdapters();
+            if(intent!=null && intent.getExtras()!=null) {
+                title = (String) intent.getExtras().get("title");
+                if (getApplicationStep().isApplicationstepCreate()) {
+                    rondaTypeOption = (RondaType) intent.getExtras().get("rondaType");
+                    getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
+                } else {
+                    Ronda ronda = (Ronda) intent.getExtras().get("ronda");
+                    getRelatedViewModel().setRonda(ronda);
+                    getRelatedViewModel().initRondaEdition();
+                }
+            }
+        });
 
 
         getSupportActionBar().setTitle(title);
-        initAdapters();
+
         rondaBinding.rondaStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,44 +125,46 @@ public class CreateRondaActivity extends BaseActivity {
     }
 
     public void reloadMenteesAdapter() {
-         ArrayAdapter<Tutored> menteesAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getrondaMenteeList());
-        rondaBinding.autCmpMentees.setThreshold(1);
-        rondaBinding.autCmpMentees.setAdapter(menteesAdapter);
-        rondaBinding.autCmpMentees.setOnFocusChangeListener((view, b) -> {
-            rondaBinding.autCmpMentees.showDropDown();
+        runOnUiThread(() -> {
+            ArrayAdapter<Tutored> menteesAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getrondaMenteeList());
+            rondaBinding.autCmpMentees.setThreshold(1);
+            rondaBinding.autCmpMentees.setAdapter(menteesAdapter);
+            rondaBinding.autCmpMentees.setOnFocusChangeListener((view, b) -> {
+                rondaBinding.autCmpMentees.showDropDown();
+            });
         });
     }
 
     public void reloadDistrictAdapter() {
-        districtAdapter = new ListableSpinnerAdapter(CreateRondaActivity.this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
-        rondaBinding.spnDistrict.setAdapter(districtAdapter);
-        rondaBinding.setDistrictAdapter(districtAdapter);
+        runOnUiThread(() -> {
+            districtAdapter = new ListableSpinnerAdapter(CreateRondaActivity.this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
+            rondaBinding.spnDistrict.setAdapter(districtAdapter);
+            rondaBinding.setDistrictAdapter(districtAdapter);
+        });
     }
 
     public void reloadHealthFacility(){
-        healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
-        rondaBinding.spnHealthFacility.setAdapter(healthFacilityAdapter);
-        rondaBinding.setHealthFacilityAdapter(healthFacilityAdapter);
-
+        runOnUiThread(() -> {
+            healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
+            rondaBinding.spnHealthFacility.setAdapter(healthFacilityAdapter);
+            rondaBinding.setHealthFacilityAdapter(healthFacilityAdapter);
+        });
     }
 
     private void initAdapters() {
-        setupMentorTypeAdapter();
-        // Fetch provinces in a background thread
-        getRelatedViewModel().getExecutorService().execute(() -> {
-            try {
-                List<Province> provinces = getRelatedViewModel().getAllProvince();
-                // Update the UI on the main thread
-                runOnUiThread(() -> {
-                    // Initialize the adapter with the fetched provinces
-                    provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-                    rondaBinding.spnProvince.setAdapter(provinceAdapter);
-                    rondaBinding.setProvinceAdapter(provinceAdapter);
-                });
-            } catch (SQLException e) {
-                runOnUiThread(() -> handleSQLException(e));
-            }
-        });
+        runOnUiThread(this::setupMentorTypeAdapter);
+        try {
+            List<Province> provinces = getRelatedViewModel().getAllProvince();
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                // Initialize the adapter with the fetched provinces
+                provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
+                rondaBinding.spnProvince.setAdapter(provinceAdapter);
+                rondaBinding.setProvinceAdapter(provinceAdapter);
+            });
+        } catch (SQLException e) {
+            runOnUiThread(() -> handleSQLException(e));
+        }
     }
 
     private void setupMentorTypeAdapter() {

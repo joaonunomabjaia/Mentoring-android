@@ -70,6 +70,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     private List<SimpleValue> menteeLabors;
 
     private boolean ONGEmployee;
+    private List<Tutored> tutoreds;
 
     public TutoredVM(@NonNull Application application) {
         super(application);
@@ -171,11 +172,17 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     public List<Tutored> getAllTutoreds() {
         try {
-            return tutoredService.getAll();
+            tutoreds = tutoredService.getAll();
+            return tutoreds;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public List<Tutored> getTutoreds() {
+        return tutoreds;
+    }
+
 
     public List<Province> getAllProvince() throws SQLException {
         List<Province> provinceList = new ArrayList<>();

@@ -54,7 +54,11 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public List<Tutored> getAll() throws SQLException {
-        return this.tutoredDao.queryForAll();
+        List<Tutored> tutoreds = this.tutoredDao.queryForAll();
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
     @Override

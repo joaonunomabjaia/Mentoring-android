@@ -70,7 +70,7 @@
                         android:layout_height="wrap_content"
                         android:text="Não há registos para visualizar!"
                         android:textColor="@color/colorPrimary"
-                        android:visibility="@{Utilities.listHasElements(viewModel.allTutoreds) ? View.GONE : View.VISIBLE}"
+                        android:visibility="@{Utilities.listHasElements(viewModel.tutoreds) ? View.GONE : View.VISIBLE}"
                         android:textSize="15sp"
                         android:gravity="center_vertical|center_horizontal"
                         android:padding="10dp"/>
@@ -79,7 +79,7 @@
                         android:id="@+id/rcv_tutoreds"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="@{Utilities.listHasElements(viewModel.allTutoreds) ? View.VISIBLE : View.GONE}"
+                        android:visibility="@{Utilities.listHasElements(viewModel.tutoreds) ? View.VISIBLE : View.GONE}"
                         android:scrollbars="vertical" />
                 </LinearLayout>
             </ScrollView>

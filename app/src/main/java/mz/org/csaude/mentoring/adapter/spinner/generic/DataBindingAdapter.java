@@ -35,7 +35,21 @@ public class DataBindingAdapter {
 
     @InverseBindingAdapter(attribute = "selectedOpt", event = "selectedOptAttrChanged")
     public static Listble getSelectedOpt(final AppCompatSpinner spinner) {
-        return (Listble)spinner.getSelectedItem();
+        if (spinner == null || spinner.getAdapter() == null || spinner.getAdapter().getCount() == 0) {
+            // If spinner or its adapter is null, or the adapter has no items, return null
+            return null;
+        }
+
+        int selectedPosition = spinner.getSelectedItemPosition();
+
+        // Ensure the selected position is valid
+        if (selectedPosition < 0 || selectedPosition >= spinner.getAdapter().getCount()) {
+            // Return null if the selected position is invalid
+            return null;
+        }
+
+        // Return the selected item if everything is valid
+        return (Listble) spinner.getItemAtPosition(selectedPosition);
     }
 
     private static int getIndexOfItem(AppCompatSpinner spinner, Listble item){

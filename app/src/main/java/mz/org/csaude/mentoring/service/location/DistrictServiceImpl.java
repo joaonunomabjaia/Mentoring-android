@@ -53,17 +53,25 @@ public class DistrictServiceImpl extends BaseServiceImpl<District> implements Di
 
     @Override
     public List<District> getAll() throws SQLException {
-        return this.districtDAO.queryForAll();
+        List<District> districts = this.districtDAO.queryForAll();
+        for (District district : districts) {
+            district.setProvince(getApplication().getProvinceService().getById(district.getProvinceId()));
+        }
+        return districts;
     }
 
     @Override
     public District getById(int id) throws SQLException {
-        return this.districtDAO.queryForId(id);
+        District district = this.districtDAO.queryForId(id);
+        district.setProvince(getApplication().getProvinceService().getById(district.getProvinceId()));
+        return district;
     }
 
     @Override
     public District getByuuid(String uuid) throws SQLException {
-        return this.districtDAO.getByUuid(uuid);
+        District district = this.districtDAO.getByUuid(uuid);
+        district.setProvince(getApplication().getProvinceService().getById(district.getProvinceId()));
+        return district;
     }
 
 
