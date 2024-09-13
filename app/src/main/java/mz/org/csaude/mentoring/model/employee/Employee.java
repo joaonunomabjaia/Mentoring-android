@@ -182,7 +182,7 @@ public class Employee extends BaseModel implements Listble {
         this.professionalCategoryId = professionalCategory.getId();
     }
 
-    public int getTrainingYear() {
+    public Integer getTrainingYear() {
         return trainingYear;
     }
 
