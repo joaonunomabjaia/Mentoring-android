@@ -68,6 +68,8 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
    private EmployeeService employeeService;
 
+   private Dialog loading;
+
     public TutoredVM(@NonNull Application application) {
         super(application);
         this.tutoredService = getApplication().getTutoredService();
@@ -173,14 +175,13 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         return this.tutoreds;
     }
 
-    public void getTutoredsList() {
-        getExecutorService().execute(()-> {
-            try {
-                setTutoreds(tutoredService.getAll());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+    public List<Tutored> getTutoredsList() {
+        try {
+            setTutoreds(tutoredService.getAll());
+            return this.tutoreds;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Province> getAllProvince() throws SQLException {
@@ -201,6 +202,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     }
 
     private void doSave(){
+        loading = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
         getExecutorService().execute(() -> {
             try {
                 tutored.setSyncStatus(SyncSatus.SENT);
@@ -225,6 +227,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
                 getApplication().isServerOnline(this);
             }
             catch (Exception e) {
+                dismissProgress(loading);
                 runOnMainThread(() -> {
                     e.printStackTrace();
                     Utilities.displayAlertDialog(getRelatedActivity(), "Failed to save Mentorando.").show();
@@ -236,29 +239,30 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     @Override
     public void doOnResponse(String flag, List<Tutored> objects) {
         try {
-        getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
-        this.tutoredService.savedOrUpdateTutored(tutored);
-        this.getApplication().getLocationService().saveOrUpdate(location);
+            getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
+            this.tutoredService.savedOrUpdateTutored(tutored);
+            this.getApplication().getLocationService().saveOrUpdate(location);
 
-        runOnMainThread(()->{
-            Dialog progressDialog = Utilities.showLoadingDialog(getRelatedActivity(), "Processando...");
-            dismissProgress(progressDialog);
-            Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando criado com sucesso.").show();
-            Map<String, Object> params = new HashMap<>();
-            params.put("createdTutored", tutored);
-            getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);
-        });
-            } catch (SQLException e) {
-                Log.e("MentorVM", e.getMessage());
-                // Handle any exception and dismiss the progress dialog
-                runOnMainThread(() -> {
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar o Mentoando.").show();
-                });
-            }
+            runOnMainThread(()->{
+                dismissProgress(loading);
+                Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando criado com sucesso.").show();
+                Map<String, Object> params = new HashMap<>();
+                params.put("createdTutored", tutored);
+                getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);
+            });
+        } catch (SQLException e) {
+            dismissProgress(loading);
+            Log.e("MentorVM", e.getMessage());
+            // Handle any exception and dismiss the progress dialog
+            runOnMainThread(() -> {
+                Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar o Mentoando.").show();
+            });
+        }
     }
 
     @Override
     public void doOnRestErrorResponse(String errorMsg) {
+        dismissProgress(loading);
         runOnMainThread(()-> {
             Utilities.displayAlertDialog(getRelatedActivity(), errorMsg).show();
         });
@@ -267,8 +271,6 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     public void save(){
         this.doSave();
     }
-
-
 
     @Bindable
     public Tutored getTutored() {
@@ -367,15 +369,8 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         return districts;
     }
 
-    public void setDistricts(List<District> districts) {
-        this.districts = districts;
-    }
-
     public List<HealthFacility> getHealthFacilities() {
         return healthFacilities;
-    }
-    public void setHealthFacilities(List<HealthFacility> healthFacilities) {
-        this.healthFacilities = healthFacilities;
     }
 
     private void loadMeteeLabors(){
@@ -384,10 +379,6 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     }
     public List<SimpleValue> getMenteeLabors() {
         return menteeLabors;
-    }
-
-    public void setMenteeLabors(List<SimpleValue> menteeLabors) {
-        this.menteeLabors = menteeLabors;
     }
 
     @Bindable
@@ -479,11 +470,9 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     @Override
     public void onServerStatusChecked(boolean isOnline) {
         if (isOnline) {
-            runOnMainThread(()-> {
-                Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
-            });
             getApplication().getTutoredRestService().restPostTutored(tutored, this);
         } else {
+            dismissProgress(loading);
             runOnMainThread(()-> {
                 Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(mz.org.csaude.mentoring.R.string.server_unavailable)).show();
             });
@@ -491,15 +480,6 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     }
     public void nextStep() {
 
-    }
-
-    public List<Tutored> loadMenteesByMentor(Tutor tutor) {
-
-        return null;
-    }
-
-    public PersonalInfoFragment getPersonalInfoFragment(){
-        return (PersonalInfoFragment) super.getRelatedFragment();
     }
 
     public Employee getEmployee(){
@@ -514,17 +494,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         this.tutoreds = tutoreds;
     }
 
-    public List<Partner> getPartners() {
-        return partners;
-    }
-
     public void setPartners(List<Partner> partners) {
         this.partners = partners;
-    }
-
-    public void getAssociatedEmployees(List<Tutored> tutoreds) throws SQLException {
-        for (Tutored tutored: tutoreds) {
-            tutored.setEmployee(this.employeeService.getById(tutored.getEmployeeId()));
-        }
     }
 }

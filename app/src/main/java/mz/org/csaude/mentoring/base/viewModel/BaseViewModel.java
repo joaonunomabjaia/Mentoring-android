@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.base.viewModel;
 
 import android.app.Application;
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -208,9 +209,13 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
         getRelatedActivity().runOnUiThread(task);
     }
 
-    protected void dismissProgress(Dialog progress) {
+    public void dismissProgress(Dialog progress) {
         if (progress != null && progress.isShowing()) {
             progress.dismiss();
         }
+    }
+
+    protected SharedPreferences getEncryptedSharedPreferences(){
+        return getApplication().getEncryptedSharedPreferences();
     }
 }

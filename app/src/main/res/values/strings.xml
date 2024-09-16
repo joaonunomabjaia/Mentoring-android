@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mentoring</string>
     <string name="title_activity_main">MainActivity</string>
@@ -14,77 +15,105 @@
     <string name="menu_slideshow">Slideshow</string>
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
-    <string name="remover">Remover</string>
-    <string name="editar">Editar</string>
-    <string name="session_date">Data da Avaliação</string>
-    <string name="start">Hora de inicio</string>
-    <string name="end_time">Hora de Término</string>
-    <string name="provincia">Província</string>
-    <string name="distrito">Distrito</string>
-    <string name="hf">Unidade Sanitária</string>
-    <string name="cabinet">Gabinete</string>
-    <string name="time_of_day">Horário</string>
-    <string name="door">Porta</string>
+    <string name="remover">Remove</string>
+    <string name="editar">Edit</string>
+    <string name="session_date">Evaluation Date</string>
+    <string name="start">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="provincia">Province</string>
+    <string name="distrito">District</string>
+    <string name="hf">Health Facility</string>
+    <string name="cabinet">Cabinet</string>
+    <string name="time_of_day">Schedule</string>
+    <string name="door">Door</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-    <string name="login">Entrar</string>
-    <string name="new_tutored">New Tutored</string>
+    <string name="welcome">"Welcome!"</string>
+    <string name="invalid_username">Not a valid user</string>
+    <string name="invalid_password">Password must be longer than 5 characters</string>
+    <string name="login_failed">"Authentication failed"</string>
+    <string name="login">Sign in</string>
     <string name="tutoreds_list">Tutored List</string>
-    <string name="record_successfully_saved">Record successfully saved</string>
-    <string name="record_sucessfully_removed">Record successfully removed</string>
+    <string name="new_tutored">New Tutored</string>
+    <string name="record_successfully_saved">Record saved successfully.</string>
+    <string name="record_sucessfully_removed">Record removed successfully</string>
     <string name="submit">Save</string>
     <string name="name">Name</string>
     <string name="surname">Surname</string>
-    <string name="telephone">Telephone</string>
+    <string name="telephone">Phone</string>
     <string name="career">Career</string>
     <string name="position">Position</string>
-    <string name="required_field">Required</string>
-    <string name="vinculo_laboral">Vinculo Laboral</string>
-    <string name="phone_number_invalid">Invalid Phone Number</string>
-    <string name="email_invalid">Invalid Email</string>
-    <string name="professional_category">Categoria Profissional</string>
+    <string name="vinculo_laboral">Work Contract</string>
+    <string name="required_field">Required field</string>
+    <string name="phone_number_invalid">Invalid phone number</string>
+    <string name="email_invalid">Invalid email</string>
     <string name="email">Email</string>
-    <string name="nuit">Nuit</string>
-    <string name="local">Local</string>
-    <string name="session_closure">Fecho da Sessão</string>
-    <string name="session_submission_state">Período de submissão</string>
-    <string name="lista_de_mentorandos_seleccionados">Lista de Mentorandos Seleccionados</string>
-    <string name="nome_nuit">Nome/NUIT</string>
-    <string name="iniciar_ronda_mentorados">Iniciar Ronda - Mentorados</string>
-    <string name="back">Voltar</string>
-    <string name="save_and_continue">Gravar e Continuar</string>
-    <string name="save">Gravar</string>
-    <string name="print">Imprimir</string>
-    <string name="server_unavailable">Não foi possivel estabelecer a ligação com o servidor, por favor verifique a sua ligação a Internet ou contacte o administrador.</string>
-    <string name="sess_es_de_mentoria">Sessões de Mentoria</string>
-    <string name="fecho_da_sess_o">Fecho da Sessão</string>
-    <string name="sync_now">Sincronizar Agora</string>
+    <string name="professional_category">Professional Category</string>
+    <string name="nuit">Tax ID</string>
+    <string name="local">Location</string>
+    <string name="session_closure">Session Closure</string>
+    <string name="back">Back</string>
+    <string name="session_submission_state">Submission Period</string>
+    <string name="lista_de_mentorandos_seleccionados">Selected Mentored List</string>
+    <string name="nome_nuit">Name/Tax ID</string>
+    <string name="iniciar_ronda_mentorados">Start Round - Mentored</string>
+    <string name="save_and_continue">Save and Continue</string>
+    <string name="save">Save</string>
+    <string name="print">Print</string>
+    <string name="server_unavailable">Could not connect to the server, please check your Internet connection or contact the administrator.</string>
+    <string name="sess_es_de_mentoria">Mentoring Sessions</string>
+    <string name="fecho_da_sess_o">Session Closure</string>
+    <string name="sync_now">Sync Now</string>
     <string name="session_sync_time_key">session_sync_time_key</string>
     <string name="metadata_sync_time_key">metadata_sync_time_key</string>
-    <string name="no_record_found">Nenhum registo encontrado.</string>
-    <string name="download_success">Download do recurso terminado com sucesso.</string>
-    <string name="download_failed">Não foi possivel baixaro recurso desejado por ocorrencia de um erro inesperado.</string>
-    <string name="permission_error">Não foi possível baixar o recurso por falta de permissão para armazenamento local.</string>
-    <string name="max_mentees_reached">O número máximo de mentorandos é 8</string>
-    <string name="start_date_required">A data de início da ronda é obrigatória.</string>
-    <string name="health_facility_required">A unidade sanitária é obrigatória</string>
-    <string name="mentees_required">Deve seleccionar mentorandos para compora aronda.</string>
-    <string name="permission_print_error">Não foi possivel imprimir o relatório por falta de permissão</string>
-    <string name="processando">Processando...</string>
-    <string name="no_resource_selected_error">Não foram selecionados recursos recomendados.</string>
-    <string name="session_update_error">Erro ao tentar salvar recursos recomendados.</string>
-    <string name="no_doors_available">Não foram encontrados registos de portas.</string>
-    <string name="no_categories_available">Não foram encontradas categorias.</string>
-    <string name="no_forms_available">Não foram encontadas tabelas de competências.</string>
-    <string name="interno">Interno</string>
-    <string name="externo">Externo</string>
-    <string name="ronda_edit_error_msg">Não é possível editar uma ronda com sessões registadas.</string>
-</resources>
+    <string name="no_record_found">No record found.</string>
+    <string name="download_success">Resource download completed successfully.</string>
+    <string name="download_failed">Could not download the resource due to an unexpected error.</string>
+    <string name="permission_error">Could not download the resource due to lack of permission for local storage.</string>
+    <string name="max_mentees_reached">The maximum number of mentees is 8</string>
+    <string name="start_date_required">The start date of the round is required.</string>
+    <string name="health_facility_required">The health facility is required</string>
+    <string name="mentees_required">You must select mentees to compose the round.</string>
+    <string name="permission_print_error">Could not print the report due to lack of permission</string>
+    <string name="processando">Processing…</string>
+    <string name="no_resource_selected_error">No recommended resources were selected.</string>
+    <string name="session_update_error">Error trying to save recommended resources.</string>
+    <string name="no_doors_available">No door records found.</string>
+    <string name="no_categories_available">No categories found.</string>
+    <string name="no_forms_available">No competency tables found.</string>
+    <string name="interno">Internal</string>
+    <string name="externo">External</string>
+    <string name="ronda_edit_error_msg">It is not possible to edit a round with registered sessions.</string>
+    <string name="dialog_title">Session Time Expired</string>
+    <string name="dialog_message">You will be logged out in %1$d seconds due to inactivity. Do you want to extend your session?</string>
+    <string name="extend_session">Extend Session</string>
+    <string name="logout">Log out</string>
 
+    <!-- SettingVM strings -->
+    <string name="invalid_sync_interval">Invalid sync interval.</string>
+    <string name="invalid_auto_logout_time">Invalid auto logout time.</string>
+    <string name="syncing_data_please_wait">Synchronizing data, please wait…</string>
+    <string name="sync_completed_successfully">Synchronization completed successfully.</string>
+    <string name="sync_failed">Synchronization failed.</string>
+    <string name="invalid_sync_interval_range">Please enter a sync interval between %d and %d minutes.</string>
+    <string name="invalid_auto_logout_time_range">Please enter an auto logout time between %d and %d minutes.</string>
+    <string name="invalid_sync_interval_range_hours">Please enter a sync interval between %d and %d hours.</string>
+    <string name="auto_logout_time_validated_successfully">Configuration applied successfully</string>
+
+    <string-array name="languages">
+        <item>English</item>
+        <item>Português</item>
+        <item>Français</item>
+        <!-- Add more languages as needed -->
+    </string-array>
+
+    <string-array name="language_codes">
+        <item>en</item>
+        <item>pt</item>
+        <item>fr</item>
+        <!-- Add corresponding language codes -->
+    </string-array>
+</resources>

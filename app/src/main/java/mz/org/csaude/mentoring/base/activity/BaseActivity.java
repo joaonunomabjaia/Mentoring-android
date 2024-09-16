@@ -1,13 +1,19 @@
 package mz.org.csaude.mentoring.base.activity;
 
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.Menu;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.pm.PackageInfoCompat;
@@ -16,31 +22,40 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.common.ApplicationStep;
-import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.view.login.LoginActivity;
 
 /**
- * Generic class that represent all application activities
+ * Generic class that represents all application activities.
  */
 public abstract class BaseActivity extends AppCompatActivity implements GenericActivity {
 
     /**
-     * {@link BaseViewModel} Activity related viewModel
+     * Activity-related ViewModel.
      */
     protected BaseViewModel relatedViewModel;
 
     /**
-     * {@link PackageInfo} application info
+     * Application package info.
      */
     private PackageInfo pinfo;
 
     protected static final int REQUEST_WRITE_STORAGE = 112;
-    private Tutored tutored;
-
     private Integer positionRemoved;
+
+    // Constants for auto logout
+    private static final long WARNING_BEFORE_LOGOUT = 10000; // 10 seconds before logout
+    private Handler autoLogoutHandler;
+    private Runnable autoLogoutRunnable;
+    private CountDownTimer countDownTimer;
+
+    private AlertDialog alertDialog;
+
+    private long autoLogoutDelay;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,20 +64,17 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
         this.relatedViewModel = initViewModel();
 
         Intent intent = this.getIntent();
-        if(intent != null){
+        if (intent != null) {
             Bundle bundle = intent.getExtras();
-            if(bundle != null) {
-                if (this.relatedViewModel != null) {
-                    if (bundle.getSerializable("relatedRecord") != null) {
-                        this.relatedViewModel.setSelectedRecord(bundle.getSerializable("relatedRecord"));
-                    }
+            if (bundle != null && this.relatedViewModel != null) {
+                if (bundle.getSerializable("relatedRecord") != null) {
+                    this.relatedViewModel.setSelectedRecord(bundle.getSerializable("relatedRecord"));
                 }
             }
         }
 
         if (this.relatedViewModel != null) {
             this.relatedViewModel.setRelatedActivity(this);
-            //this.relatedViewModel.initLoadingDialog();
         }
 
         try {
@@ -71,91 +83,251 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
             e.printStackTrace();
         }
 
+        autoLogoutDelay = getAutoLogoutDelay();
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("mz.org.csaude.mentoring.ACTION_LOGOUT");
 
+        // Initialize the auto-logout handler and runnable
+        autoLogoutHandler = new Handler();
+        autoLogoutRunnable = this::showLogoutWarningDialog;
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
-
         if (this.relatedViewModel != null) {
             this.relatedViewModel.preInit();
+        }
+        if (isAutoLogoutEnabled()) {
+            resetLogoutTimer(); // Start/reset the logout timer on activity resume
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onPause() {
+        if (isAutoLogoutEnabled()) {
+            stopLogoutTimer(); // Stop the logout timer when the activity is paused
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        if (isAutoLogoutEnabled()) {
+            resetLogoutTimer(); // Reset the logout timer on user interaction
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (isAutoLogoutEnabled()) {
+            stopLogoutTimer(); // Remove any callbacks to prevent leaks
+        }
+        super.onDestroy();
     }
 
     /**
+     * Determines whether auto logout is enabled for this activity.
+     * Subclasses can override this method to disable auto logout.
      *
-     * @return application version number
+     * @return true if auto logout is enabled, false otherwise
      */
-    public long getAppVersionNumber(){
+    protected boolean isAutoLogoutEnabled() {
+        return true; // Auto logout is enabled by default
+    }
+
+    public void updateAutoLogoutTime(int logoutTimeMinutes) {
+        // Update the auto logout delay
+        autoLogoutDelay = logoutTimeMinutes * 60 * 1000L; // Convert minutes to milliseconds
+
+        // Reset the logout timer with the new delay
+        resetLogoutTimer();
+    }
+
+
+    private void resetLogoutTimer() {
+        stopLogoutTimer(); // Remove any pending callbacks
+        autoLogoutDelay = getAutoLogoutDelay(); // Update the auto logout delay
+        long warningTime = autoLogoutDelay - WARNING_BEFORE_LOGOUT; // Calculate when to show the warning dialog
+
+        // Ensure warningTime is not negative
+        if (warningTime < 0) {
+            warningTime = 0;
+        }
+
+        autoLogoutHandler.postDelayed(autoLogoutRunnable, warningTime); // Start a new timer to show the warning dialog
+    }
+
+    private void stopLogoutTimer() {
+        autoLogoutHandler.removeCallbacks(autoLogoutRunnable);
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+    }
+
+    /**
+     * Retrieves the auto logout delay from encrypted shared preferences.
+     *
+     * @return Auto logout delay in milliseconds
+     */
+    private long getAutoLogoutDelay() {
+        MentoringApplication app = (MentoringApplication) getApplication();
+        SharedPreferences encryptedSharedPreferences = app.getEncryptedSharedPreferences();
+        String logoutTimeStr = encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, "5");
+
+        int logoutTimeMinutes;
+        try {
+            logoutTimeMinutes = Integer.parseInt(logoutTimeStr);
+        } catch (NumberFormatException e) {
+            logoutTimeMinutes = 5; // Default to 5 minutes if invalid
+        }
+        return logoutTimeMinutes * 60 * 1000L; // Convert minutes to milliseconds
+    }
+
+    private void showLogoutWarningDialog() {
+        // Check if the activity is finishing or destroyed
+        if (isFinishing() || isDestroyed()) {
+            return; // Do not show the dialog if the activity is not in a valid state
+        }
+
+        // Initialize the dialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.dialog_title));
+
+        // Set the initial message with the remaining time
+        builder.setMessage(String.format(getString(R.string.dialog_message), 10));
+        builder.setCancelable(false);
+        builder.setPositiveButton(getString(R.string.extend_session), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                resetLogoutTimer(); // Reset the timer when the user extends the session
+                if (countDownTimer != null) {
+                    countDownTimer.cancel();
+                }
+            }
+        });
+        builder.setNegativeButton(getString(R.string.logout), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                logoutUser(); // Log out immediately
+            }
+        });
+
+        alertDialog = builder.create();
+
+        // Show the dialog on the UI thread
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing() && !isDestroyed()) {
+                    alertDialog.show();
+                    startCountDown(); // Start the countdown
+                }
+            }
+        });
+    }
+
+    private void startCountDown() {
+        final long totalTime = WARNING_BEFORE_LOGOUT; // Total time in milliseconds (10 seconds)
+        final long countDownInterval = 1000; // Countdown interval (1 second)
+
+        countDownTimer = new CountDownTimer(totalTime, countDownInterval) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // Update the dialog message with the remaining time
+                long secondsRemaining = millisUntilFinished / 1000;
+                String message = String.format(getString(R.string.dialog_message), secondsRemaining);
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.setMessage(message);
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
+                }
+                logoutUser(); // Log out when the time is up
+            }
+        }.start();
+    }
+
+    private void logoutUser() {
+        // Perform logout action (clear session, navigate to login screen, etc.)
+        // Navigate to LoginActivity
+        Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    /**
+     * @return Application version number
+     */
+    public long getAppVersionNumber() {
         return PackageInfoCompat.getLongVersionCode(pinfo);
     }
 
     /**
-     *
-     * @return application version name
+     * @return Application version name
      */
-    public String getAppVersionName(){
+    public String getAppVersionName() {
         return pinfo.versionName;
     }
 
     /**
-     * Forward from current activity to a new one passed on the param without finishing current one
-     * @param clazz target activity
+     * Navigate from the current activity to a new one without finishing the current one.
+     *
+     * @param clazz Target activity class
      */
-    public void nextActivity(Class clazz){
+    public void nextActivity(Class clazz) {
         nextActivity(clazz, null, false);
     }
 
     /**
-     * Forward from current activity to a new one passed on the param finishing current one
-     * @param clazz target activity
+     * Navigate from the current activity to a new one, finishing the current one.
+     *
+     * @param clazz Target activity class
      */
-    public void nextActivityFinishingCurrent(Class clazz){
+    public void nextActivityFinishingCurrent(Class clazz) {
         nextActivity(clazz, null, true);
     }
 
     /**
-     * Forward from current activity to a new one passed on the param without finishing current one, sending params
+     * Navigate from the current activity to a new one without finishing the current one, sending parameters.
      *
-     * @param clazz target activity
-     * @param params params to be sent to the other activity
+     * @param clazz  Target activity class
+     * @param params Parameters to be sent
      */
-    public void nextActivity(Class clazz, Map<String, Object> params){
+    public void nextActivity(Class clazz, Map<String, Object> params) {
         nextActivity(clazz, params, false);
     }
 
     /**
-     * Forward from current activity to a new one passed on the param finishing current one, sending params
+     * Navigate from the current activity to a new one, finishing the current one, sending parameters.
      *
-     * @param clazz target activity
-     * @param params params to be sent to the other activity
+     * @param clazz  Target activity class
+     * @param params Parameters to be sent
      */
-    public void nextActivityFinishingCurrent(Class clazz, Map<String, Object> params){
+    public void nextActivityFinishingCurrent(Class clazz, Map<String, Object> params) {
         nextActivity(clazz, params, true);
     }
 
     /**
-     * Move from one {@link android.app.Activity} to another
+     * Move from one activity to another.
      *
-     * @param clazz target activity
-     * @param params params to be sent
-     * @param finishCurrentActivity condition to finish or not the current activity
+     * @param clazz                 Target activity class
+     * @param params                Parameters to be sent
+     * @param finishCurrentActivity Whether to finish the current activity
      */
-    private void nextActivity(Class clazz, Map<String, Object> params, boolean finishCurrentActivity){
-
+    private void nextActivity(Class clazz, Map<String, Object> params, boolean finishCurrentActivity) {
         Intent intent = new Intent(getApplication(), clazz);
         Bundle bundle = new Bundle();
 
-        if (params != null && params.size() > 0){
+        if (params != null && params.size() > 0) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 if (entry.getValue() instanceof Serializable) {
                     bundle.putSerializable(entry.getKey(), (Serializable) entry.getValue());
@@ -167,99 +339,90 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
         if (finishCurrentActivity) finish();
     }
 
-    public <T extends BaseActivity> void nextActivityWithGenericParams(Class<T> clazz){
+    public <T extends BaseActivity> void nextActivityWithGenericParams(Class<T> clazz) {
         Map<String, Object> params = new HashMap<>();
-        //params.put("user", getCurrentUser());
-        nextActivity(clazz,params);
+        nextActivity(clazz, params);
     }
 
-    public <T extends BaseActivity> void nextActivityFinishingCurrentWithGenericParams(Class<T> clazz){
+    public <T extends BaseActivity> void nextActivityFinishingCurrentWithGenericParams(Class<T> clazz) {
         Map<String, Object> params = new HashMap<>();
-        //params.put("user", getCurrentUser());
-        nextActivity(clazz,params);
+        nextActivity(clazz, params);
         finish();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-       // getMenuInflater().inflate(R.menu.toolbar_items, menu);
+        // Inflate your menu here if needed
         return true;
     }
 
     @Override
     public void onBackPressed() {
-        /*if (this instanceof  LoginActivity){
-            finishAffinity();
-            System.exit(0);
-        }else*/
-            super.onBackPressed();
+        super.onBackPressed();
     }
 
     /**
-     *
-     * @return the related {@link BaseViewModel}
+     * @return The related ViewModel
      */
     public BaseViewModel getRelatedViewModel() {
         return relatedViewModel;
     }
 
     /**
-     *
-     * @return the application current {@link User}
+     * @return The application's current User
      */
     public User getCurrentUser() {
         return ((MentoringApplication) getApplication()).getAuthenticatedUser();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_INIT}
+     * Change the current ApplicationStep to STEP_INIT
      */
-    protected void changeApplicationStepToInit(){
+    protected void changeApplicationStepToInit() {
         getApplicationStep().changeToInit();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_LIST}
+     * Change the current ApplicationStep to STEP_LIST
      */
-    protected void changeApplicationStepToList(){
+    protected void changeApplicationStepToList() {
         this.getApplicationStep().changeToList();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_DISPLAY}
+     * Change the current ApplicationStep to STEP_DISPLAY
      */
-    protected void changeApplicationStepToDisplay(){
+    protected void changeApplicationStepToDisplay() {
         getApplicationStep().changeToDisplay();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_EDIT}
+     * Change the current ApplicationStep to STEP_EDIT
      */
-    protected void changeApplicationStepToEdit(){
+    protected void changeApplicationStepToEdit() {
         getApplicationStep().changeToEdit();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_SAVE}
+     * Change the current ApplicationStep to STEP_SAVE
      */
-    protected void changeApplicationStepToSave(){
+    protected void changeApplicationStepToSave() {
         getApplicationStep().changeToSave();
     }
 
     /**
-     * Change the current {@link ApplicationStep} to {@link ApplicationStep#STEP_CREATE}
+     * Change the current ApplicationStep to STEP_CREATE
      */
-    protected void changeApplicationStepToCreate(){
+    protected void changeApplicationStepToCreate() {
         getApplicationStep().changetocreate();
     }
 
-    protected void changeApplicationStepToDownload(){
+    protected void changeApplicationStepToDownload() {
         getApplicationStep().changetoDownload();
     }
 
     /**
-     *
-     * @return the application current step
+     * @return The application's current step
      */
     public ApplicationStep getApplicationStep() {
         return ((MentoringApplication) getApplication()).getApplicationStep();
@@ -289,8 +452,7 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
         this.positionRemoved = positionRemoved;
     }
 
-    public void displaySearchResults(){
-
+    public void displaySearchResults() {
+        // Implementation for displaying search results
     }
-
 }

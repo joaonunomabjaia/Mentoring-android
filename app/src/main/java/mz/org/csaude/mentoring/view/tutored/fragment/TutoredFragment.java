@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.view.tutored.fragment;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,18 +56,19 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     }
 
     public void initAdapter() {
+        Dialog loading = Utilities.showLoadingDialog(getMyActivity(), getString(R.string.processando));
         getRelatedViewModel().getExecutorService().execute(() -> {
             try {
-                 getRelatedViewModel().getTutoredsList();
-                this.tutoreds = getRelatedViewModel().getTutoreds();
-                getRelatedViewModel().getAssociatedEmployees(this.tutoreds);
-                        getActivity().runOnUiThread(() -> {
-        if (Utilities.listHasElements(this.tutoreds)) {
-                this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
-                displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
-                }
+                this.tutoreds = getRelatedViewModel().getTutoredsList();
+                getRelatedViewModel().dismissProgress(loading);
+                getActivity().runOnUiThread(() -> {
+                    if (Utilities.listHasElements(this.tutoreds)) {
+                        this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
+                        displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
+                    }
                 });
             } catch (Exception e) {
+                getRelatedViewModel().dismissProgress(loading);
                 // Log the error or handle it as necessary
                 Log.e("TutoredFragment", "Error loading data", e);
 
@@ -78,29 +80,7 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     @Override
     public void onResume() {
         super.onResume();
-        this.rcvTutoreds = fragmentTutoredBinding.rcvTutoreds;
-
-        getRelatedViewModel().getExecutorService().execute(() -> {
-            try {
-
-                getRelatedViewModel().getTutoredsList();
-                this.tutoreds = getRelatedViewModel().getTutoreds();
-                        getActivity().runOnUiThread(() -> {
-
-        if (Utilities.listHasElements(tutoreds)) {
-            initAdapter();
-        } else if (getMyActivity().getPositionRemoved() != null) {
-            tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
-            tutoredItemAdapter.notifyItemRangeRemoved(0, tutoreds.size());
-
-        }
-                });
-            } catch (Exception e) {
-                // Log the error or handle it as necessary
-                Log.e("PersonalInfoFragment", "Error loading data", e);
-
-            }
-        });
+        initAdapter();
     }
 
     @Override

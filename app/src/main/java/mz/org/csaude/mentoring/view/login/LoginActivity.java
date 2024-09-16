@@ -16,6 +16,11 @@ public class LoginActivity extends BaseActivity {
     private ActivityLoginBinding loginBinding;
 
     @Override
+    protected boolean isAutoLogoutEnabled() {
+        return false; // Disable auto logout in LoginActivity
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         loginBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);

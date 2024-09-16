@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="mz.org.csaude.mentoring.viewmodel.setting.SettingVM" />
+    </data>
+
+    <ScrollView
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
+
+            <!-- Auto Sync Switch -->
+            <TextView
+                android:text="Enable Auto Sync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Switch
+                android:id="@+id/switch_auto_sync"
+                android:checked="@{viewModel.isAutoSyncEnabled}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Sync Interval Input with Validation Button -->
+            <TextView
+                android:text="Sync Interval (Horas)"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/editTextSyncInterval"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="@={viewModel.syncInterval}"
+                    android:hint="Enter hours" />
+
+                <Button
+                    android:id="@+id/buttonValidateSyncInterval"
+                    android:text="Gravar"
+                    android:onClick="@{() -> viewModel.onValidateSyncIntervalClicked()}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- Sync Now Button -->
+            <Button
+                android:id="@+id/button_sync_now"
+                android:text="Sync Now"
+                android:onClick="@{() -> viewModel.onSyncNowClicked()}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <!-- Auto Logout Time Input with Validation Button -->
+            <TextView
+                android:text="Auto Logout Time (minutes)"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/editTextAutoLogoutTime"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="@={viewModel.autoLogoutTime}"
+                    android:hint="Enter minutes" />
+
+                <Button
+                    android:id="@+id/buttonValidateAutoLogoutTime"
+                    android:text="@string/save"
+                    android:onClick="@{() -> viewModel.onValidateAutoLogoutTimeClicked()}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <TextView
+                android:text="Select Language"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <Spinner
+                android:id="@+id/languageSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/languages" />
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>
