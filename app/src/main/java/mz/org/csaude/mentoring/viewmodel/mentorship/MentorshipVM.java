@@ -458,8 +458,13 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             session.setStartDate(this.mentorship.getStartDate());
             session.setPerformedDate(DateUtilities.getCurrentDate());
             session.addMentorship(this.mentorship);
-            session.setTutored(this.mentorship.getTutored());
-            session.setForm(this.mentorship.getForm());
+            if (this.mentorship.getTutored() != null) {
+                session.setTutored(this.mentorship.getTutored());
+            }
+
+            if (this.mentorship.getForm() != null) {
+                session.setForm(this.mentorship.getForm());
+            }
             return session;
         } catch (SQLException e) {
             throw new RuntimeException(e);

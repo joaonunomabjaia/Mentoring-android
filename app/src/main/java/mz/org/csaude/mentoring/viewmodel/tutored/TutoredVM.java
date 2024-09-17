@@ -262,7 +262,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
             runOnMainThread(()->{
                 dismissProgress(loading);
-                Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando criado com sucesso.").show();
+                //Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando criado com sucesso.").show();
                 Map<String, Object> params = new HashMap<>();
                 params.put("createdTutored", tutored);
                 getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);

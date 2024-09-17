@@ -35,6 +35,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
+import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
@@ -203,7 +204,8 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     private void populateFormList() {
-        this.formAdapter = new FormAdapter(formsRcv, getRelatedViewModel().getTutorForms(), this);
+        List<Form> forms = getRelatedViewModel().getForms();
+        this.formAdapter = new FormAdapter(formsRcv, forms, this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         formsRcv.setLayoutManager(mLayoutManager);
         formsRcv.setItemAnimator(new DefaultItemAnimator());
