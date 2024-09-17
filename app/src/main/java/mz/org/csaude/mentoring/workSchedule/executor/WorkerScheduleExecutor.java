@@ -37,10 +37,10 @@ import mz.org.csaude.mentoring.workSchedule.work.Resourceworker;
 import mz.org.csaude.mentoring.workSchedule.work.ResponseTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.RondaTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.RondaWorker;
+import mz.org.csaude.mentoring.workSchedule.work.SessionGETWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionPOSTWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionRecommendedResourceWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionStatusWorker;
-import mz.org.csaude.mentoring.workSchedule.work.SessionGETWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutorProgrammaticAreaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TutoredWorker;
@@ -49,228 +49,294 @@ import mz.org.csaude.mentoring.workSchedule.work.UserWorker;
 public class WorkerScheduleExecutor {
 
     private static final String TAG = "WorkerScheduler";
-    public static final int JOB_ID = 1000;
-    public static final long ONE_TIME_REQUEST_JOB_ID = System.currentTimeMillis();
-    private WorkManager workManager;
+    private static final long ONE_TIME_REQUEST_JOB_ID = System.currentTimeMillis();
 
     private static WorkerScheduleExecutor instance;
 
-    private MentoringApplication application;
-
-    private List<Setting> settings;
-
-    private SharedPreferences sharedPreferences;
+    private final WorkManager workManager;
+    private final MentoringApplication application;
+    private final SharedPreferences encryptedSharedPreferences;
 
     private WorkerScheduleExecutor(Application application) {
         this.application = (MentoringApplication) application;
         this.workManager = WorkManager.getInstance(application);
-        this.sharedPreferences = ((MentoringApplication) application).getMentoringSharedPreferences();
+        this.encryptedSharedPreferences = this.application.getEncryptedSharedPreferences();
+    }
+
+    public static synchronized WorkerScheduleExecutor getInstance(Application application) {
+        if (instance == null) {
+            instance = new WorkerScheduleExecutor(application);
+        }
+        return instance;
     }
 
     public WorkManager getWorkManager() {
         return workManager;
     }
 
-    public static WorkerScheduleExecutor getInstance(Application application) {
-        if (instance == null) {
-            instance = new WorkerScheduleExecutor(application);
-        }
-        return instance;
-    }
+    /**
+     * Runs the initial synchronization tasks required for the application setup.
+     */
     public OneTimeWorkRequest runInitialSync() {
-        OneTimeWorkRequest provinceOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ProvinceWorker.class).addTag("ONE_TIME_CABINET_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest districtOneTimeWorkRequest = new OneTimeWorkRequest.Builder(DistrictWorker.class).addTag("ONE_TIME_DISTRICT_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest categoriesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ProfessionalCategoryWorker.class).addTag("ONE_TIME_CATEGORIES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest partnersOneTimeWorkRequest = new OneTimeWorkRequest.Builder(PartnerWorker.class).addTag("ONE_TIME_PARTNERS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest rondaTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(RondaTypeWorker.class).addTag("ONE_TIME_RONDA_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest responseTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ResponseTypeWorker.class).addTag("ONE_TIME_RESPONSE_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest evaluationTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(EvaluationTypeWorker.class).addTag("ONE_TIME_EVALUATION_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest iterationTypesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(IterationTypeWorker.class).addTag("ONE_TIME_ITERATION_TYPES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest doorsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(DoorWorker.class).addTag("ONE_TIME_DOORS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest cabinetOneTimeWorkRequest = new OneTimeWorkRequest.Builder(CabinetWorker.class).addTag("ONE_TIME_CABINET_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest sessionStatusOneTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionStatusWorker.class).addTag("ONE_TIME_SESSION_STATUS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest programsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ProgramWorker.class).addTag("ONE_TIME_PROGRAMS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest programmaticAreaOneTimeWorkRequest = new OneTimeWorkRequest.Builder(ProgrammaticAreaWorker.class).addTag("ONE_TIME_PROGRAMMATIC_AREA_ID" + ONE_TIME_REQUEST_JOB_ID).build();
+        // Create individual WorkRequests
+        OneTimeWorkRequest provinceWorkRequest = new OneTimeWorkRequest.Builder(ProvinceWorker.class)
+                .addTag("INITIAL_SYNC_PROVINCE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-        workManager.beginUniqueWork("INITIAL_APP_SETUP", ExistingWorkPolicy.KEEP, provinceOneTimeWorkRequest)
-                .then(Arrays.asList(districtOneTimeWorkRequest, partnersOneTimeWorkRequest, cabinetOneTimeWorkRequest))
-                .then(Arrays.asList(rondaTypesOneTimeWorkRequest, responseTypesOneTimeWorkRequest,
-                        evaluationTypesOneTimeWorkRequest, iterationTypesOneTimeWorkRequest,
-                        doorsOneTimeWorkRequest, sessionStatusOneTimeWorkRequest, programsOneTimeWorkRequest)).then(programmaticAreaOneTimeWorkRequest)
-                .then(categoriesOneTimeWorkRequest).enqueue();
-        return categoriesOneTimeWorkRequest;
+        OneTimeWorkRequest districtWorkRequest = new OneTimeWorkRequest.Builder(DistrictWorker.class)
+                .addTag("INITIAL_SYNC_DISTRICT_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-    }
+        OneTimeWorkRequest professionalCategoryWorkRequest = new OneTimeWorkRequest.Builder(ProfessionalCategoryWorker.class)
+                .addTag("INITIAL_SYNC_PROFESSIONAL_CATEGORY_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-    public OneTimeWorkRequest runPostLoginSync() {
-        OneTimeWorkRequest tutorOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TutorWorker.class).addTag("ONE_TIME_TUTOR_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        workManager.enqueue(tutorOneTimeWorkRequest);
-        return tutorOneTimeWorkRequest;
-    }
+        OneTimeWorkRequest partnerWorkRequest = new OneTimeWorkRequest.Builder(PartnerWorker.class)
+                .addTag("INITIAL_SYNC_PARTNER_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-    public OneTimeWorkRequest downloadMentorData() {
-        Data inputData = new Data.Builder().putString("requestType", String.valueOf(Http.POST)).build();
+        OneTimeWorkRequest rondaTypeWorkRequest = new OneTimeWorkRequest.Builder(RondaTypeWorker.class)
+                .addTag("INITIAL_SYNC_RONDA_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-        OneTimeWorkRequest menteesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TutoredWorker.class).addTag("ONE_TIME_MENTEES_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest hfOneTimeWorkRequest = new OneTimeWorkRequest.Builder(HealthFacilityWorker.class).addTag("ONE_TIME_HF_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest mentorFormsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(FormWorker.class).addTag("ONE_TIME_MENTOR_FORMS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest mentorFormsQuestionsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(FormQuestionWorker.class).addTag("ONE_TIME_MENTOR_FORMS_QUESTIONS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest mentorRondasOneTimeWorkRequest = new OneTimeWorkRequest.Builder(RondaWorker.class).addTag("ONE_TIME_MENTOR_RONDAS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest resourceTimeWorkRequest = new OneTimeWorkRequest.Builder(Resourceworker.class).addTag("ONE_RESOURCE_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest mentorSessionsOneTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionGETWorker.class).addTag("ONE_TIME_MENTOR_SESSIONS_ID" + ONE_TIME_REQUEST_JOB_ID).build();
-        OneTimeWorkRequest tutorProgramaticAreaOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TutorProgrammaticAreaWorker.class).addTag("ONE_TIME_TUTOR_PROGRAMMATIC_AREA_ID" + ONE_TIME_REQUEST_JOB_ID).build();
+        OneTimeWorkRequest responseTypeWorkRequest = new OneTimeWorkRequest.Builder(ResponseTypeWorker.class)
+                .addTag("INITIAL_SYNC_RESPONSE_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
 
-        workManager.beginUniqueWork("INITIAL_MENTOR_DATA_APP_SETUP", ExistingWorkPolicy.KEEP, mentorFormsOneTimeWorkRequest)
-                .then(hfOneTimeWorkRequest)
-                .then(tutorProgramaticAreaOneTimeWorkRequest)
-                .then(mentorFormsQuestionsOneTimeWorkRequest)
-                .then(resourceTimeWorkRequest)
-                .then(menteesOneTimeWorkRequest)
-                .then(mentorRondasOneTimeWorkRequest)
-                .then(mentorSessionsOneTimeWorkRequest)
+        OneTimeWorkRequest evaluationTypeWorkRequest = new OneTimeWorkRequest.Builder(EvaluationTypeWorker.class)
+                .addTag("INITIAL_SYNC_EVALUATION_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest iterationTypeWorkRequest = new OneTimeWorkRequest.Builder(IterationTypeWorker.class)
+                .addTag("INITIAL_SYNC_ITERATION_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest doorWorkRequest = new OneTimeWorkRequest.Builder(DoorWorker.class)
+                .addTag("INITIAL_SYNC_DOOR_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest cabinetWorkRequest = new OneTimeWorkRequest.Builder(CabinetWorker.class)
+                .addTag("INITIAL_SYNC_CABINET_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest sessionStatusWorkRequest = new OneTimeWorkRequest.Builder(SessionStatusWorker.class)
+                .addTag("INITIAL_SYNC_SESSION_STATUS_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest programWorkRequest = new OneTimeWorkRequest.Builder(ProgramWorker.class)
+                .addTag("INITIAL_SYNC_PROGRAM_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest programmaticAreaWorkRequest = new OneTimeWorkRequest.Builder(ProgrammaticAreaWorker.class)
+                .addTag("INITIAL_SYNC_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        // Chain WorkRequests
+        workManager.beginUniqueWork("INITIAL_APP_SETUP", ExistingWorkPolicy.KEEP, provinceWorkRequest)
+                .then(Arrays.asList(districtWorkRequest, partnerWorkRequest, cabinetWorkRequest))
+                .then(Arrays.asList(
+                        rondaTypeWorkRequest,
+                        responseTypeWorkRequest,
+                        evaluationTypeWorkRequest,
+                        iterationTypeWorkRequest,
+                        doorWorkRequest,
+                        sessionStatusWorkRequest,
+                        programWorkRequest
+                ))
+                .then(programmaticAreaWorkRequest)
+                .then(professionalCategoryWorkRequest)
                 .enqueue();
-        return mentorSessionsOneTimeWorkRequest;
+
+        return professionalCategoryWorkRequest;
     }
 
+    /**
+     * Runs synchronization tasks that should occur after the user logs in.
+     */
+    public OneTimeWorkRequest runPostLoginSync() {
+        OneTimeWorkRequest tutorWorkRequest = new OneTimeWorkRequest.Builder(TutorWorker.class)
+                .addTag("POST_LOGIN_SYNC_TUTOR_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+        workManager.enqueue(tutorWorkRequest);
+        return tutorWorkRequest;
+    }
+
+    /**
+     * Downloads data specific to the mentor after login.
+     */
+    public OneTimeWorkRequest downloadMentorData() {
+        OneTimeWorkRequest formWorkRequest = new OneTimeWorkRequest.Builder(FormWorker.class)
+                .addTag("MENTOR_DATA_FORM_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest healthFacilityWorkRequest = new OneTimeWorkRequest.Builder(HealthFacilityWorker.class)
+                .addTag("MENTOR_DATA_HEALTH_FACILITY_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest tutorProgrammaticAreaWorkRequest = new OneTimeWorkRequest.Builder(TutorProgrammaticAreaWorker.class)
+                .addTag("MENTOR_DATA_TUTOR_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest formQuestionWorkRequest = new OneTimeWorkRequest.Builder(FormQuestionWorker.class)
+                .addTag("MENTOR_DATA_FORM_QUESTION_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest resourceWorkRequest = new OneTimeWorkRequest.Builder(Resourceworker.class)
+                .addTag("MENTOR_DATA_RESOURCE_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest tutoredWorkRequest = new OneTimeWorkRequest.Builder(TutoredWorker.class)
+                .addTag("MENTOR_DATA_TUTORED_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest rondaWorkRequest = new OneTimeWorkRequest.Builder(RondaWorker.class)
+                .addTag("MENTOR_DATA_RONDA_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest sessionGetWorkRequest = new OneTimeWorkRequest.Builder(SessionGETWorker.class)
+                .addTag("MENTOR_DATA_SESSION_GET_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        // Chain WorkRequests
+        workManager.beginUniqueWork("INITIAL_MENTOR_DATA_SETUP", ExistingWorkPolicy.KEEP, formWorkRequest)
+                .then(healthFacilityWorkRequest)
+                .then(tutorProgrammaticAreaWorkRequest)
+                .then(formQuestionWorkRequest)
+                .then(resourceWorkRequest)
+                .then(tutoredWorkRequest)
+                .then(rondaWorkRequest)
+                .then(sessionGetWorkRequest)
+                .enqueue();
+
+        return sessionGetWorkRequest;
+    }
+
+    /**
+     * Uploads mentees data to the server.
+     */
     public OneTimeWorkRequest uploadMentees() {
         Data inputData = new Data.Builder()
                 .putString("requestType", String.valueOf(Http.POST))
                 .build();
-        OneTimeWorkRequest menteesOneTimeWorkRequest = new OneTimeWorkRequest.Builder(TutoredWorker.class).addTag("ONE_TIME_MENTEES_ID" + ONE_TIME_REQUEST_JOB_ID).setInputData(inputData).build();
-        workManager.enqueue(menteesOneTimeWorkRequest);
-        return menteesOneTimeWorkRequest;
+
+        OneTimeWorkRequest tutoredWorkRequest = new OneTimeWorkRequest.Builder(TutoredWorker.class)
+                .addTag("UPLOAD_MENTEES_" + ONE_TIME_REQUEST_JOB_ID)
+                .setInputData(inputData)
+                .build();
+
+        workManager.enqueue(tutoredWorkRequest);
+        return tutoredWorkRequest;
     }
 
-    public OneTimeWorkRequest syncPostData() {
-        // Define a unique job ID
-        String jobId = "ONE_TIME_REQUEST_JOB_ID_" + System.currentTimeMillis();
-
-        // Define input data for the requests
-        Data inputData = new Data.Builder().putString("requestType", String.valueOf(Http.POST)).build();
-
-        OneTimeWorkRequest sessionPostTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionPOSTWorker.class)
-                .addTag("ONE_TIME_SESSIONS_" + jobId)
-                .build();
-
-        OneTimeWorkRequest rondaPostTimeWorkRequest = new OneTimeWorkRequest.Builder(RondaWorker.class)
-                .addTag("ONE_TIME_RONDAS_" + jobId)
-                .setInputData(inputData)
-                .build();
-
-        // Create the first OneTimeWorkRequest
-        OneTimeWorkRequest mentorshipPostTimeWorkRequest = new OneTimeWorkRequest.Builder(MentorshipWorker.class)
-                .addTag("ONE_TIME_MENTORSHIPS_" + jobId)
-                .setInputData(inputData)
-                .build();
-
-        // Create the second OneTimeWorkRequest
-        OneTimeWorkRequest sessionRecommendedPostTimeWorkRequest = new OneTimeWorkRequest.Builder(SessionRecommendedResourceWorker.class)
-                .addTag("ONE_TIME_SESSIONS_RECOMMENDED_RESOURCES_" + jobId)
-                .setInputData(inputData)
-                .build();
-
-        OneTimeWorkRequest userInfoUpdateRequest = new OneTimeWorkRequest.Builder(UserWorker.class)
-                .addTag("ONE_TIME_USER_UPDATE_" + jobId)
-                .build();
-
-
-        // Chain the WorkRequests and enqueue
-        workManager
-                .beginWith(sessionPostTimeWorkRequest)
-                .then(mentorshipPostTimeWorkRequest)
-                .then(sessionRecommendedPostTimeWorkRequest)
-                .then(rondaPostTimeWorkRequest)
-                .then(userInfoUpdateRequest)
-                .enqueue();
-
-        // Return the final WorkRequest
-        return userInfoUpdateRequest;
-    }
-
-
+    /**
+     * Synchronizes data immediately by posting to the server.
+     */
     public OneTimeWorkRequest syncNowData() {
-         return syncPostData();
+        return syncPostData();
     }
 
+    /**
+     * Schedules periodic data synchronization tasks.
+     */
     public void syncPeriodicData() {
-        Data inputData = new Data.Builder().putString("requestType", String.valueOf(Http.POST)).build();
+        Data inputData = new Data.Builder()
+                .putString("requestType", String.valueOf(Http.POST))
+                .build();
 
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresCharging(true)
                 .build();
 
-        PeriodicWorkRequest menteesPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(TutoredWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_MENTEES_ID" + ONE_TIME_REQUEST_JOB_ID)
+        // Create PeriodicWorkRequests
+        PeriodicWorkRequest menteesPeriodicWorkRequest = new PeriodicWorkRequest.Builder(TutoredWorker.class, application.getMetadataSyncInterval(), TimeUnit.HOURS)
+                .addTag("PERIODIC_SYNC_MENTEES_" + ONE_TIME_REQUEST_JOB_ID)
                 .setConstraints(constraints)
                 .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest userPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(UserWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_USER_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest mentorFormsPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(FormWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_MENTOR_FORMS_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest mentorFormsQuestionsPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(FormQuestionWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_MENTOR_FORMS_QUESTIONS_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest mentorRondasPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(RondaWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_MENTOR_RONDAS_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest sessionPeriodicTimeWorkRequest = new PeriodicWorkRequest.Builder(SessionPOSTWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_SESSION_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest mentorshipPeriodicWorkRequest = new PeriodicWorkRequest.Builder(MentorshipWorker.class, getApplication().getSessionSyncInterval(), TimeUnit.HOURS)
-                .addTag("PERIODIC_MENTORSHIPS_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-        PeriodicWorkRequest sessionPeriodicWorkRequest = new PeriodicWorkRequest.Builder(SessionGETWorker.class, getApplication().getSessionSyncInterval(), TimeUnit.HOURS)
-                .addTag("ONE_TIME_SESSIONS_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS).build();
-
-
-        PeriodicWorkRequest sessionRecommendedResourcePeriodicWorkRequest = new PeriodicWorkRequest.Builder(SessionRecommendedResourceWorker.class, 1, TimeUnit.HOURS)
-                .addTag("ONE_TIME_SESSIONS_RECOMMENDED_RESOURCES_ID" + ONE_TIME_REQUEST_JOB_ID)
-                .setInputData(inputData)
-                .setInitialDelay(2, TimeUnit.HOURS)
                 .build();
 
-        workManager.enqueueUniquePeriodicWork("PERIODIC_MENTEES_ID", ExistingPeriodicWorkPolicy.KEEP, menteesPeriodicTimeWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_MENTOR_FORMS_ID", ExistingPeriodicWorkPolicy.KEEP, mentorFormsPeriodicTimeWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_MENTOR_FORMS_QUESTIONS_ID", ExistingPeriodicWorkPolicy.KEEP, mentorFormsQuestionsPeriodicTimeWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_MENTOR_RONDAS_ID", ExistingPeriodicWorkPolicy.KEEP, mentorRondasPeriodicTimeWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_SESSION_ID", ExistingPeriodicWorkPolicy.KEEP, sessionPeriodicTimeWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_MENTORSHIPS_ID", ExistingPeriodicWorkPolicy.KEEP, mentorshipPeriodicWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_SESSIONS_ID", ExistingPeriodicWorkPolicy.KEEP, sessionPeriodicWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_SESSIONS_RECOMMENDED_RESOURCES_ID", ExistingPeriodicWorkPolicy.KEEP, sessionRecommendedResourcePeriodicWorkRequest);
-        workManager.enqueueUniquePeriodicWork("PERIODIC_USER_ID", ExistingPeriodicWorkPolicy.KEEP, userPeriodicTimeWorkRequest);
+        PeriodicWorkRequest userPeriodicWorkRequest = new PeriodicWorkRequest.Builder(UserWorker.class, application.getMetadataSyncInterval(), TimeUnit.HOURS)
+                .addTag("PERIODIC_SYNC_USER_" + ONE_TIME_REQUEST_JOB_ID)
+                .setConstraints(constraints)
+                .setInputData(inputData)
+                .build();
 
+        // Enqueue PeriodicWorkRequests
+        workManager.enqueueUniquePeriodicWork("PERIODIC_SYNC_MENTEES", ExistingPeriodicWorkPolicy.KEEP, menteesPeriodicWorkRequest);
+        workManager.enqueueUniquePeriodicWork("PERIODIC_SYNC_USER", ExistingPeriodicWorkPolicy.KEEP, userPeriodicWorkRequest);
+
+        // Add additional periodic sync tasks as needed...
+    }
+
+    /**
+     * Schedules periodic synchronization based on the provided interval.
+     *
+     * @param intervalMinutes The interval in minutes for the periodic sync.
+     */
+    public void schedulePeriodicSync(int intervalMinutes) {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest periodicSyncWorkRequest = new PeriodicWorkRequest.Builder(SessionPOSTWorker.class, intervalMinutes, TimeUnit.MINUTES)
+                .addTag("PERIODIC_SYNC")
+                .setConstraints(constraints)
+                .build();
+
+        workManager.enqueueUniquePeriodicWork("PERIODIC_SYNC", ExistingPeriodicWorkPolicy.REPLACE, periodicSyncWorkRequest);
+    }
+
+    /**
+     * Cancels any scheduled periodic synchronization tasks.
+     */
+    public void cancelPeriodicSync() {
+        workManager.cancelUniqueWork("PERIODIC_SYNC");
+    }
+
+    /**
+     * Internal method to sync data by posting to the server.
+     */
+    private OneTimeWorkRequest syncPostData() {
+        String jobId = "SYNC_POST_DATA_" + System.currentTimeMillis();
+
+        Data inputData = new Data.Builder()
+                .putString("requestType", String.valueOf(Http.POST))
+                .build();
+
+        OneTimeWorkRequest sessionPostWorkRequest = new OneTimeWorkRequest.Builder(SessionPOSTWorker.class)
+                .addTag("SESSION_POST_" + jobId)
+                .build();
+
+        OneTimeWorkRequest mentorshipPostWorkRequest = new OneTimeWorkRequest.Builder(MentorshipWorker.class)
+                .addTag("MENTORSHIP_POST_" + jobId)
+                .setInputData(inputData)
+                .build();
+
+        OneTimeWorkRequest sessionRecommendedWorkRequest = new OneTimeWorkRequest.Builder(SessionRecommendedResourceWorker.class)
+                .addTag("SESSION_RECOMMENDED_POST_" + jobId)
+                .setInputData(inputData)
+                .build();
+
+        OneTimeWorkRequest rondaPostWorkRequest = new OneTimeWorkRequest.Builder(RondaWorker.class)
+                .addTag("RONDA_POST_" + jobId)
+                .setInputData(inputData)
+                .build();
+
+        OneTimeWorkRequest userInfoUpdateWorkRequest = new OneTimeWorkRequest.Builder(UserWorker.class)
+                .addTag("USER_INFO_UPDATE_" + jobId)
+                .build();
+
+        // Chain WorkRequests
+        workManager.beginUniqueWork("SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, sessionPostWorkRequest)
+                .then(mentorshipPostWorkRequest)
+                .then(sessionRecommendedWorkRequest)
+                .then(rondaPostWorkRequest)
+                .then(userInfoUpdateWorkRequest)
+                .enqueue();
+
+        return userInfoUpdateWorkRequest;
     }
 
     public MentoringApplication getApplication() {
         return application;
-    }
-
-    public void setApplication(MentoringApplication application) {
-        this.application = application;
     }
 }

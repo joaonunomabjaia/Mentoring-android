@@ -46,7 +46,11 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public RondaMentee getById(int id) throws SQLException {
-        return this.rondaMenteeDAO.queryForId(id);
+        RondaMentee rondaMentee = this.rondaMenteeDAO.queryForId(id);
+        if(rondaMentee!=null) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentee;
     }
 
     @Override
@@ -64,11 +68,19 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public List<RondaMentee> getAllOfRonda(Ronda ronda) throws SQLException {
-        return rondaMenteeDAO.getAllOfRonda(ronda.getId());
+        List<RondaMentee> rondaMentees = rondaMenteeDAO.getAllOfRonda(ronda.getId());
+        for (RondaMentee rondaMentee : rondaMentees) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentees;
     }
 
     @Override
     public RondaMentee getByuuid(String uuid) throws SQLException {
-        return rondaMenteeDAO.getByUuid(uuid);
+        RondaMentee rondaMentee = rondaMenteeDAO.getByUuid(uuid);
+        if(rondaMentee!=null) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentee;
     }
 }

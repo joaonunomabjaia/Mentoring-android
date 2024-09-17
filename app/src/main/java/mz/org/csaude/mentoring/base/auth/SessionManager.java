@@ -16,7 +16,7 @@ public class SessionManager {
 
     public SessionManager(MentoringApplication application) {
         this.application = application;
-        this.sharedPref = application.getMentoringSharedPreferences();
+        this.sharedPref = application.getEncryptedSharedPreferences();
     }
 
     public boolean isAccessTokenExpired() {

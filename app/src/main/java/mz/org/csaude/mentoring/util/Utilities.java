@@ -703,4 +703,13 @@ public class Utilities {
         }
         return null;
     }
+
+    public static boolean isValidNumber(String value) {
+        try {
+            int number = Integer.parseInt(value);
+            return number > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }

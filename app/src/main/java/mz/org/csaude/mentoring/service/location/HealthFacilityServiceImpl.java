@@ -56,12 +56,16 @@ public class HealthFacilityServiceImpl extends BaseServiceImpl<HealthFacility> i
 
     @Override
     public HealthFacility getById(int id) throws SQLException {
-        return this.healthFacilityDAO.queryForId(id);
+        HealthFacility healthFacility = this.healthFacilityDAO.queryForId(id);
+        healthFacility.setDistrict(getApplication().getDistrictService().getById(healthFacility.getDistrictId()));
+        return healthFacility;
     }
 
     @Override
     public HealthFacility getByuuid(String uuid) throws SQLException {
-        return this.healthFacilityDAO.getByUuid(uuid);
+        HealthFacility healthFacility = this.healthFacilityDAO.getByUuid(uuid);
+        healthFacility.setDistrict(getApplication().getDistrictService().getById(healthFacility.getDistrictId()));
+        return healthFacility;
     }
 
     @Override

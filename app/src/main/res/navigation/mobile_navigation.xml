@@ -15,7 +15,7 @@
         android:id="@+id/nav_settings"
         android:name="mz.org.csaude.mentoring.view.home.ui.settings.SettingsFragment"
         android:label="Configurações"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_personal_info"
