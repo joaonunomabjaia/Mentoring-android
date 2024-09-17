@@ -42,7 +42,6 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.view.ronda.CreateRondaActivity;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM;
 
 public class CreateMentorshipActivity extends BaseActivity implements ClickListener.OnItemClickListener {
@@ -360,7 +359,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         switch (item.getItemId()) {
             case android.R.id.home:
                 //getRelatedViewModel().tryToUpdateMentorship();
-                super.onBackPressed();
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(MentorshipActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

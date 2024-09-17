@@ -172,7 +172,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Handle the back button click
-                onBackPressed();
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
