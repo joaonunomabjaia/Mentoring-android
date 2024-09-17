@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.base.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -14,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.sql.SQLException;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.activity.GenericActivity;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.dialog.IListbleDialogListener;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 
 /**
  * @author Jose Julai Ritsure
@@ -62,14 +65,31 @@ public abstract class GenericFragment extends Fragment implements GenericActivit
 
     }
 
-    protected void displayDataOnRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.addItemDecoration(new DividerItemDecoration(context, 0));
-        recyclerView.setAdapter(adapter);
+    protected void displayDataOnRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context, int orientation) {
+        if (recyclerView != null && adapter != null) {
+            // Set up Layout Manager
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, orientation, false);
+            recyclerView.setLayoutManager(layoutManager);
 
+            // Set Item Animator
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+            // Add space between items (e.g., 16dp space)
+            int spacingInPixels = context.getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            recyclerView.addItemDecoration(itemDecoration);
+
+            // Improve performance for fixed-size lists
+            recyclerView.setHasFixedSize(true);
+
+            // Set the adapter
+            recyclerView.setAdapter(adapter);
+        } else {
+            Log.e("RecyclerViewSetup", "RecyclerView or Adapter is null");
+        }
     }
+
+
 
     public BaseViewModel getRelatedViewModel() {
         return relatedViewModel;

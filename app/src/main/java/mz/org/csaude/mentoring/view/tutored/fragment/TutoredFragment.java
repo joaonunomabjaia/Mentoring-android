@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.FragmentTutoredsBinding;
 import mz.org.csaude.mentoring.listner.dialog.IListbleDialogListener;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
 
@@ -44,43 +46,33 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        super.onCreateView(inflater, container, savedInstanceState);
         fragmentTutoredBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_tutoreds, container, false);
         return fragmentTutoredBinding.getRoot();
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         fragmentTutoredBinding.setViewModel(getRelatedViewModel());
         this.rcvTutoreds = fragmentTutoredBinding.rcvTutoreds;
-        initAdapter();
+        getRelatedViewModel().initSearch();
     }
 
-    public void initAdapter() {
-        Dialog loading = Utilities.showLoadingDialog(getMyActivity(), getString(R.string.processando));
-        getRelatedViewModel().getExecutorService().execute(() -> {
-            try {
-                this.tutoreds = getRelatedViewModel().getTutoredsList();
-                getRelatedViewModel().dismissProgress(loading);
-                getActivity().runOnUiThread(() -> {
-                    if (Utilities.listHasElements(this.tutoreds)) {
-                        this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, this.tutoreds, getMyActivity());
-                        displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext());
-                    }
-                });
-            } catch (Exception e) {
-                getRelatedViewModel().dismissProgress(loading);
-                // Log the error or handle it as necessary
-                Log.e("TutoredFragment", "Error loading data", e);
-
-            }
-        });
+    public void displaySearchResults() {
+        try {
+            this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, getRelatedViewModel().getSearchResults(), getMyActivity());
+            displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext(), LinearLayoutManager.VERTICAL);
+        } catch (Exception e) {
+            // Log the error or handle it as necessary
+            Log.e("TutoredFragment", "Error loading data", e);
+        }
     }
 
 
     @Override
     public void onResume() {
         super.onResume();
-        initAdapter();
     }
 
     @Override

@@ -7,11 +7,14 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,10 @@ import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
+import mz.org.csaude.mentoring.base.fragment.GenericFragment;
+import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
+import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
 import mz.org.csaude.mentoring.model.employee.Employee;
@@ -44,9 +50,10 @@ import mz.org.csaude.mentoring.view.home.ui.personalinfo.PersonalInfoFragment;
 import mz.org.csaude.mentoring.view.ronda.RondaActivity;
 import mz.org.csaude.mentoring.view.tutored.CreateTutoredActivity;
 import mz.org.csaude.mentoring.view.tutored.TutoredActivity;
+import mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 
-public class TutoredVM extends BaseViewModel implements RestResponseListener<Tutored>, ServerStatusListener {
+public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener<Tutored>, ServerStatusListener {
     private TutoredService tutoredService;
     private Tutored tutored;
 
@@ -84,7 +91,17 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         loadMeteeLabors();
     }
 
+    @Override
+    protected void doOnNoRecordFound() {
+        this.displaySearchResults();
+    }
+
     private void initNewRecord() {
+    }
+
+    @Override
+    public void doOnlineSearch(long offset, long limit) throws SQLException {
+        super.doOnlineSearch(offset, limit);
     }
 
     @Override
@@ -496,5 +513,31 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     public void setPartners(List<Partner> partners) {
         this.partners = partners;
+    }
+
+    @Override
+    public List<Tutored> doSearch(long offset, long limit) throws SQLException {
+        return this.tutoredService.getAllPagenated(offset, limit);
+    }
+
+    @Override
+    public void displaySearchResults() {
+        getRelatedFragment().displaySearchResults();
+    }
+
+    @Override
+    public AbstractSearchParams<Tutored> initSearchParams() {
+        return null;
+    }
+
+    @Override
+    public TutoredFragment getRelatedFragment() {
+        FragmentManager fragmentManager = getRelatedActivity().getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (fragment != null) {
+            return (TutoredFragment) fragment;
+            // This is the currently active fragment
+        }
+        return (TutoredFragment) super.getRelatedFragment();
     }
 }

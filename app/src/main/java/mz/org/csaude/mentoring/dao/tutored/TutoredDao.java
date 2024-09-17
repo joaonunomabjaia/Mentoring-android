@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.dao.tutored;
 
+import androidx.paging.PagingSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -85,5 +86,8 @@ public interface TutoredDao {
 
     @Query("SELECT * FROM tutored")
     List<Tutored> queryForAll();
+
+    @Query("SELECT * FROM tutored LIMIT :limit OFFSET :offset")
+    List<Tutored> getTutoredsPaginated(int limit, int offset);
 
 }

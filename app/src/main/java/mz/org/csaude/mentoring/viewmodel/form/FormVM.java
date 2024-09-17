@@ -26,7 +26,6 @@ import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.service.form.FormService;
 import mz.org.csaude.mentoring.service.form.FormServiceImpl;
-import mz.org.csaude.mentoring.view.tutored.fragment.ListTutoredActivity;
 
 public class FormVM extends BaseViewModel {
 
@@ -153,7 +152,6 @@ public class FormVM extends BaseViewModel {
         this.selectedForm = this.tutorForms.get(0);
         params.put("newMentorship", this.mentorship);
         params.put("selectedForm", this.selectedForm);
-        getRelatedActivity().nextActivityFinishingCurrent(ListTutoredActivity.class, params);
     }
 
     public Mentorship getMentorship() {

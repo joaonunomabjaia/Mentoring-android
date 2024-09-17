@@ -37,7 +37,7 @@ public class TutoredActivity extends BaseActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
-                    .add(R.id.tutored_fragment, TutoredFragment.class, bundle)
+                    .replace(R.id.fragment_container, TutoredFragment.class, bundle)
                     .commit();
         }
 

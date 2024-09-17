@@ -2,11 +2,16 @@ package mz.org.csaude.mentoring.service.tutored;
 
 import android.app.Application;
 
+import androidx.paging.Pager;
+import androidx.paging.PagingConfig;
+import androidx.paging.PagingData;
 import androidx.room.Transaction;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
+import kotlinx.coroutines.flow.Flow;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
@@ -139,5 +144,17 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
         return this.tutoredDao.getAllOfHealthFacilityForNewRonda(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
     }
 
+    @Override
+    public List<Tutored> getAllPagenated(long offset, long limit) {
+        List<Tutored> tutoreds = this.tutoredDao.getTutoredsPaginated((int) limit, (int) offset);
+        for (Tutored tutored : tutoreds) {
+            try {
+                tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return tutoreds;
+    }
 
 }
