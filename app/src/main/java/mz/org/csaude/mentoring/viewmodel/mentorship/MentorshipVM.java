@@ -733,6 +733,8 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 }
             }
 
+            if (this.session == null) this.session = mentorship.getSession();
+
             if (this.session.getTutored() == null) {
                 this.session.setTutored(getApplication().getTutoredService().getById(this.session.getMenteeId()));
             }

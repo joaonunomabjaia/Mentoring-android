@@ -53,12 +53,14 @@ public abstract class AbstractSearchMentorshipVM extends SearchVM<Mentorship> im
 
     @Override
     public void doOnConfirmed() {
-        try {
-            getApplication().getMentorshipService().delete(this.selectedMentorship);
-            initSearch();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        getExecutorService().execute(()->{
+            try {
+                getApplication().getMentorshipService().delete(this.selectedMentorship);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        initSearch();
     }
 
     @Override

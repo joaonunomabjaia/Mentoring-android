@@ -112,12 +112,20 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
 
     @Override
     public List<Tutored> getAllOfRondaForZeroEvaluation(Ronda currRonda) throws SQLException {
-        return  this.tutoredDao.getAllOfRondaForZeroEvaluation(currRonda.getId());
+        List<Tutored> tutoreds =  this.tutoredDao.getAllOfRondaForZeroEvaluation(currRonda.getId());
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
     @Override
     public List<Tutored> getAllOfHealthFacility(HealthFacility healthFacility) throws SQLException {
-        return this.tutoredDao.getAllOfHealthFacility(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
+        List<Tutored> tutoreds = this.tutoredDao.getAllOfHealthFacility(healthFacility.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
+        for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+        }
+        return tutoreds;
     }
 
 
@@ -125,6 +133,7 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public List<Tutored> getAllNotSynced() throws SQLException {
         List<Tutored> tutoreds = this.tutoredDao.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
         for (Tutored tutored : tutoreds) {
+            tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
             tutored.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(tutored.getEmployee()));
         }
         return tutoreds;

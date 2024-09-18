@@ -105,6 +105,8 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
                     return;
                 }
 
+                if(this.searchResults == null) this.searchResults = new ArrayList<>();
+
                 this.pageSize = getPageSize();
                 this.allDisplyedRecords.clear();
                 this.searchResults.clear();

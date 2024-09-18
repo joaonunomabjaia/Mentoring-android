@@ -60,12 +60,16 @@ public class ZeroMentorshipSearchVM extends AbstractSearchMentorshipVM {
 
     @Override
     public void edit(Mentorship mentorship) {
-        super.edit(mentorship);
-        Map<String, Object> params = new HashMap<>();
-        params.put("mentorship", mentorship);
-        params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
-        getApplication().getApplicationStep().changeToEdit();
-        getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
+        getExecutorService().execute(() -> {
+            super.edit(mentorship);
+            runOnMainThread(() -> {
+                Map<String, Object> params = new HashMap<>();
+                params.put("mentorship", mentorship);
+                params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
+                getApplication().getApplicationStep().changeToEdit();
+                getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
+            });
+        });
     }
 
     @Override

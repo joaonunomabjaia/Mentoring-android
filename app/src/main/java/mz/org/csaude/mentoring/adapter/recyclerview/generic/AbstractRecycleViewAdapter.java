@@ -37,11 +37,12 @@ public abstract class AbstractRecycleViewAdapter<T extends BaseModel> extends Re
                 super.onScrolled(recyclerView, dx, dy);
 
                 RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                if (layoutManager instanceof LinearLayoutManager) {
+                if (layoutManager instanceof LinearLayoutManager && records != null && !records.isEmpty()) {
                     LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
 
                     totalItemCount = linearLayoutManager.getItemCount();
                     lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
+
                     if (!isLoading && linearLayoutManager.findLastCompletelyVisibleItemPosition() == records.size() - 1) {
                         if (onLoadMoreListener != null) {
                             onLoadMoreListener.onLoadMore();
@@ -51,6 +52,12 @@ public abstract class AbstractRecycleViewAdapter<T extends BaseModel> extends Re
                 }
             }
         });
+    }
+
+    public void updateData(List<T> newRecords) {
+        this.records.clear();   // Clear the old data
+        this.records.addAll(newRecords);   // Add the new data
+        notifyDataSetChanged();  // Notify the adapter that the data has changed
     }
 
     public void setOnLoadMoreListener(IOnLoadMoreListener onLoadMoreListener) {
@@ -72,7 +79,7 @@ public abstract class AbstractRecycleViewAdapter<T extends BaseModel> extends Re
 
     @Override
     public int getItemCount() {
-        return records.size();
+        return (records != null) ? records.size() : 0;
     }
 
     public void setLoaded() {
