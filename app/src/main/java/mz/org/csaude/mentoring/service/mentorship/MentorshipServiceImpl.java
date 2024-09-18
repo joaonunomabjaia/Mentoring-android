@@ -26,6 +26,7 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
+import mz.org.csaude.mentoring.util.Utilities;
 
 public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implements MentorshipService {
 
@@ -198,8 +199,17 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
     @Override
     public List<Mentorship> getAllOfRonda(Ronda ronda) throws SQLException {
         List<Mentorship> mentorships = this.mentorshipDAO.getAllOfRonda(ronda.getId());
+        if(!Utilities.listHasElements(mentorships)) return  null;
+
         for (Mentorship mentorship : mentorships) {
-            mentorship.getSession().setRonda(this.rondaDAO.queryForId(mentorship.getSession().getRonda().getId()));
+            mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSessionId()));
+            mentorship.getSession().setRonda(getApplication().getRondaService().getById(mentorship.getSession().getRondaId()));
+            mentorship.getSession().getRonda().setRondaType(getApplication().getRondaTypeService().getById(mentorship.getSession().getRonda().getRondaTypeId()));
+            mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
+            mentorship.setTutored(getApplication().getTutoredService().getById(mentorship.getTutorId()));
+            mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
+            mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+            mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
         }
         return mentorships;
     }

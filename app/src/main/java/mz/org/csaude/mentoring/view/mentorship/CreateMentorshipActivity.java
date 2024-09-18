@@ -35,12 +35,15 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
+import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.ronda.CreateRondaActivity;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM;
@@ -203,12 +206,19 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     private void populateFormList() {
-        this.formAdapter = new FormAdapter(formsRcv, getRelatedViewModel().getTutorForms(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        formsRcv.setLayoutManager(mLayoutManager);
-        formsRcv.setItemAnimator(new DefaultItemAnimator());
-        formsRcv.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-        formsRcv.setAdapter(formAdapter);
+        getRelatedViewModel().getExecutorService().execute(()-> {
+            List<Form> forms = getRelatedViewModel().getTutorForms();
+            runOnUiThread(()->{
+                this.formAdapter = new FormAdapter(formsRcv, forms, this);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                formsRcv.setLayoutManager(mLayoutManager);
+                formsRcv.setItemAnimator(new DefaultItemAnimator());
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+                SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+                formsRcv.addItemDecoration(itemDecoration);
+                formsRcv.setAdapter(formAdapter);
+            });
+        });
     }
 
     @Override
@@ -245,12 +255,20 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     public void populateMenteesList() {
-        this.tutoredAdapter = new TutoredAdapter(mentorshipBinding.rcvTutored, getRelatedViewModel().getMentees(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mentorshipBinding.rcvTutored.setLayoutManager(mLayoutManager);
-        mentorshipBinding.rcvTutored.setItemAnimator(new DefaultItemAnimator());
-        mentorshipBinding.rcvTutored.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-        mentorshipBinding.rcvTutored.setAdapter(tutoredAdapter);
+        getRelatedViewModel().getExecutorService().execute(()-> {
+            List<Tutored> tutoreds = getRelatedViewModel().getMentees();
+            runOnUiThread(()->{
+                this.tutoredAdapter = new TutoredAdapter(mentorshipBinding.rcvTutored, tutoreds, this);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                mentorshipBinding.rcvTutored.setLayoutManager(mLayoutManager);
+                mentorshipBinding.rcvTutored.setItemAnimator(new DefaultItemAnimator());
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+                SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+                mentorshipBinding.rcvTutored.addItemDecoration(itemDecoration);
+                mentorshipBinding.rcvTutored.setAdapter(tutoredAdapter);
+
+            });
+        });
     }
 
     public void loadDoorAdapter() {
@@ -350,7 +368,9 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mentorshipBinding.rcvQuestions.setLayoutManager(mLayoutManager);
         mentorshipBinding.rcvQuestions.setItemAnimator(new DefaultItemAnimator());
-        mentorshipBinding.rcvQuestions.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_qtns_spacing);
+        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+        mentorshipBinding.rcvQuestions.addItemDecoration(itemDecoration);
         mentorshipBinding.rcvQuestions.setAdapter(questionAdapter);
     }
 

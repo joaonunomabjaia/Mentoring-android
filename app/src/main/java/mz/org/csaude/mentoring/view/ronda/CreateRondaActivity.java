@@ -36,6 +36,7 @@ import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.RondaTypeEnum;
 import mz.org.csaude.mentoring.util.SimpleValue;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.ronda.RondaVM;
 
@@ -109,9 +110,6 @@ public class CreateRondaActivity extends BaseActivity {
                 Utilities.hideKeyboard(CreateRondaActivity.this);
             }
         });
-
-        //loadSelectedMenteeToForm();
-
     }
 
     @Override
@@ -191,7 +189,12 @@ public class CreateRondaActivity extends BaseActivity {
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
             rcvSelectedMentees.setLayoutManager(mLayoutManager);
             rcvSelectedMentees.setItemAnimator(new DefaultItemAnimator());
-            rcvSelectedMentees.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+
+            int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            rcvSelectedMentees.addItemDecoration(itemDecoration);
+
+            rcvSelectedMentees.setHasFixedSize(true);
 
             tutoredAdapter = new TutoredAdapter(rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this);
             rcvSelectedMentees.setAdapter(tutoredAdapter);

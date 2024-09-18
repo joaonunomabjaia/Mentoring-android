@@ -20,8 +20,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/ronda_item_back"
-        android:padding="15dp"
-        android:layout_marginBottom="@dimen/dimen_6dp">
+        android:padding="15dp">
 
         <TextView
             android:id="@+id/ronda_name"

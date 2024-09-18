@@ -18,6 +18,8 @@ public class SessionSummary extends BaseModel {
     }
 
     public SessionSummary() {
+        this.simCount = 0;
+        this.naoCount = 0;
     }
 
     // Getters and Setters

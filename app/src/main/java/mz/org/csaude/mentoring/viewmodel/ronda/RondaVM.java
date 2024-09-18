@@ -319,12 +319,13 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     }
     private void doSave() {
         if (!isValid()) return;
-
         // Perform the save operation in the background
         getExecutorService().execute(() -> {
+            runOnMainThread(()-> {
+                progressDialog = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+            });
             try {
                 prepareRonda();
-
                 // Prepare the list of RondaMentees and RondaMentors
                 List<RondaMentee> rondaMentees = createRondaMentees();
                 List<RondaMentor> rondaMentors = createRondaMentors();
@@ -345,6 +346,7 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
             } catch (SQLException e) {
                 runOnMainThread(() -> {
+                    dismissProgress(progressDialog);
                     e.printStackTrace();
                     Utilities.displayAlertDialog(getRelatedActivity(), "Failed to save ronda").show();
                 });
@@ -485,9 +487,6 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     @Override
     public void onServerStatusChecked(boolean isOnline) {
         if (isOnline) {
-            runOnMainThread(()-> {
-                progressDialog = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
-            });
             if (getApplication().getApplicationStep().isApplicationStepEdit()) {
                 getApplication().getRondaRestService().restPatchRonda(this.ronda, this);
             } else {
