@@ -268,6 +268,7 @@ public class Ronda extends BaseModel implements Listble {
 
     private boolean allMenteeSessionsClosed(Tutored tutored) {
         if (!isRondaZero() && !menteeHasFourSessions(tutored)) return false;
+        if (isRondaZero() && menteeHasNoSession(tutored)) return false;
 
         for (Session session : sessions) {
             if (session.getTutored().equals(tutored) && !session.isCompleted()) {
@@ -275,6 +276,10 @@ public class Ronda extends BaseModel implements Listble {
             }
         }
         return true;
+    }
+
+    private boolean menteeHasNoSession(Tutored tutored) {
+        return this.sessions.stream().noneMatch(session -> session.getTutored().equals(tutored));
     }
 
     private boolean menteeHasFourSessions(Tutored tutored) {

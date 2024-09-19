@@ -127,6 +127,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             session.setForm(getApplication().getFormService().getById(session.getFormId()));
             session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
             session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+            session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
 
             for (Mentorship mentorship : session.getMentorships()) {
                 mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
