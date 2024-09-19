@@ -78,14 +78,15 @@ public class MentorshipActivity extends BaseActivity {
 
 
     public void populateRecyclerView(){
+        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         binding.rcvMentorships.setLayoutManager(mLayoutManager);
         binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
-        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
-        binding.rcvMentorships.addItemDecoration(itemDecoration);
-
-        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
+        if (adapter == null) {
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            binding.rcvMentorships.addItemDecoration(itemDecoration);
+        }
         binding.rcvMentorships.setAdapter(adapter);
     }
 

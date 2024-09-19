@@ -246,6 +246,8 @@
     <string name="evaluation_end">Fim da Avaliação</string>
     <string name="demostration_needed">Houve necessidade de demonstração</string>
     <string name="demostration_details">Detalhes das Demonstrações</string>
+    <string name="cannot_delete_completed_session">Não pode apagar uma sessão de mentoria completa.</string>
+    <string name="cannot_delete_with_evaluations">Não pode apagar uma sessão de mentoria com avaliações criadas.</string>
 
     <string-array name="languages">
         <item>Inglês</item>
