@@ -55,7 +55,8 @@ public class MentorshipActivity extends BaseActivity {
         setSupportActionBar(binding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Avaliações");
+        getSupportActionBar().setTitle(getString(R.string.evaluations_title));
+
     }
 
     @Override

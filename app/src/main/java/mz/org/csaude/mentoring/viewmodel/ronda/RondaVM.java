@@ -146,9 +146,11 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
             } catch (SQLException e) {
                 // Handle the SQL exception and show an error message on the main thread
                 runOnMainThread(() -> {
-                    e.printStackTrace();
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Failed to load mentees").show();
+                    Log.e("RondaVM", "Error loading mentees", e);
+                    String errorMessage = getRelatedActivity().getString(R.string.mentees_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
+
             }
         });
     }
@@ -221,7 +223,8 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                 runOnMainThread(() -> {
                     e.printStackTrace();
                     // Display error alert
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Failed to load districts").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.districts_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
             }
         });
@@ -278,7 +281,9 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                 runOnMainThread(() -> {
                     e.printStackTrace();
                     // Display an error alert if the query fails
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Failed to load health facilities").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.health_facilities_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
                 });
             }
         });
@@ -297,22 +302,25 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     public void addSelectedMentee() {
         // validate mentee here...
         if (selectedMentees == null) selectedMentees = new ArrayList<>();
-        if(selectedMentee != null){
+        if (selectedMentee != null) {
             if (!selectedMentees.contains(selectedMentee)) {
-                selectedMentee.setListPosition(selectedMentees.size()+1);
+                selectedMentee.setListPosition(selectedMentees.size() + 1);
                 selectedMentee.setListType(Listble.ListTypes.SELECTION_LIST);
                 selectedMentees.add(selectedMentee);
                 getRelatedActivity().displaySelectedMentees();
                 setSelectedMentee(null);
                 notifyPropertyChanged(BR.selectedMentee);
                 notifyPropertyChanged(BR.selectedMentees);
-            }else {
-                Utilities.displayAlertDialog(getRelatedActivity(), "O Mentorando seleccionado já existe na lista!").show();
+            } else {
+                String message = getRelatedActivity().getString(R.string.mentee_already_in_list);
+                Utilities.displayAlertDialog(getRelatedActivity(), message).show();
             }
-        }else{
-            Utilities.displayAlertDialog(getRelatedActivity(),"Campo Mentorando está vazio. Por favor, seleccione um Mentorando para adicionar à lista.").show();
+        } else {
+            String message = getRelatedActivity().getString(R.string.mentee_field_empty);
+            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
         }
     }
+
 
     public void save() {
         this.doSave();
@@ -348,7 +356,9 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                 runOnMainThread(() -> {
                     dismissProgress(progressDialog);
                     e.printStackTrace();
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Failed to save ronda").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_save_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
                 });
             }
         });
@@ -512,7 +522,11 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
             dismissProgress(progressDialog);
             Map<String, Object> params = new HashMap<>();
             params.put("rondaType", objects.get(0).getRondaType());
-            params.put("title", objects.get(0).isRondaZero() ? "Ronda Zero" : "Ronda de Mentoria");
+            String title = objects.get(0).isRondaZero()
+                    ? getRelatedActivity().getString(R.string.ronda_zero)
+                    : getRelatedActivity().getString(R.string.ronda_mentoria);
+            params.put("title", title);
+
             getApplication().getApplicationStep().changeToList();
             getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
         });
@@ -546,7 +560,9 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
             } catch (Exception e) {
                 runOnMainThread(() -> {
                     Log.e("RondaVM", "initRondaEdition:" + e.getMessage());
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao carregar dados da ronda.");
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
                 });
             }
     }

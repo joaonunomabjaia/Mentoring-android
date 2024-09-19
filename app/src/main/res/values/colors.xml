@@ -39,5 +39,8 @@
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="text_secondary_dark">#B0B0B0</color>
 
+    <color name="progress_bar_tint">#FF0000</color>
+    <color name="loading_message_color">#e91e63</color>
+
 
 </resources>

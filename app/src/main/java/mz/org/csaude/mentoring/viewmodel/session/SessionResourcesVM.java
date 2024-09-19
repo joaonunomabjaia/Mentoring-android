@@ -146,11 +146,17 @@ public class SessionResourcesVM extends SearchVM<Resource> implements IDialogLis
 
     @Override
     protected void doOnNoRecordFound() {
-        Utilities.displayAlertDialog(getRelatedActivity(), "Não foram encontrados resultados").show();
+        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_results_found)).show();
     }
 
     public void closeSession() {
-        Utilities.displayConfirmationDialog(getRelatedActivity(), "Confirma Terminar a Sessão de Mentoria?", "Sim", "Não", this).show();
+        Utilities.displayConfirmationDialog(
+                getRelatedActivity(),
+                getRelatedActivity().getString(R.string.confirm_end_session),
+                getRelatedActivity().getString(R.string.yes),
+                getRelatedActivity().getString(R.string.no),
+                this
+        ).show();
     }
 
     @Override

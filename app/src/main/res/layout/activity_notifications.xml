@@ -62,7 +62,7 @@
                             android:layout_weight="8"
                             android:gravity="center_vertical|left"
                             android:paddingLeft="@dimen/dimen_10dp"
-                            android:text="Seções do Mentor"
+                            android:text="@string/mentor_sessions"
                             android:textColor="@color/white" />
 
                         <ImageButton
@@ -109,7 +109,7 @@
                             android:layout_weight="8"
                             android:gravity="center_vertical|left"
                             android:paddingLeft="@dimen/dimen_10dp"
-                            android:text="Aspectos por melhorar no desempenho clinico"
+                            android:text="@string/work_aspects"
                             android:textColor="@color/white" />
 
                         <ImageButton
@@ -145,7 +145,7 @@
                             android:layout_weight="8"
                             android:gravity="center_vertical|left"
                             android:paddingLeft="@dimen/dimen_10dp"
-                            android:text="plano de trabalho para melhorar"
+                            android:text="@string/work_plan"
                             android:textColor="@color/white" />
 
                         <ImageButton
@@ -179,7 +179,7 @@
                             android:layout_weight="8"
                             android:gravity="center_vertical|left"
                             android:paddingLeft="@dimen/dimen_10dp"
-                            android:text="Observacoes"
+                            android:text="@string/observations"
                             android:textColor="@color/white" />
 
                         <ImageButton
