@@ -5,9 +5,8 @@
 
     <data>
         <variable
-            name="viewModel" type="mz.org.csaude.mentoring.viewmodel.home.HomeFragmentViewModel" />
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
-        <import type="android.view.View"/>
+            name="viewModel"
+            type="mz.org.csaude.mentoring.viewmodel.home.HomeFragmentViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,18 +35,20 @@
                 android:layout_weight="2"
                 android:layout_gravity="bottom"
                 android:src="@drawable/mentoring"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="4"
                 android:orientation="vertical">
+
                 <Button
                     android:id="@+id/btn_rondas"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_shape"
                     android:padding="@dimen/dimen_4dp"
-                    android:text="RONDAS/CICLOS DE MENTORIA"
+                    android:text="@string/rounds"
                     android:onClick="@{()-> viewModel.goToMentoringRounds()}"
                     android:textStyle="bold"
                     android:textColor="@color/white"
@@ -60,7 +61,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_shape"
                     android:padding="@dimen/dimen_4dp"
-                    android:text="SESSÕES ZERO"
+                    android:text="@string/zero_sessions"
                     android:onClick="@{()-> viewModel.goToBaseSessions()}"
                     android:textStyle="bold"
                     android:textColor="@color/white"
@@ -73,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_shape"
                     android:padding="@dimen/dimen_4dp"
-                    android:text="MENTORANDOS"
+                    android:text="@string/mentees"
                     android:onClick="@{()-> viewModel.goToMentees()}"
                     android:textStyle="bold"
                     android:textColor="@color/white"
@@ -86,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_shape"
                     android:padding="@dimen/dimen_4dp"
-                    android:text="RECURSOS DE EA"
+                    android:text="@string/ea_resources"
                     android:onClick="@{()-> viewModel.goToLearningResources()}"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:textStyle="bold"
@@ -95,6 +96,7 @@
                     android:layout_marginTop="4dp"
                     android:layout_marginEnd="8dp"/>
             </LinearLayout>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -102,6 +104,7 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 android:text="@{viewModel.appName}"/>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -110,8 +113,6 @@
                 android:gravity="center"
                 android:text="@{viewModel.appVersionName}"/>
         </LinearLayout>
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -22,7 +22,7 @@
 
             <!-- Auto Sync Switch -->
             <TextView
-                android:text="Enable Auto Sync"
+                android:text="@string/enable_auto_sync"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -34,7 +34,7 @@
 
             <!-- Sync Interval Input with Validation Button -->
             <TextView
-                android:text="Sync Interval (Horas)"
+                android:text="@string/sync_interval"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
@@ -52,11 +52,11 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:text="@={viewModel.syncInterval}"
-                    android:hint="Enter hours" />
+                    android:hint="@string/enter_hours" />
 
                 <Button
                     android:id="@+id/buttonValidateSyncInterval"
-                    android:text="Gravar"
+                    android:text="@string/submit"
                     android:onClick="@{() -> viewModel.onValidateSyncIntervalClicked()}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
             <!-- Sync Now Button -->
             <Button
                 android:id="@+id/button_sync_now"
-                android:text="Sync Now"
+                android:text="@string/sync_now"
                 android:onClick="@{() -> viewModel.onSyncNowClicked()}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
 
             <!-- Auto Logout Time Input with Validation Button -->
             <TextView
-                android:text="Auto Logout Time (minutes)"
+                android:text="@string/auto_logout_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
@@ -92,19 +92,20 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:text="@={viewModel.autoLogoutTime}"
-                    android:hint="Enter minutes" />
+                    android:hint="@string/enter_minutes" />
 
                 <Button
                     android:id="@+id/buttonValidateAutoLogoutTime"
-                    android:text="@string/save"
+                    android:text="@string/submit"
                     android:onClick="@{() -> viewModel.onValidateAutoLogoutTimeClicked()}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp" />
             </LinearLayout>
 
+            <!-- Select Language -->
             <TextView
-                android:text="Select Language"
+                android:text="@string/select_language"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />

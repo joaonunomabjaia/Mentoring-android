@@ -100,6 +100,7 @@ import mz.org.csaude.mentoring.service.tutored.TutoredService;
 import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
+import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
@@ -238,17 +239,38 @@ public class MentoringApplication  extends Application {
 
         setUpRetrofit();
 
-        Locale.setDefault(new Locale("en_ZA"));
-
         serviceExecutor = ExecutorThreadProvider.getInstance().getExecutorService();
 
-        applySavedLanguage();
+        // Load the selected language from SharedPreferences
+        SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
+        String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
+
+        Log.d("SelectedLanguage", "Language selected: " + selectedLanguageCode);
+        // Set the locale
+        setLocale(selectedLanguageCode);
 
     }
 
-
     public static synchronized MentoringApplication getInstance() {
         return mInstance;
+    }
+
+    /**
+     * Method to set the locale for the app.
+     * @param languageCode The language code to set.
+     */
+    private void setLocale(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        Configuration config = new Configuration();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            config.setLocale(locale);
+            getBaseContext().createConfigurationContext(config);
+        } else {
+            config.locale = locale;
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
     }
 
     private void applySavedLanguage() {

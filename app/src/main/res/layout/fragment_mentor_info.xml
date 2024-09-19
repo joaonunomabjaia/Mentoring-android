@@ -40,13 +40,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="@dimen/dimen_15dp"
-            >
+            android:padding="@dimen/dimen_15dp">
+
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -63,13 +62,12 @@
                         android:orientation="horizontal"
                         android:background="@drawable/shape_normal"
                         android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        >
+                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Identificação do Mentor"
+                            android:text="@string/identification_data_label"
                             android:layout_weight="8"
                             android:textColor="@color/white"
                             android:gravity="center_vertical|left"
@@ -83,22 +81,21 @@
                             android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
                             android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="2dp"
-                            android:layout_weight="1"
-                            />
+                            android:layout_weight="1"/>
 
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/identification_data_lyt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="4dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}">
+                        android:padding="4dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="Nome : "
+                            android:text="@string/name"
                             style="@style/input_labels"/>
 
                         <EditText
@@ -108,13 +105,12 @@
                             android:background="@drawable/fields_background"
                             style="@style/bottom_border_edit_text_style"
                             android:text="@={viewModel.name}"
-                            android:hint="Nome"
-                            />
+                            android:hint="@string/name"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Apelido : "
+                            android:text="@string/surname"
                             style="@style/input_labels"/>
 
                         <EditText
@@ -124,14 +120,13 @@
                             android:background="@drawable/fields_background"
                             style="@style/bottom_border_edit_text_style"
                             android:text="@={viewModel.surname}"
-                            android:hint="Surname"/>
+                            android:hint="@string/surname"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="Contacto : "
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_phone_number_label"
+                            style="@style/input_labels"/>
 
                         <EditText
                             android:layout_width="match_parent"
@@ -141,15 +136,14 @@
                             android:maxLength="9"
                             android:hint="@string/telephone"
                             android:text="@={viewModel.phoneNumber}"
-                            style="@style/bottom_border_edit_text_style"
-                            />
+                            style="@style/bottom_border_edit_text_style"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Email"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/email"
+                            style="@style/input_labels"/>
+
                         <EditText
                             android:id="@+id/tutor_email"
                             android:layout_width="match_parent"
@@ -163,9 +157,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="NUIT"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/nuit"
+                            style="@style/input_labels"/>
+
                         <EditText
                             android:id="@+id/tutor_nuit"
                             android:layout_width="match_parent"
@@ -186,14 +180,13 @@
                         android:background="@drawable/shape_normal"
                         android:orientation="horizontal"
                         android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        >
+                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Informação Laboral"
+                            android:text="@string/labor_information_label"
                             android:textColor="@color/white"
                             android:paddingLeft="10dp"
                             android:gravity="center_vertical|left"
@@ -207,8 +200,7 @@
                             android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
                             android:background="@color/background_layout"
                             android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="2dp"
-                            />
+                            android:layout_marginRight="2dp"/>
 
                     </LinearLayout>
 
@@ -216,8 +208,7 @@
                         android:id="@+id/laboral_lyt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}">
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -231,15 +222,13 @@
                             android:layout_height="wrap_content"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{professionalCategoryAdapter}"
-                            bind:selectedOpt="@={viewModel.professionalCategory}"
-                            />
+                            bind:selectedOpt="@={viewModel.professionalCategory}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/vinculo_laboral"
-                            style="@style/input_labels"
-                            />
+                            style="@style/input_labels"/>
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_mentee_labor_info"
@@ -247,17 +236,14 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             app:adapter="@{menteeLaborfoAdapter}"
-                            bind:selectedOpt="@={viewModel.menteeLabor}"
-
-                            />
+                            bind:selectedOpt="@={viewModel.menteeLabor}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
-                            android:text="Nome da ONG"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/ngo_name_label"
+                            style="@style/input_labels"/>
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_ngo"
@@ -266,15 +252,14 @@
                             android:layout_height="wrap_content"
                             android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
                             app:adapter="@{ngoAdapter}"
-                            bind:selectedOpt="@={viewModel.selectedNgo}"
-                            />
+                            bind:selectedOpt="@={viewModel.selectedNgo}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Ano de Formação"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/training_year_label"
+                            style="@style/input_labels"/>
+
                         <EditText
                             android:id="@+id/training_year"
                             android:layout_width="match_parent"
@@ -301,7 +286,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Unidade Sanitaria"
+                            android:text="@string/health_facility_label"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -322,15 +307,14 @@
                         android:id="@+id/healt_unit_lyt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}">
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Province *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/province"
+                            style="@style/input_labels"/>
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_province"
                             android:layout_width="fill_parent"
@@ -339,15 +323,14 @@
                             android:clickable="false"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{provinceAdapter}"
-                            bind:selectedOpt= "@={viewModel.province}"
-                            />
+                            bind:selectedOpt="@={viewModel.province}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Distric *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/district"
+                            style="@style/input_labels"/>
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_district"
                             android:layout_width="fill_parent"
@@ -356,15 +339,13 @@
                             android:clickable="false"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{districtAdapter}"
-                            bind:selectedOpt="@={viewModel.district}"
-                            />
+                            bind:selectedOpt="@={viewModel.district}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Unidade Sanitaria *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/health_facility"
+                            style="@style/input_labels"/>
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_healthfacility"
@@ -374,30 +355,25 @@
                             android:clickable="false"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{healthfacilityAdapter}"
-                            bind:selectedOpt="@={viewModel.healthFacility}"
-                            />
+                            bind:selectedOpt="@={viewModel.healthFacility}"/>
 
                     </LinearLayout>
 
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Gravar"
+                        android:text="@string/submit"
                         android:textStyle="bold"
                         android:layout_marginTop="@dimen/dimen_15dp"
                         android:layout_gravity="center"
                         android:textAllCaps="false"
-                        android:onClick="@{() -> viewModel.update()}"
-                        />
+                        android:onClick="@{() -> viewModel.update()}"/>
 
                 </LinearLayout>
 
             </ScrollView>
 
-
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </layout>

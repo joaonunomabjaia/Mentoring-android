@@ -213,13 +213,14 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 ResponseBody data = response.body();
                 if (response.code() == 200) {
-                    try {
-                        getApplication().getRondaService().delete(ronda);
-
+                    getServiceExecutor().execute(()->{
+                        try {
+                            getApplication().getRondaService().delete(ronda);
+                        } catch (SQLException e) {
+                            Log.e("RondaRestService", e.getMessage(), e);
+                        }
                         listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response

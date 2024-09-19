@@ -246,8 +246,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
             catch (Exception e) {
                 dismissProgress(loading);
                 runOnMainThread(() -> {
-                    e.printStackTrace();
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Failed to save Mentorando.").show();
+                    Log.e("MentorVM", e.getMessage());
+                    Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.failed_to_save_tutored)).show();
                 });
             }
         });
@@ -260,9 +260,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
             this.tutoredService.savedOrUpdateTutored(tutored);
             this.getApplication().getLocationService().saveOrUpdate(location);
 
-            runOnMainThread(()->{
+            runOnMainThread(() -> {
                 dismissProgress(loading);
-                //Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando criado com sucesso.").show();
                 Map<String, Object> params = new HashMap<>();
                 params.put("createdTutored", tutored);
                 getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);
@@ -270,9 +269,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         } catch (SQLException e) {
             dismissProgress(loading);
             Log.e("MentorVM", e.getMessage());
-            // Handle any exception and dismiss the progress dialog
             runOnMainThread(() -> {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar o Mentoando.").show();
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.failed_to_save_tutored)).show();
             });
         }
     }
@@ -466,8 +464,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
         WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
             if (workInfo != null) {
-                if (workInfo.getState() == WorkInfo.State.SUCCEEDED){
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Dados de mentorandos enviados com sucesso.").show();
+                if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                    Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.tutored_data_upload_success)).show();
                 }
             }
         });

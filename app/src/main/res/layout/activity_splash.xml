@@ -2,62 +2,60 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".view.splash.SplashActivity">
-<data>
-    <variable
-        name="viewModel"
-        type="mz.org.csaude.mentoring.viewmodel.SplashVM" />
-    <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
-    <import type="android.view.View"/>
-</data>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
+    <data>
+        <variable
+            name="viewModel"
+            type="mz.org.csaude.mentoring.viewmodel.SplashVM" />
+        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
+        <import type="android.view.View"/>
+    </data>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_0dp"
-                android:layout_weight="1"/>
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_gravity="bottom"
-                android:src="@drawable/mentoring"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"
-                style="@style/splash_app_name_style"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text="Mentoria"/>
-            <ProgressBar
-                android:layout_width="150dp"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="@dimen/dimen_10dp"
-                android:indeterminateTint="#FF0000"
-                android:layout_gravity="center|bottom"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_0dp"
-                android:text="Carregando, por favor aguarde ..."
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:textColor="#e91e63"
-                android:gravity="top|center"
-                android:layout_margin="@dimen/dimen_10dp"/>
+            android:layout_height="@dimen/dimen_0dp"
+            android:layout_weight="1"/>
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="bottom"
+            android:src="@drawable/mentoring"/>
 
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            style="@style/splash_app_name_style"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:text="@string/app_name"/>
 
-</LinearLayout>
+        <ProgressBar
+            android:layout_width="150dp"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="@dimen/dimen_10dp"
+            android:indeterminateTint="@color/progress_bar_tint"
+            android:layout_gravity="center|bottom"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_0dp"
+            android:text="@string/loading_message"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/loading_message_color"
+            android:gravity="top|center"
+            android:layout_margin="@dimen/dimen_10dp"/>
+
+    </LinearLayout>
 
 </layout>

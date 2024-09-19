@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity {
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar.toolbar);
-        getSupportActionBar().setTitle("Mentoria");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
 
         progressDialog = new ProgressDialog(this);
 

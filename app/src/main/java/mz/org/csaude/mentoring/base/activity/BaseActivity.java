@@ -3,12 +3,14 @@ package mz.org.csaude.mentoring.base.activity;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -20,6 +22,7 @@ import androidx.core.content.pm.PackageInfoCompat;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import mz.org.csaude.mentoring.R;
@@ -27,6 +30,7 @@ import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.common.ApplicationStep;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.view.login.LoginActivity;
 
 /**
@@ -91,8 +95,26 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
         // Initialize the auto-logout handler and runnable
         autoLogoutHandler = new Handler();
         autoLogoutRunnable = this::showLogoutWarningDialog;
+
+        SharedPreferences preferences = ((MentoringApplication) getApplication()).getEncryptedSharedPreferences();
+        String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "en"); // Default to English
+
+        setLocale(selectedLanguageCode);
     }
 
+    private void setLocale(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        Configuration config = new Configuration();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            config.setLocale(locale);
+            getBaseContext().createConfigurationContext(config);
+        } else {
+            config.locale = locale;
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import mz.org.csaude.mentoring.BR;
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
@@ -92,7 +93,7 @@ public class SessionVM extends BaseViewModel {
     }
     public void save() {
         // Show a progress dialog while saving
-        Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), "Salvando...");
+        Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
         // Perform the save operation in a background thread
         getExecutorService().execute(() -> {
@@ -101,12 +102,14 @@ public class SessionVM extends BaseViewModel {
                 runOnMainThread(() -> {
                     if (this.session.getStartDate().before(this.session.getRonda().getStartDate())) {
                         progress.dismiss(); // Dismiss progress dialog before showing the error
-                        Utilities.displayAlertDialog(getRelatedActivity(), "A data de início da sessão não pode ser anterior a data de início da ronda").show();
+                        String startDateError = getRelatedActivity().getString(R.string.session_start_date_error);
+                        Utilities.displayAlertDialog(getRelatedActivity(), startDateError).show();
                         return;
                     }
                     if (this.session.getForm() == null) {
                         progress.dismiss(); // Dismiss progress dialog before showing the error
-                        Utilities.displayAlertDialog(getRelatedActivity(), "Por favor, selecione uma tabela de competências").show();
+                        String selectTableError = getRelatedActivity().getString(R.string.select_competence_table);
+                        Utilities.displayAlertDialog(getRelatedActivity(), selectTableError).show();
                         return;
                     }
                 });
@@ -131,11 +134,13 @@ public class SessionVM extends BaseViewModel {
                 // Handle any database error on the main thread
                 runOnMainThread(() -> {
                     progress.dismiss(); // Dismiss the progress dialog on error
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao salvar a sessão").show();
+                    String saveError = getRelatedActivity().getString(R.string.session_save_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), saveError).show();
                 });
             }
         });
     }
+
 
 
     public void setSession(Session session) {

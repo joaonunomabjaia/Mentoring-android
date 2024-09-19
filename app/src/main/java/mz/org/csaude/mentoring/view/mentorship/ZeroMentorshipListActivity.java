@@ -18,6 +18,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityZeroMentorshipListBinding;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.viewmodel.mentorship.ZeroMentorshipSearchVM;
 
 public class ZeroMentorshipListActivity extends BaseActivity {
@@ -63,7 +64,9 @@ public class ZeroMentorshipListActivity extends BaseActivity {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         binding.rcvMentorships.setLayoutManager(mLayoutManager);
         binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
-        binding.rcvMentorships.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+        binding.rcvMentorships.addItemDecoration(itemDecoration);
 
         adapter = new ZeroMentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
         binding.rcvMentorships.setAdapter(adapter);

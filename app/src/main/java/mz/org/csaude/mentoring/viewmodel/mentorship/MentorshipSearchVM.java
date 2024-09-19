@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
@@ -81,7 +82,8 @@ public class MentorshipSearchVM extends AbstractSearchMentorshipVM {
             getCurrentStep().changetocreate();
             getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível criar mais de 4 avaliações para o mentorando(a) "+this.session.getTutored().getEmployee().getFullName()).show();
+            String message = getRelatedActivity().getString(R.string.error_max_evaluations, this.session.getTutored().getEmployee().getFullName());
+            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
         }
     }
 

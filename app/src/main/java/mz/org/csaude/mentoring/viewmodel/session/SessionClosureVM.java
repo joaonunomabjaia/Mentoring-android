@@ -112,7 +112,8 @@ public class SessionClosureVM extends BaseViewModel {
                 if (session.getEndDate().before(session.getStartDate())) {
                     getRelatedActivity().runOnUiThread(() -> {
                         if (progress != null && progress.isShowing()) progress.dismiss();
-                        Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data de início").show();
+                        String errorMessage = getRelatedActivity().getString(R.string.session_end_date_before_start);
+                        Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                     });
                     return;
                 }
@@ -120,7 +121,8 @@ public class SessionClosureVM extends BaseViewModel {
                 if (sessionCloseDateBeforeLastMentorship()) {
                     getRelatedActivity().runOnUiThread(() -> {
                         if (progress != null && progress.isShowing()) progress.dismiss();
-                        Utilities.displayAlertDialog(getRelatedActivity(), "A data de fim da sessão não pode ser menor que a data final da última avaliação").show();
+                        String errorMessage = getRelatedActivity().getString(R.string.session_end_date_before_last_mentorship);
+                        Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                     });
                     return;
                 }
@@ -143,11 +145,13 @@ public class SessionClosureVM extends BaseViewModel {
                 // Handle error on the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) progress.dismiss();
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao tentar atualizar a sessão").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.session_update_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
             }
         });
     }
+
 
 
     private boolean sessionCloseDateBeforeLastMentorship() {

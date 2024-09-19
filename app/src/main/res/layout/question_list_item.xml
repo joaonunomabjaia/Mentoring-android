@@ -11,76 +11,80 @@
             type="mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM" />
 
         <import type="mz.org.csaude.mentoring.util.Utilities"/>
-        <import type="mz.org.csaude.mentoring.util.SyncSatus"/>
         <import type="android.view.View"/>
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
     </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/ronda_item_back"
-        android:padding="15dp">
+        android:padding="@dimen/dimen_15dp">
 
+        <!-- Question Title -->
         <TextView
             android:id="@+id/ronda_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@{formQuestion.question.question}"
-            android:textSize="13dp"
-            android:drawablePadding="8dp"
+            android:textSize="@dimen/text_size_question"
+            android:drawablePadding="@dimen/dimen_8dp"
             android:textColor="@color/colorPrimaryDark"
             android:gravity="center_vertical"
             android:textStyle="bold"/>
 
-
+        <!-- Answer Options: RadioButtons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/dimen_5dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal">
+
             <RadioGroup
                 android:id="@+id/birth_date_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <!-- RadioButton: SIM -->
                 <RadioButton
                     android:id="@+id/rdb_yes"
                     android:layout_weight="2"
-                    android:textColor="@color/colorPrimaryDark"
                     android:layout_width="@dimen/dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:onClick='@{()->viewModel.setQuestionAnswer(formQuestion, "SIM")}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "SIM")}'
                     android:checked='@{formQuestion.answer.value.equals("SIM")}'
-                    android:text="SIM"
+                    android:text="@string/yes"
+                    android:textColor="@color/colorPrimaryDark"
                     android:tag="SIM"/>
 
+                <!-- RadioButton: NÃO -->
                 <RadioButton
                     android:id="@+id/rdb_no"
                     android:layout_weight="2"
                     android:layout_width="@dimen/dimen_0dp"
-                    android:textColor="@color/colorPrimaryDark"
                     android:layout_height="wrap_content"
-                    android:onClick='@{()->viewModel.setQuestionAnswer(formQuestion, "NAO")}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "NAO")}'
                     android:checked='@{formQuestion.answer.value.equals("NAO")}'
-                    android:text="NÃO"
+                    android:text="@string/no"
+                    android:textColor="@color/colorPrimaryDark"
                     android:tag="NAO"/>
 
+                <!-- RadioButton: N/A (visible only when responseType is SIM/NAO/NA) -->
                 <RadioButton
                     android:id="@+id/rdb_na"
                     android:layout_weight="2"
                     android:layout_width="@dimen/dimen_0dp"
-                    android:textColor="@color/colorPrimaryDark"
                     android:layout_height="wrap_content"
                     android:visibility='@{formQuestion.responseType.code.equals("SIM/NAO/NA") ? View.VISIBLE : View.GONE}'
-                    android:onClick='@{()->viewModel.setQuestionAnswer(formQuestion, "N/A")}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "N/A")}'
                     android:checked='@{formQuestion.answer.value.equals("N/A")}'
-                    android:text="N/A"
+                    android:text="@string/na"
+                    android:textColor="@color/colorPrimaryDark"
                     android:tag="N/A"/>
-            </RadioGroup>
 
+            </RadioGroup>
         </LinearLayout>
     </LinearLayout>
 </layout>

@@ -315,8 +315,14 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
         Configuration config = new Configuration();
-        config.locale = locale;
-        getApplication().getResources().updateConfiguration(config, getApplication().getResources().getDisplayMetrics());
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            config.setLocale(locale);
+            getApplication().getBaseContext().createConfigurationContext(config);
+        } else {
+            config.locale = locale;
+            getApplication().getResources().updateConfiguration(config, getApplication().getResources().getDisplayMetrics());
+        }
 
         // Refresh the current activity to apply the new language
         if (getRelatedActivity() != null) {

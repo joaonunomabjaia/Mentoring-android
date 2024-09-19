@@ -96,7 +96,8 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
             params.put("mentee", this.selectedMentee);
             getRelatedActivity().nextActivity(SessionActivity.class, params);
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível criar mais de 4 sessões para o(a) mentorando(a) "+this.selectedMentee.getEmployee().getFullName()).show();
+            String message = getRelatedActivity().getString(R.string.cannot_create_more_than_four_sessions, this.selectedMentee.getEmployee().getFullName());
+            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
         }
     }
 
@@ -138,36 +139,37 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
         this.selectedSession = session;
         Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
-        // Execute the task in a background thread
         getExecutorService().execute(() -> {
             try {
                 session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
 
-                // Handle UI interactions in the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
 
                     if (session.isCompleted()) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma sessão finalizada").show();
+                        String message = getRelatedActivity().getString(R.string.cannot_edit_completed_session);
+                        Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     } else if (Utilities.listHasElements(session.getMentorships())) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma sessão com avaliações criadas.").show();
+                        String message = getRelatedActivity().getString(R.string.cannot_edit_with_evaluations);
+                        Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     }
 
-                    Utilities.displayConfirmationDialog(getRelatedActivity(), "Deseja realmente excluir a sessão?", "Sim", "Não", this).show();
+                    String confirmationMessage = getRelatedActivity().getString(R.string.confirm_delete_session);
+                    Utilities.displayConfirmationDialog(getRelatedActivity(), confirmationMessage, getRelatedActivity().getString(R.string.yes), getRelatedActivity().getString(R.string.no), this).show();
                 });
             } catch (SQLException e) {
                 Log.e("SessionListVM", "deleteSession: ", e);
 
-                // Handle error UI interaction on the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao tentar excluir a sessão.").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.session_delete_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
             }
         });
@@ -178,26 +180,25 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
     public void editSession(Session session) {
         Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
-        // Execute the task in a background thread
         getExecutorService().execute(() -> {
             try {
                 session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
 
-                // Handle UI interactions in the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
 
                     if (session.isCompleted()) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma sessão finalizada").show();
+                        String message = getRelatedActivity().getString(R.string.cannot_edit_completed_session);
+                        Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     } else if (Utilities.listHasElements(session.getMentorships())) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma sessão com avaliações criadas.").show();
+                        String message = getRelatedActivity().getString(R.string.cannot_edit_with_evaluations);
+                        Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     }
 
-                    // Proceed to the next activity for editing the session
                     Map<String, Object> params = new HashMap<>();
                     params.put("session", session);
                     getApplication().getApplicationStep().changeToEdit();
@@ -207,12 +208,12 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
             } catch (SQLException e) {
                 Log.e("SessionListVM", "editSession: ", e);
 
-                // Handle error UI interaction on the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao tentar editar a sessão.").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.session_update_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
             }
         });
@@ -234,29 +235,26 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
     public void doOnConfirmed() {
         Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
-        // Execute the task in a background thread
         getExecutorService().execute(() -> {
             try {
-                // Perform the deletion in the background
                 getApplication().getSessionService().delete(this.selectedSession);
 
-                // Handle UI interactions in the main thread after deletion
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
-                    initSearch(); // Re-initialize the search after the deletion
+                    initSearch();
                 });
 
             } catch (SQLException e) {
                 Log.e("SessionListVM", "doOnConfirmed: ", e);
 
-                // Handle error UI interaction on the main thread
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) {
                         progress.dismiss();
                     }
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao tentar excluir a sessão.").show();
+                    String errorMessage = getRelatedActivity().getString(R.string.session_delete_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                 });
             }
         });

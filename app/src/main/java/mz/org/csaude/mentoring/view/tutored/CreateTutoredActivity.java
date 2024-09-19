@@ -54,7 +54,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         setSupportActionBar(activityCreateTutoredBinding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Mentorandos");
+        getSupportActionBar().setTitle(getString(R.string.tutored_title));
     }
 
     private void switchLayout(){

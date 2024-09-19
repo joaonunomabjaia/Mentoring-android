@@ -36,6 +36,7 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
@@ -100,7 +101,8 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                         setSupportActionBar(mentorshipBinding.toolbar.toolbar);
                         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                         getSupportActionBar().setDisplayShowHomeEnabled(true);
-                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? "Avaliação" : "Sessão Zero");
+                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? getString(R.string.evaluation_title)
+                                : getString(R.string.zero_session_title));
 
                         // Set the ViewModel to Data Binding
                         mentorshipBinding.setViewModel(getRelatedViewModel());
@@ -118,7 +120,10 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                         setSupportActionBar(mentorshipBinding.toolbar.toolbar);
                         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                         getSupportActionBar().setDisplayShowHomeEnabled(true);
-                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? "Avaliação" : "Sessão Zero");
+                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship()
+                                ? getString(R.string.evaluation_title)
+                                : getString(R.string.zero_session_title));
+
 
                         mentorshipBinding.setViewModel(getRelatedViewModel());
                         //loadSectorAdapter();
@@ -170,7 +175,10 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? "Avaliação" : "Sessão Zero");
+            getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship()
+                    ? getString(R.string.evaluation_title)
+                    : getString(R.string.zero_session_title));
+
         }
     }
 
@@ -364,13 +372,20 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
 
     public void populateQuestionList() {
-        this.questionAdapter = new QuestionAdapter(mentorshipBinding.rcvQuestions, getRelatedViewModel().getQuestionMap().get(getRelatedViewModel().getCurrQuestionCategory()), this);
+        List<FormQuestion> updatedQuestionList = getRelatedViewModel()
+                .getQuestionMap()
+                .get(getRelatedViewModel().getCurrQuestionCategory());
+
+
+        if (questionAdapter == null) {
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_qtns_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            mentorshipBinding.rcvQuestions.addItemDecoration(itemDecoration);
+        }
+        this.questionAdapter = new QuestionAdapter(mentorshipBinding.rcvQuestions, updatedQuestionList, this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mentorshipBinding.rcvQuestions.setLayoutManager(mLayoutManager);
         mentorshipBinding.rcvQuestions.setItemAnimator(new DefaultItemAnimator());
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_qtns_spacing);
-        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
-        mentorshipBinding.rcvQuestions.addItemDecoration(itemDecoration);
         mentorshipBinding.rcvQuestions.setAdapter(questionAdapter);
     }
 

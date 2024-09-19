@@ -29,6 +29,7 @@
 
             <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
@@ -51,13 +52,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Materiais de EA Recomendados"
+                    android:text="@string/session_materials_title"
                     android:textColor="@color/white"
                     android:textAlignment="center"
                     android:textSize="15sp"
                     android:paddingLeft="@dimen/dimen_10dp"/>
 
             </LinearLayout>
+
             <!-- Recommend Consultation Checkbox -->
             <CheckBox
                 android:id="@+id/recommendConsultation"
@@ -65,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.recommendResources}"
                 android:onClick="@{() -> viewModel.changeRecommendResourcesStatus()}"
-                android:text="Recomendar Consulta aos Materiais de EA"
+                android:text="@string/recommend_consultation"
                 android:padding="8dp" />
 
             <!-- Search Bar -->
@@ -80,7 +82,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Pesquisar"
+                    android:hint="@string/search_hint"
                     android:text="@={viewModel.searchText}"
                     android:padding="8dp"
                     android:background="@drawable/search_background" />
@@ -94,6 +96,8 @@
                     android:background="?attr/selectableItemBackground"
                     android:padding="8dp" />
             </LinearLayout>
+
+            <!-- Checkboxes for filtering -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -106,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="HIV"
+                    android:text="@string/hiv"
                     android:checked="@{viewModel.hivChecked}"
                     android:onClick="@{() -> viewModel.changeHivChecked()}"
                     android:textStyle="bold"
@@ -119,15 +123,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="TB"
+                    android:text="@string/tb"
                     android:checked="@{viewModel.tbChecked}"
                     android:onClick="@{() -> viewModel.changeTBChecked()}"
                     android:textStyle="bold"
                     android:textColor="@color/black"
                     android:textSize="14sp"/>
 
-
             </LinearLayout>
+
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -144,7 +148,9 @@
                         android:scrollbars="vertical"/>
                 </LinearLayout>
             </ScrollView>
+
         </LinearLayout>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
