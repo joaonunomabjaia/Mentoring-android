@@ -243,6 +243,10 @@
     <string name="mentor">Mentor</string>
     <string name="sair">Sair</string>
 
+    <string name="evaluation_end">Fim da Avaliação</string>
+    <string name="demostration_needed">Houve necessidade de demonstração</string>
+    <string name="demostration_details">Detalhes das Demonstrações</string>
+
 
     <string-array name="languages">
         <item>Inglês</item>

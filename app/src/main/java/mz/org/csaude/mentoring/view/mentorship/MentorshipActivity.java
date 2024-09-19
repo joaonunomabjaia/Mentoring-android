@@ -24,6 +24,7 @@ import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipSearchVM;
 
 import java.io.Serializable;
@@ -80,7 +81,9 @@ public class MentorshipActivity extends BaseActivity {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         binding.rcvMentorships.setLayoutManager(mLayoutManager);
         binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
-        binding.rcvMentorships.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+        binding.rcvMentorships.addItemDecoration(itemDecoration);
 
         adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
         binding.rcvMentorships.setAdapter(adapter);

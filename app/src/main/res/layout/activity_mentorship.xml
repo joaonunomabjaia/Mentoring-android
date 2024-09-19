@@ -302,6 +302,66 @@
                         </LinearLayout>
                     </ScrollView>
                 </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/demostration_selection_layout"
+                    android:layout_width="match_parent"
+                    android:visibility='@{viewModel.currMentorshipStep.equals("DEMOSTRATION_SELECTION") ? View.VISIBLE : View.GONE}'
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/demostration_navigation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/dimen_10dp"
+                            android:layout_marginTop="@dimen/dimen_10dp"
+                            android:layout_marginEnd="@dimen/dimen_10dp"
+                            android:layout_marginBottom="@dimen/dimen_10dp"
+                            android:background="@drawable/shape_normal"
+                            android:gravity="center"
+                            android:text="@string/evaluation_end"
+                            android:textColor="@color/white"
+                            android:textSize="15sp" />
+
+                        <CheckBox
+                            android:id="@+id/recommendConsultation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="@{viewModel.demostrationMade}"
+                            android:onClick="@{() -> viewModel.changeDemostrationStatus()}"
+                            android:text="@string/demostration_needed"
+                            android:padding="8dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/demostration_details"
+                            style="@style/input_labels" />
+
+                        <EditText
+                            android:id="@+id/edt_demo_details"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textMultiLine"
+                            android:gravity="top|start"
+                            android:minLines="6"
+                            android:maxLines="10"
+                            android:padding="3dp"
+                            android:overScrollMode="always"
+                            android:imeOptions="actionDone"
+                            android:layout_marginTop="@dimen/dimen_4dp"
+                            android:text="@={viewModel.demostrationDetails}"
+                            android:background="@drawable/listble_shape"
+                            android:scrollbars="vertical"/>
+                    </LinearLayout>
+                </RelativeLayout>
+
             </LinearLayout>
         </LinearLayout>
 
