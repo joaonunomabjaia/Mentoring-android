@@ -24,7 +24,7 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
 
     @Override
     public RondaMentor save(RondaMentor record) throws SQLException {
-        this.rondaMentorDAO.create(record);
+        record.setId((int) this.rondaMentorDAO.insert(record));
         return record;
     }
 
@@ -46,21 +46,38 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
 
     @Override
     public RondaMentor getById(int id) throws SQLException {
-        return this.rondaMentorDAO.queryForId(id);
+        RondaMentor rondaMentor = this.rondaMentorDAO.queryForId(id);
+        if (rondaMentor == null) return null;
+        rondaMentor.setTutor(getApplication().getTutorService().getById(rondaMentor.getTutorId()));
+        return rondaMentor;
+    }
+
+    @Override
+    public RondaMentor getByuuid(String uuid) throws SQLException {
+        RondaMentor rondaMentor = this.rondaMentorDAO.getByUuid(uuid);
+        if (rondaMentor == null) return null;
+        rondaMentor.setTutor(getApplication().getTutorService().getById(rondaMentor.getTutorId()));
+        return rondaMentor;
     }
 
     @Override
     public RondaMentor savedOrUpdateRondaMentor(RondaMentor rondaMentor) throws SQLException {
-        RondaMentor rm = this.rondaMentorDAO.getByUuid(rondaMentor.getUuid());
+        RondaMentor rm = this.getByuuid(rondaMentor.getUuid());
         if(rm!=null) {
             rondaMentor.setId(rm.getId());
+            this.update(rondaMentor);
+        } else {
+            this.save(rondaMentor);
         }
-        this.rondaMentorDAO.createOrUpdate(rondaMentor);
         return rondaMentor;
     }
 
     @Override
     public List<RondaMentor> getRondaMentors(Ronda ronda) throws SQLException {
-        return this.rondaMentorDAO.getRondaMentors(ronda);
+        List<RondaMentor> rondaMentors = this.rondaMentorDAO.getRondaMentors(ronda.getId());
+        for (RondaMentor rondaMentor : rondaMentors) {
+            rondaMentor.setTutor(getApplication().getTutorService().getById(rondaMentor.getTutorId()));
+        }
+        return rondaMentors;
     }
 }

@@ -1,12 +1,16 @@
 package mz.org.csaude.mentoring.model.session;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.Relation;
 
 import java.util.Date;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.session.SessionRecommendedResourceDAOImpl;
 import mz.org.csaude.mentoring.dto.session.SessionRecommendedResourceDTO;
 import mz.org.csaude.mentoring.model.resourceea.Node;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
@@ -15,7 +19,14 @@ import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
-@DatabaseTable(tableName = SessionRecommendedResource.TABLE_NAME, daoClass = SessionRecommendedResourceDAOImpl.class)
+@Entity(
+        tableName = SessionRecommendedResource.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Session.class, parentColumns = "id", childColumns = "session_id", onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutored.class, parentColumns = "id", childColumns = "tutored_id", onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutor.class, parentColumns = "id", childColumns = "tutor_id", onDelete = ForeignKey.CASCADE)
+        }
+)
 public class SessionRecommendedResource extends BaseModel {
 
     public static final String TABLE_NAME = "session_recommended_resource";
@@ -26,57 +37,107 @@ public class SessionRecommendedResource extends BaseModel {
     public static final String COLUMN_RESOURCE_NAME = "resource_name";
     public static final String COLUMN_DATE_RECOMMENDED = "date_recommended";
 
+    @NonNull
+    @ColumnInfo(name = COLUMN_SESSION_ID)
+    private Integer sessionId;
 
-    @DatabaseField(columnName = COLUMN_SESSION_ID, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @Ignore
+    @Relation(parentColumn = COLUMN_SESSION_ID, entityColumn = "id")
     private Session session;
-    @DatabaseField(columnName = COLUMN_TUTORED_ID, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_TUTORED_ID)
+    private Integer tutoredId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_TUTORED_ID, entityColumn = "id")
     private Tutored tutored;
-    @DatabaseField(columnName = COLUMN_TUTOR_ID, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_TUTOR_ID)
+    private Integer tutorId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_TUTOR_ID, entityColumn = "id")
     private Tutor tutor;
 
-    @DatabaseField(columnName = COLUMN_RESOURCE_LINK, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_RESOURCE_LINK)
     private String resourceLink;
-    @DatabaseField(columnName = COLUMN_RESOURCE_NAME, canBeNull = false)
+
+    @NonNull
+    @ColumnInfo(name = COLUMN_RESOURCE_NAME)
     private String resourceName;
 
-    @DatabaseField(columnName = COLUMN_DATE_RECOMMENDED, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_DATE_RECOMMENDED)
     private Date dateRecommended;
 
-
-    // Default constructor is needed by ORMLite
+    // Default constructor is needed by Room
     public SessionRecommendedResource() {
     }
 
+    @Ignore
     public SessionRecommendedResource(Session session, Node node) {
-        this.tutor = session.getRonda().getActiveMentor();
-        this.tutored = session.getTutored();
         this.session = session;
+        this.sessionId = session.getId();
+
+        this.tutor = session.getRonda().getActiveMentor();
+        this.tutorId = this.tutor.getId();
+
+        this.tutored = session.getTutored();
+        this.tutoredId = this.tutored.getId();
+
         this.resourceLink = node.getName().replace(" ", "_");
         this.resourceName = node.getName().replace(" ", "_");
         this.dateRecommended = DateUtilities.getCurrentDate();
+
         this.setSyncStatus(SyncSatus.PENDING);
         this.setCreatedAt(DateUtilities.getCurrentDate());
         this.setUuid(Utilities.getNewUUID().toString());
     }
 
-
+    @Ignore
     public SessionRecommendedResource(SessionRecommendedResourceDTO dto, Session session, Tutored tutored, Tutor tutor) {
         super(dto);
         this.session = session;
+        this.sessionId = session.getId();
+
         this.tutored = tutored;
+        this.tutoredId = tutored.getId();
+
         this.tutor = tutor;
+        this.tutorId = tutor.getId();
+
         this.resourceLink = dto.getResourceLink();
         this.resourceName = dto.getResourceName();
         this.dateRecommended = dto.getDateRecommended();
     }
 
     // Getters and Setters
+    public Integer getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Integer sessionId) {
+        this.sessionId = sessionId;
+    }
+
     public Session getSession() {
         return session;
     }
 
     public void setSession(Session session) {
         this.session = session;
+        this.sessionId = session.getId();
+    }
+
+    public Integer getTutoredId() {
+        return tutoredId;
+    }
+
+    public void setTutoredId(Integer tutoredId) {
+        this.tutoredId = tutoredId;
     }
 
     public Tutored getTutored() {
@@ -85,6 +146,15 @@ public class SessionRecommendedResource extends BaseModel {
 
     public void setTutored(Tutored tutored) {
         this.tutored = tutored;
+        this.tutoredId = tutored.getId();
+    }
+
+    public Integer getTutorId() {
+        return tutorId;
+    }
+
+    public void setTutorId(Integer tutorId) {
+        this.tutorId = tutorId;
     }
 
     public Tutor getTutor() {
@@ -93,6 +163,7 @@ public class SessionRecommendedResource extends BaseModel {
 
     public void setTutor(Tutor tutor) {
         this.tutor = tutor;
+        this.tutorId = tutor.getId();
     }
 
     public String getResourceLink() {
@@ -118,6 +189,4 @@ public class SessionRecommendedResource extends BaseModel {
     public void setDateRecommended(Date dateRecommended) {
         this.dateRecommended = dateRecommended;
     }
-
-
 }

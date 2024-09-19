@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.ronda;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
@@ -37,6 +39,8 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     private String title;
 
     private Ronda selectedRonda;
+
+    private Dialog progress;
 
     public RondaSearchVM(@NonNull Application application) {
         super(application);
@@ -151,9 +155,11 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
             }
             boolean print = PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
             if (print) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Resumo impresso com sucesso, encontre o documento no diretório de downloads.").show();
+                String successMessage = getRelatedActivity().getString(R.string.ronda_print_success);
+                Utilities.displayAlertDialog(getRelatedActivity(), successMessage).show();
             } else {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Não foi possível imprimir o documento.").show();
+                String failureMessage = getRelatedActivity().getString(R.string.ronda_print_failure);
+                Utilities.displayAlertDialog(getRelatedActivity(), failureMessage).show();
             }
 
         } catch (SQLException e) {
@@ -174,40 +180,80 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     public void edit(Ronda ronda) {
-        try {
-            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
-            if (Utilities.listHasElements(ronda.getSessions())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível editar uma ronda com sessões registadas.").show();
-                return;
-            }
-        } catch (SQLException e) {
-            Log.e("Ronda Search VM", "Exception: " + e.getMessage());
-        }
+        // Perform the database query in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Fetch sessions in the background thread
+                ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
 
+                // Check if the Ronda has sessions and update the UI on the main thread
+                runOnMainThread(() -> {
+                    if (Utilities.listHasElements(ronda.getSessions())) {
+                        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.ronda_edit_error_msg)).show();
+                        return;
+                    }
+
+                    // Proceed to edit if there are no sessions
+                    navigateToEditRonda(ronda);
+                });
+
+            } catch (SQLException e) {
+                // Handle SQL exceptions on the main thread
+                runOnMainThread(() -> {
+                    Log.e("Ronda Search VM", "Exception: " + e.getMessage());
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_session_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                });
+            }
+        });
+    }
+
+    private void navigateToEditRonda(Ronda ronda) {
+        // Prepare the parameters for the next activity
         Map<String, Object> params = new HashMap<>();
         params.put("ronda", ronda);
-        getApplication().getApplicationStep().changeToEdit();
-        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
 
+        // Change the application step to "edit"
+        getApplication().getApplicationStep().changeToEdit();
+
+        // Navigate to the CreateRondaActivity
+        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
     }
+
 
     public void delete(Ronda ronda) {
         this.selectedRonda = ronda;
-        try {
-            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
-            if (Utilities.listHasElements(ronda.getSessions())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Não é possível apagar uma ronda com sessões registadas.").show();
-                return;
-            }
-        } catch (SQLException e) {
-            Log.e("Ronda Search VM", "Exception: " + e.getMessage());
-        }
 
-        Utilities.displayConfirmationDialog(getRelatedActivity(), "Deseja realmente excluir a ronda?", "Sim", "Não", this).show();
+        getExecutorService().execute(() -> {
+            try {
+                List<Session> sessions = getApplication().getSessionService().getAllOfRonda(ronda);
+                ronda.setSessions(sessions);
+
+                runOnMainThread(() -> {
+                    if (Utilities.listHasElements(ronda.getSessions())) {
+                        String errorMessage = getRelatedActivity().getString(R.string.ronda_delete_error_msg);
+                        Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                        return;
+                    }
+
+                    String confirmationMessage = getRelatedActivity().getString(R.string.ronda_delete_confirmation);
+                    Utilities.displayConfirmationDialog(getRelatedActivity(), confirmationMessage, getRelatedActivity().getString(R.string.yes), getRelatedActivity().getString(R.string.no), this).show();
+                });
+
+            } catch (SQLException e) {
+                runOnMainThread(() -> {
+                    Log.e("Ronda Search VM", "Exception: " + e.getMessage());
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_session_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                });
+            }
+        });
     }
+
 
     @Override
     public void doOnConfirmed() {
+        this.progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
         getApplication().getApplicationStep().changeToRemove();
         getApplication().isServerOnline(this);
     }
@@ -231,8 +277,17 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     public void doOnResponse(String flag, List<Ronda> objects) {
         if (getApplication().getApplicationStep().isApplicationStepRemove()) {
             getApplication().getApplicationStep().changeToList();
-            Utilities.displayAlertDialog(getRelatedActivity(), "Ronda removida com sucesso.").show();
+            dismissProgress(this.progress);
             initSearch();
+        }
+    }
+
+    @Override
+    public void doOnRestErrorResponse(String errormsg) {
+        if (getApplication().getApplicationStep().isApplicationStepRemove()) {
+            getApplication().getApplicationStep().changeToList();
+            dismissProgress(this.progress);
+            Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
         }
     }
 }

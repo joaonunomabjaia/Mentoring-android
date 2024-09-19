@@ -2,16 +2,19 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
         <variable name="viewModel" type="mz.org.csaude.mentoring.viewmodel.session.SessionVM" />
         <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
         <import type="android.view.View"/>
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".view.session.SessionActivity">
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout2"
             android:layout_width="match_parent"
@@ -23,6 +26,7 @@
 
             <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
@@ -34,113 +38,113 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appBarLayout2">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
                 <LinearLayout
+                    android:id="@+id/initial_data"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/shape_normal"
+                    android:padding="3dp"
+                    android:onClick="@{(view) -> viewModel.openCollapse(view)}"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="@dimen/dimen_0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="8"
+                        android:text="@string/start_session"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:gravity="center_vertical|left"
+                        android:paddingLeft="@dimen/dimen_10dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btn_show_collapse"
+                        android:layout_width="@dimen/dimen_0dp"
+                        android:layout_height="match_parent"
+                        android:onClick="@{(view) -> viewModel.openCollapse(view)}"
+                        android:background="@color/background_layout"
+                        android:src="@drawable/baseline_expand_circle_down_24"
+                        android:layout_marginRight="@dimen/dimen_2dp"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/initial_data_lyt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    >
-                    <LinearLayout
-                        android:id="@+id/initial_data"
+                    android:padding="@dimen/dimen_4dp">
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                        android:orientation="horizontal">
+                        android:text="@string/session_start_date"
+                        style="@style/input_labels"/>
 
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="Iniciar Sessão"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:id="@+id/btn_show_collapse"
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/initial_data_lyt"
+                    <EditText
+                        android:id="@+id/start_date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/dimen_4dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Data de Inicio da Sessão"
-                            style="@style/input_labels"
-                            />
-                        <EditText
-                            android:id="@+id/start_date"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:focusableInTouchMode="false"
-                            android:drawableLeft="@drawable/ic_calendar"
-                            android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.startDate)}"
-                            android:enabled="@{!viewModel.currentStep.applicationStepDisplay}"
-                            style="@style/bottom_border_edit_text_style"/>
-                    </LinearLayout>
-
-
-
-                    <LinearLayout
-                        android:id="@+id/mentees_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_10dp"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="Tabelas de Competências"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/mentee_data_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/dimen_4dp">
-
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rcv_forms"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/dimen_4dp"
-                            android:scrollbars="vertical"/>
-                    </LinearLayout>
-
+                        android:focusableInTouchMode="false"
+                        android:drawableLeft="@drawable/ic_calendar"
+                        android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.startDate)}"
+                        android:enabled="@{!viewModel.currentStep.applicationStepDisplay}"
+                        style="@style/bottom_border_edit_text_style"/>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/mentees_lyt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    android:background="@drawable/shape_normal"
+                    android:padding="3dp"
+                    android:onClick="@{(view) -> viewModel.openCollapse(view)}"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="@dimen/dimen_0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="8"
+                        android:text="@string/competency_tables"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:gravity="center_vertical|left"
+                        android:paddingLeft="@dimen/dimen_10dp"/>
+
+                    <ImageButton
+                        android:layout_width="@dimen/dimen_0dp"
+                        android:layout_height="match_parent"
+                        android:onClick="@{(view) -> viewModel.openCollapse(view)}"
+                        android:background="@color/background_layout"
+                        android:src="@drawable/baseline_expand_circle_down_24"
+                        android:layout_marginRight="@dimen/dimen_2dp"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/mentee_data_lyt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/dimen_4dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rcv_forms"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dimen_4dp"
+                        android:scrollbars="vertical"/>
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
@@ -151,6 +155,6 @@
             android:onClick="@{()->viewModel.save()}"
             android:src="@drawable/baseline_done_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

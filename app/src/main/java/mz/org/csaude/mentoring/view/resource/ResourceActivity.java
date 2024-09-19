@@ -69,7 +69,8 @@ public class ResourceActivity extends BaseActivity {
         setSupportActionBar(activityResourceBinding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Recursos de EA");
+        getSupportActionBar().setTitle(getString(R.string.ea_resources_title));
+
         getRelatedViewModel().setViewListEditButton(false);
         getRelatedViewModel().setViewListRemoveButton(false);
 

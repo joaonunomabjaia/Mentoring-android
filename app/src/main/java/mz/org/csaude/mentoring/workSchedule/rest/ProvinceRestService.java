@@ -37,28 +37,31 @@ public class ProvinceRestService extends BaseRestService {
                 List<ProvinceDTO> data = response.body();
 
                 if(data == null){
-
+                    listener.doOnRestErrorResponse("No data received");
+                    return;
                 }
-                try {
+                getServiceExecutor().execute(() -> {
+                    try {
 
-                ProvinceService provinceService = getApplication().getProvinceService();
+                        ProvinceService provinceService = getApplication().getProvinceService();
 
-                    List<Province> provinces = new ArrayList<>();
-                    for (ProvinceDTO provinceDTO : data) {
-                        provinceDTO.getProvince().setSyncStatus(SyncSatus.SENT);
-                        provinces.add(provinceDTO.getProvince());
+                        List<Province> provinces = new ArrayList<>();
+                        for (ProvinceDTO provinceDTO : data) {
+                            provinceDTO.getProvince().setSyncStatus(SyncSatus.SENT);
+                            provinces.add(provinceDTO.getProvince());
+                        }
+                        provinceService.savedOrUpdateProvince(data);
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, provinces);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
-                    provinceService.savedOrUpdateProvince(data);
-                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, provinces);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                });
             }
 
             @Override
             public void onFailure(Call<List<ProvinceDTO>> call, Throwable t) {
                 Log.i("METADATA LOAD --", t.getMessage(), t);
-
+                listener.doOnRestErrorResponse(t.getMessage());
             }
         });
 

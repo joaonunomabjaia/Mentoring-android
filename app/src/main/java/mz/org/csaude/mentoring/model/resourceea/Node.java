@@ -11,7 +11,7 @@ public class Node extends BaseModel {
     private  String name;
     private String label;
 
-    private int clickable;
+    private Integer clickable;
 
     List<Node> children;
 

@@ -1,44 +1,76 @@
 package mz.org.csaude.mentoring.model.tutored;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 
 import java.util.Objects;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.tutored.TutoredDaoImpl;
 import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.model.employee.Employee;
 
-
-@DatabaseTable(tableName = Tutored.COLUMN_TABLE_NAME, daoClass = TutoredDaoImpl.class)
+@Entity(tableName = Tutored.COLUMN_TABLE_NAME,
+        foreignKeys = @ForeignKey(
+                entity = Employee.class,
+                parentColumns = "id",
+                childColumns = Tutored.COLUMN_EMPLOYEE,
+                onDelete = ForeignKey.CASCADE
+        ))
 public class Tutored extends BaseModel {
 
     public static final String COLUMN_TABLE_NAME = "tutored";
-    public static final String COLUMN_EMPLOYEE = "emplyee_id";
-    public static final String COLUMN_ZERO_EVALUATION_STATUS = "zero_evatuation_status";
-    public static final String COLUMN_ZERO_EVALUATION_SCORE = "zero_evatuation_score";
+    public static final String COLUMN_EMPLOYEE = "employee_id";
+    public static final String COLUMN_ZERO_EVALUATION_STATUS = "zero_evaluation_status";
+    public static final String COLUMN_ZERO_EVALUATION_SCORE = "zero_evaluation_score";
 
-    @DatabaseField(columnName = COLUMN_EMPLOYEE, foreign = true, foreignAutoRefresh = true )
+    @NonNull
+    @ColumnInfo(name = COLUMN_EMPLOYEE)
+    private Integer employeeId;
+
+    @Ignore // Room will ignore this field since it's not stored directly in the Tutored table.
     private Employee employee;
 
-    @DatabaseField(columnName = COLUMN_ZERO_EVALUATION_STATUS)
+    @ColumnInfo(name = COLUMN_ZERO_EVALUATION_STATUS)
     private boolean zeroEvaluationDone;
 
-    @DatabaseField(columnName = COLUMN_ZERO_EVALUATION_SCORE)
+    @ColumnInfo(name = COLUMN_ZERO_EVALUATION_SCORE)
     private Double zeroEvaluationScore;
+
     public Tutored() {
     }
 
-    public Tutored(Employee employee) {
-        this.setEmployee(employee);
+    public Tutored(Integer employeeId) {
+        this.employeeId = employeeId;
     }
 
+    @Ignore // This constructor should be ignored by Room because it involves complex object initialization.
+    public Tutored(Employee employee) {
+        this.employeeId = employee.getId();
+        this.employee = employee;
+    }
+
+    @Ignore // This constructor should be ignored by Room as it’s used for DTO to Entity conversion.
     public Tutored(TutoredDTO tutoredDTO) {
         super(tutoredDTO);
-        this.setZeroEvaluationScore(tutoredDTO.getZeroEvaluationScore());
-        this.setZeroEvaluationDone(tutoredDTO.isZeroEvaluationDone());
-        if (tutoredDTO.getEmployeeDTO() != null) this.setEmployee(new Employee(tutoredDTO.getEmployeeDTO()));
+        this.zeroEvaluationDone = tutoredDTO.isZeroEvaluationDone();
+        this.zeroEvaluationScore = tutoredDTO.getZeroEvaluationScore();
+        if (tutoredDTO.getEmployeeDTO() != null) {
+            this.employee = new Employee(tutoredDTO.getEmployeeDTO());
+            this.employeeId = this.employee.getId();
+        }
+    }
+
+    // Getters and Setters
+
+    public Integer getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Integer employeeId) {
+        this.employeeId = employeeId;
     }
 
     public Employee getEmployee() {
@@ -47,12 +79,9 @@ public class Tutored extends BaseModel {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
-    }
-
-
-    @Override
-    public String getDescription() {
-        return this.employee.getFullName();
+        if (employee != null) {
+            this.employeeId = employee.getId();
+        }
     }
 
     public boolean isZeroEvaluationDone() {
@@ -63,32 +92,17 @@ public class Tutored extends BaseModel {
         this.zeroEvaluationDone = zeroEvaluationDone;
     }
 
-    @Override
-    public int getDrawable() {
-        return 0;
-    }
-
-    @Override
-    public String getCode() {
-        return null;
-    }
-
-    @Override
-    public String validade() {
-        return this.employee.validade();
-    }
-
-    @Override
-    public String getListType() {
-        return listTyp;
-    }
-
     public Double getZeroEvaluationScore() {
         return zeroEvaluationScore;
     }
 
     public void setZeroEvaluationScore(Double zeroEvaluationScore) {
         this.zeroEvaluationScore = zeroEvaluationScore;
+    }
+
+    @Override
+    public String getDescription() {
+        return this.employee != null ? this.employee.getFullName() : "No Employee";
     }
 
     @Override

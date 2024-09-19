@@ -39,20 +39,20 @@ public class DistrictRestService extends BaseRestService {
                 if(!Utilities.listHasElements(data)){
 
                 } else {
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            DistrictService districtService = getApplication().getDistrictService();
+                            List<District> districts = new ArrayList<>();
+                            for (DistrictDTO districtDTO : data) {
+                                districts.add(new District(districtDTO));
+                            }
+                            districtService.savedOrUpdateDistricts(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, districts);
 
-                    try {
-                        DistrictService districtService = getApplication().getDistrictService();
-                        List<District> districts = new ArrayList<>();
-                        for (DistrictDTO districtDTO : data){
-                            districts.add(new District(districtDTO));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        districtService.savedOrUpdateDistricts(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, districts);
-
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-
+                    });
                 }
 
             }

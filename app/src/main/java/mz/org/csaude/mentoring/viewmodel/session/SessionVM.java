@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.session;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import mz.org.csaude.mentoring.BR;
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
@@ -34,19 +36,25 @@ public class SessionVM extends BaseViewModel {
     }
 
     public void init() {
-        try {
-            if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
-                this.session = new Session();
-                this.session.setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.INCOMPLETE));
-                this.session.setStartDate(DateUtilities.getCurrentDate());
-                this.session.setSyncStatus(SyncSatus.PENDING);
-                this.session.setUuid(Utilities.getNewUUID().toString());
-                this.session.setCreatedAt(DateUtilities.getCurrentDate());
+        getExecutorService().execute(() -> {
+            try {
+                if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
+                    // Create a new session in the background
+                    Session newSession = new Session();
+                    newSession.setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.INCOMPLETE));
+                    newSession.setStartDate(DateUtilities.getCurrentDate());
+                    newSession.setSyncStatus(SyncSatus.PENDING);
+                    newSession.setUuid(Utilities.getNewUUID().toString());
+                    newSession.setCreatedAt(DateUtilities.getCurrentDate());
+
+                    this.session = newSession;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
+
     @Override
     public void preInit() {
 
@@ -84,25 +92,56 @@ public class SessionVM extends BaseViewModel {
         notifyPropertyChanged(BR.startDate);
     }
     public void save() {
-        try {
-            if (this.session.getStartDate().before(this.session.getRonda().getStartDate())) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "A data de início da sessão não pode ser anterior a data de início da ronda").show();
-                return;
+        // Show a progress dialog while saving
+        Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+
+        // Perform the save operation in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Run validations on the main thread before proceeding with database operations
+                runOnMainThread(() -> {
+                    if (this.session.getStartDate().before(this.session.getRonda().getStartDate())) {
+                        progress.dismiss(); // Dismiss progress dialog before showing the error
+                        String startDateError = getRelatedActivity().getString(R.string.session_start_date_error);
+                        Utilities.displayAlertDialog(getRelatedActivity(), startDateError).show();
+                        return;
+                    }
+                    if (this.session.getForm() == null) {
+                        progress.dismiss(); // Dismiss progress dialog before showing the error
+                        String selectTableError = getRelatedActivity().getString(R.string.select_competence_table);
+                        Utilities.displayAlertDialog(getRelatedActivity(), selectTableError).show();
+                        return;
+                    }
+                });
+
+                // Perform the database operations in the background
+                if (getApplication().getApplicationStep().isApplicationStepEdit()) {
+                    getApplication().getSessionService().update(this.session);
+                } else {
+                    getApplication().getSessionService().save(this.session);
+                }
+
+                // After saving, dismiss progress dialog and finish the activity on the main thread
+                runOnMainThread(() -> {
+                    progress.dismiss(); // Dismiss the progress dialog
+                    getCurrentStep().changeToList();
+                    getRelatedActivity().finish(); // Finish the activity
+                });
+
+            } catch (SQLException e) {
+                Log.e("SessionVM", "save: " + e.getMessage());
+
+                // Handle any database error on the main thread
+                runOnMainThread(() -> {
+                    progress.dismiss(); // Dismiss the progress dialog on error
+                    String saveError = getRelatedActivity().getString(R.string.session_save_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), saveError).show();
+                });
             }
-            if (this.session.getForm() == null) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "Por favor, selecione uma tabela de competências").show();
-                return;
-            }
-            if (getApplication().getApplicationStep().isApplicationStepEdit()) {
-                getApplication().getSessionService().update(this.session);
-            } else {
-                getApplication().getSessionService().save(this.session);
-            }
-            getRelatedActivity().finish();
-        } catch (SQLException e) {
-            Log.e("SessionVM", "save: " + e.getMessage());
-        }
+        });
     }
+
+
 
     public void setSession(Session session) {
         this.session = session;
@@ -120,6 +159,7 @@ public class SessionVM extends BaseViewModel {
         for (Form form : this.forms) {
             if (form.equals(this.session.getForm())) {
                 form.setItemSelected(true);
+                break;
             }
         }
     }

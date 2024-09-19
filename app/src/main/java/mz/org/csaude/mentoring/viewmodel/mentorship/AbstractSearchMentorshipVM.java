@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import java.sql.SQLException;
 import java.util.List;
 
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
@@ -27,33 +28,48 @@ public abstract class AbstractSearchMentorshipVM extends SearchVM<Mentorship> im
     }
 
     public void edit(Mentorship mentorship) {
-        try {
-            mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSession().getId()));
-            mentorship.getSession().getRonda().addSession(getApplication().getSessionService().getAllOfRonda(mentorship.getSession().getRonda()));
-            mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
-            this.selectedMentorship = mentorship;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            try {
+                // Fetch session, Ronda sessions, and mentorship answers in the background
+                mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSessionId()));
+                mentorship.getSession().setRonda(getApplication().getRondaService().getById(mentorship.getSession().getRondaId()));
+                mentorship.getSession().getRonda().addSession(getApplication().getSessionService().getAllOfRonda(mentorship.getSession().getRonda()));
+                mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+                mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
+                mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+                this.selectedMentorship = mentorship;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
     }
+
 
     public void delete(Mentorship mentorship) {
         this.selectedMentorship = mentorship;
+
         if (mentorship.isCompleted()) {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Não pode apagar uma avaliação finalizada").show();
+            String errorMessage = getRelatedActivity().getString(R.string.error_delete_completed);
+            Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
         } else {
-            Utilities.displayConfirmationDialog(getRelatedActivity(), "Deseja apagar a avaliação?", "SIM", "NÃO", this).show();
+            String confirmMessage = getRelatedActivity().getString(R.string.confirm_delete_evaluation);
+            String yesText = getRelatedActivity().getString(R.string.yes);
+            String noText = getRelatedActivity().getString(R.string.no);
+
+            Utilities.displayConfirmationDialog(getRelatedActivity(), confirmMessage, yesText, noText, this).show();
         }
     }
 
+
     @Override
     public void doOnConfirmed() {
-        try {
-            getApplication().getMentorshipService().delete(this.selectedMentorship);
-            initSearch();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        getExecutorService().execute(()->{
+            try {
+                getApplication().getMentorshipService().delete(this.selectedMentorship);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            runOnMainThread(this::initSearch);
+        });
+
     }
 
     @Override

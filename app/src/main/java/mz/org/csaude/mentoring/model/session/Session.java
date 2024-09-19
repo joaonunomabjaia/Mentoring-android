@@ -1,18 +1,21 @@
 package mz.org.csaude.mentoring.model.session;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-
-
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.session.SessionDAOImpl;
 import mz.org.csaude.mentoring.dto.session.SessionDTO;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
@@ -20,68 +23,94 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.Utilities;
 
-
-@DatabaseTable(tableName = Session.TABLE_NAME, daoClass = SessionDAOImpl.class)
-
+@Entity(tableName = Session.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = SessionStatus.class, parentColumns = "id", childColumns = Session.COLUMN_STATUS, onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Ronda.class, parentColumns = "id", childColumns = Session.COLUMN_RONDA, onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutored.class, parentColumns = "id", childColumns = Session.COLUMN_MENTEE, onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Form.class, parentColumns = "id", childColumns = Session.COLUMN_FORM, onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Session.COLUMN_RONDA}),
+                @Index(value = {Session.COLUMN_MENTEE}),
+                @Index(value = {Session.COLUMN_FORM})
+        })
 public class Session extends BaseModel {
 
     public static final String TABLE_NAME = "session";
-
     public static final String COLUMN_START_DATE = "start_date";
-
     public static final String COLUMN_END_DATE = "end_date";
-
     public static final String COLUMN_PERFORMED_DATE = "performed_date";
-
     public static final String COLUMN_STATUS = "session_status_id";
-
     public static final String COLUMN_RONDA = "ronda_id";
-
     public static final String COLUMN_MENTEE = "mentee_id";
-
     public static final String COLUMN_FORM = "form_id";
-
-
     public static final String COLUMN_STRONG_POINTS = "strong_points";
     public static final String COLUMN_WEAK_POINTS = "points_to_improve";
     public static final String COLUMN_WORK_PLAN = "work_plan";
     public static final String COLUMN_OBSERVATIONS = "observations";
 
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
-    @DatabaseField(columnName = COLUMN_END_DATE)
+    @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
 
-    @DatabaseField(columnName = COLUMN_PERFORMED_DATE)
+    @ColumnInfo(name = COLUMN_PERFORMED_DATE)
     private Date performedDate;
 
-    @DatabaseField(columnName = COLUMN_STATUS, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_STATUS)
+    private Integer statusId;
+
+    @Relation(parentColumn = COLUMN_STATUS, entityColumn = "id")
+    @Ignore
     private SessionStatus status;
 
-    @DatabaseField(columnName = COLUMN_RONDA, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_RONDA)
+    private Integer rondaId;
+
+    @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
+    @Ignore
     private Ronda ronda;
 
-    @DatabaseField(columnName = COLUMN_MENTEE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_MENTEE)
+    private Integer menteeId;
+
+    @Relation(parentColumn = COLUMN_MENTEE, entityColumn = "id")
+    @Ignore
     private Tutored tutored;
 
-    @DatabaseField(columnName = COLUMN_FORM, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_FORM)
+    private Integer formId;
+
+    @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
+    @Ignore
     private Form form;
+
+    @Ignore
     private List<Mentorship> mentorships;
 
-
-    @DatabaseField(columnName = COLUMN_STRONG_POINTS)
+    @ColumnInfo(name = COLUMN_STRONG_POINTS)
     private String strongPoints;
-    @DatabaseField(columnName = COLUMN_WEAK_POINTS)
+
+    @ColumnInfo(name = COLUMN_WEAK_POINTS)
     private String pointsToImprove;
-    @DatabaseField(columnName = COLUMN_WORK_PLAN)
+
+    @ColumnInfo(name = COLUMN_WORK_PLAN)
     private String workPlan;
-    @DatabaseField(columnName = COLUMN_OBSERVATIONS)
-    private String obsevations;
+
+    @ColumnInfo(name = COLUMN_OBSERVATIONS)
+    private String observations;
 
     public Session() {
     }
 
+    @Ignore
     public Session(SessionDTO sessionDTO) {
         super(sessionDTO);
         this.setStartDate(sessionDTO.getStartDate());
@@ -90,29 +119,28 @@ public class Session extends BaseModel {
         this.setPointsToImprove(sessionDTO.getPointsToImprove());
         this.setStrongPoints(sessionDTO.getStrongPoints());
         this.setObservations(sessionDTO.getObservations());
-        if(sessionDTO.getSessionStatus()!=null) {
+        if (sessionDTO.getSessionStatus() != null) {
             this.setStatus(new SessionStatus(sessionDTO.getSessionStatus()));
+            this.statusId = this.status.getId();
         }
-        if(sessionDTO.getMentee()!=null) {
+        if (sessionDTO.getMentee() != null) {
             this.setTutored(new Tutored(sessionDTO.getMentee()));
+            this.menteeId = this.tutored.getId();
         }
-        if(sessionDTO.getRonda()!=null) {
+        if (sessionDTO.getRonda() != null) {
             this.setRonda(new Ronda(sessionDTO.getRonda()));
+            this.rondaId = this.ronda.getId();
         }
-        if(sessionDTO.getForm()!=null) {
+        if (sessionDTO.getForm() != null) {
             this.setForm(new Form(sessionDTO.getForm()));
+            this.formId = this.form.getId();
         }
         if (Utilities.listHasElements(sessionDTO.getMentorships())) {
             setMentorships(Utilities.parse(sessionDTO.getMentorships(), Mentorship.class));
         }
     }
 
-    public Session(Date startDate, Date endDate, Date performedDate, SessionStatus status) {
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.performedDate = performedDate;
-        this.status = status;
-    }
+    // Getters and Setters
 
     public Ronda getRonda() {
         return ronda;
@@ -120,6 +148,7 @@ public class Session extends BaseModel {
 
     public void setRonda(Ronda ronda) {
         this.ronda = ronda;
+        this.rondaId = ronda.getId();
     }
 
     public Date getStartDate() {
@@ -152,11 +181,13 @@ public class Session extends BaseModel {
 
     public void setStatus(SessionStatus status) {
         this.status = status;
+        this.statusId = status.getId();
     }
 
     public List<Mentorship> getMentorships() {
         return mentorships;
     }
+
     public void addMentorship(Mentorship mentorship) {
         if (mentorships == null) {
             mentorships = new ArrayList<>();
@@ -184,6 +215,7 @@ public class Session extends BaseModel {
 
     public void setTutored(Tutored tutored) {
         this.tutored = tutored;
+        this.menteeId = tutored.getId();
     }
 
     public Form getForm() {
@@ -192,15 +224,20 @@ public class Session extends BaseModel {
 
     public void setForm(Form form) {
         this.form = form;
+        this.formId = form.getId();
     }
 
     @JsonIgnore
     public boolean isCompleted() {
-        return this.status.isCompleted();
+        return this.status != null && this.status.isCompleted();
     }
 
     public boolean canBeClosed() {
         if (this.isCompleted()) return true;
+
+        if (this.getRonda().isRondaZero()) {
+            return Utilities.listHasElements(mentorships);
+        }
 
         if (!Utilities.listHasElements(mentorships)) {
             return false;
@@ -222,7 +259,6 @@ public class Session extends BaseModel {
         return completedPatient == form.getTargetPatient() && completedFile == form.getTargetFile();
     }
 
-
     public void addMentorships(List<Mentorship> completedMentorships) {
         for (Mentorship mentorship : completedMentorships) {
             if (!this.mentorships.contains(mentorship)) {
@@ -230,8 +266,6 @@ public class Session extends BaseModel {
             }
         }
     }
-
-
 
     public String getStrongPoints() {
         return strongPoints;
@@ -258,11 +292,11 @@ public class Session extends BaseModel {
     }
 
     public String getObservations() {
-        return obsevations;
+        return observations;
     }
 
-    public void setObservations(String obsevations) {
-        this.obsevations = obsevations;
+    public void setObservations(String observations) {
+        this.observations = observations;
     }
 
     @Override
@@ -271,11 +305,45 @@ public class Session extends BaseModel {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Session session = (Session) o;
-        return Objects.equals(ronda, session.ronda) && Objects.equals(tutored, session.tutored) && Objects.equals(form, session.form);
+        return Objects.equals(ronda, session.ronda) &&
+                Objects.equals(tutored, session.tutored) &&
+                Objects.equals(form, session.form);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), ronda, tutored, form);
+    }
+
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
+    public Integer getRondaId() {
+        return rondaId;
+    }
+
+    public void setRondaId(int rondaId) {
+        this.rondaId = rondaId;
+    }
+
+    public int getMenteeId() {
+        return menteeId;
+    }
+
+    public void setMenteeId(int menteeId) {
+        this.menteeId = menteeId;
+    }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
     }
 }

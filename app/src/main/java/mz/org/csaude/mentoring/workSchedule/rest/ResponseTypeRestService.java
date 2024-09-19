@@ -39,18 +39,20 @@ public class ResponseTypeRestService extends BaseRestService {
                 List<ResponseTypeDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        ResponseTypeService responseTypeService = getApplication().getResponseTypeService();
-                        List<ResponseType> responseTypes = new ArrayList<>();
-                        for (ResponseTypeDTO responseTypeDTO : data){
-                            responseTypeDTO.getResponseType().setSyncStatus(SyncSatus.SENT);
-                            responseTypes.add(responseTypeDTO.getResponseType());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            ResponseTypeService responseTypeService = getApplication().getResponseTypeService();
+                            List<ResponseType> responseTypes = new ArrayList<>();
+                            for (ResponseTypeDTO responseTypeDTO : data) {
+                                responseTypeDTO.getResponseType().setSyncStatus(SyncSatus.SENT);
+                                responseTypes.add(responseTypeDTO.getResponseType());
+                            }
+                            responseTypeService.saveOrUpdateResponseTypes(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, responseTypes);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        responseTypeService.saveOrUpdateResponseTypes(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, responseTypes);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

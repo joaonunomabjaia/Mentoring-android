@@ -1,14 +1,43 @@
 package mz.org.csaude.mentoring.dao.answer;
 
-import com.j256.ormlite.dao.Dao;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import mz.org.csaude.mentoring.base.dao.MentoringBaseDao;
 import mz.org.csaude.mentoring.model.answer.Answer;
-import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 
-public interface AnswerDAO extends MentoringBaseDao<Answer, Integer> {
-    List<Answer> queryForMentorship(Mentorship mentorship) throws SQLException;
+@Dao
+public interface AnswerDAO {
+
+    @Query("SELECT * FROM answer WHERE mentorship_id = :mentorshipId")
+    List<Answer> queryForMentorship(int mentorshipId);
+
+    @Insert
+    long insert(Answer answer);
+
+    @Insert
+    void insertAll(List<Answer> answers);
+
+    @Update
+    void update(Answer answer);
+
+    @Update
+    void updateAll(List<Answer> answers);
+
+    @Query("SELECT * FROM answer WHERE uuid = :uuid LIMIT 1")
+    Answer getByUuid(String uuid);
+
+
+    @Query("SELECT * FROM answer WHERE id = :id LIMIT 1")
+    Answer queryForId(int id);
+
+    @Query("DELETE FROM answer WHERE id = :id")
+    int delete(int id);
+
+    @Query("SELECT * FROM answer")
+    List<Answer> queryForAll();
 }

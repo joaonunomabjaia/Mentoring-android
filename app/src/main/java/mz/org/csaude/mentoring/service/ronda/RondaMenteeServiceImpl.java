@@ -24,7 +24,7 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public RondaMentee save(RondaMentee record) throws SQLException {
-        this.rondaMenteeDAO.create(record);
+        record.setId((int) this.rondaMenteeDAO.insert(record));
         return record;
     }
 
@@ -46,7 +46,11 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
 
     @Override
     public RondaMentee getById(int id) throws SQLException {
-        return this.rondaMenteeDAO.queryForId(id);
+        RondaMentee rondaMentee = this.rondaMenteeDAO.queryForId(id);
+        if(rondaMentee!=null) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentee;
     }
 
     @Override
@@ -54,18 +58,29 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
         RondaMentee rm = this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid());
         if(rm!=null) {
             rondaMentee.setId(rm.getId());
+            rondaMenteeDAO.update(rondaMentee);
+        } else {
+            this.rondaMenteeDAO.insert(rondaMentee);
+            rondaMentee.setId(this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid()).getId());
         }
-        this.rondaMenteeDAO.createOrUpdate(rondaMentee);
         return rondaMentee;
     }
 
     @Override
     public List<RondaMentee> getAllOfRonda(Ronda ronda) throws SQLException {
-        return rondaMenteeDAO.getAllOfRonda(ronda);
+        List<RondaMentee> rondaMentees = rondaMenteeDAO.getAllOfRonda(ronda.getId());
+        for (RondaMentee rondaMentee : rondaMentees) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentees;
     }
 
     @Override
     public RondaMentee getByuuid(String uuid) throws SQLException {
-        return rondaMenteeDAO.getByUuid(uuid);
+        RondaMentee rondaMentee = rondaMenteeDAO.getByUuid(uuid);
+        if(rondaMentee!=null) {
+            rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
+        }
+        return rondaMentee;
     }
 }

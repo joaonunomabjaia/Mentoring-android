@@ -33,6 +33,8 @@ public class RondaDTO extends BaseEntityDTO {
     private HealthFacilityDTO healthFacility;
     private List<RondaMenteeDTO> rondaMentees;
     private List<RondaMentorDTO> rondaMentors;
+    public RondaDTO() {
+    }
     public RondaDTO(Ronda ronda) {
         super(ronda);
         this.setDescription(ronda.getDescription());

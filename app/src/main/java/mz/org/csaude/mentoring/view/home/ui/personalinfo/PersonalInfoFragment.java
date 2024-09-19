@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.view.home.ui.personalinfo;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,9 @@ import mz.org.csaude.mentoring.base.fragment.GenericFragment;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.FragmentMentorInfoBinding;
 import mz.org.csaude.mentoring.model.location.Province;
+import mz.org.csaude.mentoring.model.partner.Partner;
+import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
+import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.Utilities;
 
 public class PersonalInfoFragment extends GenericFragment {
@@ -69,30 +73,51 @@ public class PersonalInfoFragment extends GenericFragment {
 
     }
 
-    private void initAdapters(){
+    private void initAdapters() {
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+                // Fetch data in the background thread
+                List<Province> provinces = getRelatedViewModel().getAllProvince();
+                List<ProfessionalCategory> professionalCategories = getRelatedViewModel().getAllProfessionalCategys();
+                List<SimpleValue> menteeLabors = getRelatedViewModel().getMenteeLabors();
+                List<Partner> partners = getRelatedViewModel().getAllPartners();
 
-        try {
-            List<Province> provinces = getRelatedViewModel().getAllProvince();
-            provinceAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, provinces);
-            binding.spnProvince.setAdapter(provinceAdapter);
-            binding.setProvinceAdapter(provinceAdapter);
+                // Switch back to the main thread to update the UI
+                getActivity().runOnUiThread(() -> {
+                    // Ensure the lists are not empty before using them
+                    if (provinces != null && !provinces.isEmpty()) {
+                        provinceAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, provinces);
+                        binding.spnProvince.setAdapter(provinceAdapter);
+                        binding.setProvinceAdapter(provinceAdapter);
+                    }
 
-            professionalCategoryAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, getRelatedViewModel().getAllProfessionalCategys());
-            binding.spnProfessionalCategory.setAdapter(professionalCategoryAdapter);
-            binding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
+                    if (professionalCategories != null && !professionalCategories.isEmpty()) {
+                        professionalCategoryAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, professionalCategories);
+                        binding.spnProfessionalCategory.setAdapter(professionalCategoryAdapter);
+                        binding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
+                    }
 
-            menteeLaborfoAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, getRelatedViewModel().getMenteeLabors());
-            binding.spnMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
-            binding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
+                    if (menteeLabors != null && !menteeLabors.isEmpty()) {
+                        menteeLaborfoAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, menteeLabors);
+                        binding.spnMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
+                        binding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
+                    }
 
-            ngoAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, getRelatedViewModel().getAllPartners());
-            binding.spnNgo.setAdapter(ngoAdapter);
-            binding.setNgoAdapter(ngoAdapter);
+                    if (partners != null && !partners.isEmpty()) {
+                        ngoAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, partners);
+                        binding.spnNgo.setAdapter(ngoAdapter);
+                        binding.setNgoAdapter(ngoAdapter);
+                    }
+                });
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            } catch (SQLException e) {
+                // Log the error or handle it as necessary
+                Log.e("PersonalInfoFragment", "Error loading data", e);
+
+            }
+        });
     }
+
 
     public void reloadDistrcitAdapter() {
         districtAdapter = new ListableSpinnerAdapter(this.getActivity(), R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());

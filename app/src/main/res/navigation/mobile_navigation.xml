@@ -3,34 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
         android:name="mz.org.csaude.mentoring.view.home.ui.home.HomeFragment"
-        android:label="Mentoria"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_settings"
         android:name="mz.org.csaude.mentoring.view.home.ui.settings.SettingsFragment"
-        android:label="Configurações"
-        tools:layout="@layout/fragment_gallery" />
+        android:label="@string/configuracoes"
+        tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_personal_info"
         android:name="mz.org.csaude.mentoring.view.home.ui.personalinfo.PersonalInfoFragment"
-        android:label="Meus Dados"
+        android:label="@string/meus_dados"
         tools:layout="@layout/fragment_mentor_info" />
 
     <fragment
         android:id="@+id/nav_credentials"
         android:name="mz.org.csaude.mentoring.view.home.ui.credentials.CredentialsFragment"
-        android:label="Mentor"
+        android:label="@string/mentor"
         tools:layout="@layout/fragment_credentials" />
+
     <fragment
         android:id="@+id/nav_log_out"
         android:name="mz.org.csaude.mentoring.view.home.ui.logout.LogoutFragment"
-        android:label="Sair"
+        android:label="@string/sair"
         tools:layout="@layout/fragment_logout" />
 </navigation>

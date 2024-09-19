@@ -14,5 +14,5 @@ public interface ProvinceService extends BaseService<Province> {
 
     void savedOrUpdateProvince(List<ProvinceDTO> provinceDTOs) throws SQLException;
 
-     Province savedOrUpdateProvince(ProvinceDTO provinceDTO) throws SQLException;
+    Province savedOrUpdateProvince(ProvinceDTO provinceDTO) throws SQLException;
 }

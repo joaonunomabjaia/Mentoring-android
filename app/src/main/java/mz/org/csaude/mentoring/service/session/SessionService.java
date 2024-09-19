@@ -26,7 +26,7 @@ public interface SessionService extends BaseService<Session> {
 
     List<Session> getAllOfRondaPending(Ronda ronda) throws SQLException;
 
-    void saveOrUpdate(Session session) throws SQLException;
+    Session saveOrUpdate(Session session) throws SQLException;
 
     List<Session> getAllNotSynced() throws SQLException;
 }

@@ -36,18 +36,20 @@ public class DoorRestService extends BaseRestService {
                 List<DoorDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        DoorService doorService = getApplication().getDoorService();
-                        List<Door> doors = new ArrayList<>();
-                        for (DoorDTO doorDTO : data){
-                            doorDTO.getDoor().setSyncStatus(SyncSatus.SENT);
-                            doors.add(doorDTO.getDoor());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            DoorService doorService = getApplication().getDoorService();
+                            List<Door> doors = new ArrayList<>();
+                            for (DoorDTO doorDTO : data) {
+                                doorDTO.getDoor().setSyncStatus(SyncSatus.SENT);
+                                doors.add(doorDTO.getDoor());
+                            }
+                            doorService.saveOrUpdateDoors(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, doors);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        doorService.saveOrUpdateDoors(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, doors);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

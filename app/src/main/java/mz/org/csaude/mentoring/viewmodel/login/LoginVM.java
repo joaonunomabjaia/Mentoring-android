@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.login;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
@@ -74,18 +75,20 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     }
 
     public void doLogin() {
-        setAuthenticating(true);
-        try {
-            if (AppHasUser()) {
-                doLocalLogin();
-            } else {
-                getApplication().isServerOnline(this);
+        getExecutorService().execute(()-> {
+            setAuthenticating(true);
+            try {
+                if (AppHasUser()) {
+                    doLocalLogin();
+                } else {
+                    getApplication().isServerOnline(this);
+                }
+                getApplication().saveDefaultSyncSettings();
+                getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-            getApplication().saveDefaultSyncSettings();
-            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     private void doLocalLogin() throws SQLException {
@@ -93,13 +96,15 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
         if (logedUser != null) {
             if (!logedUser.isActivated()) {
-                Utilities.displayAlertDialog(getRelatedActivity(), "O utilizador está inativo, contacte o administrador.").show();
+                String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
+                Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
                 return;
             }
             getApplication().setAuthenticatedUser(logedUser, remeberMe);
             goHome();
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Utilizador ou senha inválida").show();
+            String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
+            Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
         }
 
         setAuthenticating(false);
@@ -115,38 +120,41 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
     @Override
     public void doOnRestSucessResponse(User user) {
-        try {
-            if (getApplication().isInitialSetupComplete()) {
-                getApplication().init();
-                goHome();
-            } else {
-                OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
+        getRelatedActivity().runOnUiThread(() -> {
+            try {
+                if (getApplication().isInitialSetupComplete()) {
+                    getApplication().init();
+                    goHome();
+                } else {
+                    OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
 
-                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
-                    if (workInfo != null) {
-                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                            try {
-                                getApplication().init();
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                            OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
-                            WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
-                                if (info.getState() == WorkInfo.State.SUCCEEDED) {
-                                    getApplication().setInitialSetUpComplete();
-                                    getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-                                    goHome();
+                    WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
+                        if (workInfo != null) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                try {
+                                    getApplication().init();
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
                                 }
-                            });
+
+                                OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
+                                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
+                                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                                        getApplication().setInitialSetUpComplete();
+                                        getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                        goHome();
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } catch (SQLException e) {
+                Log.e("LoginVM", "doOnRestSucessResponse: ", e);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
+
 
     private void goHome() {
         try {
@@ -193,11 +201,14 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
     @Override
     public void doOnRestErrorResponse(String errormsg) {
-        if (Utilities.stringHasValue(errormsg)) {
-            Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
-        } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), "Utilizador ou senha inválida").show();
-        }
-        setAuthenticating(false);
+        runOnMainThread(() -> {
+            if (Utilities.stringHasValue(errormsg)) {
+                Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
+            } else {
+                String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
+                Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
+            }
+            setAuthenticating(false);
+        });
     }
 }

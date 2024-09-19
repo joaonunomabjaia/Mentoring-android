@@ -12,17 +12,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".view.session.SessionClosureActivity">
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:elevation="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
@@ -36,13 +36,13 @@
 
             <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
+                android:layout_height="wrap_content">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    >
+                    android:orientation="vertical">
+
                     <LinearLayout
                         android:id="@+id/pontos_fortes"
                         android:layout_width="match_parent"
@@ -56,7 +56,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Pontos Fortes no desempenho clinico"
+                            android:text="@string/strong_points"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -71,6 +71,7 @@
                             android:layout_marginRight="@dimen/dimen_2dp"
                             android:layout_weight="1"/>
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/pontos_fortes_lyt"
                         android:layout_width="match_parent"
@@ -81,9 +82,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Pontos Fortes no desempenho clinico"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/strong_points"
+                            style="@style/input_labels"/>
 
                         <EditText
                             android:id="@+id/inp_pontos_fortes"
@@ -100,7 +100,6 @@
                             android:text="@={viewModel.sessionStrongPoints}"
                             android:background="@drawable/listble_shape"
                             android:scrollbars="vertical"/>
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -117,7 +116,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Aspectos por melhorar no desempenho clinico"
+                            android:text="@string/points_to_improve"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -133,6 +132,7 @@
                             android:layout_marginRight="@dimen/dimen_2dp"
                             android:layout_weight="1"/>
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/aspectos_por_melhorar_lyt"
                         android:layout_width="match_parent"
@@ -143,9 +143,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Aspectos por melhorar no desempenho clinico"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/points_to_improve"
+                            style="@style/input_labels"/>
 
                         <EditText
                             android:id="@+id/inp_aspectos_por_melhorar"
@@ -162,7 +161,6 @@
                             android:text="@={viewModel.pointsToImprove}"
                             android:background="@drawable/listble_shape"
                             android:scrollbars="vertical"/>
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -179,7 +177,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Plano de trabalho para melhoria"
+                            android:text="@string/work_plan"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -195,6 +193,7 @@
                             android:layout_marginRight="@dimen/dimen_2dp"
                             android:layout_weight="1"/>
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/plano_melhoraria_lyt"
                         android:layout_width="match_parent"
@@ -205,9 +204,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Plano de trabalho para melhoria"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/work_plan"
+                            style="@style/input_labels"/>
 
                         <EditText
                             android:id="@+id/inp_plano_para_melhorar"
@@ -224,7 +222,6 @@
                             android:text="@={viewModel.workPlan}"
                             android:background="@drawable/listble_shape"
                             android:scrollbars="vertical"/>
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -243,9 +240,9 @@
                             android:layout_weight="8"
                             android:gravity="center_vertical|left"
                             android:paddingLeft="@dimen/dimen_10dp"
-                            android:text="Observações"
+                            android:text="@string/observations"
                             android:textColor="@color/white"
-                            android:textSize="15sp" />
+                            android:textSize="15sp"/>
 
                         <ImageButton
                             android:id="@+id/btn_observacoes"
@@ -257,6 +254,7 @@
                             android:layout_marginRight="@dimen/dimen_2dp"
                             android:layout_weight="1"/>
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/observacoes_lyt"
                         android:layout_width="match_parent"
@@ -267,9 +265,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Observações"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/observations"
+                            style="@style/input_labels"/>
 
                         <EditText
                             android:id="@+id/inp_observacoes"
@@ -286,7 +283,6 @@
                             android:text="@={viewModel.obsevations}"
                             android:background="@drawable/listble_shape"
                             android:scrollbars="vertical"/>
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -302,7 +298,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Data de Fim da Sessão"
+                            android:text="@string/session_end_date"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -329,9 +325,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Data de Fim da Sessão"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/session_end_date"
+                            style="@style/input_labels"/>
+
                         <EditText
                             android:id="@+id/session_end_date"
                             android:layout_width="match_parent"
@@ -340,13 +336,11 @@
                             android:drawableLeft="@drawable/ic_calendar"
                             android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.endDate)}"
                             style="@style/bottom_border_edit_text_style"/>
-
-
                     </LinearLayout>
-
                 </LinearLayout>
             </ScrollView>
         </LinearLayout>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="0dp"
@@ -360,6 +354,5 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_weight="1"
             app:layout_constraintEnd_toEndOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

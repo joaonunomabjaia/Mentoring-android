@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:bind="http://schemas.android.com/apk/res-auto"
-        tools:context=".view.tutored.CreateTutoredActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    tools:context=".view.tutored.CreateTutoredActivity">
     <data>
         <variable
             name="viewModel"
@@ -16,7 +15,6 @@
         <variable
             name="professionalCategoryAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
-        <variable name="careerAdapter" type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
         <variable
             name="provinceAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
@@ -38,7 +36,6 @@
         <import type="mz.org.csaude.mentoring.model.tutored.Tutored"/>
         <import type="mz.org.csaude.mentoring.util.Utilities"/>
     </data>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -87,7 +84,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Identificação do Mentorando"
+                            android:text="@string/identification_data_label"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -104,7 +101,6 @@
                             android:layout_weight="1"/>
                     </LinearLayout>
 
-
                     <LinearLayout
                         android:id="@+id/identification_data_lyt"
                         android:layout_width="match_parent"
@@ -115,9 +111,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Nome"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_name_label"
+                            style="@style/input_labels" />
 
                         <EditText
                             android:id="@+id/tutored_name"
@@ -130,9 +125,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Apelido"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_surname_label"
+                            style="@style/input_labels" />
+
                         <EditText
                             android:id="@+id/tutored_surname"
                             android:layout_width="match_parent"
@@ -144,9 +139,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Contacto"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_phone_number_label"
+                            style="@style/input_labels" />
+
                         <EditText
                             android:id="@+id/tutored_phone_number"
                             android:layout_width="match_parent"
@@ -160,9 +155,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Email"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_email_label"
+                            style="@style/input_labels" />
+
                         <EditText
                             android:id="@+id/tutored_email"
                             android:layout_width="match_parent"
@@ -175,9 +170,9 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="NUIT"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/tutored_nuit_label"
+                            style="@style/input_labels" />
+
                         <EditText
                             android:id="@+id/tutored_nuit"
                             android:layout_width="match_parent"
@@ -204,7 +199,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Informação Laboral"
+                            android:text="@string/labor_information_label"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -231,23 +226,21 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/professional_category"
-                            style="@style/input_labels"
-                            />
+                            style="@style/input_labels" />
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_professional_category"
                             android:layout_width="fill_parent"
                             style="@style/bottom_spinner_style"
                             android:layout_height="wrap_content"
                             app:adapter="@{professionalCategoryAdapter}"
-                            bind:selectedOpt="@={viewModel.professionalCategory}"
-                            />
+                            bind:selectedOpt="@={viewModel.professionalCategory}" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/vinculo_laboral"
-                            style="@style/input_labels"
-                            />
+                            style="@style/input_labels" />
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_mentee_labor_info"
@@ -255,16 +248,14 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             app:adapter="@{menteeLaborfoAdapter}"
-                            bind:selectedOpt="@={viewModel.menteeLabor}"
-                         />
+                            bind:selectedOpt="@={viewModel.menteeLabor}" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
-                            android:text="Nome da ONG"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/ngo_name_label"
+                            style="@style/input_labels" />
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_ngo"
@@ -273,15 +264,14 @@
                             android:layout_height="wrap_content"
                             android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
                             app:adapter="@{ngoAdapter}"
-                            bind:selectedOpt="@={viewModel.selectedNgo}"
-                            />
+                            bind:selectedOpt="@={viewModel.selectedNgo}" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Ano de Formação"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/training_year_label"
+                            style="@style/input_labels" />
+
                         <EditText
                             android:id="@+id/training_year"
                             android:layout_width="match_parent"
@@ -309,7 +299,7 @@
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
-                            android:text="Unidade Sanitaria"
+                            android:text="@string/health_unit_label"
                             android:textColor="@color/white"
                             android:textSize="15sp"
                             android:gravity="center_vertical|left"
@@ -335,39 +325,36 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Province *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/province_label"
+                            style="@style/input_labels" />
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_province"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{provinceAdapter}"
-                            bind:selectedOpt= "@={viewModel.province}"
-                            />
+                            bind:selectedOpt="@={viewModel.province}" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Distric *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/district_label"
+                            style="@style/input_labels" />
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_district"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{districtAdapter}"
-                            bind:selectedOpt="@={viewModel.district}"/>
-
+                            bind:selectedOpt="@={viewModel.district}" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Unidade Sanitaria *"
-                            style="@style/input_labels"
-                            />
+                            android:text="@string/health_facility_label"
+                            style="@style/input_labels" />
 
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_healthfacility"
@@ -375,7 +362,7 @@
                             android:layout_height="wrap_content"
                             style="@style/bottom_spinner_style"
                             app:adapter="@{healthfacilityAdapter}"
-                            bind:selectedOpt="@={viewModel.healthFacility}"/>
+                            bind:selectedOpt="@={viewModel.healthFacility}" />
 
                     </LinearLayout>
 
@@ -390,12 +377,11 @@
                         android:textAllCaps="false"
                         android:textStyle="bold"
                         android:textColor="@color/white"
-                        android:onClick="@{() -> viewModel.save()}"/>
+                        android:onClick="@{() -> viewModel.save()}" />
 
                 </LinearLayout>
             </ScrollView>
         </LinearLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

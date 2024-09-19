@@ -24,6 +24,7 @@ import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipSearchVM;
 
 import java.io.Serializable;
@@ -55,7 +56,8 @@ public class MentorshipActivity extends BaseActivity {
         setSupportActionBar(binding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Avaliações");
+        getSupportActionBar().setTitle(getString(R.string.evaluations_title));
+
     }
 
     @Override
@@ -76,12 +78,15 @@ public class MentorshipActivity extends BaseActivity {
 
 
     public void populateRecyclerView(){
+        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         binding.rcvMentorships.setLayoutManager(mLayoutManager);
         binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
-        binding.rcvMentorships.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-
-        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
+        if (adapter == null) {
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            binding.rcvMentorships.addItemDecoration(itemDecoration);
+        }
         binding.rcvMentorships.setAdapter(adapter);
     }
 

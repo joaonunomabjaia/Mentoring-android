@@ -33,6 +33,8 @@ public class UserDTO extends BaseEntityDTO {
         this.setSalt(user.getSalt());
     }
 
+    public UserDTO() {
+    }
 
     public List<UserRoleDTO> getUserRoleDTOS() {
         return userRoleDTOS;

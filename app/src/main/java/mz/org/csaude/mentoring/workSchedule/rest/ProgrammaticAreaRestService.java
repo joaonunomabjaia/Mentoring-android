@@ -35,14 +35,16 @@ public class ProgrammaticAreaRestService extends BaseRestService {
                 List<ProgrammaticAreaDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        ProgrammaticAreaService programmaticAreaService = getApplication().getProgrammaticAreaService();
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            ProgrammaticAreaService programmaticAreaService = getApplication().getProgrammaticAreaService();
 
-                        programmaticAreaService.saveOrUpdateProgrammaticAreas(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parse(data, ProgrammaticArea.class));
-                    } catch (SQLException e) {
-                        Log.e("ProgrammaticAreaRestService", e.getMessage());
-                    }
+                            programmaticAreaService.saveOrUpdateProgrammaticAreas(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parse(data, ProgrammaticArea.class));
+                        } catch (SQLException e) {
+                            Log.e("ProgrammaticAreaRestService", e.getMessage());
+                        }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

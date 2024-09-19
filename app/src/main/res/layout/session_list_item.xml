@@ -53,6 +53,7 @@
                     android:padding="@dimen/dimen_4dp"
                     android:drawableLeft="@drawable/baseline_local_hospital_24"
                     android:textSize="@dimen/dimen_12dp"
+                    android:textColor="?attr/textColorPrimary"
                     android:gravity="center_vertical"
                     android:drawablePadding="8dp"
                     android:textStyle="bold" />
@@ -62,6 +63,7 @@
                     android:layout_weight="1"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
+                    android:textColor="?attr/textColorPrimary"
                     android:drawableStart="@drawable/ic_calendar"
                     android:text="@{DateUtilities.formatToDDMMYYYY(session.startDate)}"
                    />
@@ -73,6 +75,7 @@
                 android:text="@{session.form.name}"
                 android:padding="@dimen/dimen_4dp"
                 android:textSize="@dimen/dimen_12dp"
+                android:textColor="?attr/textColorPrimary"
                 android:textStyle="bold" />
             <View
                 android:layout_width="match_parent"

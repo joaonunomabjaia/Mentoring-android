@@ -27,19 +27,19 @@ public class SessionStatusServiceImpl extends BaseServiceImpl<SessionStatus> imp
 
     @Override
     public SessionStatus save(SessionStatus record) throws SQLException {
-        this.sessionStatusDAO.create(record);
+        this.sessionStatusDAO.insert(record);
         return record;
     }
 
     @Override
     public SessionStatus update(SessionStatus record) throws SQLException {
-        this.sessionStatusDAO.create(record);
+        this.sessionStatusDAO.update(record);
         return record;
     }
 
     @Override
     public int delete(SessionStatus record) throws SQLException {
-        return this.sessionStatusDAO.delete(record);
+        return this.sessionStatusDAO.delete(record.getId());
     }
 
     @Override

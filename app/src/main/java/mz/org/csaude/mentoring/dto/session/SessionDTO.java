@@ -43,6 +43,9 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
 
     private List<MentorshipDTO> mentorships;
 
+    public SessionDTO() {
+    }
+
     public SessionDTO(Session session) {
         super(session);
         this.setStartDate(session.getStartDate());

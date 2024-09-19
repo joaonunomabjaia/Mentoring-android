@@ -22,12 +22,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Override
     public void init(Application application) throws SQLException {
         super.init(application);
-       this.userDao = getDataBaseHelper().getUserDao();
+       this.userDao = getDataBaseHelper().getUserDAO();
     }
 
     @Override
     public User save(User record) throws SQLException {
-        this.userDao.create(record);
+        record.setId((int) this.userDao.insert(record));
         return record;
     }
 
@@ -53,51 +53,41 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    public User getByuuid(String uuid) throws SQLException {
+        return this.userDao.getByUuid(uuid);
+    }
+
+    @Override
     public User login(User user) throws SQLException {
-        User u = this.userDao.getByUserName(user);
+        User u = this.userDao.getByUserName(user.getUserName());
         if (u != null) {
             user.setPassword(Utilities.MD5Crypt(u.getSalt()+":"+user.getPassword()));
-            return this.userDao.getByCredentials(user);
+            return this.userDao.getByCredentials(user.getUserName(), user.getPassword());
         } else return null;
     }
 
     @Override
     public User savedOrUpdateUser(User user) throws SQLException {
 
-       List<User> users = this.userDao.queryForEq("uuid", user.getUuid());
+       User u = this.userDao.getByUuid(user.getUuid());
 
-       if(users.isEmpty()){
+       if(u == null){
            getApplication().getEmployeeService().saveOrUpdateEmployee(user.getEmployee());
-           this.userDao.createOrUpdate(user);
+           user.setEmployee(getApplication().getEmployeeService().getByuuid(user.getEmployee().getUuid()));
+           this.save(user);
            return user;
+       } else {
+           user.setId(u.getId());
+           getApplication().getEmployeeService().saveOrUpdateEmployee(user.getEmployee());
+           user.setEmployee(getApplication().getEmployeeService().getByuuid(user.getEmployee().getUuid()));
+           this.update(user);
        }
-        return users.get(0);
-    }
-
-    @Override
-    public User getByUserNameAndPassword(User currentUser) {
-        try {
-            return userDao.getByCredentials(currentUser);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return u;
     }
 
     @Override
     public void updatePassword(User relatedRecord) throws SQLException {
         userDao.update(relatedRecord);
-    }
-
-    private void saveUser(User user) throws SQLException {
-
-        List<User> users = this.userDao.queryForEq("uuid", user.getUuid());
-
-        if (users.isEmpty()){
-            userDao.create(user);
-        }else {
-           this.update(user);
-        }
     }
 
     @Override

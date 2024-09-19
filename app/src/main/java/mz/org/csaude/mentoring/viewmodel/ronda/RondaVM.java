@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.ronda;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
@@ -59,6 +60,7 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     private List<HealthFacility> healthFacilities;
     private Tutored selectedMentee;
     private List<Tutored> menteeList;
+    private Dialog progressDialog;
 
     private List<Tutored> selectedMentees;
 
@@ -78,11 +80,13 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
     @Override
     public void preInit() {
-        try {
-            this.provinces = getApplication().getProvinceService().getAll();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        getExecutorService().execute(()->{
+            try {
+                this.provinces = getApplication().getProvinceService().getAll();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public Ronda getRonda() {
@@ -105,28 +109,52 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
     @Bindable
     public Listble getHealthFacility() {
+        if (getCurrentStep().isApplicationStepEdit() && ronda.getHealthFacility() != null) return ronda.getHealthFacility();
         return this.ronda.getHealthFacility();
     }
 
     public void setHealthFacility(Listble selectedHealthFacility) {
-        if (selectedHealthFacility == null) return;
+        if (selectedHealthFacility == null || StringUtils.isEmpty(((HealthFacility) selectedHealthFacility).getUuid()) || (this.selectedHealthFacility != null && this.selectedHealthFacility.getId().equals(selectedHealthFacility.getId()))) {
+            return;
+        }
 
-        if (StringUtils.isEmpty(((HealthFacility)selectedHealthFacility).getUuid())) return;
-        this.selectedHealthFacility = (HealthFacility) selectedHealthFacility;
-        try {
-            if(this.menteeList == null) this.menteeList = new ArrayList<>();
+        getExecutorService().execute(()-> {
+            this.selectedHealthFacility = (HealthFacility) selectedHealthFacility;
+
+            // Clear the existing mentee list
+            if (this.menteeList == null) {
+                this.menteeList = new ArrayList<>();
+            }
             this.menteeList.clear();
 
-            if(!StringUtils.isEmpty(this.selectedHealthFacility.getUuid())) {
-                this.ronda.setHealthFacility(this.selectedHealthFacility);
-                setMenteeList(getApplication().getTutoredService().getAllForMentoringRound(this.selectedHealthFacility, !this.ronda.isRondaZero()));
+            try {
+                // Update health facility and load the mentees list in the background
+                if (!StringUtils.isEmpty(this.selectedHealthFacility.getUuid())) {
+                    this.ronda.setHealthFacility(this.selectedHealthFacility);
+
+                    // Fetch the mentee list for the selected health facility and mentoring round
+                    List<Tutored> fetchedMentees = getApplication().getTutoredService()
+                            .getAllForMentoringRound(this.selectedHealthFacility, !this.ronda.isRondaZero());
+
+                        setMenteeList(fetchedMentees);
+
+                        // Reload the mentees adapter and notify property changes
+                        getRelatedActivity().reloadMenteesAdapter();
+                        notifyPropertyChanged(BR.healthFacility);
+
+                }
+            } catch (SQLException e) {
+                // Handle the SQL exception and show an error message on the main thread
+                runOnMainThread(() -> {
+                    Log.e("RondaVM", "Error loading mentees", e);
+                    String errorMessage = getRelatedActivity().getString(R.string.mentees_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                });
+
             }
-            getRelatedActivity().reloadMenteesAdapter();
-            notifyPropertyChanged(BR.healthFacility);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
+
 
     public void setMenteeList(List<Tutored> menteeList) {
         this.menteeList = menteeList;
@@ -153,6 +181,7 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
     @Bindable
     public Listble getSelectedProvince() {
+        if (getCurrentStep().isApplicationStepEdit() && ronda.getHealthFacility() != null) return ronda.getHealthFacility().getDistrict().getProvince();
         return selectedProvince;
     }
 
@@ -161,23 +190,46 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     }
 
     public void setSelectedProvince(Listble selectedProvince) {
-        this.selectedProvince = (Province) selectedProvince;
-        if (selectedProvince.getId() == null) return;
+        // Check if the province is valid before proceeding
+        if (selectedProvince == null || selectedProvince.getId() == null || (this.selectedProvince != null && this.selectedProvince.getId().equals(selectedProvince.getId()))) {
+            return;
+        }
+        getExecutorService().execute(()-> {
+            this.selectedProvince = (Province) selectedProvince;
+            // Ensure districts and health facilities lists are initialized
+            if (this.districts == null) this.districts = new ArrayList<>();
+            if (this.healthFacilities == null) this.healthFacilities = new ArrayList<>();
 
-        if (this.districts == null) this.districts = new ArrayList<>();
-        if (this.healthFacilities == null) this.healthFacilities = new ArrayList<>();
-        try {
+            // Clear previous data
             this.districts.clear();
             this.healthFacilities.clear();
-            if (selectedProvince.getId() == null) return;
+
+            // Add default empty district item
             this.districts.add(new District());
-            if (selectedProvince.getId() == null) return;
-            this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.selectedProvince, getApplication().getCurrMentor()));
-            getRelatedActivity().reloadDistrictAdapter();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+            try {
+                // Fetch districts from the database based on the selected province and mentor
+                List<District> fetchedDistricts = getApplication().getDistrictService().getByProvinceAndMentor(this.selectedProvince, getApplication().getCurrMentor());
+
+                    if (fetchedDistricts != null && !fetchedDistricts.isEmpty()) {
+                        this.districts.addAll(fetchedDistricts);
+                    }
+
+                    // Refresh district adapter
+                    getRelatedActivity().reloadDistrictAdapter();
+
+
+            } catch (SQLException e) {
+                runOnMainThread(() -> {
+                    e.printStackTrace();
+                    // Display error alert
+                    String errorMessage = getRelatedActivity().getString(R.string.districts_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                });
+            }
+        });
     }
+
 
     @Bindable
     public Listble getMentorType() {
@@ -192,23 +244,51 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
     @Bindable
     public Listble getSelectedDistrict() {
+        if (getCurrentStep().isApplicationStepEdit() && ronda.getHealthFacility() != null) return ronda.getHealthFacility().getDistrict();
         return selectedDistrict;
     }
 
     public void setSelectedDistrict(Listble selectedDistrict) {
-        if (selectedDistrict == null || selectedDistrict.getId() == null) return;
-        try {
-            this.selectedDistrict = (District) selectedDistrict;
+        if (selectedDistrict == null || selectedDistrict.getId() == null || (this.selectedDistrict != null && this.selectedDistrict.getId().equals(selectedDistrict.getId()))) return;
+
+        getExecutorService().execute(()->{
+            if (this.healthFacilities == null) this.healthFacilities = new ArrayList<>();
+
+            // Clear existing health facilities before fetching new ones
             this.healthFacilities.clear();
-            if (selectedDistrict.getId() == null) return;
+
+            // Add a default empty HealthFacility item
             this.healthFacilities.add(new HealthFacility());
-            this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor(this.selectedDistrict, getApplication().getCurrMentor()));
-            getRelatedActivity().reloadHealthFacility();
-            notifyPropertyChanged(BR.selectedDistrict);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+            try {
+                this.selectedDistrict = (District) selectedDistrict;
+
+                // Fetch health facilities based on the selected district and mentor
+                List<HealthFacility> facilities = getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor(this.selectedDistrict, getApplication().getCurrMentor());
+
+                    if (facilities != null && !facilities.isEmpty()) {
+                        this.healthFacilities.addAll(facilities);
+                    }
+
+                    // Refresh the health facility spinner
+                    getRelatedActivity().reloadHealthFacility();
+
+                    // Notify that the selected district property has changed
+                    notifyPropertyChanged(BR.selectedDistrict);
+
+
+            } catch (SQLException e) {
+                runOnMainThread(() -> {
+                    e.printStackTrace();
+                    // Display an error alert if the query fails
+                    String errorMessage = getRelatedActivity().getString(R.string.health_facilities_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
+                });
+            }
+        });
     }
+
     @Bindable
     public Tutored getSelectedMentee() {
         return selectedMentee;
@@ -222,78 +302,119 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     public void addSelectedMentee() {
         // validate mentee here...
         if (selectedMentees == null) selectedMentees = new ArrayList<>();
-        if(selectedMentee != null){
+        if (selectedMentee != null) {
             if (!selectedMentees.contains(selectedMentee)) {
-                selectedMentee.setListPosition(selectedMentees.size()+1);
+                selectedMentee.setListPosition(selectedMentees.size() + 1);
                 selectedMentee.setListType(Listble.ListTypes.SELECTION_LIST);
                 selectedMentees.add(selectedMentee);
                 getRelatedActivity().displaySelectedMentees();
                 setSelectedMentee(null);
                 notifyPropertyChanged(BR.selectedMentee);
                 notifyPropertyChanged(BR.selectedMentees);
-
-
-            }else {
-                Utilities.displayAlertDialog(getRelatedActivity(), "O Mentorando seleccionado já existe na lista!").show();
+            } else {
+                String message = getRelatedActivity().getString(R.string.mentee_already_in_list);
+                Utilities.displayAlertDialog(getRelatedActivity(), message).show();
             }
-        }else{
-            Utilities.displayAlertDialog(getRelatedActivity(),"Campo Mentorando está vazio. Por favor, seleccione um Mentorando para adicionar à lista.").show();
+        } else {
+            String message = getRelatedActivity().getString(R.string.mentee_field_empty);
+            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
         }
     }
+
 
     public void save() {
         this.doSave();
     }
-    private void doSave(){
-        try {
-            if (!isValid()) return;
+    private void doSave() {
+        if (!isValid()) return;
+        // Perform the save operation in the background
+        getExecutorService().execute(() -> {
+            runOnMainThread(()-> {
+                progressDialog = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+            });
+            try {
+                prepareRonda();
+                // Prepare the list of RondaMentees and RondaMentors
+                List<RondaMentee> rondaMentees = createRondaMentees();
+                List<RondaMentor> rondaMentors = createRondaMentors();
 
+                // Set the mentees and mentors to the ronda
+                this.ronda.setRondaMentees(rondaMentees);
+                this.ronda.setRondaMentors(rondaMentors);
 
-            ronda.setSyncStatus(SyncSatus.SENT);
-            if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
-                ronda.setUuid(Utilities.getNewUUID().toString());
-                this.ronda.setCreatedAt(DateUtilities.getCurrentDate());
-                this.ronda.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
-            }
-            ronda.setStartDate(this.getStartDate());
-            ronda.setHealthFacility(this.selectedHealthFacility);
-            int count = getApplication().getRondaService().countRondas();
-            count++;
-            ronda.setDescription(ronda.getRondaType().getDescription()+" "+count);
-            List<RondaMentee> rondaMentees = new ArrayList<>();
-            for (Tutored tutored : this.getSelectedMentees()) {
-                RondaMentee rondaMentee = new RondaMentee();
-                rondaMentee.setUuid(Utilities.getNewUUID().toString());
-                rondaMentee.setSyncStatus(SyncSatus.SENT);
-                rondaMentee.setCreatedAt(DateUtilities.getCurrentDate());
-                rondaMentee.setTutored(tutored);
-                rondaMentee.setStartDate(this.getStartDate());
-                rondaMentees.add(rondaMentee);
-            }
+                // Validate the ronda
+                String error = this.ronda.validade();
+                if (Utilities.stringHasValue(error)) {
+                    runOnMainThread(() -> Utilities.displayAlertDialog(getRelatedActivity(), error).show());
+                    return;
+                }
 
-            List<RondaMentor> rondaMentors = new ArrayList<>();
-            Tutor tutor = this.getApplication().getCurrMentor();
-            RondaMentor rondaMentor = new RondaMentor();
-            if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
-                rondaMentor.setUuid(Utilities.getNewUUID().toString());
-                rondaMentor.setCreatedAt(DateUtilities.getCurrentDate());
-                rondaMentor.setStartDate(this.getStartDate());
+                // Check if the server is online (this may run in a background thread, depending on your implementation)
+                getApplication().isServerOnline(this);
+
+            } catch (SQLException e) {
+                runOnMainThread(() -> {
+                    dismissProgress(progressDialog);
+                    e.printStackTrace();
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_save_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
+                });
             }
-            rondaMentor.setSyncStatus(SyncSatus.SENT);
-            rondaMentor.setTutor(tutor);
-            rondaMentors.add(rondaMentor);
-            this.ronda.setRondaMentees(rondaMentees);
-            this.ronda.setRondaMentors(rondaMentors);
-            String error = this.ronda.validade();
-            if (Utilities.stringHasValue(error)) {
-                Utilities.displayAlertDialog(getRelatedActivity(), error).show();
-                return;
-            }
-            getApplication().isServerOnline(this);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
+
+    private void prepareRonda() throws SQLException {
+        ronda.setSyncStatus(SyncSatus.SENT);
+
+        if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
+            ronda.setUuid(Utilities.getNewUUID().toString());
+            ronda.setCreatedAt(DateUtilities.getCurrentDate());
+            ronda.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+        }
+
+        ronda.setStartDate(this.getStartDate());
+        ronda.setHealthFacility(this.selectedHealthFacility);
+
+        // Generate and set the description based on count
+        int count = getApplication().getRondaService().countRondas() + 1;
+        ronda.setDescription(ronda.getRondaType().getDescription() + " " + count);
+    }
+
+    private List<RondaMentee> createRondaMentees() throws SQLException {
+        List<RondaMentee> rondaMentees = new ArrayList<>();
+
+        for (Tutored tutored : this.getSelectedMentees()) {
+            RondaMentee rondaMentee = new RondaMentee();
+            rondaMentee.setUuid(Utilities.getNewUUID().toString());
+            rondaMentee.setSyncStatus(SyncSatus.SENT);
+            rondaMentee.setCreatedAt(DateUtilities.getCurrentDate());
+            rondaMentee.setTutored(tutored);
+            rondaMentee.setStartDate(this.getStartDate());
+            rondaMentees.add(rondaMentee);
+        }
+
+        return rondaMentees;
+    }
+
+    private List<RondaMentor> createRondaMentors() throws SQLException {
+        List<RondaMentor> rondaMentors = new ArrayList<>();
+        Tutor tutor = this.getApplication().getCurrMentor();
+        RondaMentor rondaMentor = new RondaMentor();
+
+        if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
+            rondaMentor.setUuid(Utilities.getNewUUID().toString());
+            rondaMentor.setCreatedAt(DateUtilities.getCurrentDate());
+            rondaMentor.setStartDate(this.getStartDate());
+        }
+
+        rondaMentor.setSyncStatus(SyncSatus.SENT);
+        rondaMentor.setTutor(tutor);
+        rondaMentors.add(rondaMentor);
+
+        return rondaMentors;
+    }
+
 
     private boolean isValid() {
         if (this.ronda.getStartDate() == null) {
@@ -382,41 +503,68 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                 getApplication().getRondaRestService().restPostRonda(this.ronda, this);
             }
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(mz.org.csaude.mentoring.R.string.server_unavailable)).show();
+            runOnMainThread(()-> {
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(mz.org.csaude.mentoring.R.string.server_unavailable)).show();
+            });
         }
     }
     @Override
     public void doOnRestErrorResponse(String errorMsg) {
-        Utilities.displayAlertDialog(getRelatedActivity(), errorMsg).show();
+        runOnMainThread(()-> {
+            dismissProgress(progressDialog);
+            Utilities.displayAlertDialog(getRelatedActivity(), errorMsg).show();
+        });
     }
 
     @Override
     public void doOnResponse(String flag, List<Ronda> objects) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("rondaType", objects.get(0).getRondaType());
-        params.put("title", objects.get(0).isRondaZero() ? "Ronda Zero" : "Ronda de Mentoria");
-        getApplication().getApplicationStep().changeToList();
-        getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
+        runOnMainThread(()->{
+            dismissProgress(progressDialog);
+            Map<String, Object> params = new HashMap<>();
+            params.put("rondaType", objects.get(0).getRondaType());
+            String title = objects.get(0).isRondaZero()
+                    ? getRelatedActivity().getString(R.string.ronda_zero)
+                    : getRelatedActivity().getString(R.string.ronda_mentoria);
+            params.put("title", title);
+
+            getApplication().getApplicationStep().changeToList();
+            getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
+        });
     }
 
     public void initRondaEdition() {
-        try {
-            ronda.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(ronda));
-            if (this.selectedMentees == null) this.selectedMentees = new ArrayList<>();
-            for (RondaMentee rondaMentee : ronda.getRondaMentees()) {
-                rondaMentee.getTutored().setListType(Listble.ListTypes.SELECTION_LIST);
-                this.selectedMentees.add(rondaMentee.getTutored());
+            try {
+                // Fetch RondaMentees and handle selected mentees
+                ronda.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(ronda));
+                if (this.selectedMentees == null) {
+                    this.selectedMentees = new ArrayList<>();
+                }
+                for (RondaMentee rondaMentee : ronda.getRondaMentees()) {
+                    rondaMentee.getTutored().setListType(Listble.ListTypes.SELECTION_LIST);
+                    this.selectedMentees.add(rondaMentee.getTutored());
+                }
+
+                // Fetch and set health facility and district
+                ronda.getHealthFacility().setDistrict(getApplication().getDistrictService().getById(ronda.getHealthFacility().getDistrictId()));
+
+                // Update the selected province, district, and health facility
+                runOnMainThread(() -> {
+                    getRelatedActivity().displaySelectedMentees();
+                });
+                this.setMentorType(new SimpleValue(ronda.getMentorType()));
+                this.setStartDate(ronda.getStartDate());
+                //this.setSelectedProvince(getRonda().getHealthFacility().getDistrict().getProvince());
+                /*this.setSelectedDistrict(getRonda().getHealthFacility().getDistrict());
+                this.setHealthFacility(getRonda().getHealthFacility());*/
+
+            } catch (Exception e) {
+                runOnMainThread(() -> {
+                    Log.e("RondaVM", "initRondaEdition:" + e.getMessage());
+                    String errorMessage = getRelatedActivity().getString(R.string.ronda_load_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+
+                });
             }
-
-            getRelatedActivity().displaySelectedMentees();
-
-            ronda.getHealthFacility().setDistrict(getApplication().getDistrictService().getById(ronda.getHealthFacility().getDistrict().getId()));
-            this.setSelectedProvince(getRonda().getHealthFacility().getDistrict().getProvince());
-            this.setSelectedDistrict(getRonda().getHealthFacility().getDistrict());
-            this.setHealthFacility(getRonda().getHealthFacility());
-        } catch (SQLException e) {
-            Log.e("RondaVM", "initRondaEdition:" + e.getMessage());
-        }
-
     }
+
 }

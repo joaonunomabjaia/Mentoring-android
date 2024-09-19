@@ -40,18 +40,20 @@ public class EvaluationTypeRestService extends BaseRestService {
                 List<EvaluationTypeDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        EvaluationTypeService evaluationTypeService = getApplication().getEvaluationTypeService();
-                        List<EvaluationType> evaluationTypes = new ArrayList<>();
-                        for (EvaluationTypeDTO evaluationTypeDTO : data){
-                            evaluationTypeDTO.getEvaluationType().setSyncStatus(SyncSatus.SENT);
-                            evaluationTypes.add(evaluationTypeDTO.getEvaluationType());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            EvaluationTypeService evaluationTypeService = getApplication().getEvaluationTypeService();
+                            List<EvaluationType> evaluationTypes = new ArrayList<>();
+                            for (EvaluationTypeDTO evaluationTypeDTO : data) {
+                                evaluationTypeDTO.getEvaluationType().setSyncStatus(SyncSatus.SENT);
+                                evaluationTypes.add(evaluationTypeDTO.getEvaluationType());
+                            }
+                            evaluationTypeService.saveOrUpdateEvaluationTypes(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, evaluationTypes);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        evaluationTypeService.saveOrUpdateEvaluationTypes(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, evaluationTypes);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

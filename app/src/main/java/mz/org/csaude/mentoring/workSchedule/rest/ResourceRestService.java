@@ -41,19 +41,20 @@ public class ResourceRestService extends BaseRestService {
               List<ResourceDTO> data = response.body();
 
               if(Utilities.listHasElements(data)){
-                  try {
-                  ResourceService resourceService = getApplication().getResourceService();
-                  List<Resource> resourceList = new ArrayList<>();
+                  getServiceExecutor().execute(()-> {
+                      try {
+                          ResourceService resourceService = getApplication().getResourceService();
+                          List<Resource> resourceList = new ArrayList<>();
 
-                  for(ResourceDTO resourceDTO : data){
-                      resourceList.add(resourceDTO.getResourceModel());
-                  }
-                      resourceService.savedOrUpdateResources(resourceList);
-                      listener.doOnResponse(BaseRestService.REQUEST_SUCESS, resourceList);
-                  } catch (SQLException e) {
-                      throw new RuntimeException(e);
-                  }
-
+                          for (ResourceDTO resourceDTO : data) {
+                              resourceList.add(resourceDTO.getResourceModel());
+                          }
+                          resourceService.savedOrUpdateResources(resourceList);
+                          listener.doOnResponse(BaseRestService.REQUEST_SUCESS, resourceList);
+                      } catch (SQLException e) {
+                          throw new RuntimeException(e);
+                      }
+                  });
               }else{
                   listener.doOnResponse(REQUEST_NO_DATA, null);
               }

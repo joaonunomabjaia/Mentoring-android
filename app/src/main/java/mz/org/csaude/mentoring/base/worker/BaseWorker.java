@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
@@ -21,6 +22,7 @@ import mz.org.csaude.mentoring.base.viewModel.SearchPaginator;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.util.Http;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 
 public abstract class BaseWorker<T extends BaseModel> extends Worker implements SearchPaginator<T>, RestResponseListener<T> {
 
@@ -36,6 +38,8 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker implements 
     protected long updatedRecsQty;
     protected int notificationId;
 
+    protected ExecutorThreadProvider executorThreadProvider;
+
     protected Context context;
 
     protected String requestType;
@@ -43,6 +47,7 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker implements 
     public BaseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         setWorkStatus(WORK_STATUS_STARTING);
+        this.executorThreadProvider = ExecutorThreadProvider.getInstance();
 
         this.context = context;
         this.notificationId = ThreadLocalRandom.current().nextInt();
@@ -59,8 +64,7 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker implements 
             doOnStart();
 
             changeStatusToPerforming();
-            fullLoadRecords();
-        } catch (SQLException e) {
+            fullLoadRecords();        } catch (SQLException e) {
             e.printStackTrace();
             return Result.failure();
         }
@@ -98,7 +102,13 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker implements 
     }
 
     protected void fullLoadRecords() throws SQLException {
-        doOnlineSearch(this.offset, RECORDS_PER_SEARCH);
+        this.executorThreadProvider.getExecutorService().execute(() -> {
+            try {
+                doOnlineSearch(this.offset, RECORDS_PER_SEARCH);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     protected void doAfterSearch(String flag, List<T> recs) throws SQLException {

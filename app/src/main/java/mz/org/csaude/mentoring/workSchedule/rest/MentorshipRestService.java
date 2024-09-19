@@ -47,17 +47,19 @@ public class MentorshipRestService extends BaseRestService {
                 public void onResponse(Call<List<MentorshipDTO>> call, Response<List<MentorshipDTO>> response) {
                     List<MentorshipDTO> data = response.body();
                     if (Utilities.listHasElements(data)) {
-                        try {
-                            List<Mentorship> mentorshipList = getApplication().getMentorshipService().getAllNotSynced(getApplication());
-                            for (Mentorship mentorship : mentorshipList) {
-                                mentorship.setSyncStatus(SyncSatus.SENT);
-                                getApplication().getMentorshipService().update(mentorship);
-                            }
+                        getServiceExecutor().execute(()-> {
+                            try {
+                                List<Mentorship> mentorshipList = getApplication().getMentorshipService().getAllNotSynced(getApplication());
+                                for (Mentorship mentorship : mentorshipList) {
+                                    mentorship.setSyncStatus(SyncSatus.SENT);
+                                    getApplication().getMentorshipService().update(mentorship);
+                                }
 
-                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, mentorshipList);
-                        } catch (SQLException  e) {
-                            throw new RuntimeException(e);
-                        }
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, mentorshipList);
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     } else listener.doOnRestErrorResponse(response.message());
                 }
 

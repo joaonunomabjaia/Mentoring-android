@@ -17,6 +17,9 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityCreateTutoredBinding;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.location.Province;
+import mz.org.csaude.mentoring.model.partner.Partner;
+import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
+import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
 
@@ -51,7 +54,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         setSupportActionBar(activityCreateTutoredBinding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Mentorandos");
+        getSupportActionBar().setTitle(getString(R.string.tutored_title));
     }
 
     private void switchLayout(){
@@ -60,27 +63,33 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
     }
 
     private void initAdapters(){
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+                List<Province> provinces = getRelatedViewModel().getAllProvince();
+                List<ProfessionalCategory> professionalCategories = getRelatedViewModel().getAllProfessionalCategys();
+                List<SimpleValue> menteeLabors = getRelatedViewModel().getMenteeLabors();
+                getRelatedViewModel().getPartnersList();
+                getRelatedViewModel().getCreateTutoredActivity().runOnUiThread(() -> {
+                    provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
+                    activityCreateTutoredBinding.spnProvince.setAdapter(provinceAdapter);
+                    activityCreateTutoredBinding.setProvinceAdapter(provinceAdapter);
 
-        try {
-            List<Province> provinces = getRelatedViewModel().getAllProvince();
-            provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-            activityCreateTutoredBinding.spnProvince.setAdapter(provinceAdapter);
-            activityCreateTutoredBinding.setProvinceAdapter(provinceAdapter);
+                    professionalCategoryAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, professionalCategories);
+                    activityCreateTutoredBinding.spnProfessionalCategory.setAdapter(professionalCategoryAdapter);
+                    activityCreateTutoredBinding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
 
-            professionalCategoryAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getAllProfessionalCategys());
-            activityCreateTutoredBinding.spnProfessionalCategory.setAdapter(professionalCategoryAdapter);
-            activityCreateTutoredBinding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
+                    menteeLaborfoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, menteeLabors);
+                    activityCreateTutoredBinding.spnMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
+                    activityCreateTutoredBinding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
 
-            menteeLaborfoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getMenteeLabors());
-            activityCreateTutoredBinding.spnMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
-            activityCreateTutoredBinding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
+                    ngoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getAllPartners());
+                    activityCreateTutoredBinding.setNgoAdapter(ngoAdapter);
+                });
 
-            ngoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getAllPartners());
-            activityCreateTutoredBinding.setNgoAdapter(ngoAdapter);
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -163,7 +172,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Handle the back button click
-                onBackPressed();
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

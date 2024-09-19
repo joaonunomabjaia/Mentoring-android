@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.view.ronda;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.tutored.TutoredAdapter;
@@ -35,6 +38,7 @@ import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.RondaTypeEnum;
 import mz.org.csaude.mentoring.util.SimpleValue;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.ronda.RondaVM;
 
@@ -61,22 +65,25 @@ public class CreateRondaActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         Intent intent = this.getIntent();
-        if(intent!=null && intent.getExtras()!=null) {
-            title = (String) intent.getExtras().get("title");
-            if (getApplicationStep().isApplicationstepCreate()) {
-                rondaTypeOption = (RondaType) intent.getExtras().get("rondaType");
-                getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
-            } else {
-                Ronda ronda = (Ronda) intent.getExtras().get("ronda");
-                getRelatedViewModel().setRonda(ronda);
-                getRelatedViewModel().initRondaEdition();
-            }
-        }
 
+        getRelatedViewModel().getExecutorService().execute(()->{
+            initAdapters();
+            if(intent!=null && intent.getExtras()!=null) {
+                title = (String) intent.getExtras().get("title");
+                if (getApplicationStep().isApplicationstepCreate()) {
+                    rondaTypeOption = (RondaType) intent.getExtras().get("rondaType");
+                    getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
+                } else {
+                    Ronda ronda = (Ronda) intent.getExtras().get("ronda");
+                    getRelatedViewModel().setRonda(ronda);
+                    getRelatedViewModel().initRondaEdition();
+                }
+            }
+        });
 
 
         getSupportActionBar().setTitle(title);
-        initAdapters();
+
         rondaBinding.rondaStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,9 +112,6 @@ public class CreateRondaActivity extends BaseActivity {
                 Utilities.hideKeyboard(CreateRondaActivity.this);
             }
         });
-
-        //loadSelectedMenteeToForm();
-
     }
 
     @Override
@@ -121,43 +125,65 @@ public class CreateRondaActivity extends BaseActivity {
     }
 
     public void reloadMenteesAdapter() {
-         ArrayAdapter<Tutored> menteesAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getrondaMenteeList());
-        rondaBinding.autCmpMentees.setThreshold(1);
-        rondaBinding.autCmpMentees.setAdapter(menteesAdapter);
-        rondaBinding.autCmpMentees.setOnFocusChangeListener((view, b) -> {
-            rondaBinding.autCmpMentees.showDropDown();
+        runOnUiThread(() -> {
+            ArrayAdapter<Tutored> menteesAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getrondaMenteeList());
+            rondaBinding.autCmpMentees.setThreshold(1);
+            rondaBinding.autCmpMentees.setAdapter(menteesAdapter);
+            rondaBinding.autCmpMentees.setOnFocusChangeListener((view, b) -> {
+                rondaBinding.autCmpMentees.showDropDown();
+            });
         });
     }
 
     public void reloadDistrictAdapter() {
-        districtAdapter = new ListableSpinnerAdapter(CreateRondaActivity.this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
-        rondaBinding.spnDistrict.setAdapter(districtAdapter);
-        rondaBinding.setDistrictAdapter(districtAdapter);
+        runOnUiThread(() -> {
+            districtAdapter = new ListableSpinnerAdapter(CreateRondaActivity.this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
+            rondaBinding.spnDistrict.setAdapter(districtAdapter);
+            rondaBinding.setDistrictAdapter(districtAdapter);
+        });
     }
 
     public void reloadHealthFacility(){
-        healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
-        rondaBinding.spnHealthFacility.setAdapter(healthFacilityAdapter);
-        rondaBinding.setHealthFacilityAdapter(healthFacilityAdapter);
-
+        runOnUiThread(() -> {
+            healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
+            rondaBinding.spnHealthFacility.setAdapter(healthFacilityAdapter);
+            rondaBinding.setHealthFacilityAdapter(healthFacilityAdapter);
+        });
     }
 
-    private void initAdapters(){
+    private void initAdapters() {
+        runOnUiThread(this::setupMentorTypeAdapter);
         try {
-            List<SimpleValue> mentorTypes = new ArrayList<>();
-            mentorTypes.add(new SimpleValue(1, "Interno"));
-            mentorTypes.add(new SimpleValue(2, "Externo"));
-            mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
-            rondaBinding.spnMentorType.setAdapter(mentorTypeAdapter);
-
             List<Province> provinces = getRelatedViewModel().getAllProvince();
-            provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-            rondaBinding.spnProvince.setAdapter(provinceAdapter);
-            rondaBinding.setProvinceAdapter(provinceAdapter);
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                // Initialize the adapter with the fetched provinces
+                provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
+                rondaBinding.spnProvince.setAdapter(provinceAdapter);
+                rondaBinding.setProvinceAdapter(provinceAdapter);
+            });
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            runOnUiThread(() -> handleSQLException(e));
         }
     }
+
+    private void setupMentorTypeAdapter() {
+        List<SimpleValue> mentorTypes = getMentorTypes();
+        mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
+        rondaBinding.spnMentorType.setAdapter(mentorTypeAdapter);
+    }
+
+    private List<SimpleValue> getMentorTypes() {
+        List<SimpleValue> mentorTypes = new ArrayList<>();
+        mentorTypes.add(new SimpleValue(1, getString(R.string.interno)));
+        mentorTypes.add(new SimpleValue(2, getString(R.string.externo)));
+        return mentorTypes;
+    }
+
+    private void handleSQLException(SQLException e) {
+        Log.e("Database Error", "Error while initializing adapters: ", e);
+    }
+
     public void displaySelectedMentees(){
         if (tutoredAdapter != null) {
             tutoredAdapter.notifyDataSetChanged();
@@ -165,7 +191,12 @@ public class CreateRondaActivity extends BaseActivity {
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
             rcvSelectedMentees.setLayoutManager(mLayoutManager);
             rcvSelectedMentees.setItemAnimator(new DefaultItemAnimator());
-            rcvSelectedMentees.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+
+            int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            rcvSelectedMentees.addItemDecoration(itemDecoration);
+
+            rcvSelectedMentees.setHasFixedSize(true);
 
             tutoredAdapter = new TutoredAdapter(rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this);
             rcvSelectedMentees.setAdapter(tutoredAdapter);
@@ -184,7 +215,10 @@ public class CreateRondaActivity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Handle the back button click
-                onBackPressed();
+                Map<String, Object> params = new HashMap<>();
+                params.put("title", title);
+                params.put("rondaType", rondaTypeOption);
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

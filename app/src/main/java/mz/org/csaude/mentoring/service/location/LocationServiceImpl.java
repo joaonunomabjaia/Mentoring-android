@@ -31,7 +31,7 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
     }
     @Override
     public Location save(Location record) throws SQLException {
-        this.locationDAO.create(record);
+        this.locationDAO.insertLocation(record);
         return record;
     }
 
@@ -43,7 +43,7 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
 
     @Override
     public int delete(Location record) throws SQLException {
-        return this.locationDAO.delete(record);
+        return this.locationDAO.delete(record.getId());
     }
 
     @Override
@@ -55,7 +55,12 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
     public Location getById(int id) throws SQLException {
         return this.locationDAO.queryForId(id);
     }
-    
+
+    @Override
+    public Location getByuuid(String uuid) throws SQLException {
+        return this.locationDAO.getByUuid(uuid);
+    }
+
     @Override
     public void saveOrUpdates(List<LocationDTO> locationDTOS) throws SQLException {
         for (LocationDTO locationDTO : locationDTOS){
@@ -69,7 +74,7 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
         Location l = this.locationDAO.getByUuid(location.getUuid());
 
         if (l == null){
-            this.locationDAO.create(location);
+            this.locationDAO.insertLocation(location);
             return location;
         } else {
             location.setId(l.getId());
@@ -80,6 +85,13 @@ public class LocationServiceImpl extends BaseServiceImpl<Location> implements Lo
 
     @Override
     public List<Location> getAllOfEmploee(Employee employee) throws SQLException {
-        return this.locationDAO.getAllOfEmploee(employee);
+        List<Location> locations = this.locationDAO.getAllOfEmployee(employee.getId());
+        for (Location location : locations){
+            location.setEmployee(employee);
+            location.setProvince(getApplication().getProvinceService().getById(location.getProvinceId()));
+            location.setDistrict(getApplication().getDistrictService().getById(location.getDistrictId()));
+            location.setHealthFacility(getApplication().getHealthFacilityService().getById(location.getHealthFacilityId()));
+        }
+        return locations;
     }
 }

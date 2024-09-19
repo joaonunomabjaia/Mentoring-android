@@ -17,11 +17,7 @@ public class SettingServiceImpl extends BaseServiceImpl<Setting> implements Sett
 
     public SettingServiceImpl(Application application) {
         super(application);
-        try {
-            this.settingDAO = getDataBaseHelper().getSettingDAO();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        this.settingDAO = getDataBaseHelper().getSettingDAO();
     }
 
     @Override
@@ -31,7 +27,7 @@ public class SettingServiceImpl extends BaseServiceImpl<Setting> implements Sett
     }
     @Override
     public Setting save(Setting record) throws SQLException {
-        this.settingDAO.create(record);
+        record.setId((int) this.settingDAO.insert(record));
         return record;
     }
 
@@ -57,12 +53,22 @@ public class SettingServiceImpl extends BaseServiceImpl<Setting> implements Sett
     }
 
     @Override
+    public Setting getByuuid(String uuid) throws SQLException {
+        return this.settingDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void savedOrUpdateSettings(List<SettingDTO> settings) throws SQLException {
         for (SettingDTO settingDTO: settings) {
             boolean doesSettingExist = settingDAO.checkSettingExistence(settingDTO.getUuid());
             if(!doesSettingExist) {
                 Setting setting = settingDTO.getSetting();
-                this.settingDAO.createOrUpdate(setting);
+                this.save(setting);
+            } else {
+                Setting setting = settingDTO.getSetting();
+                Setting s = settingDAO.getByUuid(settingDTO.getUuid());
+                setting.setId(s.getId());
+                this.update(setting);
             }
         }
     }

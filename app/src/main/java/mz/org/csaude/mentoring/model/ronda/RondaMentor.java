@@ -1,51 +1,90 @@
 package mz.org.csaude.mentoring.model.ronda;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+import androidx.room.Relation;
 
 import java.util.Date;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.ronda.RondaMentorDAOImpl;
 import mz.org.csaude.mentoring.dto.ronda.RondaMentorDTO;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 
-
-@DatabaseTable(tableName = RondaMentor.TABLE_NAME, daoClass = RondaMentorDAOImpl.class)
+@Entity(tableName = RondaMentor.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Ronda.class,
+                        parentColumns = "id",
+                        childColumns = RondaMentor.COLUMN_RONDA,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutor.class,
+                        parentColumns = "id",
+                        childColumns = RondaMentor.COLUMN_TUTOR,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {RondaMentor.COLUMN_RONDA}),
+                @Index(value = {RondaMentor.COLUMN_TUTOR})
+        })
 public class RondaMentor extends BaseModel {
 
     public static final String TABLE_NAME = "ronda_mentor";
     public static final String COLUMN_RONDA = "ronda_id";
     public static final String COLUMN_TUTOR = "mentor_id";
     public static final String COLUMN_START_DATE = "start_date";
-
     public static final String COLUMN_END_DATE = "end_date";
 
-    @DatabaseField(columnName = COLUMN_RONDA, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+    @NonNull
+    @ColumnInfo(name = COLUMN_RONDA)
+    private Integer rondaId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_RONDA, entityColumn = "id")
     private Ronda ronda;
 
-    @DatabaseField(columnName = COLUMN_TUTOR, canBeNull = false, foreign = true, foreignAutoRefresh = true )
+    @NonNull
+    @ColumnInfo(name = COLUMN_TUTOR)
+    private Integer tutorId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_TUTOR, entityColumn = "id")
     private Tutor tutor;
 
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
-    @DatabaseField(columnName = COLUMN_END_DATE)
+    @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
 
     public RondaMentor() {
     }
 
+    @Ignore
     public RondaMentor(RondaMentorDTO rondaMentorDTO) {
         super(rondaMentorDTO);
         this.setStartDate(rondaMentorDTO.getStartDate());
         this.setEndDate(rondaMentorDTO.getEndDate());
-        if(rondaMentorDTO.getMentor()!=null) {
+        if (rondaMentorDTO.getMentor() != null) {
             this.setTutor(new Tutor(rondaMentorDTO.getMentor()));
+            this.tutorId = this.tutor.getId();
         }
-        if(rondaMentorDTO.getRonda()!=null) {
+        if (rondaMentorDTO.getRonda() != null) {
             this.setRonda(new Ronda(rondaMentorDTO.getRonda()));
+            this.rondaId = this.ronda.getId();
         }
+    }
+
+    public Integer getRondaId() {
+        return rondaId;
+    }
+
+    public void setRondaId(Integer rondaId) {
+        this.rondaId = rondaId;
     }
 
     public Ronda getRonda() {
@@ -54,6 +93,15 @@ public class RondaMentor extends BaseModel {
 
     public void setRonda(Ronda ronda) {
         this.ronda = ronda;
+        this.rondaId = ronda.getId();
+    }
+
+    public Integer getTutorId() {
+        return tutorId;
+    }
+
+    public void setTutorId(Integer tutorId) {
+        this.tutorId = tutorId;
     }
 
     public Tutor getTutor() {
@@ -62,6 +110,7 @@ public class RondaMentor extends BaseModel {
 
     public void setTutor(Tutor tutor) {
         this.tutor = tutor;
+        this.tutorId = tutor.getId();
     }
 
     public Date getStartDate() {

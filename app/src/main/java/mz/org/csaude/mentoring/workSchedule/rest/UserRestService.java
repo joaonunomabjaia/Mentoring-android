@@ -37,7 +37,7 @@ public class UserRestService extends BaseRestService implements UserSyncService 
     }
 
 
-    public void doOnlineLogin (RestResponseListener listener, boolean remeberMe) {
+    public void doOnlineLogin(RestResponseListener listener, boolean rememberMe) {
         this.sessionManager = new SessionManager(getApplication());
 
         SyncDataService syncDataService = getRetrofit().create(SyncDataService.class);
@@ -51,38 +51,71 @@ public class UserRestService extends BaseRestService implements UserSyncService 
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.code() == 200) {
+                if (response.code() == 200 && response.body() != null) {
                     LoginResponse data = response.body();
-                    try {
-                        if (!Utilities.listHasElements(data.getUserDTO().getUserRoleDTOS())) {
-                            listener.doOnRestErrorResponse("O utilizador não tem perfil associado");
-                        } else if (!isMentor(data.getUserDTO())) {
-                            listener.doOnRestErrorResponse("O utilizador não tem perfil de mentor associado");
-                        } else if (data.getUserDTO().getLifeCycleStatus().equals(LifeCycleStatus.INACTIVE)) {
-                            listener.doOnRestErrorResponse("O utilizador está inativo, contacte o administrador.");
-                        } else {
-                            getApplication().setAuthenticatedUser(getApplication().getUserService().savedOrUpdateUser(new User(data.getUserDTO())), remeberMe);
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
 
-                    if (Utilities.stringHasValue(data.getAccess_token())) {
-                        sessionManager.saveAuthToken(data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
-                        listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
-                    }
+                    // Move the database operations to a background thread
+                    getServiceExecutor().execute(() -> {
+                        try {
+                            String error = validateUserData(data);
+
+                            if (error != null) {
+                                listener.doOnRestErrorResponse(error);
+                                return;
+                            }
+
+                            // Save user information and handle session data in the background thread
+                            saveUserAndSessionData(data, rememberMe);
+
+                            // If the access token exists, save it
+                            if (Utilities.stringHasValue(data.getAccess_token())) {
+                                sessionManager.saveAuthToken(data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
+
+                                // Notify success on the main thread
+                                listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
+                            }
+
+                        } catch (SQLException e) {
+                            // Handle database errors on the main thread
+                            listener.doOnRestErrorResponse("Database error: " + e.getMessage());
+                        }
+                    });
                 } else {
                     listener.doOnRestErrorResponse(response.message());
                 }
-
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.i("USER LOGIN --", t.getMessage(), t);
+                Log.e("USER LOGIN --", t.getMessage(), t);
+                listener.doOnRestErrorResponse("Login failed: " + t.getMessage());
             }
         });
     }
+
+    private String validateUserData(LoginResponse data) {
+        if (!Utilities.listHasElements(data.getUserDTO().getUserRoleDTOS())) {
+            return "O utilizador não tem perfil associado";
+        } else if (!isMentor(data.getUserDTO())) {
+            return "O utilizador não tem perfil de mentor associado";
+        } else if (data.getUserDTO().getLifeCycleStatus().equals(LifeCycleStatus.INACTIVE)) {
+            return "O utilizador está inativo, contacte o administrador.";
+        }
+        return null;
+    }
+
+    private void saveUserAndSessionData(LoginResponse data, boolean rememberMe) throws SQLException {
+        // Save user data to the database in the background thread
+        getApplication().getUserService().savedOrUpdateUser(new User(data.getUserDTO()));
+
+        // Retrieve the saved user and update additional information
+        User user = getApplication().getUserService().getByuuid(data.getUserDTO().getUuid());
+        user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
+
+        // Set the authenticated user with the rememberMe flag
+        getApplication().setAuthenticatedUser(user, rememberMe);
+    }
+
 
     private boolean isMentor(UserDTO userDTO) {
         for (UserRoleDTO userRoleDTO : userDTO.getUserRoleDTOS()) {
@@ -104,16 +137,17 @@ public class UserRestService extends BaseRestService implements UserSyncService 
                 public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                     if (response.code() == 200) {
                         UserDTO data = response.body();
-
-                        try {
-                            User user1 = new User(data);
-                            UserService userService = getApplication().getUserService();
-                            userService.savedOrUpdateUser(user1);
-                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(user1));
-                        } catch (SQLException e) {
-                            Log.e("USER FETCH --", e.getMessage(), e);
-                            listener.doOnRestErrorResponse(e.getMessage());
-                        }
+                        getServiceExecutor().execute(()-> {
+                            try {
+                                User user1 = new User(data);
+                                UserService userService = getApplication().getUserService();
+                                userService.savedOrUpdateUser(user1);
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(user1));
+                            } catch (SQLException e) {
+                                Log.e("USER FETCH --", e.getMessage(), e);
+                                listener.doOnRestErrorResponse(e.getMessage());
+                            }
+                        });
                     }
 
                 }

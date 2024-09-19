@@ -52,9 +52,11 @@ public class SessionSummaryActivity extends BaseActivity {
         setSupportActionBar(binding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Resumo");
+        getSupportActionBar().setTitle(getString(R.string.summary_title));
 
-        getRelatedViewModel().generateSessionSummary();
+        getRelatedViewModel().getExecutorService().execute(()->{
+            getRelatedViewModel().generateSessionSummary();
+        });
 
         Intent finishIntent = new Intent("FINISH_ACTIVITY");
         LocalBroadcastManager.getInstance(this).sendBroadcast(finishIntent);

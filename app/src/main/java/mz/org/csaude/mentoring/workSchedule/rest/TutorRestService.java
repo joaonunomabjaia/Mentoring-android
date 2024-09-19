@@ -47,21 +47,23 @@ public class TutorRestService extends BaseRestService {
                 if(data == null){
 
                 }
-                try {
+                getServiceExecutor().execute(()-> {
+                    try {
 
-                TutorService tutorService = getApplication().getTutorService();
+                        TutorService tutorService = getApplication().getTutorService();
 
-                List<Tutor> tutors = new ArrayList<>();
-                for (TutorDTO tutorDTO : data){
-                    tutorDTO.getTutor().getEmployee().setSyncStatus(SyncSatus.SENT);
-                    tutorDTO.getTutor().setSyncStatus(SyncSatus.SENT);
-                    tutors.add(tutorDTO.getTutor());
-                }
-                    tutorService.saveOrUpdateTutors(data);
-                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutors);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                        List<Tutor> tutors = new ArrayList<>();
+                        for (TutorDTO tutorDTO : data) {
+                            tutorDTO.getTutor().getEmployee().setSyncStatus(SyncSatus.SENT);
+                            tutorDTO.getTutor().setSyncStatus(SyncSatus.SENT);
+                            tutors.add(tutorDTO.getTutor());
+                        }
+                        tutorService.saveOrUpdateTutors(data);
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, tutors);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
 
             @Override
@@ -85,18 +87,19 @@ public class TutorRestService extends BaseRestService {
                 if(data == null){
 
                 }
+                getServiceExecutor().execute(()-> {
+                    try {
 
-                try {
+                        TutorService tutorService = getApplication().getTutorService();
 
-                    TutorService tutorService = getApplication().getTutorService();
+                        Tutor tutor = tutorService.saveOrUpdate(new Tutor(data));
 
-                    Tutor tutor = tutorService.saveOrUpdate(new Tutor(data));
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(tutor));
 
-                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(tutor));
-
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
 
             @Override

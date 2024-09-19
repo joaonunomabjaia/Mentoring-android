@@ -37,19 +37,21 @@ public class PartnerRestService extends BaseRestService {
                 if(data == null){
 
                 }
-                try {
+                getServiceExecutor().execute(()-> {
+                    try {
 
-                    List<Partner> partners = new ArrayList<>();
-                    for (PartnerDTO partnerDTO : data) {
-                        partnerDTO.getPartner().setSyncStatus(SyncSatus.SENT);
-                        partners.add(partnerDTO.getPartner());
+                        List<Partner> partners = new ArrayList<>();
+                        for (PartnerDTO partnerDTO : data) {
+                            partnerDTO.getPartner().setSyncStatus(SyncSatus.SENT);
+                            partners.add(partnerDTO.getPartner());
+                        }
+                        getApplication().getPartnerService().saveAll(partners);
+
+                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, partners);
+                    } catch (SQLException e) {
+                        listener.doOnRestErrorResponse(e.getMessage());
                     }
-                    getApplication().getPartnerService().saveAll(partners);
-
-                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, partners);
-                } catch (SQLException e) {
-                    listener.doOnRestErrorResponse(e.getMessage());
-                }
+                });
             }
 
             @Override

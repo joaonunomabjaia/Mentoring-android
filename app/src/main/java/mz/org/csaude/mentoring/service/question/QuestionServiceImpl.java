@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.question;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.question.QuestionDAO;
 import mz.org.csaude.mentoring.dto.question.QuestionDTO;
 import mz.org.csaude.mentoring.model.question.Question;
+import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 
 public class QuestionServiceImpl extends BaseServiceImpl<Question> implements QuestionService {
 
@@ -26,7 +29,7 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
 
     @Override
     public Question save(Question record) throws SQLException {
-        this.questionDAO.create(record);
+        record.setId((int) this.questionDAO.insert(record));
         return record;
     }
 
@@ -48,7 +51,9 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
 
     @Override
     public Question getById(int id) throws SQLException {
-        return this.questionDAO.queryForId(id);
+        Question question = this.questionDAO.queryForId(id);
+        question.setQuestionsCategory(getApplication().getQuestionsCategoryService().getById(question.getQuestionCategoryId()));
+        return question;
     }
 
     @Override
@@ -59,13 +64,37 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     }
 
     @Override
+    @Transaction
+    public void saveOrUpdateQuestionList(List<Question> questions) throws SQLException {
+        for (Question question: questions) {
+            QuestionsCategory qcOnDb = getApplication().getQuestionsCategoryService().getByuuid(question.getQuestionsCategory().getUuid());;
+            if(qcOnDb!=null) {
+                question.setQuestionsCategory(qcOnDb);
+            } else {
+                question.setQuestionsCategory(getApplication().getQuestionsCategoryService().saveOrUpdateQuestionCategory(question.getQuestionsCategory()));
+            }
+
+            Question qOnDb = this.questionDAO.getByUuid(question.getUuid());
+            if(qOnDb!=null) {
+                question.setId(qOnDb.getId());
+                this.questionDAO.update(question);
+            } else {
+                question.setId((int) this.questionDAO.insert(question));
+            }
+        }
+    }
+
+    @Override
     public Question saveOrUpdateQuestion(QuestionDTO questionDTO) throws SQLException {
         Question q = this.questionDAO.getByUuid(questionDTO.getUuid());
         Question question = questionDTO.getQuestionObj();
+        question.setQuestionsCategory(getApplication().getQuestionsCategoryService().getByuuid(questionDTO.getQuestionCategory().getUuid()));
         if(q!=null) {
             question.setId(q.getId());
+            this.update(question);
+        } else {
+            this.save(question);
         }
-        this.questionDAO.createOrUpdate(question);
         return question;
     }
 

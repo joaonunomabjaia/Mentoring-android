@@ -24,12 +24,14 @@ public class RondaTypeServiceImpl extends BaseServiceImpl<RondaType> implements 
 
     @Override
     public RondaType save(RondaType record) throws SQLException {
-        return null;
+        record.setId((int) this.rondaTypeDAO.insert(record));
+        return record;
     }
 
     @Override
     public RondaType update(RondaType record) throws SQLException {
-        return null;
+        this.rondaTypeDAO.update(record);
+        return record;
     }
 
     @Override
@@ -39,22 +41,23 @@ public class RondaTypeServiceImpl extends BaseServiceImpl<RondaType> implements 
 
     @Override
     public List<RondaType> getAll() throws SQLException {
-        return null;
+        return this.rondaTypeDAO.queryForAll();
     }
 
     @Override
     public RondaType getById(int id) throws SQLException {
-        return null;
+        return this.rondaTypeDAO.queryForId(id);
+    }
+
+    @Override
+    public RondaType getByuuid(String uuid) throws SQLException {
+        return this.rondaTypeDAO.getByUuid(uuid);
     }
 
     @Override
     public void saveOrUpdateRondaTypes(List<RondaTypeDTO> rondaTypeDTOS) throws SQLException {
         for (RondaTypeDTO dto: rondaTypeDTOS) {
-            boolean doesRondaTypeExist = this.rondaTypeDAO.checkRondaTypeExistance(dto.getUuid());
-            if(!doesRondaTypeExist) {
-                RondaType rondaType = new RondaType(dto);
-                this.rondaTypeDAO.createOrUpdate(rondaType);
-            }
+           this.saveOrUpdateRondaType(dto.getRondaType());
         }
     }
 
@@ -63,8 +66,10 @@ public class RondaTypeServiceImpl extends BaseServiceImpl<RondaType> implements 
         RondaType rt = this.rondaTypeDAO.getByUuid(rondaType.getUuid());
         if(rt!=null) {
             rondaType.setId(rt.getId());
+            this.update(rondaType);
+        } else {
+            this.save(rondaType);
         }
-        this.rondaTypeDAO.createOrUpdate(rondaType);
         return rondaType;
     }
 

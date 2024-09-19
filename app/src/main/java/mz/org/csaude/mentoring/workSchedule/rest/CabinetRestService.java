@@ -40,19 +40,21 @@ public class CabinetRestService extends BaseRestService {
                 if(!Utilities.listHasElements(data)){
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 } else {
-                    try {
+                    getServiceExecutor().execute(()->{
+                        try {
 
-                        CabinetService cabinetService = getApplication().getCabinetService();
-                        List<Cabinet> cabinets = new ArrayList<>();
-                        for (CabinetDTO cabinetDTO : data){
-                            cabinetDTO.getCabinet().setSyncStatus(SyncSatus.SENT);
-                            cabinets.add(new Cabinet(cabinetDTO));
+                            CabinetService cabinetService = getApplication().getCabinetService();
+                            List<Cabinet> cabinets = new ArrayList<>();
+                            for (CabinetDTO cabinetDTO : data){
+                                cabinetDTO.getCabinet().setSyncStatus(SyncSatus.SENT);
+                                cabinets.add(new Cabinet(cabinetDTO));
+                            }
+                            cabinetService.saveOrUpdateCabinets(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, cabinets);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        cabinetService.saveOrUpdateCabinets(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, cabinets);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 }
 
             }

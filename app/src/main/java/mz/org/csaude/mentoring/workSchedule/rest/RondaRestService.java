@@ -50,22 +50,24 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<List<RondaDTO>> call, Response<List<RondaDTO>> response) {
                 List<RondaDTO> data = response.body();
                 if (Utilities.listHasElements(data)) {
-                    try {
-                        RondaService rondaService = getApplication().getRondaService();
-                        List<Ronda> rondas = new ArrayList<>();
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            RondaService rondaService = getApplication().getRondaService();
+                            List<Ronda> rondas = new ArrayList<>();
 
-                        for (RondaDTO rondaDTO: data) {
-                            Ronda ronda = new Ronda(rondaDTO);
-                            ronda.setSyncStatus(SyncSatus.SENT);
-                            rondaDTO.getHealthFacility().getHealthFacilityObj().setSyncStatus(SyncSatus.SENT);
-                            rondas.add(ronda);
+                            for (RondaDTO rondaDTO : data) {
+                                Ronda ronda = new Ronda(rondaDTO);
+                                ronda.setSyncStatus(SyncSatus.SENT);
+                                rondaDTO.getHealthFacility().getHealthFacilityObj().setSyncStatus(SyncSatus.SENT);
+                                rondas.add(ronda);
+                            }
+                            rondaService.saveOrUpdateRondas(data);
+
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondas);
+                        } catch (SQLException e) {
+                            Log.e("RondaRestService", e.getMessage(), e);
                         }
-                        rondaService.saveOrUpdateRondas(data);
-
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondas);
-                    } catch (SQLException e) {
-                        Log.e("RondaRestService", e.getMessage(), e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
                 }
@@ -90,17 +92,19 @@ public class RondaRestService extends BaseRestService {
                     public void onResponse(Call<List<RondaDTO>> call, Response<List<RondaDTO>> response) {
                         List<RondaDTO> data = response.body();
                         if (response.code() == 201) {
-                            try {
-                                List<Ronda> rondaList = getApplication().getRondaService().getAllNotSynced();
-                                for (Ronda ronda : rondaList) {
-                                    ronda.setSyncStatus(SyncSatus.SENT);
-                                    getApplication().getRondaService().update(ronda);
-                                }
+                            getServiceExecutor().execute(()-> {
+                                try {
+                                    List<Ronda> rondaList = getApplication().getRondaService().getAllNotSynced();
+                                    for (Ronda ronda : rondaList) {
+                                        ronda.setSyncStatus(SyncSatus.SENT);
+                                        getApplication().getRondaService().update(ronda);
+                                    }
 
-                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondaList);
-                            } catch (SQLException  e) {
-                                listener.doOnRestErrorResponse(response.message());
-                            }
+                                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondaList);
+                                } catch (SQLException e) {
+                                    listener.doOnRestErrorResponse(response.message());
+                                }
+                            });
                         } else listener.doOnRestErrorResponse(response.message());
                     }
 
@@ -125,15 +129,17 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<RondaDTO> call, Response<RondaDTO> response) {
                 RondaDTO data = response.body();
                 if (response.code() == 201) {
-                    try {
-                        Ronda ronda1 = data.getRonda();
-                        ronda1.setSyncStatus(ronda.getSyncStatus());
-                        getApplication().getRondaService().savedOrUpdateRonda(ronda1);
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            Ronda ronda1 = data.getRonda();
+                            ronda1.setSyncStatus(ronda.getSyncStatus());
+                            getApplication().getRondaService().savedOrUpdateRonda(ronda1);
 
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response
@@ -207,13 +213,14 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 ResponseBody data = response.body();
                 if (response.code() == 200) {
-                    try {
-                        getApplication().getRondaService().delete(ronda);
-
+                    getServiceExecutor().execute(()->{
+                        try {
+                            getApplication().getRondaService().delete(ronda);
+                        } catch (SQLException e) {
+                            Log.e("RondaRestService", e.getMessage(), e);
+                        }
                         listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response

@@ -22,6 +22,6 @@ public interface MentorshipService extends BaseService<Mentorship> {
 
     List<Mentorship> getAllOfSession(Session session) throws SQLException;
 
-    void saveOrUpdate(Mentorship mentorship) throws SQLException;
+    Mentorship saveOrUpdate(Mentorship mentorship) throws SQLException;
 
 }

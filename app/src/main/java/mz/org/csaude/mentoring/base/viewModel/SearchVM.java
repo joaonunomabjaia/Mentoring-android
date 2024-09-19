@@ -1,7 +1,10 @@
 package mz.org.csaude.mentoring.base.viewModel;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.app.Application;
 import android.os.Handler;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
@@ -90,49 +93,62 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
     }
 
     public void initSearch() {
-        try {
-            if (isSearchOnProgress()) return;
+        if (isSearchOnProgress()) return;
 
-            String errors = validateBeforeSearch();
-            if (Utilities.stringHasValue(errors)) {
-                displayErrors(errors);
+        // Run the search logic in a background thread
+        getExecutorService().execute(() -> {
+            try {
+                // Validation before search
+                String errors = validateBeforeSearch();
+                if (Utilities.stringHasValue(errors)) {
+                    runOnMainThread(() -> displayErrors(errors));
+                    return;
+                }
+
+                if(this.searchResults == null) this.searchResults = new ArrayList<>();
+
+                this.pageSize = getPageSize();
+                this.allDisplyedRecords.clear();
+                this.searchResults.clear();
+
+                // Perform search based on pagination and online search flags
+                if (isPaginatedSearch()) {
+                    if (isOnlineSearch() && !canDisplayRecsAfterInitSearch()) {
+                        doOnlineSearch(0, RECORDS_PER_SEARCH);
+                    } else {
+                        this.searchResults = doSearch(0, RECORDS_PER_SEARCH);
+                    }
+                } else {
+                    if (isOnlineSearch() && !canDisplayRecsAfterInitSearch()) {
+                        doOnlineSearch(0, 0);
+                    } else {
+                        this.searchResults = doSearch(0, 0);
+                    }
+                }
+
+            } catch (SQLException e) {
+                Log.e(TAG, "initSearch: ", e.getCause());
+                runOnMainThread(() -> Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao executar a busca").show());
                 return;
             }
 
-            this.pageSize = getPageSize();
-
-            this.allDisplyedRecords.clear();
-            this.searchResults.clear();
-
-
-            if (isPaginatedSearch()) {
-                if (isOnlineSearch() && !canDisplayRecsAfterInitSearch()) {
-                    doOnlineSearch(0, RECORDS_PER_SEARCH);
-                } else this.searchResults = doSearch(0, RECORDS_PER_SEARCH);
-            } else {
-                if (isOnlineSearch() && !canDisplayRecsAfterInitSearch()) {
-                    doOnlineSearch(0, 0);
-                } else this.searchResults = doSearch(0, 0);
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if (!isOnlineSearch() || canDisplayRecsAfterInitSearch()) {
-            if (Utilities.listHasElements(this.searchResults)) {
-                loadFirstPage();
-
-                changeSearchStatusToFinished();
-                this.processedRecs = getAllDisplyedRecords();
-
-                displaySearchResults();
-            } else {
-                doOnNoRecordFound();
-            }
-
-            notifyChange();
-        }
+            // Handle UI updates on the main thread
+            runOnMainThread(() -> {
+                if (!isOnlineSearch() || canDisplayRecsAfterInitSearch()) {
+                    if (Utilities.listHasElements(this.searchResults)) {
+                        loadFirstPage();
+                        changeSearchStatusToFinished();
+                        this.processedRecs = getAllDisplyedRecords();
+                        displaySearchResults();
+                    } else {
+                        doOnNoRecordFound();
+                    }
+                    notifyChange();
+                }
+            });
+        });
     }
+
 
     protected boolean canDisplayRecsAfterInitSearch() {
         return false;

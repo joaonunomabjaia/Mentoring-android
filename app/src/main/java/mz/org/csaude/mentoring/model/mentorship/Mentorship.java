@@ -1,104 +1,171 @@
 package mz.org.csaude.mentoring.model.mentorship;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.Relation;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-
-
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.mentorship.MentorshipDAOImpl;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
 import mz.org.csaude.mentoring.dto.mentorship.MentorshipDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.location.Cabinet;
-import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
-
-@DatabaseTable(tableName = Mentorship.TABLE_NAME, daoClass = MentorshipDAOImpl.class)
-
+@Entity(tableName = Mentorship.TABLE_NAME,
+        foreignKeys = {
+                @ForeignKey(entity = Tutor.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_TUTOR,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Tutored.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_TUTORED,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Form.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_FORM,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Session.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_SESSION,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Cabinet.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_CABINET,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = EvaluationType.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_ITERATION_TYPE,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Door.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_DOOR,
+                        onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index(value = {Mentorship.COLUMN_TUTOR}),
+                @Index(value = {Mentorship.COLUMN_TUTORED}),
+                @Index(value = {Mentorship.COLUMN_FORM}),
+                @Index(value = {Mentorship.COLUMN_SESSION}),
+                @Index(value = {Mentorship.COLUMN_CABINET}),
+                @Index(value = {Mentorship.COLUMN_ITERATION_TYPE}),
+                @Index(value = {Mentorship.COLUMN_DOOR})
+        })
 public class Mentorship extends BaseModel {
 
     public static final String TABLE_NAME = "mentorship";
-
     public static final String COLUMN_START_DATE = "start_date";
-
     public static final String COLUMN_END_DATE = "end_date";
-
     public static final String COLUMN_PERFORMED_DATE = "performed_date";
-
     public static final String COLUMN_TUTOR = "tutor_id";
-
     public static final String COLUMN_DEMOSTRATION_DETAILS = "demonstration_details";
-
     public static final String COLUMN_TUTORED = "tutored_id";
-
     public static final String COLUMN_FORM = "form_id";
-
     public static final String COLUMN_SESSION = "session_id";
-
     public static final String COLUMN_DEMOSTRATION = "demonstration";
     public static final String COLUMN_CABINET = "cabinet_id";
-
     public static final String COLUMN_ITERATION_TYPE = "iteration_type_id";
-
     public static final String COLUMN_ITERATION_NUMBER = "iteration_number";
-
     public static final String COLUMN_DOOR = "door_id";
 
-    @DatabaseField(columnName = COLUMN_START_DATE, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_START_DATE)
     private Date startDate;
 
-    @DatabaseField(columnName = COLUMN_END_DATE)
+    @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
 
-    @DatabaseField(columnName = COLUMN_PERFORMED_DATE, canBeNull = false)
+    @ColumnInfo(name = COLUMN_PERFORMED_DATE)
     private Date performedDate;
 
-    @DatabaseField(columnName = COLUMN_TUTOR, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_TUTOR)
+    private Integer tutorId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_TUTOR, entityColumn = "id")
     private Tutor tutor;
 
-    @DatabaseField(columnName = COLUMN_TUTORED, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_TUTORED)
+    private Integer tutoredId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_TUTORED, entityColumn = "id")
     private Tutored tutored;
 
-    @DatabaseField(columnName = COLUMN_FORM, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_FORM)
+    private Integer formId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
     private Form form;
 
-    @DatabaseField(columnName = COLUMN_SESSION, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_SESSION)
+    private Integer sessionId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_SESSION, entityColumn = "id")
     private Session session;
 
-    @DatabaseField(columnName = COLUMN_CABINET, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_CABINET)
+    private Integer cabinetId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_CABINET, entityColumn = "id")
     private Cabinet cabinet;
 
-    @DatabaseField(columnName = COLUMN_ITERATION_TYPE, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_ITERATION_TYPE)
+    private Integer evaluationTypeId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_ITERATION_TYPE, entityColumn = "id")
     private EvaluationType evaluationType;
 
-    @DatabaseField(columnName = COLUMN_ITERATION_NUMBER, canBeNull = false)
+    @NonNull
+    @ColumnInfo(name = COLUMN_ITERATION_NUMBER)
     private Integer iterationNumber;
 
-    @DatabaseField(columnName = COLUMN_DOOR, canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_DOOR)
+    private Integer doorId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_DOOR, entityColumn = "id")
     private Door door;
 
-    @DatabaseField(columnName = COLUMN_DEMOSTRATION)
+    @ColumnInfo(name = COLUMN_DEMOSTRATION)
     private boolean demonstration;
 
-    @DatabaseField(columnName = COLUMN_DEMOSTRATION_DETAILS)
+    @ColumnInfo(name = COLUMN_DEMOSTRATION_DETAILS)
     private String demonstrationDetails;
+
+    @Ignore
     private List<Answer> answers;
 
     public Mentorship() {
     }
 
+    @Ignore
     public Mentorship(MentorshipDTO mentorshipDTO) {
         super(mentorshipDTO);
         this.setStartDate(mentorshipDTO.getStartDate());
@@ -108,30 +175,30 @@ public class Mentorship extends BaseModel {
         this.setDemonstrationDetails(mentorshipDTO.getDemonstrationDetails());
         this.setPerformedDate(mentorshipDTO.getPerformedDate());
 
-        if(mentorshipDTO.getMentor()!=null) {
+        if (mentorshipDTO.getMentor() != null) {
             this.setTutor(new Tutor(mentorshipDTO.getMentor()));
         }
-        if(mentorshipDTO.getMentee()!=null) {
+        if (mentorshipDTO.getMentee() != null) {
             this.setTutored(new Tutored(mentorshipDTO.getMentee()));
         }
-        if(mentorshipDTO.getSession()!=null) {
+        if (mentorshipDTO.getSession() != null) {
             this.setSession(new Session(mentorshipDTO.getSession()));
         }
-        if(mentorshipDTO.getForm()!=null) {
+        if (mentorshipDTO.getForm() != null) {
             this.setForm(new Form(mentorshipDTO.getForm()));
         }
-        if(mentorshipDTO.getCabinet()!=null) {
+        if (mentorshipDTO.getCabinet() != null) {
             this.setCabinet(new Cabinet(mentorshipDTO.getCabinet()));
         }
-        if(mentorshipDTO.getDoor()!=null) {
+        if (mentorshipDTO.getDoor() != null) {
             this.setDoor(new Door(mentorshipDTO.getDoor()));
         }
-        if(mentorshipDTO.getEvaluationType()!=null) {
+        if (mentorshipDTO.getEvaluationType() != null) {
             this.setEvaluationType(new EvaluationType(mentorshipDTO.getEvaluationType()));
         }
-        if(mentorshipDTO.getAnswers()!=null) {
+        if (mentorshipDTO.getAnswers() != null) {
             List<Answer> answerList = new ArrayList<>();
-            for (AnswerDTO answerDTO: mentorshipDTO.getAnswers()) {
+            for (AnswerDTO answerDTO : mentorshipDTO.getAnswers()) {
                 answerList.add(new Answer(answerDTO));
             }
             this.setAnswers(answerList);
@@ -168,6 +235,7 @@ public class Mentorship extends BaseModel {
 
     public void setTutor(Tutor tutor) {
         this.tutor = tutor;
+        this.tutorId = tutor.getId();
     }
 
     public Tutored getTutored() {
@@ -176,6 +244,7 @@ public class Mentorship extends BaseModel {
 
     public void setTutored(Tutored tutored) {
         this.tutored = tutored;
+        this.tutoredId = tutored.getId();
     }
 
     public Form getForm() {
@@ -184,6 +253,7 @@ public class Mentorship extends BaseModel {
 
     public void setForm(Form form) {
         this.form = form;
+        this.formId = form.getId();
     }
 
     public Session getSession() {
@@ -192,6 +262,7 @@ public class Mentorship extends BaseModel {
 
     public void setSession(Session session) {
         this.session = session;
+        this.sessionId = session.getId();
     }
 
     public Cabinet getCabinet() {
@@ -200,8 +271,8 @@ public class Mentorship extends BaseModel {
 
     public void setCabinet(Cabinet cabinet) {
         this.cabinet = cabinet;
+        this.cabinetId = cabinet.getId();
     }
-
 
     public EvaluationType getEvaluationType() {
         return evaluationType;
@@ -209,6 +280,7 @@ public class Mentorship extends BaseModel {
 
     public void setEvaluationType(EvaluationType evaluationType) {
         this.evaluationType = evaluationType;
+        if (evaluationType != null) this.evaluationTypeId = evaluationType.getId();
     }
 
     public Integer getIterationNumber() {
@@ -219,28 +291,16 @@ public class Mentorship extends BaseModel {
         this.iterationNumber = iterationNumber;
     }
 
-    public List<Answer> getAnswers() {
-        return answers;
-    }
-
-    public void addAnswer(Answer answer) {
-        if (answers == null) answers = new ArrayList<>();
-        answers.add(answer);
-    }
-
-    public void setAnswers(List<Answer> answers) {
-        this.answers = answers;
-    }
-
     public Door getDoor() {
         return door;
     }
 
     public void setDoor(Door door) {
         this.door = door;
+        this.doorId = door.getId();
     }
 
-    public String getEvaluationTypeDestription(){
+    public String getEvaluationTypeDescription() {
         return "Avaliação de " + evaluationType.getDescription();
     }
 
@@ -283,7 +343,12 @@ public class Mentorship extends BaseModel {
         if (!(o instanceof Mentorship)) return false;
         if (!super.equals(o)) return false;
         Mentorship that = (Mentorship) o;
-        return Objects.equals(tutor, that.tutor) && Objects.equals(tutored, that.tutored) && Objects.equals(form, that.form) && Objects.equals(session, that.session) && Objects.equals(evaluationType, that.evaluationType) && Objects.equals(iterationNumber, that.iterationNumber);
+        return Objects.equals(tutor, that.tutor) &&
+                Objects.equals(tutored, that.tutored) &&
+                Objects.equals(form, that.form) &&
+                Objects.equals(session, that.session) &&
+                Objects.equals(evaluationType, that.evaluationType) &&
+                Objects.equals(iterationNumber, that.iterationNumber);
     }
 
     @Override
@@ -305,5 +370,74 @@ public class Mentorship extends BaseModel {
 
     public void setDemonstrationDetails(String demonstrationDetails) {
         this.demonstrationDetails = demonstrationDetails;
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public void addAnswer(Answer answer) {
+        if (answers == null) answers = new ArrayList<>();
+        answers.add(answer);
+    }
+
+    public void setAnswers(List<Answer> answers) {
+        this.answers = answers;
+    }
+
+    public Integer getTutorId() {
+        return tutorId;
+    }
+
+    public void setTutorId(Integer tutorId) {
+        this.tutorId = tutorId;
+    }
+
+    public Integer getTutoredId() {
+        return tutoredId;
+    }
+
+    public void setTutoredId(Integer tutoredId) {
+        this.tutoredId = tutoredId;
+    }
+
+    public Integer getFormId() {
+        return formId;
+    }
+
+    public void setFormId(Integer formId) {
+        this.formId = formId;
+    }
+
+    public Integer getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public int getCabinetId() {
+        return cabinetId;
+    }
+
+    public void setCabinetId(int cabinetId) {
+        this.cabinetId = cabinetId;
+    }
+
+    public int getEvaluationTypeId() {
+        return evaluationTypeId;
+    }
+
+    public void setEvaluationTypeId(int evaluationTypeId) {
+        this.evaluationTypeId = evaluationTypeId;
+    }
+
+    public int getDoorId() {
+        return doorId;
+    }
+
+    public void setDoorId(int doorId) {
+        this.doorId = doorId;
     }
 }

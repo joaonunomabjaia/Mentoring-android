@@ -16,8 +16,7 @@
         android:orientation="horizontal"
         android:layout_marginTop="@dimen/dimen_5dp"
         android:background="@drawable/ronda_item_back"
-        android:padding="8dp"
-        android:layout_marginBottom="4dp">
+        android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -37,6 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{node.name}"
+                android:textColor="?attr/textColorPrimary"
                 android:textStyle="bold" />
 
             <TextView

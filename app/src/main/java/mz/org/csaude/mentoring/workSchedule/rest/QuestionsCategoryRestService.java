@@ -38,18 +38,20 @@ public class QuestionsCategoryRestService extends BaseRestService {
                 List<QuestionCategoryDTO> data = response.body();
 
                 if(Utilities.listHasElements(data)){
-                    try {
-                        QuestionsCategoryService questionsCategoryService = getApplication().getQuestionsCategoryService();
-                        List<QuestionsCategory> questionsCategories = new ArrayList<>();
-                        for (QuestionCategoryDTO questionCategoryDTO : data){
-                            questionCategoryDTO.getQuestionCategory().setSyncStatus(SyncSatus.SENT);
-                            questionsCategories.add(questionCategoryDTO.getQuestionCategory());
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            QuestionsCategoryService questionsCategoryService = getApplication().getQuestionsCategoryService();
+                            List<QuestionsCategory> questionsCategories = new ArrayList<>();
+                            for (QuestionCategoryDTO questionCategoryDTO : data) {
+                                questionCategoryDTO.getQuestionCategory().setSyncStatus(SyncSatus.SENT);
+                                questionsCategories.add(questionCategoryDTO.getQuestionCategory());
+                            }
+                            questionsCategoryService.saveOrUpdateQuestionCategories(data);
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, questionsCategories);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-                        questionsCategoryService.saveOrUpdateQuestionCategories(data);
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, questionsCategories);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
+                    });
                 } else {
                     listener.doOnResponse(REQUEST_NO_DATA, null);
                 }

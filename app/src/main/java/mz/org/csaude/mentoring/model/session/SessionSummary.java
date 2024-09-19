@@ -5,8 +5,8 @@ import mz.org.csaude.mentoring.base.model.BaseModel;
 public class SessionSummary extends BaseModel {
 
     private String title;
-    private int simCount;
-    private int naoCount;
+    private Integer simCount;
+    private Integer naoCount;
     private double progressPercentage;
 
     // Constructor
@@ -18,6 +18,8 @@ public class SessionSummary extends BaseModel {
     }
 
     public SessionSummary() {
+        this.simCount = 0;
+        this.naoCount = 0;
     }
 
     // Getters and Setters

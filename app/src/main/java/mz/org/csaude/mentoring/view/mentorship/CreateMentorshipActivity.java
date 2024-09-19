@@ -23,9 +23,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
+import java.util.List;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.form.FormAdapter;
+import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.adapter.recyclerview.question.QuestionAdapter;
 import mz.org.csaude.mentoring.adapter.recyclerview.tutored.TutoredAdapter;
 import mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter;
@@ -33,12 +35,17 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
+import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
+import mz.org.csaude.mentoring.model.location.Cabinet;
+import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.view.ronda.CreateRondaActivity;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM;
 
 public class CreateMentorshipActivity extends BaseActivity implements ClickListener.OnItemClickListener {
@@ -63,57 +70,130 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         super.onCreate(savedInstanceState);
         mentorshipBinding = DataBindingUtil.setContentView(this, R.layout.activity_mentorship);
         formsRcv = mentorshipBinding.rcvForms;
-        Intent intent = this.getIntent();
-        if(intent!=null && intent.getExtras()!=null) {
-            getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
-            if (getRelatedViewModel().getMentorship() == null) {
-                getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
-                getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
-                getRelatedViewModel().determineMentorshipType();
-                if (getRelatedViewModel().getRonda() == null)
-                    getRelatedViewModel().setRonda(getRelatedViewModel().getSession().getRonda());
-                if (getRelatedViewModel().getRonda().isRondaZero()) {
-                    populateFormList();
-                }
-            } else {
-                getRelatedViewModel().setSession(getRelatedViewModel().getMentorship().getSession());
-                getRelatedViewModel().setRonda(getRelatedViewModel().getMentorship().getSession().getRonda());
-            }
 
-            getRelatedViewModel().setCurrMentorshipStep((String) intent.getExtras().get("CURR_MENTORSHIP_STEP"));
+        Intent intent = this.getIntent();
+        if (intent != null && intent.getExtras() != null) {
+
+            getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
+
+            // Execute determineMentorshipType() on a background thread
+            getRelatedViewModel().getExecutorService().execute(() -> {
+                loadSectorAdapter();
+                loadDoorAdapter();
+                if (getRelatedViewModel().getMentorship() == null) {
+                    getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
+                    getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
+
+                    // Heavy operation running in the background
+                    getRelatedViewModel().determineMentorshipType();
+
+                    // Update UI after background work is done
+                    runOnUiThread(() -> {
+                        if (getRelatedViewModel().getRonda() == null) {
+                            getRelatedViewModel().setRonda(getRelatedViewModel().getSession().getRonda());
+                        }
+                        if (getRelatedViewModel().getRonda().isRondaZero()) {
+                            populateFormList();
+                        }
+
+                        // Set toolbar and other UI elements after thread is done
+                        setSupportActionBar(mentorshipBinding.toolbar.toolbar);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        getSupportActionBar().setDisplayShowHomeEnabled(true);
+                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? getString(R.string.evaluation_title)
+                                : getString(R.string.zero_session_title));
+
+                        // Set the ViewModel to Data Binding
+                        mentorshipBinding.setViewModel(getRelatedViewModel());
+
+
+                        // Set the current mentorship step from the intent
+                        getRelatedViewModel().setCurrMentorshipStep((String) intent.getExtras().get("CURR_MENTORSHIP_STEP"));
+                    });
+                } else {
+                    runOnUiThread(() -> {
+                        getRelatedViewModel().setSession(getRelatedViewModel().getMentorship().getSession());
+                        getRelatedViewModel().setRonda(getRelatedViewModel().getMentorship().getSession().getRonda());
+
+                        // Same UI updates after thread completion
+                        setSupportActionBar(mentorshipBinding.toolbar.toolbar);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        getSupportActionBar().setDisplayShowHomeEnabled(true);
+                        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship()
+                                ? getString(R.string.evaluation_title)
+                                : getString(R.string.zero_session_title));
+
+
+                        mentorshipBinding.setViewModel(getRelatedViewModel());
+                        //loadSectorAdapter();
+                        //loadDoorAdapter();
+
+                        getRelatedViewModel().setCurrMentorshipStep((String) intent.getExtras().get("CURR_MENTORSHIP_STEP"));
+                    });
+                }
+            });
+
         }
 
-        setSupportActionBar(mentorshipBinding.toolbar.toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship() ? "Avaliação" : "Sessão Zero");
+        // Date picker listener
+        mentorshipBinding.sessionDate.setOnClickListener(view -> showDatePickerDialog());
 
-        mentorshipBinding.setViewModel(getRelatedViewModel());
-        loadSectorAdapter();
-        loadDoorAdapter();
-
-        mentorshipBinding.sessionDate.setOnClickListener(view -> {
-            int mYear, mMonth, mDay;
-
-            final Calendar c = Calendar.getInstance();
-            mYear = c.get(Calendar.YEAR);
-            mMonth = c.get(Calendar.MONTH);
-            mDay = c.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(CreateMentorshipActivity.this, new DatePickerDialog.OnDateSetListener() {
-
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    getRelatedViewModel().setStartDate(DateUtilities.createDate(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year, DateUtilities.DATE_FORMAT));
-                }
-            }, mYear, mMonth, mDay);
-            datePickerDialog.show();
-        });
-
-        mentorshipBinding.sessionStartTime.setOnClickListener(view -> {
-            showTimePickerDialog(mentorshipBinding.sessionStartTime);
-        });
+        // Time picker listener
+        mentorshipBinding.sessionStartTime.setOnClickListener(view -> showTimePickerDialog(mentorshipBinding.sessionStartTime));
     }
+
+
+
+    // Method to handle the intent and initialize the ViewModel
+    private void handleIntent(Intent intent) {
+        if (intent == null || intent.getExtras() == null) return;
+
+        getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
+        if (getRelatedViewModel().getMentorship() == null) {
+            getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
+            getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
+            getRelatedViewModel().determineMentorshipType();
+
+            if (getRelatedViewModel().getRonda() == null) {
+                getRelatedViewModel().setRonda(getRelatedViewModel().getSession().getRonda());
+            }
+            if (getRelatedViewModel().getRonda().isRondaZero()) {
+                populateFormList();
+            }
+        } else {
+            getRelatedViewModel().setSession(getRelatedViewModel().getMentorship().getSession());
+            getRelatedViewModel().setRonda(getRelatedViewModel().getMentorship().getSession().getRonda());
+        }
+
+        getRelatedViewModel().setCurrMentorshipStep((String) intent.getExtras().get("CURR_MENTORSHIP_STEP"));
+    }
+
+    // Method to setup toolbar properties
+    private void setupToolbar() {
+        setSupportActionBar(mentorshipBinding.toolbar.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle(getRelatedViewModel().isMentoringMentorship()
+                    ? getString(R.string.evaluation_title)
+                    : getString(R.string.zero_session_title));
+
+        }
+    }
+
+    // Method to show date picker dialog
+    private void showDatePickerDialog() {
+        final Calendar c = Calendar.getInstance();
+        int mYear = c.get(Calendar.YEAR);
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, monthOfYear, dayOfMonth) -> {
+            getRelatedViewModel().setStartDate(DateUtilities.createDate(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year, DateUtilities.DATE_FORMAT));
+        }, mYear, mMonth, mDay);
+        datePickerDialog.show();
+    }
+
 
     private void showTimePickerDialog(EditText viewTe) {
         Calendar calendar = Calendar.getInstance();
@@ -133,12 +213,19 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     private void populateFormList() {
-        this.formAdapter = new FormAdapter(formsRcv, getRelatedViewModel().getTutorForms(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        formsRcv.setLayoutManager(mLayoutManager);
-        formsRcv.setItemAnimator(new DefaultItemAnimator());
-        formsRcv.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-        formsRcv.setAdapter(formAdapter);
+        getRelatedViewModel().getExecutorService().execute(()-> {
+            List<Form> forms = getRelatedViewModel().getTutorForms();
+            runOnUiThread(()->{
+                this.formAdapter = new FormAdapter(formsRcv, forms, this);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                formsRcv.setLayoutManager(mLayoutManager);
+                formsRcv.setItemAnimator(new DefaultItemAnimator());
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+                SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+                formsRcv.addItemDecoration(itemDecoration);
+                formsRcv.setAdapter(formAdapter);
+            });
+        });
     }
 
     @Override
@@ -175,50 +262,129 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     public void populateMenteesList() {
-        this.tutoredAdapter = new TutoredAdapter(mentorshipBinding.rcvTutored, getRelatedViewModel().getMentees(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mentorshipBinding.rcvTutored.setLayoutManager(mLayoutManager);
-        mentorshipBinding.rcvTutored.setItemAnimator(new DefaultItemAnimator());
-        mentorshipBinding.rcvTutored.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
-        mentorshipBinding.rcvTutored.setAdapter(tutoredAdapter);
+        getRelatedViewModel().getExecutorService().execute(()-> {
+            List<Tutored> tutoreds = getRelatedViewModel().getMentees();
+            runOnUiThread(()->{
+                this.tutoredAdapter = new TutoredAdapter(mentorshipBinding.rcvTutored, tutoreds, this);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                mentorshipBinding.rcvTutored.setLayoutManager(mLayoutManager);
+                mentorshipBinding.rcvTutored.setItemAnimator(new DefaultItemAnimator());
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+                SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+                mentorshipBinding.rcvTutored.addItemDecoration(itemDecoration);
+                mentorshipBinding.rcvTutored.setAdapter(tutoredAdapter);
+
+            });
+        });
     }
 
     public void loadDoorAdapter() {
-        doorAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDoors());
-        mentorshipBinding.spnDoor.setAdapter(doorAdapter);
+        // Fetch the doors in a background thread
+            // Access the database in the background thread
+            List<Door> doors = getRelatedViewModel().getDoors();
+
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                if (doors != null && !doors.isEmpty()) {
+                    // Initialize and set the adapter if the doors list is not null or empty
+                    doorAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, doors);
+                    mentorshipBinding.spnDoor.setAdapter(doorAdapter);
+                } else {
+                    // Handle the case where no doors are available
+                    Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_doors_available)).show();
+                }
+            });
     }
+
+
 
     public void loadCategoryAdapter() {
-        categorieAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getCategories());
-        mentorshipBinding.spnCurrCategory.setAdapter(categorieAdapter);
+        // Fetch the categories in a background thread
+            List<Listble> categories = getRelatedViewModel().getCategories();
+
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                if (categories != null && !categories.isEmpty()) {
+                    // Initialize and set the adapter if the categories list is not null or empty
+                    categorieAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, categories);
+                    mentorshipBinding.spnCurrCategory.setAdapter(categorieAdapter);
+                } else {
+                    // Handle the case where no categories are available (optional)
+                    Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_categories_available)).show();
+                }
+            });
     }
+
 
     public void reloadCategoryAdapter() {
+        // Fetch the categories in a background thread
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            List<Listble> categories = getRelatedViewModel().getCategories();
 
-        if (categorieAdapter != null) {
-            categorieAdapter.notifyDataSetChanged();
-        } else {
-            categorieAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getCategories());
-            mentorshipBinding.spnCurrCategory.setAdapter(categorieAdapter);
-        }
+            // Update the UI on the main thread
+            runOnUiThread(() -> {
+                if (categorieAdapter != null) {
+                    // If the adapter already exists, notify about data change
+                    categorieAdapter.notifyDataSetChanged();
+                } else {
+                    // Initialize and set the adapter if it doesn't exist yet
+                    if (categories != null && !categories.isEmpty()) {
+                        categorieAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, categories);
+                        mentorshipBinding.spnCurrCategory.setAdapter(categorieAdapter);
+                    } else {
+                        // Handle the case where no categories are available
+                        Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_categories_available)).show();
+                    }
+                }
+            });
+        });
     }
+
 
 
     public void loadSectorAdapter() {
-        if (sectorAdapter != null) {
-            sectorAdapter.notifyDataSetChanged();
-        } else {
-            sectorAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getSectors());
-            mentorshipBinding.spnSector.setAdapter(sectorAdapter);
-        }
+
+        // Fetch sectors in the background thread
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            List<Cabinet> sectors = getRelatedViewModel().getSectors();
+
+            // Ensure we update the UI on the main thread
+            runOnUiThread(() -> {
+
+                // Check if the sectors list is null or empty
+                if (sectors == null || sectors.isEmpty()) {
+                    // Handle no sectors case (e.g., show a message)
+                    return;
+                }
+
+                if (sectorAdapter != null) {
+                    // Notify adapter only if sectors list has changed
+                    sectorAdapter.notifyDataSetChanged();
+                } else {
+                    // Initialize and set adapter if it doesn't exist
+                    sectorAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, sectors);
+                    mentorshipBinding.spnSector.setAdapter(sectorAdapter);
+                }
+            });
+        });
     }
 
+
     public void populateQuestionList() {
-        this.questionAdapter = new QuestionAdapter(mentorshipBinding.rcvQuestions, getRelatedViewModel().getQuestionMap().get(getRelatedViewModel().getCurrQuestionCategory()), this);
+        List<FormQuestion> updatedQuestionList = getRelatedViewModel()
+                .getQuestionMap()
+                .get(getRelatedViewModel().getCurrQuestionCategory());
+
+
+        if (questionAdapter == null) {
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_qtns_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            mentorshipBinding.rcvQuestions.addItemDecoration(itemDecoration);
+        }
+        this.questionAdapter = new QuestionAdapter(mentorshipBinding.rcvQuestions, updatedQuestionList, this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mentorshipBinding.rcvQuestions.setLayoutManager(mLayoutManager);
         mentorshipBinding.rcvQuestions.setItemAnimator(new DefaultItemAnimator());
-        mentorshipBinding.rcvQuestions.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
         mentorshipBinding.rcvQuestions.setAdapter(questionAdapter);
     }
 
@@ -227,7 +393,8 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                getRelatedViewModel().tryToUpdateMentorship();
+                //getRelatedViewModel().tryToUpdateMentorship();
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(MentorshipActivity.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

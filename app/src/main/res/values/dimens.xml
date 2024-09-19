@@ -25,4 +25,11 @@
     <dimen name="dimen_m3dp">-3dp</dimen>
     <dimen name="dimen_25dp">25dp</dimen>
     <dimen name="dimen_20dp">20dp</dimen>
+    <dimen name="recycler_item_spacing">10dp</dimen>
+    <dimen name="recycler_qtns_spacing">5dp</dimen>
+    <dimen name="padding_large">50dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="text_size_question">13sp</dimen>
 </resources>

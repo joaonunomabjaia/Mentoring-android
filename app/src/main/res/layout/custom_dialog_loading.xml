@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="50dp">
+    android:padding="@dimen/padding_large">
 
     <LinearLayout
         android:id="@+id/login_progress_box"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,7 +30,7 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="3"
             android:gravity="left"
-            android:text="Carregando informação, aguarde por favor..."
+            android:text="@string/loading_message"
             android:textColor="@color/logo"
             android:textSize="16sp" />
     </LinearLayout>

@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.viewmodel.session;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import mz.org.csaude.mentoring.BR;
+import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
@@ -144,11 +146,17 @@ public class SessionResourcesVM extends SearchVM<Resource> implements IDialogLis
 
     @Override
     protected void doOnNoRecordFound() {
-        Utilities.displayAlertDialog(getRelatedActivity(), "Não foram encontrados resultados").show();
+        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_results_found)).show();
     }
 
     public void closeSession() {
-        Utilities.displayConfirmationDialog(getRelatedActivity(), "Confirma Terminar a Sessão de Mentoria?", "Sim", "Não", this).show();
+        Utilities.displayConfirmationDialog(
+                getRelatedActivity(),
+                getRelatedActivity().getString(R.string.confirm_end_session),
+                getRelatedActivity().getString(R.string.yes),
+                getRelatedActivity().getString(R.string.no),
+                this
+        ).show();
     }
 
     @Override
@@ -158,23 +166,47 @@ public class SessionResourcesVM extends SearchVM<Resource> implements IDialogLis
     }
 
     private void goToSessionSummary() {
-        try {
-            getApplication().getSessionService().update(session);
-            if (isRecommendResources()) {
-                if (!Utilities.listHasElements(recommendedResources)) {
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Não foram selecionados recursos recomendados.").show();
-                    return;
-                }
-                getApplication().getSessionService().saveRecommendedResources(session, recommendedResources);
-            }
-        } catch (SQLException e) {
-            Log.e(TAG, "goToSessionSummary: ", e.getCause());
-        }
-        Map<String, Object> params = new HashMap<>();
-        params.put("session", session);
+        Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
-        getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
+        getExecutorService().execute(() -> {
+            try {
+                // Update session in the background
+                getApplication().getSessionService().update(session);
+
+                if (isRecommendResources()) {
+                    if (!Utilities.listHasElements(recommendedResources)) {
+                        // Show error dialog on the main thread
+                        runOnMainThread(() -> {
+                            dismissProgress(progress);
+                            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_resource_selected_error)).show();
+                        });
+                        return;
+                    }
+
+                    // Save recommended resources in the background
+                    getApplication().getSessionService().saveRecommendedResources(session, recommendedResources);
+                }
+
+                // Proceed to session summary on the main thread
+                runOnMainThread(() -> {
+                    dismissProgress(progress);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("session", session);
+                    getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
+                });
+
+            } catch (SQLException e) {
+                Log.e(TAG, "goToSessionSummary: ", e.getCause());
+
+                // Handle error on the main thread
+                runOnMainThread(() -> {
+                    dismissProgress(progress);
+                    Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.session_update_error)).show();
+                });
+            }
+        });
     }
+
 
     @Override
     public void doOnDeny() {

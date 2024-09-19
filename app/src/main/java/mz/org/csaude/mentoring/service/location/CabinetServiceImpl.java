@@ -28,7 +28,7 @@ public class CabinetServiceImpl extends BaseServiceImpl<Cabinet> implements Cabi
 
     @Override
     public Cabinet save(Cabinet record) throws SQLException {
-        this.cabinetDAO.create(record);
+        record.setId((int) this.cabinetDAO.insert(record));
         return record;
     }
 
@@ -54,12 +54,20 @@ public class CabinetServiceImpl extends BaseServiceImpl<Cabinet> implements Cabi
     }
 
     @Override
+    public Cabinet getByuuid(String uuid) throws SQLException {
+        return this.cabinetDAO.getByUuid(uuid);
+    }
+
+    @Override
     public void saveOrUpdateCabinets(List<CabinetDTO> cabinets) throws SQLException {
         for (CabinetDTO dto: cabinets) {
-            boolean doesCabinetExist = this.cabinetDAO.checkCabinetExistance(dto.getUuid());
-            if(!doesCabinetExist){
-                Cabinet cabinet = dto.getCabinet();
-                this.cabinetDAO.createOrUpdate(cabinet);
+            Cabinet cabinet = this.cabinetDAO.getByUuid(dto.getUuid());
+            if(cabinet == null){
+                this.save(dto.getCabinet());
+            } else {
+                Cabinet newCabinet = dto.getCabinet();
+                newCabinet.setId(cabinet.getId());
+                this.update(newCabinet);
             }
         }
     }

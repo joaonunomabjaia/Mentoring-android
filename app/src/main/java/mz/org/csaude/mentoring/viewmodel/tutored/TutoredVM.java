@@ -1,31 +1,35 @@
 package mz.org.csaude.mentoring.viewmodel.tutored;
 
 import android.app.Application;
+import android.app.Dialog;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
-import mz.org.csaude.mentoring.base.model.BaseModel;
+import mz.org.csaude.mentoring.base.fragment.GenericFragment;
+import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
+import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
-import mz.org.csaude.mentoring.model.career.Career;
-import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
@@ -33,34 +37,27 @@ import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
-import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.service.career.CareerService;
-import mz.org.csaude.mentoring.service.professionalCategory.ProfessionalCategoryService;
-import mz.org.csaude.mentoring.service.session.SessionService;
+import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.tutored.TutoredService;
-import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.view.home.ui.personalinfo.PersonalInfoFragment;
+import mz.org.csaude.mentoring.view.ronda.RondaActivity;
 import mz.org.csaude.mentoring.view.tutored.CreateTutoredActivity;
 import mz.org.csaude.mentoring.view.tutored.TutoredActivity;
+import mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 
-public class TutoredVM extends BaseViewModel implements RestResponseListener<Tutored>, ServerStatusListener {
+public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener<Tutored>, ServerStatusListener {
     private TutoredService tutoredService;
     private Tutored tutored;
 
     private Location location;
-
-    private Province province;
-
-    private District district;
-
-    private HealthFacility healthFacility;
 
     private boolean initialDataVisible;
 
@@ -72,9 +69,18 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     private boolean ONGEmployee;
 
+   private List<Tutored> tutoreds;
+
+   private List<Partner> partners;
+
+   private EmployeeService employeeService;
+
+   private Dialog loading;
+
     public TutoredVM(@NonNull Application application) {
         super(application);
         this.tutoredService = getApplication().getTutoredService();
+        this.employeeService = getApplication().getEmployeeService();
 
         initNewRecord();
         districts = new ArrayList<>();
@@ -85,7 +91,17 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         loadMeteeLabors();
     }
 
+    @Override
+    protected void doOnNoRecordFound() {
+        this.displaySearchResults();
+    }
+
     private void initNewRecord() {
+    }
+
+    @Override
+    public void doOnlineSearch(long offset, long limit) throws SQLException {
+        super.doOnlineSearch(offset, limit);
     }
 
     @Override
@@ -105,7 +121,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     public void setName(String name) {
         this.tutored.getEmployee().setName(name);
-        notifyPropertyChanged(BR.name);
+        notifyPropertyChanged(mz.org.csaude.mentoring.BR.name);
     }
     @Bindable
     public String getSurname(){
@@ -137,9 +153,10 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         this.tutored.getEmployee().setProfessionalCategory((ProfessionalCategory) professionalCategory);
         notifyPropertyChanged(BR.professionalCategory);
     }
+
     @Bindable
     public String getTrainingYear() {
-        if (this.tutored.getEmployee().getTrainingYear() <= 0) return null;
+        if (this.tutored.getEmployee().getTrainingYear() == null || this.tutored.getEmployee().getTrainingYear() <= 0) return null;
         return String.valueOf(this.tutored.getEmployee().getTrainingYear());
     }
     public void setTrainingYear(String trainingYear) {
@@ -166,13 +183,19 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     public Listble getPartner() {
         return this.tutored.getEmployee().getPartner();
     }
+
     public void setPartner(Partner partner) {
         this.tutored.getEmployee().setPartner(partner);
     }
 
     public List<Tutored> getAllTutoreds() {
+        return this.tutoreds;
+    }
+
+    public List<Tutored> getTutoredsList() {
         try {
-            return tutoredService.getAll();
+            setTutoreds(tutoredService.getAll());
+            return this.tutoreds;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -180,7 +203,7 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     public List<Province> getAllProvince() throws SQLException {
         List<Province> provinceList = new ArrayList<>();
-        provinceList.add(new Province());
+        //provinceList.add(new Province());
         provinceList.addAll(getApplication().getProvinceService().getAllOfTutor(getApplication().getCurrMentor()));
         return provinceList;
     }
@@ -196,46 +219,73 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
     }
 
     private void doSave(){
-        tutored.setSyncStatus(SyncSatus.SENT);
-        tutored.setUuid(Utilities.getNewUUID().toString());
-        tutored.getEmployee().setUuid(Utilities.getNewUUID().toString());
-        location.setUuid(Utilities.getNewUUID().toString());
-        location.setProvince((Province) getProvince());
-        location.setDistrict((District) getDistrict());
-        location.setHealthFacility((HealthFacility) getHealthFacility());
-        location.setLocationLevel("N/A");
-        location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+        loading = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+        getExecutorService().execute(() -> {
+            try {
+                tutored.setSyncStatus(SyncSatus.SENT);
+                tutored.setUuid(Utilities.getNewUUID().toString());
+                tutored.getEmployee().setUuid(Utilities.getNewUUID().toString());
+                location.setUuid(Utilities.getNewUUID().toString());
+                location.setProvince((Province) getProvince());
+                location.setDistrict((District) getDistrict());
+                location.setHealthFacility((HealthFacility) getHealthFacility());
+                location.setLocationLevel("N/A");
+                location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
 
-        tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
-        tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
-        tutored.getEmployee().addLocation(location);
+                tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                tutored.getEmployee().addLocation(location);
 
-        String error = this.tutored.validade();
-        if (Utilities.stringHasValue(error)) {
-            Utilities.displayAlertDialog(getRelatedActivity(), error).show();
-            return;
-        }
-        getApplication().isServerOnline(this);
+                String error = this.tutored.validade();
+                if (Utilities.stringHasValue(error)) {
+                    Utilities.displayAlertDialog(getRelatedActivity(), error).show();
+                    return;
+                }
+                getApplication().isServerOnline(this);
+            }
+            catch (Exception e) {
+                dismissProgress(loading);
+                runOnMainThread(() -> {
+                    Log.e("MentorVM", e.getMessage());
+                    Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.failed_to_save_tutored)).show();
+                });
+            }
+        });
     }
 
     @Override
     public void doOnResponse(String flag, List<Tutored> objects) {
-        //Utilities.displayAlertDialog(getRelatedActivity(), "Mentorando gravado com sucesso.").show();
-        Map<String, Object> params = new HashMap<>();
-        params.put("createdTutored", tutored);
-        getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);
+        try {
+            getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
+            this.tutoredService.savedOrUpdateTutored(tutored);
+            this.getApplication().getLocationService().saveOrUpdate(location);
+
+            runOnMainThread(() -> {
+                dismissProgress(loading);
+                Map<String, Object> params = new HashMap<>();
+                params.put("createdTutored", tutored);
+                getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class, params);
+            });
+        } catch (SQLException e) {
+            dismissProgress(loading);
+            Log.e("MentorVM", e.getMessage());
+            runOnMainThread(() -> {
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.failed_to_save_tutored)).show();
+            });
+        }
     }
 
     @Override
-    public void doOnRestErrorResponse(String errormsg) {
-        Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
+    public void doOnRestErrorResponse(String errorMsg) {
+        dismissProgress(loading);
+        runOnMainThread(()-> {
+            Utilities.displayAlertDialog(getRelatedActivity(), errorMsg).show();
+        });
     }
 
     public void save(){
         this.doSave();
     }
-
-
 
     @Bindable
     public Tutored getTutored() {
@@ -265,46 +315,55 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
 
     @Bindable
     public Listble getProvince() {
-        return this.province;
+        return this.location.getProvince();
     }
     public void setProvince(Listble province) {
-        this.province =(Province) province;
-        try {
-            this.districts.clear();
-            this.healthFacilities.clear();
-            if (province.getId() == null) return;
-            this.districts.add(new District());
-            if (province.getId() == null) return;
-            this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.province, getApplication().getCurrMentor()));
-            getCreateTutoredActivity().reloadDistrcitAdapter();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        this.location.setProvince((Province) province);
+        getExecutorService().execute(()-> {
+            try {
+                this.districts.clear();
+                this.healthFacilities.clear();
+                if (province.getId() == null) return;
+                //this.districts.add(new District());
+                if (province.getId() == null) return;
+                this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.location.getProvince(), getApplication().getCurrMentor()));
+                getRelatedActivity().runOnUiThread(()-> {
+                    getCreateTutoredActivity().reloadDistrcitAdapter();
+                });
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Bindable
     public Listble getDistrict(){
-        return this.district;
+        return this.location.getDistrict();
     }
     public void setDistrict(Listble district){
-        try {
-            this.district = (District) district;
-            this.healthFacilities.clear();
-            if (district.getId() == null) return;
-            this.healthFacilities.add(new HealthFacility());
-            this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor(this.district, getApplication().getCurrMentor()));
-            getCreateTutoredActivity().reloadHealthFacility();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        getExecutorService().execute(()-> {
+            try {
+                this.location.setDistrict((District) district);
+                this.healthFacilities.clear();
+                if (district.getId() == null) return;
+                //this.healthFacilities.add(new HealthFacility());
+                this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor((District) district, getApplication().getCurrMentor()));
+                getRelatedActivity().runOnUiThread(()-> {
+                    getCreateTutoredActivity().reloadHealthFacility();
+                });
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
+
     @Bindable
     public Listble getHealthFacility(){
-        return this.healthFacility;
+        return this.location.getHealthFacility();
     }
 
     public void setHealthFacility(Listble healthFacility){
-        this.healthFacility = (HealthFacility) healthFacility;
+        this.location.setHealthFacility((HealthFacility) healthFacility);
     }
 
     @Bindable
@@ -325,15 +384,8 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         return districts;
     }
 
-    public void setDistricts(List<District> districts) {
-        this.districts = districts;
-    }
-
     public List<HealthFacility> getHealthFacilities() {
         return healthFacilities;
-    }
-    public void setHealthFacilities(List<HealthFacility> healthFacilities) {
-        this.healthFacilities = healthFacilities;
     }
 
     private void loadMeteeLabors(){
@@ -344,29 +396,28 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         return menteeLabors;
     }
 
-    public void setMenteeLabors(List<SimpleValue> menteeLabors) {
-        this.menteeLabors = menteeLabors;
-    }
-
     @Bindable
     public Listble getMenteeLabor(){
         return Utilities.findOnArray(this.menteeLabors, SimpleValue.fastCreate("SNS"));
     }
 
-
     public void setMenteeLabor(Listble menteeLabor){
-        if (this.tutored.getEmployee() == null) return;
-        SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
-        if (selectSimpleValue.getDescription().equals("ONG")){
-            setONGEmployee(true);
-        } else {
-            setONGEmployee(false);
-            try {
-                this.tutored.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        getExecutorService().execute(()-> {
+            if (this.tutored.getEmployee() == null) return;
+            SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
+            if (selectSimpleValue.getDescription().equals("ONG")) {
+                setONGEmployee(true);
+            } else {
+                setONGEmployee(false);
+                getExecutorService().execute(() -> {
+                    try {
+                        this.tutored.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
-        }
+        });
     }
 
     @Bindable
@@ -395,11 +446,17 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class);
     }
     public List getAllPartners() {
+        return this.partners;
+    }
+
+    public void getPartnersList() {
+        getExecutorService().execute(()-> {
         try {
-            return getApplication().getPartnerService().getAll();
+            setPartners(getApplication().getPartnerService().getAll());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        });
     }
 
     public void initMenteeUpload() {
@@ -407,8 +464,8 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
         WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
             if (workInfo != null) {
-                if (workInfo.getState() == WorkInfo.State.SUCCEEDED){
-                    Utilities.displayAlertDialog(getRelatedActivity(), "Dados de mentorandos enviados com sucesso.").show();
+                if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                    Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.tutored_data_upload_success)).show();
                 }
             }
         });
@@ -430,15 +487,55 @@ public class TutoredVM extends BaseViewModel implements RestResponseListener<Tut
         if (isOnline) {
             getApplication().getTutoredRestService().restPostTutored(tutored, this);
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
+            dismissProgress(loading);
+            runOnMainThread(()-> {
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(mz.org.csaude.mentoring.R.string.server_unavailable)).show();
+            });
         }
     }
     public void nextStep() {
 
     }
 
-    public List<Tutored> loadMenteesByMentor(Tutor tutor) {
+    public Employee getEmployee(){
+        return this.tutored.getEmployee();
+    }
 
+    public List<Tutored> getTutoreds() {
+        return tutoreds;
+    }
+
+    public void setTutoreds(List<Tutored> tutoreds) {
+        this.tutoreds = tutoreds;
+    }
+
+    public void setPartners(List<Partner> partners) {
+        this.partners = partners;
+    }
+
+    @Override
+    public List<Tutored> doSearch(long offset, long limit) throws SQLException {
+        return this.tutoredService.getAllPagenated(offset, limit);
+    }
+
+    @Override
+    public void displaySearchResults() {
+        getRelatedFragment().displaySearchResults();
+    }
+
+    @Override
+    public AbstractSearchParams<Tutored> initSearchParams() {
         return null;
+    }
+
+    @Override
+    public TutoredFragment getRelatedFragment() {
+        FragmentManager fragmentManager = getRelatedActivity().getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (fragment != null) {
+            return (TutoredFragment) fragment;
+            // This is the currently active fragment
+        }
+        return (TutoredFragment) super.getRelatedFragment();
     }
 }

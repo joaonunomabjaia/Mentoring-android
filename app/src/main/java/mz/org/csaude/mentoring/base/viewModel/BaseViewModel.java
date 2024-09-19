@@ -1,6 +1,8 @@
 package mz.org.csaude.mentoring.base.viewModel;
 
 import android.app.Application;
+import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.lifecycle.AndroidViewModel;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
 import mz.org.csaude.mentoring.R;
@@ -196,5 +199,23 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
 
     public void setRelatedFragment(GenericFragment relatedFragment) {
         this.relatedFragment = relatedFragment;
+    }
+
+    public ExecutorService getExecutorService() {
+        return getApplication().getServiceExecutor();
+    }
+
+    protected void runOnMainThread(Runnable task) {
+        getRelatedActivity().runOnUiThread(task);
+    }
+
+    public void dismissProgress(Dialog progress) {
+        if (progress != null && progress.isShowing()) {
+            progress.dismiss();
+        }
+    }
+
+    protected SharedPreferences getEncryptedSharedPreferences(){
+        return getApplication().getEncryptedSharedPreferences();
     }
 }

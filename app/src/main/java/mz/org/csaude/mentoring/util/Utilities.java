@@ -39,14 +39,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.KeySpec;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
@@ -500,23 +506,37 @@ public class Utilities {
     private static final String LOG_TAG = "CryptUtils";
 
     /**
-     * Generates a SHA-1 hash of password and salt and returns it as hex-encoded string.
+     * Generates a PBKDF2WithHmacSHA256 hash of password and salt and returns it as a Base64-encoded string.
      * @param password the password to encrypt
      * @param salt random string that should be used to salt the password
-     * @return hex-encoded string of hash
+     * @return Base64-encoded string of hash
      */
     public static String encryptPassword(String password, String salt) {
-        final String algorithm = "SHA-1";
-        try {
-            MessageDigest digester = MessageDigest.getInstance(algorithm);
-            byte[] saltedPassword = (password + salt).getBytes();
-            byte[] hash = digester.digest(saltedPassword);
+        final String algorithm = "PBKDF2WithHmacSHA256";
+        final int iterations = 10000;
+        final int keyLength = 256;
 
-            return String.format("%040x", new BigInteger(1, hash));
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(LOG_TAG, "Algorithm " + algorithm, e);
+        try {
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), iterations, keyLength);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(algorithm);
+            byte[] hash = factory.generateSecret(spec).getEncoded();
+
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error while encrypting password with " + algorithm, e);
             return null;
         }
+    }
+
+    /**
+     * Generates a random salt.
+     * @return Base64-encoded string of random salt
+     */
+    public static String generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
     }
 
     public static boolean isWorkRunning(String tag, WorkManager instance) {
@@ -632,6 +652,34 @@ public class Utilities {
         return dialog;
     }
 
+    public static Dialog showLoadingDialog(final BaseActivity mContext, final String message) {
+        if (mContext == null || mContext.isFinishing()) {
+            return null; // Return early if the context is invalid
+        }
+
+        // Step 1: Create the dialog and inflate the layout
+        Dialog dialog = new Dialog(mContext);
+        LayoutInflater inflater = mContext.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
+        dialog.setContentView(dialogView);
+
+        // Step 2: Set up the message
+        TextView loadingMessage = dialogView.findViewById(R.id.loadingMessage);
+        if (message != null && !message.isEmpty()) {
+            loadingMessage.setText(message);
+        } else {
+            loadingMessage.setText("Loading..."); // Default message
+        }
+
+        // Step 3: Make the dialog non-cancelable to prevent accidental dismiss
+        dialog.setCancelable(false);
+
+        // Step 4: Show the dialog
+        dialog.show();
+
+        return dialog;
+    }
+
     private static void showTimePickerDialog(EditText viewTe, BaseActivity activity) {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -654,5 +702,14 @@ public class Utilities {
             if(((BaseModel) object).getUuid().equalsIgnoreCase(uuid)) return object;
         }
         return null;
+    }
+
+    public static boolean isValidNumber(String value) {
+        try {
+            int number = Integer.parseInt(value);
+            return number > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

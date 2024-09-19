@@ -4,15 +4,20 @@ import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_COMPLETE;
 import static mz.org.csaude.mentoring.util.Constants.LAST_SYNC_DATE;
 import static mz.org.csaude.mentoring.util.Constants.LOGGED_USER;
-import static mz.org.csaude.mentoring.util.Constants.METADATA_SYNC_TIME;
-import static mz.org.csaude.mentoring.util.Constants.SESSION_SYNC_TIME;
+import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
 
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
+import android.content.res.Configuration;
+import android.util.Log;
+
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.R;
@@ -59,8 +66,6 @@ import mz.org.csaude.mentoring.service.mentorship.IterationTypeService;
 import mz.org.csaude.mentoring.service.mentorship.IterationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.mentorship.MentorshipService;
 import mz.org.csaude.mentoring.service.mentorship.MentorshipServiceImpl;
-import mz.org.csaude.mentoring.service.mentorship.TimeOfDayService;
-import mz.org.csaude.mentoring.service.mentorship.TimeOfDayServiceImpl;
 import mz.org.csaude.mentoring.service.partner.PartnerService;
 import mz.org.csaude.mentoring.service.partner.PartnerServiceImpl;
 import mz.org.csaude.mentoring.service.professionalCategory.ProfessionalCategoryService;
@@ -95,8 +100,10 @@ import mz.org.csaude.mentoring.service.tutored.TutoredService;
 import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
+import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.rest.FormQuestionRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.FormRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.MentorshipRestService;
@@ -123,6 +130,7 @@ public class MentoringApplication  extends Application {
     private Tutor tutor;
 
     private Retrofit retrofit;
+    
     private ObjectMapper mapper;
 
     private RondaService rondaService;
@@ -162,8 +170,6 @@ public class MentoringApplication  extends Application {
     private RondaTypeService rondaTypeService;
     AuthInterceptorImpl interceptor;
 
-    SharedPreferences mentoringSharedPreferences;
-
     private SessionManager sessionManager;
 
     private DoorService doorService;
@@ -182,7 +188,6 @@ public class MentoringApplication  extends Application {
 
     private SettingService settingService;
 
-    private TimeOfDayService timeOfDayService;
 
     private TutorProgrammaticAreaService tutorProgrammaticAreaService;
 
@@ -209,11 +214,24 @@ public class MentoringApplication  extends Application {
     private SessionRestService sessionRestService;
     private SessionRecommendedResourceRestService sessionRecommendedResourceRestService;
 
+    private String encryptedPassphrase;
+
+
+    private ExecutorService serviceExecutor;
+
+    private SharedPreferences encryptedSharedPreferences;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+
+        try {
+            initEncryptedPassphraseStorage();
+        } catch (GeneralSecurityException | IOException e) {
+            Log.e("MentoringApplication", "Error initializing encrypted passphrase storage", e);
+        }
 
         interceptor = new AuthInterceptorImpl(this);
 
@@ -221,13 +239,48 @@ public class MentoringApplication  extends Application {
 
         setUpRetrofit();
 
-        Locale.setDefault(new Locale("en_ZA"));
+        serviceExecutor = ExecutorThreadProvider.getInstance().getExecutorService();
+
+        // Load the selected language from SharedPreferences
+        SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
+        String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
+
+        Log.d("SelectedLanguage", "Language selected: " + selectedLanguageCode);
+        // Set the locale
+        setLocale(selectedLanguageCode);
 
     }
 
-
     public static synchronized MentoringApplication getInstance() {
         return mInstance;
+    }
+
+    /**
+     * Method to set the locale for the app.
+     * @param languageCode The language code to set.
+     */
+    private void setLocale(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        Configuration config = new Configuration();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            config.setLocale(locale);
+            getBaseContext().createConfigurationContext(config);
+        } else {
+            config.locale = locale;
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
+    }
+
+    private void applySavedLanguage() {
+        SharedPreferences sharedPreferences = getEncryptedSharedPreferences();
+        String languageCode = sharedPreferences.getString(PREF_SELECTED_LANGUAGE, "en"); // default to English
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
     }
 
     private void setUpRetrofit() {
@@ -433,10 +486,7 @@ public class MentoringApplication  extends Application {
         if (settingService == null) this.settingService = new SettingServiceImpl(this);
         return settingService;
     }
-    public TimeOfDayService getTimeOfDayService() {
-        if (timeOfDayService == null) this.timeOfDayService = new TimeOfDayServiceImpl(this);
-        return timeOfDayService;
-    }
+
     public TutorProgrammaticAreaService getTutorProgrammaticAreaService() {
         if (tutorProgrammaticAreaService == null) this.tutorProgrammaticAreaService = new TutorProgrammaticAreaServiceImpl(this);
         return tutorProgrammaticAreaService;
@@ -473,14 +523,20 @@ public class MentoringApplication  extends Application {
     }
 
     public void init() throws SQLException {
-        this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
-        setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
-        getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
-    }
-
-    public SharedPreferences getMentoringSharedPreferences() {
-        if (mentoringSharedPreferences == null) mentoringSharedPreferences = this.getSharedPreferences(this.getString(R.string.app_name), Context.MODE_PRIVATE);
-        return mentoringSharedPreferences;
+        try {
+            getServiceExecutor().submit(()->{
+                try {
+                    this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
+                    if (getAuthenticatedUser().getEmployee() == null) getAuthenticatedUser().setEmployee(getEmployeeService().getById(getAuthenticatedUser().getEmployeeId()));
+                    setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));
+                    getCurrMentor().getEmployee().setLocations(getLocationService().getAllOfEmploee(getAuthenticatedUser().getEmployee()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ServerStatusChecker getServerStatusChecker() {
@@ -493,42 +549,33 @@ public class MentoringApplication  extends Application {
     }
 
     public boolean isInitialSetupComplete() {
-        String status = mentoringSharedPreferences.getString(INITIAL_SETUP_STATUS, null);
+        String status = encryptedSharedPreferences.getString(INITIAL_SETUP_STATUS, null);
         if (!Utilities.stringHasValue(status)) return false;
 
-        return mentoringSharedPreferences.getString(INITIAL_SETUP_STATUS, null).equals(INITIAL_SETUP_STATUS_COMPLETE);
+        return encryptedSharedPreferences.getString(INITIAL_SETUP_STATUS, null).equals(INITIAL_SETUP_STATUS_COMPLETE);
     }
 
     public void setInitialSetUpComplete() {
-        SharedPreferences.Editor editor = mentoringSharedPreferences.edit();
+        SharedPreferences.Editor editor = encryptedSharedPreferences.edit();
         editor.putString(INITIAL_SETUP_STATUS, INITIAL_SETUP_STATUS_COMPLETE);
         editor.apply();
     }
 
     private void saveUserName() {
-        SharedPreferences.Editor editor = getMentoringSharedPreferences().edit();
-        editor.putString(LOGGED_USER, authenticatedUser.getUserName());
-        editor.apply();
+        encryptedSharedPreferences.edit().putString(LOGGED_USER, authenticatedUser.getUserName()).apply();
     }
 
     public String getLastUser() {
-        return getMentoringSharedPreferences().getString(LOGGED_USER, null);
+        return encryptedSharedPreferences.getString(LOGGED_USER, null);
     }
 
     private void removeUserName() {
-        SharedPreferences.Editor editor = getMentoringSharedPreferences().edit();
-        editor.remove(LOGGED_USER);
-        editor.apply();
+        encryptedSharedPreferences.edit().remove(LOGGED_USER).apply();
     }
-    public void saveDefaultSyncSettings() {
-        SharedPreferences.Editor editor = getMentoringSharedPreferences().edit();
-        editor.putInt(SESSION_SYNC_TIME, getMentoringSharedPreferences().getInt(SESSION_SYNC_TIME, 2));
-        editor.putInt(METADATA_SYNC_TIME, getMentoringSharedPreferences().getInt(METADATA_SYNC_TIME, 2));
-        editor.apply();
-    }
+
     public void saveDefaultLastSyncDate(Date date) {
-        SharedPreferences.Editor editor = getMentoringSharedPreferences().edit();
-        editor.putString(LAST_SYNC_DATE, getMentoringSharedPreferences().getString(LAST_SYNC_DATE,DateUtilities.getStringDateFromDate(date, DateUtilities.DATE_FORMAT)));
+        SharedPreferences.Editor editor = encryptedSharedPreferences.edit();
+        editor.putString(LAST_SYNC_DATE, encryptedSharedPreferences.getString(LAST_SYNC_DATE,DateUtilities.getStringDateFromDate(date, DateUtilities.DATE_FORMAT)));
         editor.apply();
     }
     public void initSessionManager() {
@@ -541,11 +588,81 @@ public class MentoringApplication  extends Application {
         return answerService;
     }
     public int getMetadataSyncInterval() {
-        return getMentoringSharedPreferences().getInt(METADATA_SYNC_TIME, 2);
-    }
-    public int getSessionSyncInterval() {
-        return getMentoringSharedPreferences().getInt(SESSION_SYNC_TIME, 2);
+        return encryptedSharedPreferences.getInt(PREF_METADATA_SYNC_TIME, 2);
     }
 
+    private void initEncryptedPassphraseStorage() throws GeneralSecurityException, IOException {
+        String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
 
+        encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                "mentoring_encrypted_prefs",
+                masterKeyAlias,
+                this,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        );
+
+        // Initialize the encrypted passphrase
+        encryptedPassphrase = encryptedSharedPreferences.getString("db_passphrase", null);
+
+        if (encryptedPassphrase == null) {
+            // Generate and store the passphrase
+            encryptedPassphrase = generatePassphrase();
+            encryptedSharedPreferences.edit().putString("db_passphrase", encryptedPassphrase).apply();
+        }
+    }
+
+    private String generatePassphrase() {
+        // Generate a secure random passphrase
+        // In a real application, you might use a more complex passphrase generation method
+        return Utilities.generateSalt(); // Replace with actual passphrase generation logic
+    }
+
+    public String getEncryptedPassphrase() {
+        return encryptedPassphrase;
+    }
+
+    /**
+     * Gracefully shuts down the ExecutorService.
+     */
+    public void shutdownExecutorService() {
+        serviceExecutor.shutdown(); // Disable new tasks from being submitted
+
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                serviceExecutor.shutdownNow(); // Cancel currently executing tasks
+
+                // Wait a while for tasks to respond to being cancelled
+                if (!serviceExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    System.err.println("ExecutorService did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            serviceExecutor.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public SharedPreferences getEncryptedSharedPreferences() {
+        return encryptedSharedPreferences;
+    }
+
+    public ExecutorService getServiceExecutor() {
+        return serviceExecutor;
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        shutdownExecutorService();
+    }
+
+    public void saveDefaultSyncSettings() {
+        SharedPreferences.Editor editor = encryptedSharedPreferences.edit();
+        editor.putInt(PREF_METADATA_SYNC_TIME, encryptedSharedPreferences.getInt(PREF_METADATA_SYNC_TIME, 2));
+        editor.apply();
+    }
 }

@@ -37,21 +37,21 @@ public class ProfessionalCategoryServiceImpl extends BaseServiceImpl<Professiona
     @Override
     public ProfessionalCategory saveOrUpdateProfessionalCategory(ProfessionalCategoryDTO professionalCategory) throws SQLException {
 
-       List<ProfessionalCategory> professionalCategories = this.professionalCategoryDAO.queryForEq("uuid", professionalCategory.getUuid());
+        ProfessionalCategory professionalCategories = this.professionalCategoryDAO.getByUuid(professionalCategory.getUuid());
 
-       if(professionalCategories.isEmpty()){
+       if(professionalCategories == null){
 
            ProfessionalCategory professionalCategoryEntity = new ProfessionalCategory(professionalCategory);
-           this.professionalCategoryDAO.create(professionalCategoryEntity);
+           this.professionalCategoryDAO.insert(professionalCategoryEntity);
            return professionalCategoryEntity;
        }
-        return professionalCategories.get(0);
+        return professionalCategories;
     }
 
     @Override
     public ProfessionalCategory save(ProfessionalCategory record) throws SQLException {
 
-        this.professionalCategoryDAO.create(record);
+        this.professionalCategoryDAO.insert(record);
         return record;
     }
 
@@ -74,5 +74,10 @@ public class ProfessionalCategoryServiceImpl extends BaseServiceImpl<Professiona
     @Override
     public ProfessionalCategory getById(int id) throws SQLException {
         return this.professionalCategoryDAO.queryForId(id);
+    }
+
+    @Override
+    public ProfessionalCategory getByuuid(String uuid) throws SQLException {
+        return this.professionalCategoryDAO.getByUuid(uuid);
     }
 }

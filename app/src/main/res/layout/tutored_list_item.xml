@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
@@ -11,105 +12,122 @@
             type="mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM" />
 
         <import type="mz.org.csaude.mentoring.util.Utilities"/>
-        <import type="mz.org.csaude.mentoring.util.SyncSatus"/>
         <import type="android.view.View"/>
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
     </data>
-    <LinearLayout
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/tutored_item_back"
-        android:padding="@dimen/dimen_10dp"
-        android:layout_margin="@dimen/dimen_5dp"
-        android:orientation="horizontal">
+        android:padding="@dimen/dimen_10dp">
 
-        <LinearLayout
+        <!-- Profile Image -->
+        <ImageView
+            android:id="@+id/profile_image"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.8">
+            android:layout_height="0dp"
+            android:padding="3dp"
+            bind:srcCompat="@drawable/ic_person_24"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.15" />
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dp"
-                bind:srcCompat="@drawable/ic_person_24"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="@dimen/dimen_10dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.1"
-            android:orientation="horizontal"/>
-        <LinearLayout
+        <!-- Full Name -->
+        <TextView
+            android:id="@+id/full_name_text"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="3.2">
+            android:layout_height="wrap_content"
+            android:text="@{tutored.employee.fullName}"
+            android:textColor="?attr/textColorPrimary"
+            android:textSize="14dp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toStartOf="@id/icons_container" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@{tutored.employee.fullName}"
-                android:textSize="14dp"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/professionalCategoryId"
-                android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/dimen_6dp"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:text="@{tutored.employee.professionalCategory.description}" />
+        <!-- Professional Category -->
+        <TextView
+            android:id="@+id/professionalCategoryId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_6dp"
+            android:gravity="center_vertical"
+            android:textColor="?attr/textColorPrimary"
+            android:text="@{tutored.employee.professionalCategory.description}"
+            app:layout_constraintTop_toBottomOf="@id/full_name_text"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toStartOf="@id/icons_container" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_marginTop="@dimen/dimen_6dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="match_parent"
-                    android:text="@{tutored.employee.phoneNumber}"
-                    android:drawablePadding="@dimen/dimen_5dp"
-                    bind:drawableLeftCompat="@drawable/baseline_call_24" />
+        <!-- Phone Number -->
+        <TextView
+            android:id="@+id/phone_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{tutored.employee.phoneNumber}"
+            android:textColor="?attr/textColorPrimary"
+            android:drawablePadding="@dimen/dimen_5dp"
+            bind:drawableLeftCompat="@drawable/baseline_call_24"
+            app:layout_constraintTop_toBottomOf="@id/professionalCategoryId"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toStartOf="@id/icons_container" />
 
-                <TextView
-                    android:layout_marginTop="@dimen/dimen_6dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="match_parent"
-                    android:text='@{Utilities.concatStrings("NUIT", Utilities.parseLongToString(tutored.employee.nuit), ": ")}'/>
-            </LinearLayout>
+        <!-- NUIT -->
+        <TextView
+            android:id="@+id/nuit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text='@{Utilities.concatStrings("NUIT", Utilities.parseLongToString(tutored.employee.nuit), ": ")}'
+            android:textColor="?attr/textColorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/phone_text"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toStartOf="@id/icons_container" />
 
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="@dimen/dimen_0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical"
+        <!-- Right Icon Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/icons_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:padding="@dimen/dimen_5dp"
-            android:layout_weight="0.5">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.15">
+
+            <!-- Selected Icon -->
             <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility='@{tutored.selected ? View.VISIBLE : View.GONE}'
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@drawable/ic_done"
-                android:layout_gravity="center_vertical"/>
+                android:visibility='@{tutored.selected ? View.VISIBLE : View.GONE}'
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Delete Button -->
             <ImageButton
                 android:id="@+id/btn_remove_selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_delete"
                 android:visibility='@{tutored.listType.equals("SELECTION_LIST") ? View.VISIBLE : View.GONE}'
-                android:layout_width="match_parent"
-                android:background="#e9f1f7"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_delete" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Cloud Sync Status -->
             <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility='@{tutored.listType.equals("NORMAL") ? View.VISIBLE : View.GONE}'
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@drawable/baseline_cloud_done_24"
-                android:layout_gravity="center_vertical"/>
-        </LinearLayout>
-    </LinearLayout>
+                android:visibility='@{tutored.listType.equals("NORMAL") ? View.VISIBLE : View.GONE}'
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

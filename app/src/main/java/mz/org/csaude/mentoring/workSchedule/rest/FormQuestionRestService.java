@@ -14,6 +14,7 @@ import mz.org.csaude.mentoring.dto.form.FormQuestionDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
+import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.service.form.FormService;
 import mz.org.csaude.mentoring.service.form.FormServiceImpl;
 import mz.org.csaude.mentoring.service.formQuestion.FormQuestionService;
@@ -52,27 +53,33 @@ public class FormQuestionRestService extends BaseRestService {
             public void onResponse(Call<List<FormQuestionDTO>> call, Response<List<FormQuestionDTO>> response) {
                 List<FormQuestionDTO> data = response.body();
                 if (Utilities.listHasElements(data)) {
-                    try {
-                        FormQuestionService formQuestionService = getApplication().getFormQuestionService();
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            FormQuestionService formQuestionService = getApplication().getFormQuestionService();
 
-                        List<FormQuestion> formQuestions = new ArrayList<>();
+                            List<FormQuestion> formQuestions = new ArrayList<>();
 
-                        for(FormQuestionDTO formQuestionDTO : data) {
-                            FormQuestion formQuestion = formQuestionDTO.getFormQuestion();
-                            formQuestion.setSyncStatus(SyncSatus.SENT);
-                            formQuestion.setForm(getApplication().getFormService().getByuuid(formQuestionDTO.getFormUuid()));
-                            formQuestion.setEvaluationType(getApplication().getEvaluationTypeService().getByuuid(formQuestion.getEvaluationType().getUuid()));
-                            formQuestion.setResponseType(getApplication().getResponseTypeService().getByuuid(formQuestion.getResponseType().getUuid()));
-                            formQuestions.add(formQuestion);
+                            List<Question> questions = new ArrayList<>();
+
+                            for (FormQuestionDTO formQuestionDTO : data) {
+                                FormQuestion formQuestion = formQuestionDTO.getFormQuestion();
+                                formQuestion.setSyncStatus(SyncSatus.SENT);
+                                formQuestion.setForm(getApplication().getFormService().getByuuid(formQuestionDTO.getFormUuid()));
+                                formQuestion.setEvaluationType(getApplication().getEvaluationTypeService().getByuuid(formQuestion.getEvaluationType().getUuid()));
+                                formQuestion.setResponseType(getApplication().getResponseTypeService().getByuuid(formQuestion.getResponseType().getUuid()));
+                                formQuestion.setQuestion(formQuestionDTO.getFormQuestion().getQuestion());
+                                formQuestions.add(formQuestion);
+                                questions.add(formQuestionDTO.getFormQuestion().getQuestion());
+                            }
+
+                            getApplication().getQuestionService().saveOrUpdateQuestionList(questions);
+                            formQuestionService.saveOrUpdate(formQuestions);
+
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, formQuestions);
+                        } catch (SQLException e) {
+                            Log.e("Error saving FormQuestion: ", e.getMessage(), e);
                         }
-
-                        formQuestionService.saveOrUpdate(formQuestions);
-
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, formQuestions);
-                    } catch (SQLException e) {
-                        Log.e("Error saving FormQuestion: " ,e.getMessage(), e);
-                    }
-
+                    });
                 } else {
                     listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
                 }

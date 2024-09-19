@@ -4,4 +4,13 @@
     <string name="nome_nuit">Nome/NUIT</string>
     <string name="iniciar_ronda_mentorados">Iniciar Ronda - Mentorados</string>
     <string name="sess_es_de_mentoria">Sessões de Mentoria</string>
+    <string name="processando">Processando...</string>
+    <string name="no_resource_selected_error">Não foram selecionados recursos recomendados.</string>
+    <string name="session_update_error">Erro ao tentar salvar recursos recomendados.</string>
+    <string name="no_doors_available">Não foram encontrados registos de portas.</string>
+    <string name="no_categories_available">Não foram encontradas categorias.</string>
+    <string name="no_forms_available">Não foram encontadas tabelas de competências.</string>
+    <string name="interno">Interno</string>
+    <string name="externo">Externo</string>
+    <string name="ronda_edit_error_msg">Não é possível editar uma ronda com sessões registadas.</string>
 </resources>

@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.formQuestion;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 import mz.org.csaude.mentoring.model.responseType.ResponseType;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
 
 public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> implements FormQuestionService {
 
@@ -47,7 +50,7 @@ public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> imple
     }
     @Override
     public FormQuestion save(FormQuestion record) throws SQLException {
-        this.formQuestionDAO.create(record);
+        record.setId((int) this.formQuestionDAO.insert(record));
         return record;
     }
 
@@ -73,73 +76,40 @@ public class FormQuestionServiceImpl extends BaseServiceImpl<FormQuestion> imple
     }
 
     @Override
-    public void saveOrUpdateFormQuestions(List<FormQuestionDTO> formQuestionDTOS) throws SQLException {
-        for (FormQuestionDTO formQuestionDTO: formQuestionDTOS) {
-            this.saveOrUpdateFormQuestion(formQuestionDTO);
-        }
-    }
-    @Override
-    public FormQuestion saveOrUpdateFormQuestion(FormQuestionDTO formQuestionDTO) throws SQLException {
-        QuestionCategoryDTO questionCategoryDTO = formQuestionDTO.getQuestion().getQuestionCategory();
-        QuestionsCategory qc = this.questionsCategoryDAO.getByUuid(questionCategoryDTO.getUuid());
-        QuestionsCategory questionsCategory = questionCategoryDTO.getQuestionCategory();
-        if(qc!=null) {
-            questionsCategory.setId(qc.getId());
-        }
-        this.questionsCategoryDAO.createOrUpdate(questionsCategory);
-
-        QuestionDTO questionDTO = formQuestionDTO.getQuestion();
-        Question q = this.questionDAO.getByUuid(questionDTO.getUuid());
-        Question question = questionDTO.getQuestionObj();
-        if(q!=null) {
-            question.setId(q.getId());
-        }
-        this.questionDAO.createOrUpdate(question);
-
-        FormQuestion fq = this.formQuestionDAO.getByUuid(formQuestionDTO.getUuid());
-        FormQuestion formQuestion = formQuestionDTO.getFormQuestion();
-        if(fq!=null) {
-            formQuestion.setId(fq.getId());
-        }
-        this.formQuestionDAO.createOrUpdate(formQuestion);
-        return formQuestion;
+    public FormQuestion getByuuid(String uuid) throws SQLException {
+        return this.formQuestionDAO.getByUuid(uuid);
     }
 
+
     @Override
+    @Transaction
     public void saveOrUpdate(List<FormQuestion> formQuestions) throws SQLException {
         for (FormQuestion fQuestion : formQuestions) {
-            Question q = this.questionDAO.getByUuid(fQuestion.getQuestion().getUuid());
-            if(q!=null) {
-                fQuestion.getQuestion().setId(q.getId());
+
+            fQuestion.setQuestion(this.questionDAO.getByUuid(fQuestion.getQuestion().getUuid()));
+
+            FormQuestion existingFormQuestion = this.formQuestionDAO.getByUuid(fQuestion.getUuid());
+            if (existingFormQuestion != null) {
+                fQuestion.setId(existingFormQuestion.getId());
+                this.formQuestionDAO.update(fQuestion);
+            } else {
+                this.formQuestionDAO.insert(fQuestion);
             }
-            QuestionsCategory qc = getApplication().getQuestionsCategoryService().getByuuid(fQuestion.getQuestion().getQuestionsCategory().getUuid());
-            if (qc != null) {
-                fQuestion.getQuestion().getQuestionsCategory().setId(qc.getId());
-            }
-            Form f = this.formDAO.getByUuid(fQuestion.getForm().getUuid());
-            if(f!=null) {
-                fQuestion.getForm().setId(f.getId());
-            }
-            EvaluationType ev = this.evaluationTypeDAO.getByUuid(fQuestion.getEvaluationType().getUuid());
-            if(ev!=null) {
-                fQuestion.getEvaluationType().setId(ev.getId());
-            }
-            ResponseType rt = this.responseTypeDAO.getByUuid(fQuestion.getResponseType().getUuid());
-            if(rt!=null) {
-                fQuestion.getResponseType().setId(rt.getId());
-            }
-            getApplication().getQuestionsCategoryService().saveOrUpdateQuestionCategory(fQuestion.getQuestion().getQuestionsCategory());
-            this.questionDAO.createOrUpdate(fQuestion.getQuestion());
-            FormQuestion fq = this.formQuestionDAO.getByUuid(fQuestion.getUuid());
-            if(fq!=null) {
-                fQuestion.setId(fq.getId());
-            }
-            this.formQuestionDAO.createOrUpdate(fQuestion);
         }
     }
 
+
+
     @Override
-    public List<FormQuestion> getAllOfForm(Form form, String evaluationTipe) throws SQLException {
-        return formQuestionDAO.getAllOfForm(form, evaluationTipe, getApplication());
+    public List<FormQuestion> getAllOfForm(Form form, String evaluationType) {
+        List<FormQuestion> formQuestions = formQuestionDAO.getAllOfForm(form.getId(), evaluationType, String.valueOf(LifeCycleStatus.ACTIVE));
+        for (FormQuestion formQuestion : formQuestions) {
+            formQuestion.setQuestion(questionDAO.queryForId(formQuestion.getQuestionId()));
+            formQuestion.getQuestion().setQuestionsCategory(questionsCategoryDAO.queryForId(formQuestion.getQuestion().getQuestionCategoryId()));
+            formQuestion.setForm(formDAO.queryForId(formQuestion.getFormId()));
+            formQuestion.setResponseType(responseTypeDAO.queryForId(formQuestion.getResponseTypeId()));
+            formQuestion.setEvaluationType(evaluationTypeDAO.queryForId(formQuestion.getEvaluationTypeId()));
+        }
+        return formQuestions;
     }
 }

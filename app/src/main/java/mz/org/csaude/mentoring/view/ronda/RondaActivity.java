@@ -27,6 +27,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentoringCycleListBinding;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
+import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.ronda.RondaSearchVM;
 
@@ -48,9 +49,9 @@ public class RondaActivity extends BaseActivity {
             getRelatedViewModel().setTitle((String) intent.getExtras().get("title"));
             getRelatedViewModel().setRondaType((RondaType) intent.getExtras().get("rondaType"));
             setUpToolbar(getRelatedViewModel().getTitle());
-            //getRelatedViewModel().initSearch();
         }
         getRelatedViewModel().initSearch();
+
     }
 
     @Override
@@ -77,15 +78,20 @@ public class RondaActivity extends BaseActivity {
         getRelatedViewModel().setViewListRemoveButton(false);
     }
 
-    public void populateRecyclerView(){
+    public void populateRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         rondasRecyclerView.setLayoutManager(mLayoutManager);
         rondasRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        rondasRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
 
+        int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+        rondasRecyclerView.addItemDecoration(itemDecoration);
+
+        rondasRecyclerView.setHasFixedSize(true);
         rondaAdapter = new RondaAdapter(rondasRecyclerView, getRelatedViewModel().getSearchResults(), this);
         rondasRecyclerView.setAdapter(rondaAdapter);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

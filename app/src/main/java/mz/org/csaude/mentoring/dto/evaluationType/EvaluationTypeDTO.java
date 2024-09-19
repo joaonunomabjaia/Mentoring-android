@@ -16,6 +16,9 @@ public class EvaluationTypeDTO extends BaseEntityDTO {
         this.setCode(evaluationType.getCode());
         this.setDescription(evaluationType.getDescription());
     }
+    public EvaluationTypeDTO() {
+        super();
+    }
 
     public String getCode() {
         return code;

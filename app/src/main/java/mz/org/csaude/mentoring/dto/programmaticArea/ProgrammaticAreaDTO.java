@@ -25,6 +25,10 @@ public class ProgrammaticAreaDTO extends BaseEntityDTO {
         }
     }
 
+    public ProgrammaticAreaDTO() {
+        super();
+    }
+
     public String getCode() {
         return code;
     }

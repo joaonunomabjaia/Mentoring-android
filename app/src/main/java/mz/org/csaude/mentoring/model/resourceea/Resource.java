@@ -1,20 +1,26 @@
 package mz.org.csaude.mentoring.model.resourceea;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
 
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dao.resource.ResourceDaoImpl;
 import mz.org.csaude.mentoring.dto.resource.ResourceDTO;
 
-@DatabaseTable(tableName = Resource.TABLE_NAME, daoClass = ResourceDaoImpl.class)
+@Entity(tableName = Resource.TABLE_NAME,
+        indices = {
+                @Index(value = {Resource.COLUMN_RESOURCE}, unique = true)
+        })
 public class Resource extends BaseModel implements Listble {
 
     public static final String TABLE_NAME = "resources";
     public static final String COLUMN_RESOURCE = "resource";
 
-    @DatabaseField(columnName = COLUMN_RESOURCE, unique = true)
+    @NonNull
+    @ColumnInfo(name = COLUMN_RESOURCE)
     private String resource;
 
     public Resource(String resource) {
@@ -24,6 +30,7 @@ public class Resource extends BaseModel implements Listble {
     public Resource() {
     }
 
+    @Ignore
     public Resource(ResourceDTO resourceDTO) {
         super(resourceDTO);
         this.setResource(resourceDTO.getResource());
