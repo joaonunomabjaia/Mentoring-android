@@ -21,7 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.tutored.TutoredAdapter;
@@ -213,7 +215,10 @@ public class CreateRondaActivity extends BaseActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Handle the back button click
-                onBackPressed();
+                Map<String, Object> params = new HashMap<>();
+                params.put("title", title);
+                params.put("rondaType", rondaTypeOption);
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
