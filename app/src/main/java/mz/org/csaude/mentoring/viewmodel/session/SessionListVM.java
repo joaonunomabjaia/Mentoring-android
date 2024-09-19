@@ -149,11 +149,11 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
                     }
 
                     if (session.isCompleted()) {
-                        String message = getRelatedActivity().getString(R.string.cannot_edit_completed_session);
+                        String message = getRelatedActivity().getString(R.string.cannot_delete_completed_session);
                         Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     } else if (Utilities.listHasElements(session.getMentorships())) {
-                        String message = getRelatedActivity().getString(R.string.cannot_edit_with_evaluations);
+                        String message = getRelatedActivity().getString(R.string.cannot_delete_with_evaluations);
                         Utilities.displayAlertDialog(getRelatedActivity(), message).show();
                         return;
                     }

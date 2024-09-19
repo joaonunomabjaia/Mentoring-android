@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
@@ -739,6 +740,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             if (this.session.getTutored() == null) {
                 this.session.setTutored(getApplication().getTutoredService().getById(this.session.getMenteeId()));
             }
+
             this.mentorship.setEndDate(DateUtilities.getCurrentDate());
             if (ronda.isRondaZero()) {
                 this.mentorship.getTutored().setZeroEvaluationDone(true);
@@ -810,39 +812,47 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     private boolean determineIterationNumber() throws SQLException {
-            List<Mentorship> completedMentorships = getApplication().getMentorshipService().getAllOfSession(this.mentorship.getSession());
-            List<Mentorship> similarMentorships = new ArrayList<>();
-            int maxIteration = 0;
-            for (Mentorship mentorship : completedMentorships) {
-                if (mentorship.getEvaluationType().getCode().equals(this.mentorship.getEvaluationType().getCode())) {
-                    similarMentorships.add(mentorship);
-                }
-            }
-            if (Utilities.listHasElements(similarMentorships)) {
-                for (Mentorship mentorship : similarMentorships) {
-                    if (mentorship.getIterationNumber() > maxIteration) {
-                        maxIteration = mentorship.getIterationNumber();
-                    }
-                }
-            }
-            this.mentorship.setIterationNumber(maxIteration + 1);
+        List<Mentorship> completedMentorships = getApplication().getMentorshipService().getAllOfSession(this.mentorship.getSession());
+        List<Mentorship> similarMentorships = completedMentorships.stream()
+                .filter(m -> m.getEvaluationType().getCode().equals(this.mentorship.getEvaluationType().getCode()))
+                .collect(Collectors.toList());
 
-            if (this.mentorship.getEvaluationType().getCode().equals(EvaluationType.CONSULTA)) {
-                if (this.mentorship.getForm().getTargetPatient() < this.mentorship.getIterationNumber()) {
-                    String message = getRelatedActivity().getString(R.string.error_max_consultation, this.mentorship.getForm().getTargetPatient());
-                    Utilities.displayAlertDialog(getRelatedActivity(), message).show();
-                    return false;
-                }
-            } else if (this.mentorship.getEvaluationType().getCode().equals(EvaluationType.FICHA)) {
-                if (this.mentorship.getForm().getTargetFile() < this.mentorship.getIterationNumber()) {
-                    String message = getRelatedActivity().getString(R.string.error_max_file, this.mentorship.getForm().getTargetFile());
-                    Utilities.displayAlertDialog(getRelatedActivity(), message).show();
-                    return false;
-                }
-            }
+        int maxIteration = similarMentorships.stream()
+                .mapToInt(Mentorship::getIterationNumber)
+                .max()
+                .orElse(0);
+
+        this.mentorship.setIterationNumber(maxIteration + 1);
+
+        return checkIterationLimit();
+    }
+
+    private boolean checkIterationLimit() {
+        String evaluationTypeCode = this.mentorship.getEvaluationType().getCode();
+        int target = 0;
+        String messageKey;
+
+        if (evaluationTypeCode.equals(EvaluationType.CONSULTA)) {
+            target = this.mentorship.getForm().getTargetPatient();
+            messageKey = getRelatedActivity().getString(R.string.error_max_consultation, target);
+        } else if (evaluationTypeCode.equals(EvaluationType.FICHA)) {
+            target = this.mentorship.getForm().getTargetFile();
+            messageKey = getRelatedActivity().getString(R.string.error_max_file, target);
+        } else {
+            messageKey = null;
+        }
+
+        if (this.mentorship.getIterationNumber() > target) {
+            // Run the dialog display on the UI thread
+            getRelatedActivity().runOnUiThread(() -> {
+                Utilities.displayAlertDialog(getRelatedActivity(), messageKey).show();
+            });
+            return false;
+        }
 
         return true;
     }
+
 
     public List<Listble> getCategories() {
         return categories;

@@ -235,6 +235,10 @@ public class Session extends BaseModel {
     public boolean canBeClosed() {
         if (this.isCompleted()) return true;
 
+        if (this.getRonda().isRondaZero()) {
+            return Utilities.listHasElements(mentorships);
+        }
+
         if (!Utilities.listHasElements(mentorships)) {
             return false;
         }

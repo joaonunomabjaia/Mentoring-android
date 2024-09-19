@@ -206,7 +206,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
             mentorship.getSession().setRonda(getApplication().getRondaService().getById(mentorship.getSession().getRondaId()));
             mentorship.getSession().getRonda().setRondaType(getApplication().getRondaTypeService().getById(mentorship.getSession().getRonda().getRondaTypeId()));
             mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
-            mentorship.setTutored(getApplication().getTutoredService().getById(mentorship.getTutorId()));
+            mentorship.setTutored(getApplication().getTutoredService().getById(mentorship.getTutoredId()));
             mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
             mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
             mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));

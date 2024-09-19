@@ -280,7 +280,7 @@ public class Mentorship extends BaseModel {
 
     public void setEvaluationType(EvaluationType evaluationType) {
         this.evaluationType = evaluationType;
-        this.evaluationTypeId = evaluationType.getId();
+        if (evaluationType != null) this.evaluationTypeId = evaluationType.getId();
     }
 
     public Integer getIterationNumber() {
