@@ -3,9 +3,9 @@ plugins {
 }
 ext.versionMajor = 1
 ext.versionMinor = 0
-ext.versionPatch = 1
+ext.versionPatch = 2
 ext.versionClassifier = null
-ext.isSnapshot = false
+ext.isSnapshot = true
 ext.minimumSdkVersion = 28
 
 android {

@@ -216,8 +216,8 @@ public class CreateRondaActivity extends BaseActivity {
             case android.R.id.home:
                 // Handle the back button click
                 Map<String, Object> params = new HashMap<>();
-                params.put("title", title);
-                params.put("rondaType", rondaTypeOption);
+                params.put("title", getRelatedViewModel().getRonda().isRondaZero() ? getString(R.string.ronda_zero):getString(R.string.ronda_mentoria));
+                params.put("rondaType", getRelatedViewModel().getRonda().getRondaType());
                 this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(RondaActivity.class, params);
                 return true;
             default:

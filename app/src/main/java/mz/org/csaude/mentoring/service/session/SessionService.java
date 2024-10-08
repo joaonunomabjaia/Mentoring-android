@@ -15,6 +15,8 @@ import mz.org.csaude.mentoring.model.tutored.Tutored;
 public interface SessionService extends BaseService<Session> {
     List<Session> getAllOfRondaAndMentee(Ronda currRonda, Tutored selectedMentee, long offset, long limit) throws SQLException;
 
+    int countAllOfRondaAndMentee(Ronda currRonda, Tutored selectedMentee);
+
     List<Session> getAllOfRonda(Ronda ronda) throws SQLException;
 
     List<SessionSummary> generateSessionSummary(Session session);

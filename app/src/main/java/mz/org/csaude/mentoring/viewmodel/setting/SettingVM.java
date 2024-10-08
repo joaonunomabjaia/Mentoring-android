@@ -186,7 +186,7 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
     }
 
     public void onSyncNowClicked() {
-        ((MentoringApplication) getApplication()).isServerOnline(this);
+        getApplication().isServerOnline(this);
     }
 
     @Override

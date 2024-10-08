@@ -29,6 +29,7 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
     private Date startDate;
     private Date endDate;
     private Date performedDate;
+    private Date nextSessionDate;
     private SessionStatusDTO sessionStatus;
     private String reason;
     private FormDTO form;
@@ -50,10 +51,12 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
         super(session);
         this.setStartDate(session.getStartDate());
         this.setEndDate(session.getEndDate());
+        this.setNextSessionDate(session.getNextSessionDate());
         this.setPerformedDate(session.getPerformedDate());
         this.setPointsToImprove(session.getPointsToImprove());
         this.setStrongPoints(session.getStrongPoints());
         this.setObservations(session.getObservations());
+        this.setWorkPlan(session.getWorkPlan());
         if(session.getStatus()!=null) {
             this.setSessionStatus(new SessionStatusDTO(session.getStatus()));
         }
@@ -200,6 +203,8 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
         session.setPointsToImprove(this.getPointsToImprove());
         session.setStrongPoints(this.getStrongPoints());
         session.setObservations(this.getObservations());
+        session.setWorkPlan(this.getWorkPlan());
+        session.setNextSessionDate(this.getNextSessionDate());
         if(session.getStatus()!=null) {
             session.setStatus(new SessionStatus(this.getSessionStatus()));
         }
@@ -223,5 +228,13 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
     @Override
     public SyncSatus getSyncSatus() {
         return null;
+    }
+
+    public Date getNextSessionDate() {
+        return nextSessionDate;
+    }
+
+    public void setNextSessionDate(Date nextSessionDate) {
+        this.nextSessionDate = nextSessionDate;
     }
 }

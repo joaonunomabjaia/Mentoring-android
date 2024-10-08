@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 import mz.org.csaude.mentoring.R;
@@ -394,7 +395,11 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         switch (item.getItemId()) {
             case android.R.id.home:
                 //getRelatedViewModel().tryToUpdateMentorship();
-                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(MentorshipActivity.class);
+                /*HashMap<String, Object> paras = new HashMap<>();
+                paras.put("session", this.getRelatedViewModel().getSession());
+                paras.put("ronda", this.getRelatedViewModel().getRonda());
+                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(MentorshipActivity.class, paras);*/
+                super.onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

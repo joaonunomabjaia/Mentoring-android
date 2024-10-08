@@ -8,6 +8,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.user.UserDao;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 
 public class UserServiceImpl extends BaseServiceImpl<User> implements UserService {
@@ -33,6 +34,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public User update(User record) throws SQLException {
+        record.setUpdatedAt(DateUtilities.getCurrentDate());
         userDao.update(record);
         return record;
     }

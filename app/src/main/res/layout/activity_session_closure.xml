@@ -336,6 +336,22 @@
                             android:drawableLeft="@drawable/ic_calendar"
                             android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.endDate)}"
                             style="@style/bottom_border_edit_text_style"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/next_session_date"
+                            style="@style/input_labels"/>
+
+                        <EditText
+                            android:id="@+id/next_session_date"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusableInTouchMode="false"
+                            android:visibility="@{!viewModel.FourthSession ? View.VISIBLE : View.GONE}"
+                            android:drawableLeft="@drawable/ic_calendar"
+                            android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.nextSessionDate)}"
+                            style="@style/bottom_border_edit_text_style"/>
                     </LinearLayout>
                 </LinearLayout>
             </ScrollView>
