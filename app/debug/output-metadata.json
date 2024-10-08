@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 280010000,
-      "versionName": "1.0.0-SNAPSHOT",
-      "outputFile": "Mentoria-1.0.0-SNAPSHOT.apk"
+      "versionCode": 280010002,
+      "versionName": "1.0.2-SNAPSHOT",
+      "outputFile": "Mentoria-1.0.2-SNAPSHOT.apk"
     }
   ],
   "elementType": "File"

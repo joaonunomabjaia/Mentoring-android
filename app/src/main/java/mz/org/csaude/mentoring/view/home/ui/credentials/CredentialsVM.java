@@ -7,21 +7,18 @@ import androidx.databinding.Bindable;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.service.user.UserService;
+import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.user.UserVM;
 
 public class CredentialsVM extends UserVM {
 
-    private UserService userService;
     protected String userPassWordCorrente;
 
     protected String userNovaPassWord;
 
-    private boolean initialDataVisible;
-
     public CredentialsVM(@NonNull Application application) {
         super(application);
-        this.userService = getApplication().getUserService();
 
     }
     @Override
@@ -51,11 +48,12 @@ public class CredentialsVM extends UserVM {
 
     @Override
     public void updatePassword() {
-        if (Utilities.MD5Crypt(getCurrentUser().getSalt()+":"+userPassWordCorrente).equals(getPassword())){
+        if (Utilities.encryptPassword(userPassWordCorrente,getCurrentUser().getSalt()).equals(getPassword())){
             if (!userNovaPassWord.equals(getUserPassRepeat())){
                 Utilities.displayAlertDialog(getRelatedFragment().getContext(), "As senhas indicadas não conferem, por favor verificar.").show();
             }else {
-                getRelatedRecord().setPassword(Utilities.MD5Crypt(getRelatedRecord().getSalt()+":"+userNovaPassWord));
+                getRelatedRecord().setPassword(Utilities.encryptPassword(userNovaPassWord,getRelatedRecord().getSalt()));
+                getRelatedRecord().setSyncStatus(SyncSatus.PENDING);
                 super.updatePassword();
             }
         }else Utilities.displayAlertDialog(getRelatedFragment().getContext(), "A senha Corrente indicada é inválida.").show();

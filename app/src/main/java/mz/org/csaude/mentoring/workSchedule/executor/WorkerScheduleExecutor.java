@@ -326,10 +326,10 @@ public class WorkerScheduleExecutor {
                 .build();
 
         // Chain WorkRequests
-        workManager.beginUniqueWork("SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, sessionPostWorkRequest)
+        workManager.beginUniqueWork("   MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaPostWorkRequest)
+                .then(sessionPostWorkRequest)
                 .then(mentorshipPostWorkRequest)
                 .then(sessionRecommendedWorkRequest)
-                .then(rondaPostWorkRequest)
                 .then(userInfoUpdateWorkRequest)
                 .enqueue();
 

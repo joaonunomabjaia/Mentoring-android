@@ -83,9 +83,11 @@ public class RondaActivity extends BaseActivity {
         rondasRecyclerView.setLayoutManager(mLayoutManager);
         rondasRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
-        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
-        rondasRecyclerView.addItemDecoration(itemDecoration);
+        if (rondaAdapter == null) {
+            int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            rondasRecyclerView.addItemDecoration(itemDecoration);
+        }
 
         rondasRecyclerView.setHasFixedSize(true);
         rondaAdapter = new RondaAdapter(rondasRecyclerView, getRelatedViewModel().getSearchResults(), this);

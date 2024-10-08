@@ -28,6 +28,7 @@ public class SessionClosureVM extends BaseViewModel {
     private Session session;
 
     private boolean initialDataVisible;
+    private boolean fourthSession;
 
     public SessionClosureVM(@NonNull Application application) {
         super(application);
@@ -35,7 +36,9 @@ public class SessionClosureVM extends BaseViewModel {
 
     @Override
     public void preInit() {
-
+        getExecutorService().execute(()->{
+            this.fourthSession = getApplication().getSessionService().countAllOfRondaAndMentee(session.getRonda(), session.getTutored()) == 4;
+        });
     }
 
     @Bindable
@@ -90,6 +93,20 @@ public class SessionClosureVM extends BaseViewModel {
     public void setInitialDataVisible(boolean initialDataVisible) {
         this.initialDataVisible = initialDataVisible;
         this.notifyPropertyChanged(BR.initialDataVisible);
+    }
+
+    @Bindable
+    public Date getNextSessionDate() {
+        return this.session.getNextSessionDate();
+    }
+
+    public void setNextSessionDate(Date nextSessionDate) {
+        this.session.setNextSessionDate(nextSessionDate);
+        notifyPropertyChanged(BR.nextSessionDate);
+    }
+
+    public boolean isFourthSession() {
+        return fourthSession;
     }
 
     @Bindable

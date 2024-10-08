@@ -27,6 +27,7 @@ import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
+import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
@@ -117,6 +118,11 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             }
         }
         return sessions;
+    }
+
+    @Override
+    public int countAllOfRondaAndMentee(Ronda currRonda, Tutored selectedMentee) {
+        return this.sessionDAO.countAllOfRondaAndMentee(currRonda.getId(), selectedMentee.getId());
     }
 
     @Override
