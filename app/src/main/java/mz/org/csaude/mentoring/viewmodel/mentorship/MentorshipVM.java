@@ -24,7 +24,8 @@ import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
-import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
+import mz.org.csaude.mentoring.model.form.FormSection;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
@@ -32,7 +33,6 @@ import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
-import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.SimpleValue;
@@ -62,13 +62,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private List<Tutored> tutoreds;
 
-    private List<FormQuestion> formQuestions;
-
-    private TreeMap<SimpleValue, List<FormQuestion>> questionMap;
-
-    private Listble currQuestionCategory;
-
-    private List<Listble> categories;
+    private FormSection currentFormSection;
 
     private boolean mentorshipCompleted;
 
@@ -90,18 +84,16 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     public void preInit() {
     }
 
-    public boolean isThereNextKey() {
-        if (this.questionMap == null) return false;
-        return this.questionMap.higherKey((SimpleValue) this.currQuestionCategory) != null;
-    }
-
-    public boolean isTherePreviousKey() {
-        if (this.questionMap == null) return false;
-        return this.questionMap.lowerKey((SimpleValue) this.currQuestionCategory) != null;
-    }
     public void nextCategory() {
-        setCurrQuestionCategory(this.questionMap.higherKey((SimpleValue) this.currQuestionCategory));
-        getRelatedActivity().populateQuestionList();
+        int currentIndex = this.mentorship.getForm().getFormSections().indexOf(this.currentFormSection);
+        // Get the next item if available
+        if (currentIndex + 1 < this.mentorship.getForm().getFormSections().size()) {
+            setCurrentFormSection(this.mentorship.getForm().getFormSections().get(currentIndex + 1));
+            getRelatedActivity().populateQuestionList();
+        } else {
+            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_previous_category)).show();
+            return;
+        }
     }
 
     public boolean isMentorshipCompleted() {
@@ -113,19 +105,25 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     private boolean allCurrentQuestionsResponded() {
-        for (FormQuestion formQuestion : questionMap.get(this.currQuestionCategory)) {
-            if (!Utilities.stringHasValue(formQuestion.getAnswer().getValue())) return false;
+        for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+            for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                if (!Utilities.stringHasValue(formSectionQuestion.getAnswer().getValue())) return false;
+            }
         }
         return true;
     }
 
     public void previousCategory() {
-        if (this.questionMap.lowerKey((SimpleValue) this.currQuestionCategory) == null) {
-            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_previous_category)).show();
-            return;
+        int currentIndex = this.mentorship.getForm().getFormSections().indexOf(this.currentFormSection);
+        if (currentIndex != -1) {  // Ensure the item is in the list
+            // Get the previous item if available
+            if (currentIndex - 1 >= 0) {
+                setCurrentFormSection(this.mentorship.getForm().getFormSections().get(currentIndex - 1));
+                getRelatedActivity().populateQuestionList();
+            } else {
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_previous_category)).show();
+            }
         }
-        setCurrQuestionCategory(this.questionMap.lowerKey((SimpleValue) this.currQuestionCategory));
-        getRelatedActivity().populateQuestionList();
     }
 
     public void finnalizeMentorship() {
@@ -138,9 +136,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     private boolean allQuestionsResponded() {
-        for (Map.Entry<SimpleValue, List<FormQuestion>> entry : questionMap.entrySet()) {
-            for (FormQuestion question : entry.getValue()) {
-                if (!Utilities.stringHasValue(question.getAnswer().getValue()) || question.getAnswer().getValue().length() <= 1) return false;
+        for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+            for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                if (!Utilities.stringHasValue(formSectionQuestion.getAnswer().getValue()) || formSectionQuestion.getAnswer().getValue().length() <= 1) return false;
             }
         }
         return true;
@@ -245,13 +243,12 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             getExecutorService().execute(() -> {
                 loadQuestion();
 
-                // Prepare questions and categories
-                for (Listble listble : categories) {
+                for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
                     int responded = 0;
-                    for (FormQuestion formQuestion : questionMap.get(listble)) {
-                        if (Utilities.stringHasValue(formQuestion.getAnswer().getValue())) responded++;
+                    for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                        if (Utilities.stringHasValue(formSectionQuestion.getAnswer().getValue())) responded++;
                     }
-                    ((SimpleValue) listble).setExtraInfo(responded + "/" + questionMap.get(listble).size());
+                    formSection.setExtraInfo(responded + "/" + formSection.getFormSectionQuestions().size());
                 }
 
                 // Update UI on the main thread
@@ -302,9 +299,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void doMentorshipInitialSave() {
         try {
-            for (Map.Entry<SimpleValue, List<FormQuestion>> entry : questionMap.entrySet()) {
-                for (FormQuestion question : entry.getValue()) {
-                    this.mentorship.addAnswer(question.getAnswer());
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+                for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                    this.mentorship.addAnswer(formSectionQuestion.getAnswer());
                 }
             }
             if (ronda.isRondaZero()) {
@@ -595,82 +592,54 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void loadQuestion() {
         try {
-            this.formQuestions = getApplication().getFormQuestionService().getAllOfForm(this.mentorship.getForm(), this.mentorship.getEvaluationType().getCode());
-            if (Utilities.listHasElements(this.formQuestions)) {
-                if (this.mentorship.getId() == null) {
-                    for (FormQuestion formQuestion : formQuestions) {
-                        formQuestion.setAnswer(new Answer());
-                        formQuestion.getAnswer().setQuestion(formQuestion.getQuestion());
-                        formQuestion.getAnswer().setSyncStatus(SyncSatus.PENDING);
-                        formQuestion.getAnswer().setUuid(Utilities.getNewUUID().toString());
-                        formQuestion.getAnswer().setCreatedAt(DateUtilities.getCurrentDate());
-                        formQuestion.getAnswer().setMentorship(this.mentorship);
-                        formQuestion.getAnswer().setForm(this.mentorship.getForm());
-                        formQuestion.getAnswer().setValue("");
-                        loadQuestionMap(formQuestion, formQuestion.getQuestion().getQuestionsCategory());
-                    }
-                } else {
-                    for (FormQuestion formQuestion : formQuestions) {
-                        formQuestion.setAnswer(getRelatedAnswer(formQuestion));
-                        loadQuestionMap(formQuestion, formQuestion.getQuestion().getQuestionsCategory());
-                    }
-                }
-                setCurrQuestionCategory(this.questionMap.firstKey());
-            }
+            this.mentorship.setForm(getApplication().getFormService().getFullByIdForEvaluation(this.mentorship.getForm().getId(), this.mentorship.getEvaluationType().getCode()));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        if (this.mentorship.getId() == null) {
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+                formSection.setExtraInfo("0/0");
+                for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                    formSectionQuestion.setAnswer(new Answer());
+                    formSectionQuestion.getAnswer().setQuestion(formSectionQuestion.getQuestion());
+                    formSectionQuestion.getAnswer().setSyncStatus(SyncSatus.PENDING);
+                    formSectionQuestion.getAnswer().setFormSectionQuestion(formSectionQuestion);
+                    formSectionQuestion.getAnswer().setUuid(Utilities.getNewUUID().toString());
+                    formSectionQuestion.getAnswer().setCreatedAt(DateUtilities.getCurrentDate());
+                    formSectionQuestion.getAnswer().setMentorship(this.mentorship);
+                    formSectionQuestion.getAnswer().setForm(this.mentorship.getForm());
+                    formSectionQuestion.getAnswer().setValue("");
+                }
+            }
+        } else {
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+                for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                    formSectionQuestion.setAnswer(getRelatedAnswer(formSectionQuestion));
+                }
+            }
+        }
+        setCurrentFormSection(this.mentorship.getForm().getFormSections().get(0));
     }
 
-    private Answer getRelatedAnswer(FormQuestion formQuestion) {
+    private Answer getRelatedAnswer(FormSectionQuestion formSectionQuestion) {
         for (Answer answer : this.mentorship.getAnswers()) {
-            if (answer.getQuestion().equals(formQuestion.getQuestion())) {
+            if (answer.getQuestion().equals(formSectionQuestion.getQuestion())) {
                 return answer;
             }
         }
         return null;
     }
 
-
-    private void loadQuestionMap(FormQuestion formQuestion, QuestionsCategory category) {
-        if (questionMap == null) {
-            questionMap = new TreeMap<>((o1, o2) -> {
-                if (o1.getId() != null && o2.getId() != null) {
-                    return o1.getId().compareTo(o2.getId());
-                } else if (o1.getDescription() != null && o2.getDescription() != null) {
-                    return o1.getDescription().compareTo(o2.getDescription());
-                }
-                return 0;
-            });
-        }
-        SimpleValue cat = SimpleValue.fastCreate(category.getId(), category.getDescription(), "0/0");
-        if (!questionMap.containsKey(cat)) {
-            questionMap.put(cat, new ArrayList<>());
-            addToCategoryList(cat);
-        }
-        questionMap.get(cat).add(formQuestion);
-    }
-
-    private void addToCategoryList(SimpleValue cat) {
-        if (categories == null) categories = new ArrayList<>();
-        categories.add(cat);
-    }
-
-    public TreeMap<SimpleValue, List<FormQuestion>> getQuestionMap() {
-        return questionMap;
-    }
-
     @Bindable
-    public Listble getCurrQuestionCategory() {
-        return currQuestionCategory;
+    public Listble getCurrentFormSection() {
+        return currentFormSection;
     }
 
-    public void setCurrQuestionCategory(Listble currQuestionCategory) {
-        if (currQuestionCategory == null) return;
-
-        this.currQuestionCategory = currQuestionCategory;
+    public void setCurrentFormSection(Listble currentFormSection) {
+        this.currentFormSection = (FormSection) currentFormSection;
         getRelatedActivity().populateQuestionList();
-        notifyPropertyChanged(BR.currQuestionCategory);
+        notifyPropertyChanged(BR.currentFormSection);
     }
 
     @Override
@@ -729,9 +698,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     private void doSaveMentorship() {
         try {
             this.mentorship.getAnswers().clear();
-            for (Map.Entry<SimpleValue, List<FormQuestion>> entry : questionMap.entrySet()) {
-                for (FormQuestion question : entry.getValue()) {
-                    this.mentorship.addAnswer(question.getAnswer());
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+                for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                    this.mentorship.addAnswer(formSectionQuestion.getAnswer());
                 }
             }
 
@@ -853,40 +822,32 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         return true;
     }
 
-
-    public List<Listble> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<Listble> categories) {
-        this.categories = categories;
-    }
-
     @Override
     public void doOnDeny() {
         getRelatedActivity().onBackPressed();
     }
 
-    public void setQuestionAnswer(FormQuestion formQuestion, String answerValue) {
+    public void setQuestionAnswer(FormSectionQuestion formSectionQuestion, String answerValue) {
         getExecutorService().execute(()->{
-            formQuestion.getAnswer().setValue(answerValue);
+            formSectionQuestion.getAnswer().setValue(answerValue);
             try {
-                getApplication().getAnswerService().update(formQuestion.getAnswer());
+                getApplication().getAnswerService().update(formSectionQuestion.getAnswer());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
             int i=0;
-            List<FormQuestion> formQuestionList= questionMap.get(this.currQuestionCategory);
+            List<FormSectionQuestion> formSectionQuestionList = currentFormSection.getFormSectionQuestions();
 
-            for (FormQuestion fq : formQuestionList) {
+            for (FormSectionQuestion fq : formSectionQuestionList) {
                 if (Utilities.stringHasValue(fq.getAnswer().getValue()) && fq.getAnswer().getValue().length() > 1) i++;
             }
-            for (Listble listble : categories) {
-                if (listble.equals(this.currQuestionCategory)) {
-                    ((SimpleValue) listble).setExtraInfo(i + "/" + formQuestionList.size());
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()){
+                if (formSection.equals(this.currentFormSection)){
+                    formSection.setExtraInfo(i + "/" + formSectionQuestionList.size());
                 }
             }
-            ((SimpleValue) currQuestionCategory).setExtraInfo(i + "/" + formQuestionList.size());
+
+            currentFormSection.setExtraInfo(i + "/" + formSectionQuestionList.size());
             runOnMainThread(()->getRelatedActivity().reloadCategoryAdapter());
         });
     }
@@ -923,9 +884,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     private void doMentorshipStateSave() {
         try {
             this.mentorship.getAnswers().clear();
-            for (Map.Entry<SimpleValue, List<FormQuestion>> entry : questionMap.entrySet()) {
-                for (FormQuestion question : entry.getValue()) {
-                    this.mentorship.addAnswer(question.getAnswer());
+            for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
+                for (FormSectionQuestion formSectionQuestion : formSection.getFormSectionQuestions()) {
+                    this.mentorship.addAnswer(formSectionQuestion.getAnswer());
                 }
             }
             getApplication().getMentorshipService().save(this.mentorship);

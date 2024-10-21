@@ -205,6 +205,10 @@ public class Mentorship extends BaseModel {
         }
     }
 
+    public Mentorship(String uuid) {
+        super(uuid);
+    }
+
     public Date getStartDate() {
         return startDate;
     }

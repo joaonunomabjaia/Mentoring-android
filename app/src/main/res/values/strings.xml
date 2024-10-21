@@ -80,7 +80,7 @@
     <string name="no_resource_selected_error">Nenhum recurso recomendado foi selecionado.</string>
     <string name="session_resources_update_error">Erro ao tentar salvar os recursos recomendados.</string>
     <string name="no_doors_available">Nenhum registro de porta encontrado.</string>
-    <string name="no_categories_available">Nenhuma categoria encontrada.</string>
+    <string name="no_categories_available">Nenhuma secção encontrada.</string>
     <string name="no_forms_available">Nenhuma tabela de competências encontrada.</string>
     <string name="interno">Interno</string>
     <string name="externo">Externo</string>

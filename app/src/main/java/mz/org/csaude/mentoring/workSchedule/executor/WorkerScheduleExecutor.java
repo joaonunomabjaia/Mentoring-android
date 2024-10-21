@@ -13,17 +13,15 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
-import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.util.Http;
 import mz.org.csaude.mentoring.workSchedule.work.CabinetWorker;
 import mz.org.csaude.mentoring.workSchedule.work.DistrictWorker;
 import mz.org.csaude.mentoring.workSchedule.work.DoorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.EvaluationTypeWorker;
-import mz.org.csaude.mentoring.workSchedule.work.FormQuestionWorker;
+import mz.org.csaude.mentoring.workSchedule.work.FormSectionQuestionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.FormWorker;
 import mz.org.csaude.mentoring.workSchedule.work.HealthFacilityWorker;
 import mz.org.csaude.mentoring.workSchedule.work.IterationTypeWorker;
@@ -37,6 +35,7 @@ import mz.org.csaude.mentoring.workSchedule.work.Resourceworker;
 import mz.org.csaude.mentoring.workSchedule.work.ResponseTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.RondaTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.RondaWorker;
+import mz.org.csaude.mentoring.workSchedule.work.SectionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionGETWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionPOSTWorker;
 import mz.org.csaude.mentoring.workSchedule.work.SessionRecommendedResourceWorker;
@@ -85,6 +84,10 @@ public class WorkerScheduleExecutor {
 
         OneTimeWorkRequest districtWorkRequest = new OneTimeWorkRequest.Builder(DistrictWorker.class)
                 .addTag("INITIAL_SYNC_DISTRICT_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
+        OneTimeWorkRequest sectionWorkRequest = new OneTimeWorkRequest.Builder(SectionWorker.class)
+                .addTag("INITIAL_SYNC_SECTION_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
 
         OneTimeWorkRequest professionalCategoryWorkRequest = new OneTimeWorkRequest.Builder(ProfessionalCategoryWorker.class)
@@ -136,6 +139,7 @@ public class WorkerScheduleExecutor {
                 .then(Arrays.asList(districtWorkRequest, partnerWorkRequest, cabinetWorkRequest))
                 .then(Arrays.asList(
                         rondaTypeWorkRequest,
+                        sectionWorkRequest,
                         responseTypeWorkRequest,
                         evaluationTypeWorkRequest,
                         iterationTypeWorkRequest,
@@ -177,7 +181,7 @@ public class WorkerScheduleExecutor {
                 .addTag("MENTOR_DATA_TUTOR_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
 
-        OneTimeWorkRequest formQuestionWorkRequest = new OneTimeWorkRequest.Builder(FormQuestionWorker.class)
+        OneTimeWorkRequest formQuestionWorkRequest = new OneTimeWorkRequest.Builder(FormSectionQuestionWorker.class)
                 .addTag("MENTOR_DATA_FORM_QUESTION_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
 

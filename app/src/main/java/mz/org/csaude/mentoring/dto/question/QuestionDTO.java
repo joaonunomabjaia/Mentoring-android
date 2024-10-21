@@ -8,19 +8,21 @@ import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 
 public class QuestionDTO extends BaseEntityDTO {
     private String code;
+    private String tableCode;
     private String question;
-    private QuestionCategoryDTO questionCategory;
+    private String programUuid;
 
     public QuestionDTO() {
         super();
     }
+
     public QuestionDTO(Question question) {
         super(question);
         this.setCode(question.getCode());
         this.setQuestion(question.getQuestion());
-        if(question.getQuestionsCategory()!=null) {
-            this.setQuestionCategory(new QuestionCategoryDTO(question.getQuestionsCategory()));
-        }
+        this.setTableCode(question.getTableCode());
+        this.setProgramUuid(question.getProgram().getUuid());
+
     }
 
     public String getCode() {
@@ -38,22 +40,20 @@ public class QuestionDTO extends BaseEntityDTO {
     public void setQuestion(String question) {
         this.question = question;
     }
-    public QuestionCategoryDTO getQuestionCategory() {
-        return questionCategory;
+
+    public String getTableCode() {
+        return tableCode;
     }
 
-    public void setQuestionCategory(QuestionCategoryDTO questionCategory) {
-        this.questionCategory = questionCategory;
+    public void setTableCode(String tableCode) {
+        this.tableCode = tableCode;
     }
-    public Question getQuestionObj() {
-        Question question = new Question();
-        question.setQuestion(this.getQuestion());
-        question.setCode(this.getCode());
-        question.setLifeCycleStatus(this.getLifeCycleStatus());
-        question.setUuid(this.getUuid());
-        question.setCreatedAt(this.getCreatedAt());
-        question.setUpdatedAt(this.getUpdatedAt());
-        if (this.getQuestionCategory()!=null) question.setQuestionsCategory(new QuestionsCategory(this.getQuestionCategory()));
-        return question;
+
+    public String getProgramUuid() {
+        return programUuid;
+    }
+
+    public void setProgramUuid(String programUuid) {
+        this.programUuid = programUuid;
     }
 }

@@ -63,7 +63,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public User login(User user) throws SQLException {
         User u = this.userDao.getByUserName(user.getUserName());
         if (u != null) {
-            user.setPassword(Utilities.MD5Crypt(u.getSalt()+":"+user.getPassword()));
+            user.setPassword(Utilities.encryptPassword(user.getPassword(), u.getSalt()));
             return this.userDao.getByCredentials(user.getUserName(), user.getPassword());
         } else return null;
     }

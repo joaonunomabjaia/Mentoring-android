@@ -11,6 +11,7 @@ import androidx.work.WorkInfo;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
@@ -77,37 +78,48 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void doLogin() {
         getExecutorService().execute(()-> {
             setAuthenticating(true);
-            try {
-                if (AppHasUser()) {
-                    doLocalLogin();
-                } else {
-                    getApplication().isServerOnline(this);
-                }
-                getApplication().saveDefaultSyncSettings();
-                getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            if (AppHasUser()) {
+                runOnMainThread(() -> {
+                    try {
+                        doLocalLogin();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } else {
+                getApplication().isServerOnline(this);
             }
+            getApplication().saveDefaultSyncSettings();
+            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
         });
     }
 
     private void doLocalLogin() throws SQLException {
-        User logedUser = userService.login(this.user);
-
-        if (logedUser != null) {
-            if (!logedUser.isActivated()) {
-                String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
-                Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
-                return;
+        AtomicReference<User> logedUser = new AtomicReference<>();
+        getExecutorService().execute(()-> {
+            try {
+                logedUser.set(userService.login(this.user));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-            getApplication().setAuthenticatedUser(logedUser, remeberMe);
-            goHome();
-        } else {
-            String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
-            Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
-        }
 
-        setAuthenticating(false);
+            runOnMainThread(()->{
+                if (logedUser.get() != null) {
+                    if (!logedUser.get().isActivated()) {
+                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
+                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                        return;
+                    }
+                    getApplication().setAuthenticatedUser(logedUser.get(), remeberMe);
+                    goHome();
+                } else {
+                    String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
+                    Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
+                }
+
+                setAuthenticating(false);
+            });
+        });
     }
 
     private boolean AppHasUser() {

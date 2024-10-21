@@ -155,7 +155,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
                 if (mentorship.isPatientEvaluation()) {
                     mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
                     for (Answer answer : mentorship.getAnswers()) {
-                        String cat = answer.getQuestion().getQuestionsCategory().getCategory();
+                        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
                         if (categoryAlreadyExists(cat, summaries)){
                             doCountInCategory(cat, summaries, answer);
                         } else {
@@ -211,7 +211,8 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     private SessionSummary initSessionSummary(Answer answer) {
         SessionSummary sessionSummary = new SessionSummary();
-        sessionSummary.setTitle(answer.getQuestion().getQuestionsCategory().getCategory());
+        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
+        sessionSummary.setTitle(cat);
 
         if (answer.getValue().equals("SIM")) {
             sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);

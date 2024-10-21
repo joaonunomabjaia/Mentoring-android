@@ -4,8 +4,8 @@
 
     <data>
         <variable
-            name="formQuestion"
-            type="mz.org.csaude.mentoring.model.formQuestion.FormQuestion" />
+            name="formSectionQuestion"
+            type="mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion" />
         <variable
             name="viewModel"
             type="mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM" />
@@ -26,7 +26,7 @@
             android:id="@+id/ronda_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{formQuestion.question.question}"
+            android:text="@{formSectionQuestion.question.question}"
             android:textSize="@dimen/text_size_question"
             android:drawablePadding="@dimen/dimen_8dp"
             android:textColor="@color/colorPrimaryDark"
@@ -53,8 +53,8 @@
                     android:layout_weight="2"
                     android:layout_width="@dimen/dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "SIM")}'
-                    android:checked='@{formQuestion.answer.value.equals("SIM")}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "SIM")}'
+                    android:checked='@{formSectionQuestion.answer.value.equals("SIM")}'
                     android:text="@string/yes"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="SIM"/>
@@ -65,8 +65,8 @@
                     android:layout_weight="2"
                     android:layout_width="@dimen/dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "NAO")}'
-                    android:checked='@{formQuestion.answer.value.equals("NAO")}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "NAO")}'
+                    android:checked='@{formSectionQuestion.answer.value.equals("NAO")}'
                     android:text="@string/no"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="NAO"/>
@@ -77,9 +77,9 @@
                     android:layout_weight="2"
                     android:layout_width="@dimen/dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:visibility='@{formQuestion.responseType.code.equals("SIM/NAO/NA") ? View.VISIBLE : View.GONE}'
-                    android:onClick='@{() -> viewModel.setQuestionAnswer(formQuestion, "N/A")}'
-                    android:checked='@{formQuestion.answer.value.equals("N/A")}'
+                    android:visibility='@{formSectionQuestion.responseType.code.equals("SIM/NAO/NA") ? View.VISIBLE : View.GONE}'
+                    android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "N/A")}'
+                    android:checked='@{formSectionQuestion.answer.value.equals("N/A")}'
                     android:text="@string/na"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="N/A"/>

@@ -10,40 +10,45 @@ import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.question.QuestionDTO;
+import mz.org.csaude.mentoring.model.program.Program;
 
 @Entity(tableName = Question.TABLE_NAME,
         foreignKeys = {
-                @ForeignKey(entity = QuestionsCategory.class,
+                @ForeignKey(entity = Program.class,
                         parentColumns = "id",
-                        childColumns = Question.COLUMN_QUESTION_CATEGORY,
+                        childColumns = Question.COLUMN_PROGRAM,
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
                 @Index(value = {Question.COLUMN_CODE}),
-                @Index(value = {Question.COLUMN_QUESTION_CATEGORY})
+                @Index(value = {Question.COLUMN_PROGRAM})
         })
 public class Question extends BaseModel {
 
     public static final String TABLE_NAME = "question";
     public static final String COLUMN_CODE = "code";
+    public static final String COLUMN_TABLE_CODE = "table_code";
     public static final String COLUMN_QUESTION = "question";
-    public static final String COLUMN_QUESTION_CATEGORY = "question_category_id";
+    public static final String COLUMN_PROGRAM = "program_id";
 
     @NonNull
     @ColumnInfo(name = COLUMN_CODE)
     private String code;
 
     @NonNull
+    @ColumnInfo(name = COLUMN_TABLE_CODE)
+    private String tableCode;
+
+    @NonNull
     @ColumnInfo(name = COLUMN_QUESTION)
     private String question;
 
     @NonNull
-    @ColumnInfo(name = COLUMN_QUESTION_CATEGORY)
-    private Integer questionCategoryId;
+    @ColumnInfo(name = COLUMN_PROGRAM)
+    private Integer programId;
 
     @Ignore
-    @Relation(parentColumn = COLUMN_QUESTION_CATEGORY, entityColumn = "id")
-    private QuestionsCategory questionsCategory;
+    private Program program;
 
     public Question() {
     }
@@ -52,11 +57,13 @@ public class Question extends BaseModel {
     public Question(QuestionDTO questionDTO) {
         super(questionDTO);
         this.setCode(questionDTO.getCode());
-        if (questionDTO.getQuestion() != null) this.setQuestion(questionDTO.getQuestion());
-        if (questionDTO.getQuestionCategory() != null) {
-            this.setQuestionsCategory(new QuestionsCategory(questionDTO.getQuestionCategory()));
-            this.questionCategoryId = this.questionsCategory.getId();
-        }
+        this.setQuestion(questionDTO.getQuestion());
+        this.setTableCode(questionDTO.getTableCode());
+        this.setProgram(new Program(questionDTO.getProgramUuid()));
+    }
+
+    public Question(String uuid) {
+        super(uuid);
     }
 
     public String getCode() {
@@ -67,10 +74,6 @@ public class Question extends BaseModel {
         return question;
     }
 
-    public QuestionsCategory getQuestionsCategory() {
-        return questionsCategory;
-    }
-
     public void setCode(String code) {
         this.code = code;
     }
@@ -79,17 +82,30 @@ public class Question extends BaseModel {
         this.question = question;
     }
 
-    public void setQuestionsCategory(QuestionsCategory questionsCategory) {
-        this.questionsCategory = questionsCategory;
-        this.questionCategoryId = questionsCategory.getId();
+    @NonNull
+    public String getTableCode() {
+        return tableCode;
     }
 
-    public Integer getQuestionCategoryId() {
-        return questionCategoryId;
+    public void setTableCode(@NonNull String tableCode) {
+        this.tableCode = tableCode;
     }
 
-    public void setQuestionCategoryId(Integer questionCategoryId) {
-        this.questionCategoryId = questionCategoryId;
+    @NonNull
+    public Integer getProgramId() {
+        return programId;
     }
 
+    public void setProgramId(@NonNull Integer programId) {
+        this.programId = programId;
+    }
+
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+        this.programId = program.getId();
+    }
 }
