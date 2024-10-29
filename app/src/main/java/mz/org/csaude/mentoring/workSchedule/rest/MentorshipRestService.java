@@ -32,16 +32,9 @@ public class MentorshipRestService extends BaseRestService {
         List<Mentorship> mentorships = null;
         try {
             mentorships = getApplication().getMentorshipService().getAllNotSynced(getApplication());
+
         if (Utilities.listHasElements(mentorships)) {
-            for (Mentorship mentorship : mentorships) {
-                List<Answer> answers = getApplication().getAnswerService().getAllOfMentorship(mentorship);
-                for (Answer answer: answers) {
-                    answer.setMentorship(mentorship);
-                }
-                mentorship.setAnswers(answers);
-            }
-            List<MentorshipDTO> mentorshipDTOList = Utilities.parse(mentorships, MentorshipDTO.class);
-            Call<List<MentorshipDTO>> mentorshipsCall = syncDataService.postMenthorships(mentorshipDTOList);
+            Call<List<MentorshipDTO>> mentorshipsCall = syncDataService.postMenthorships(Utilities.parse(mentorships, MentorshipDTO.class));
             mentorshipsCall.enqueue(new Callback<List<MentorshipDTO>>() {
                 @Override
                 public void onResponse(Call<List<MentorshipDTO>> call, Response<List<MentorshipDTO>> response) {

@@ -11,8 +11,8 @@ import androidx.work.WorkerParameters;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -24,110 +24,120 @@ import mz.org.csaude.mentoring.util.Http;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 
-public abstract class BaseWorker<T extends BaseModel> extends Worker implements SearchPaginator<T>, RestResponseListener<T> {
+public abstract class BaseWorker<T extends BaseModel> extends Worker
+        implements SearchPaginator<T>, RestResponseListener<T> {
 
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final AtomicBoolean hasFailed = new AtomicBoolean(false);
 
     public static final int RECORDS_PER_SEARCH = 200;
-    protected int offset = 0;
     public static final String WORK_STATUS_PERFORMING = "PERFORMING";
     public static final String WORK_STATUS_FINISHED = "FINISHED";
     public static final String WORK_STATUS_STARTING = "STARTING";
-    protected String workStatus;
-    public static Application app;
+
+    protected int offset = 0;
     protected long newRecsQty;
     protected long updatedRecsQty;
     protected int notificationId;
+    protected String workStatus;
+    protected String requestType;
 
     protected ExecutorThreadProvider executorThreadProvider;
-
     protected Context context;
-
-    protected String requestType;
 
     public BaseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        setWorkStatus(WORK_STATUS_STARTING);
-        this.executorThreadProvider = ExecutorThreadProvider.getInstance();
-
         this.context = context;
         this.notificationId = ThreadLocalRandom.current().nextInt();
-
-        requestType = getInputData().getString("requestType");
+        this.executorThreadProvider = ExecutorThreadProvider.getInstance();
+        this.requestType = getInputData().getString("requestType");
+        this.workStatus = WORK_STATUS_STARTING;
     }
 
     protected MentoringApplication getApplication() {
         return (MentoringApplication) getApplicationContext();
     }
+
     @Override
     public Result doWork() {
         try {
             doOnStart();
-
             changeStatusToPerforming();
-            fullLoadRecords();        } catch (SQLException e) {
-            e.printStackTrace();
-            return Result.failure();
-        }
+            fullLoadRecords();
+            waitUntilFinished();
 
-        while (isRunning()) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (hasFailed.get()) {
+                return Result.failure();
             }
+            return Result.success();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            hasFailed.set(true);  // Mark as failed
+            return Result.failure();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Result.retry();
         }
+    }
 
-        return Result.success();
+    private void waitUntilFinished() throws InterruptedException {
+        while (isRunning.get()) {
+            Thread.sleep(2000); // Non-blocking delay
+        }
     }
 
     protected abstract void doOnStart();
 
     protected void issueNotification(String channel, String msg, boolean progressStatus) throws InterruptedException {
-        Utilities.issueNotification(NotificationManagerCompat.from(getApplicationContext()), getApplicationContext(), msg, channel, progressStatus, this.notificationId);
+        Utilities.issueNotification(
+                NotificationManagerCompat.from(getApplicationContext()),
+                getApplicationContext(), msg, channel, progressStatus, this.notificationId
+        );
     }
 
     @Override
     public List<T> doSearch(long offset, long limit) throws SQLException {
-        return null;
+        return null;  // Override in subclasses with actual logic
     }
 
     @Override
     public void displaySearchResults() {
-
+        // Optional override
     }
 
     @Override
     public AbstractSearchParams<T> initSearchParams() {
-        return null;
+        return null;  // Override in subclasses with actual logic
     }
 
     protected void fullLoadRecords() throws SQLException {
-        this.executorThreadProvider.getExecutorService().execute(() -> {
+        isRunning.set(true);
+        executorThreadProvider.getExecutorService().execute(() -> {
             try {
-                doOnlineSearch(this.offset, RECORDS_PER_SEARCH);
+                doOnlineSearch(offset, RECORDS_PER_SEARCH);
             } catch (SQLException e) {
                 e.printStackTrace();
+                hasFailed.set(true);  // Mark as failed on exception
+            } finally {
+                isRunning.set(false);  // Ensure state cleanup
             }
         });
     }
 
     protected void doAfterSearch(String flag, List<T> recs) throws SQLException {
-        if ((Utilities.listHasElements(recs) || flag.equals(BaseRestService.REQUEST_SUCESS)) && recs.size() < RECORDS_PER_SEARCH) {
+        if ((Utilities.listHasElements(recs) || flag.equals(BaseRestService.REQUEST_SUCESS))
+                && recs.size() < RECORDS_PER_SEARCH) {
             changeStatusToFinished();
             doOnFinish();
         } else if (Utilities.listHasElements(recs) || flag.equals(BaseRestService.REQUEST_SUCESS)) {
-            this.newRecsQty = this.newRecsQty + recs.size();
-            this.offset = this.offset + RECORDS_PER_SEARCH;
+            newRecsQty += recs.size();
+            offset += RECORDS_PER_SEARCH;
             doSave(recs);
-            fullLoadRecords();
+            fullLoadRecords();  // Continue loading records
         } else {
             changeStatusToFinished();
             doOnFinish();
         }
-    }
-
-    protected boolean hasNewRescs () {
-        return getNewRecsQty() > 0 || getUpdatedRecsQty() > 0;
     }
 
     protected abstract void doOnFinish();
@@ -136,67 +146,51 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker implements 
 
     @Override
     public void doOnRestSucessResponse(String flag) {
-
+        // Optional override
     }
 
     @Override
     public void doOnRestErrorResponse(String errormsg) {
+        hasFailed.set(true);  // Mark as failed
         changeStatusToFinished();
         doOnFinish();
     }
 
     @Override
     public void doOnRestSucessResponseObjects(String flag, List<T> objects) {
-
+        // Optional override
     }
 
     @Override
     public void doOnResponse(String flag, List<T> objects) {
         try {
             doAfterSearch(flag, objects);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            hasFailed.set(true);  // Mark as failed on exception
         }
     }
 
     @Override
     public void onResponse(String flag, HashMap<String, Object> result) {
-
+        // Optional override
     }
 
-    public long getUpdatedRecsQty() {
-        return updatedRecsQty;
+    public void changeStatusToPerforming() {
+        workStatus = WORK_STATUS_PERFORMING;
     }
 
-    public long getNewRecsQty() {
-        return newRecsQty;
+    public void changeStatusToFinished() {
+        workStatus = WORK_STATUS_FINISHED;
+        isRunning.set(false);  // Ensure the worker is marked as finished
     }
 
-    public void setNewRecsQty(long newRecsQty) {
-        this.newRecsQty = newRecsQty;
+    public boolean isRunning() {
+        return isRunning.get();
     }
 
-    protected void changeStatusToPerforming () {
-        this.setWorkStatus(WORK_STATUS_PERFORMING);
-    }
-
-    protected void changeStatusToFinished () {
-        this.setWorkStatus(WORK_STATUS_FINISHED);
-    }
-
-    protected boolean isRunning () {
-        return this.workStatus.equals(WORK_STATUS_PERFORMING);
-    }
-
-    public String getWorkStatus() {
-        return workStatus;
-    }
-
-    public void setWorkStatus(String workStatus) {
-        this.workStatus = workStatus;
-    }
-
-    protected boolean isPOSTRequest() {
-        return Utilities.stringHasValue(requestType) && requestType.equalsIgnoreCase(String.valueOf(Http.POST));
+    public boolean isPOSTRequest() {
+        return Utilities.stringHasValue(requestType)
+                && requestType.equalsIgnoreCase(String.valueOf(Http.POST));
     }
 }

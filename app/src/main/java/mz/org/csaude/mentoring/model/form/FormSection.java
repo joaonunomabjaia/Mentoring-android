@@ -140,6 +140,6 @@ public class FormSection extends BaseModel implements Listble {
 
     @Override
     public String getDescription() {
-        return this.getSection().getDescription();
+        return "[Secção: "+this.getSequence()+"] - "+this.getSection().getDescription();
     }
 }

@@ -105,7 +105,7 @@ public interface SyncDataService {
     @POST("tutored/save")
     Call<TutoredDTO> postTutored(@Body TutoredDTO tutoredDTO);
 
-    @POST("tutored/saveMany")
+    @PATCH("tutored/batch-update")
     Call<List<TutoredDTO>> postTutoreds(@Body List<TutoredDTO> tutoredDTOS);
     @GET("rondaTypes/getall")
     Call<List<RondaTypeDTO>> getRondaTypes();

@@ -7,6 +7,7 @@
         <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
         <import type="android.view.View"/>
     </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
@@ -15,20 +16,26 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout2"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:elevation="6dp"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/app_toolbar" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
             android:id="@+id/linearLayout4"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:padding="@dimen/dimen_15dp"
             android:orientation="vertical"
+            android:padding="@dimen/dimen_15dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,28 +55,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/shape_normal"
-                        android:padding="3dp"
                         android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="3dp">
 
                         <TextView
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
+                            android:gravity="center_vertical|left"
+                            android:paddingLeft="@dimen/dimen_10dp"
                             android:text="@string/strong_points"
                             android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/btn_collapse_pontos_fortes"
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="match_parent"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:background="@color/background_layout"
+                            android:src="@drawable/baseline_expand_circle_down_24" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -80,26 +87,26 @@
                         android:padding="@dimen/dimen_4dp">
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/strong_points"
-                            style="@style/input_labels"/>
+                            android:text="@string/strong_points" />
 
                         <EditText
                             android:id="@+id/inp_pontos_fortes"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="8"
-                            android:padding="3dp"
-                            android:overScrollMode="always"
-                            android:imeOptions="actionDone"
                             android:layout_marginTop="@dimen/dimen_4dp"
-                            android:text="@={viewModel.sessionStrongPoints}"
                             android:background="@drawable/listble_shape"
-                            android:scrollbars="vertical"/>
+                            android:gravity="top|start"
+                            android:imeOptions="actionDone"
+                            android:inputType="textMultiLine"
+                            android:maxLines="8"
+                            android:minLines="4"
+                            android:overScrollMode="always"
+                            android:padding="3dp"
+                            android:scrollbars="vertical"
+                            android:text="@={viewModel.sessionStrongPoints}" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -108,29 +115,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/dimen_10dp"
                         android:background="@drawable/shape_normal"
-                        android:padding="3dp"
                         android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="3dp">
 
                         <TextView
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
+                            android:gravity="center_vertical|left"
+                            android:paddingLeft="@dimen/dimen_10dp"
                             android:text="@string/points_to_improve"
                             android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/btn_collapse_aspectos_melhorar"
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:background="@color/background_layout"
+                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
+                            android:src="@drawable/baseline_expand_circle_down_24" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -141,26 +148,26 @@
                         android:padding="@dimen/dimen_4dp">
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/points_to_improve"
-                            style="@style/input_labels"/>
+                            android:text="@string/points_to_improve" />
 
                         <EditText
                             android:id="@+id/inp_aspectos_por_melhorar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="8"
-                            android:overScrollMode="always"
-                            android:imeOptions="actionDone"
-                            android:padding="3dp"
                             android:layout_marginTop="@dimen/dimen_4dp"
-                            android:text="@={viewModel.pointsToImprove}"
                             android:background="@drawable/listble_shape"
-                            android:scrollbars="vertical"/>
+                            android:gravity="top|start"
+                            android:imeOptions="actionDone"
+                            android:inputType="textMultiLine"
+                            android:maxLines="8"
+                            android:minLines="4"
+                            android:overScrollMode="always"
+                            android:padding="3dp"
+                            android:scrollbars="vertical"
+                            android:text="@={viewModel.pointsToImprove}" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -169,29 +176,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/dimen_10dp"
                         android:background="@drawable/shape_normal"
-                        android:padding="3dp"
                         android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="3dp">
 
                         <TextView
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
+                            android:gravity="center_vertical|left"
+                            android:paddingLeft="@dimen/dimen_10dp"
                             android:text="@string/work_plan"
                             android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/btn_collapse_plano_trabalho"
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:background="@color/background_layout"
+                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
+                            android:src="@drawable/baseline_expand_circle_down_24" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -202,26 +209,26 @@
                         android:padding="@dimen/dimen_4dp">
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/work_plan"
-                            style="@style/input_labels"/>
+                            android:text="@string/work_plan" />
 
                         <EditText
                             android:id="@+id/inp_plano_para_melhorar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="8"
-                            android:overScrollMode="always"
-                            android:imeOptions="actionDone"
-                            android:padding="3dp"
                             android:layout_marginTop="@dimen/dimen_4dp"
-                            android:text="@={viewModel.workPlan}"
                             android:background="@drawable/listble_shape"
-                            android:scrollbars="vertical"/>
+                            android:gravity="top|start"
+                            android:imeOptions="actionDone"
+                            android:inputType="textMultiLine"
+                            android:maxLines="8"
+                            android:minLines="4"
+                            android:overScrollMode="always"
+                            android:padding="3dp"
+                            android:scrollbars="vertical"
+                            android:text="@={viewModel.workPlan}" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -230,9 +237,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/dimen_10dp"
                         android:background="@drawable/shape_normal"
-                        android:padding="3dp"
                         android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="3dp">
 
                         <TextView
                             android:layout_width="@dimen/dimen_0dp"
@@ -242,17 +249,17 @@
                             android:paddingLeft="@dimen/dimen_10dp"
                             android:text="@string/observations"
                             android:textColor="@color/white"
-                            android:textSize="15sp"/>
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/btn_observacoes"
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:background="@color/background_layout"
+                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
+                            android:src="@drawable/baseline_expand_circle_down_24" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -263,26 +270,26 @@
                         android:padding="@dimen/dimen_4dp">
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/observations"
-                            style="@style/input_labels"/>
+                            android:text="@string/observations" />
 
                         <EditText
                             android:id="@+id/inp_observacoes"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textMultiLine"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="8"
-                            android:overScrollMode="always"
-                            android:imeOptions="actionDone"
-                            android:padding="3dp"
                             android:layout_marginTop="@dimen/dimen_4dp"
-                            android:text="@={viewModel.obsevations}"
                             android:background="@drawable/listble_shape"
-                            android:scrollbars="vertical"/>
+                            android:gravity="top|start"
+                            android:imeOptions="actionDone"
+                            android:inputType="textMultiLine"
+                            android:maxLines="8"
+                            android:minLines="4"
+                            android:overScrollMode="always"
+                            android:padding="3dp"
+                            android:scrollbars="vertical"
+                            android:text="@={viewModel.obsevations}" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -290,29 +297,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/dimen_10dp"
                         android:background="@drawable/shape_normal"
-                        android:padding="3dp"
                         android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="3dp">
 
                         <TextView
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="8"
+                            android:gravity="center_vertical|left"
+                            android:paddingLeft="@dimen/dimen_10dp"
                             android:text="@string/session_end_date"
                             android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
+                            android:textSize="15sp" />
 
                         <ImageButton
                             android:id="@+id/btn_collapse_data_fim"
                             android:layout_width="@dimen/dimen_0dp"
                             android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
                             android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:background="@color/background_layout"
+                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
+                            android:src="@drawable/baseline_expand_circle_down_24" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -323,35 +330,36 @@
                         android:padding="@dimen/dimen_4dp">
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/session_end_date"
-                            style="@style/input_labels"/>
+                            android:text="@string/session_end_date" />
 
                         <EditText
                             android:id="@+id/session_end_date"
+                            style="@style/bottom_border_edit_text_style"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:focusableInTouchMode="false"
                             android:drawableLeft="@drawable/ic_calendar"
-                            android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.endDate)}"
-                            style="@style/bottom_border_edit_text_style"/>
+                            android:focusableInTouchMode="false"
+                            android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.endDate)}" />
 
                         <TextView
+                            style="@style/input_labels"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/next_session_date"
-                            style="@style/input_labels"/>
+                            android:visibility="@{!viewModel.FourthSession ? View.VISIBLE : View.GONE}" />
 
                         <EditText
                             android:id="@+id/next_session_date"
+                            style="@style/bottom_border_edit_text_style"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:focusableInTouchMode="false"
-                            android:visibility="@{!viewModel.FourthSession ? View.VISIBLE : View.GONE}"
                             android:drawableLeft="@drawable/ic_calendar"
+                            android:focusableInTouchMode="false"
                             android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.nextSessionDate)}"
-                            style="@style/bottom_border_edit_text_style"/>
+                            android:visibility="@{!viewModel.FourthSession ? View.VISIBLE : View.GONE}" />
                     </LinearLayout>
                 </LinearLayout>
             </ScrollView>
@@ -363,12 +371,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
-            android:contentDescription="@string/submit"
+            android:layout_weight="1"
             android:background="@color/background_layout"
+            android:contentDescription="@string/submit"
             android:onClick="@{()->viewModel.nextStep()}"
             android:src="@drawable/baseline_arrow_forward_ios_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_weight="1"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

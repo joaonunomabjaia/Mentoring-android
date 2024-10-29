@@ -234,6 +234,7 @@
     <string name="remover">Remover</string>
     <string name="record_sucessfully_removed">Registro removido com sucesso.</string>
     <string name="session_start_date_error">A data de início da sessão não pode ser anterior à data de início da ronda.</string>
+    <string name="prev_session_start_date_error">A data de início da sessão não pode ser anterior à data de termino da sessão anterior.</string>
     <string name="select_competence_table">Por favor, selecione uma tabela de competências.</string>
     <string name="print_success">Resumo impresso com sucesso. Encontre o documento no diretório de downloads.</string>
     <string name="print_failure">Não foi possível imprimir o documento.</string>
@@ -249,6 +250,9 @@
     <string name="cannot_delete_completed_session">Não pode apagar uma sessão de mentoria completa.</string>
     <string name="cannot_delete_with_evaluations">Não pode apagar uma sessão de mentoria com avaliações criadas.</string>
     <string name="next_session_date">Data da proxima Sessão</string>
+    <string name="session_next_date_before_end">A data da próxima sessão não deve ser anterior à data de termino da sessão.</string>
+    <string name="cannot_create_new_session_with_onpen_session">Não pode criar uma nova sessão antes de concluir a sessão em curso.</string>
+    <string name="session_end_date_null">A data de término da sessão não pode ser nula. Por favor, especifique uma data de término válida.</string>
 
     <string-array name="languages">
         <item>Inglês</item>

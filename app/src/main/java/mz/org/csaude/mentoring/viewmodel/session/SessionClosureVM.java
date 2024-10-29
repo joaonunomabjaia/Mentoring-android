@@ -20,6 +20,9 @@ import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.model.session.SessionStatus;
+import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.session.SessionClosureActivity;
 import mz.org.csaude.mentoring.view.session.SessionEAResourceActivity;
@@ -125,8 +128,21 @@ public class SessionClosureVM extends BaseViewModel {
 
         getExecutorService().execute(() -> {
             try {
+                session.setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.COMPLETE));
+                session.setSyncStatus(SyncSatus.PENDING);
+
+                // Check if the end date is null
+                if (session.getEndDate() == null) {
+                    getRelatedActivity().runOnUiThread(() -> {
+                        if (progress != null && progress.isShowing()) progress.dismiss();
+                        String errorMessage = getRelatedActivity().getString(R.string.session_end_date_null);
+                        Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                    });
+                    return;
+                }
+
                 // Validation logic
-                if (session.getEndDate().before(session.getStartDate())) {
+                if (DateUtilities.isDateBeforeIgnoringTime(session.getEndDate(), session.getStartDate())) {
                     getRelatedActivity().runOnUiThread(() -> {
                         if (progress != null && progress.isShowing()) progress.dismiss();
                         String errorMessage = getRelatedActivity().getString(R.string.session_end_date_before_start);
@@ -142,6 +158,18 @@ public class SessionClosureVM extends BaseViewModel {
                         Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                     });
                     return;
+                }
+
+                if (session.getNextSessionDate() != null) {
+
+                    if (DateUtilities.isDateBeforeIgnoringTime(session.getNextSessionDate(), session.getEndDate())) {
+                        getRelatedActivity().runOnUiThread(() -> {
+                            if (progress != null && progress.isShowing()) progress.dismiss();
+                            String errorMessage = getRelatedActivity().getString(R.string.session_next_date_before_end);
+                            Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                        });
+                        return;
+                    }
                 }
 
                 // Perform updates in the background
@@ -173,7 +201,7 @@ public class SessionClosureVM extends BaseViewModel {
 
     private boolean sessionCloseDateBeforeLastMentorship() {
         for (Mentorship mentorship : session.getMentorships()) {
-            if (session.getEndDate().before(mentorship.getEndDate())) {
+            if (DateUtilities.isDateBeforeIgnoringTime(session.getEndDate(), mentorship.getEndDate())) {
                 return true;
             }
         }

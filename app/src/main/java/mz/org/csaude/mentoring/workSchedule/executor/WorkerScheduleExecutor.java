@@ -284,6 +284,7 @@ public class WorkerScheduleExecutor {
         PeriodicWorkRequest periodicSyncWorkRequest = new PeriodicWorkRequest.Builder(SessionPOSTWorker.class, intervalMinutes, TimeUnit.MINUTES)
                 .addTag("PERIODIC_SYNC")
                 .setConstraints(constraints)
+                .setInitialDelay(8, TimeUnit.HOURS)
                 .build();
 
         workManager.enqueueUniquePeriodicWork("PERIODIC_SYNC", ExistingPeriodicWorkPolicy.REPLACE, periodicSyncWorkRequest);
@@ -329,11 +330,18 @@ public class WorkerScheduleExecutor {
                 .addTag("USER_INFO_UPDATE_" + jobId)
                 .build();
 
+        OneTimeWorkRequest tutoredUpdateWorkRequest = new OneTimeWorkRequest.Builder(TutoredWorker.class)
+                .addTag("MENTEE_UPDATE_" + jobId)
+                .setInputData(inputData)
+                .build();
+
+
         // Chain WorkRequests
         workManager.beginUniqueWork("   MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaPostWorkRequest)
                 .then(sessionPostWorkRequest)
                 .then(mentorshipPostWorkRequest)
                 .then(sessionRecommendedWorkRequest)
+                .then(tutoredUpdateWorkRequest)
                 .then(userInfoUpdateWorkRequest)
                 .enqueue();
 

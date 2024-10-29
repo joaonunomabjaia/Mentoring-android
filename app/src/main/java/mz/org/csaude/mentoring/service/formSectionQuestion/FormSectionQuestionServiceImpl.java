@@ -62,7 +62,12 @@ public class FormSectionQuestionServiceImpl extends BaseServiceImpl<FormSectionQ
 
     @Override
     public FormSectionQuestion getById(int id) throws SQLException {
-        return this.formSectionQuestionDAO.queryForId(id);
+        FormSectionQuestion formSectionQuestion = this.formSectionQuestionDAO.queryForId(id);
+        formSectionQuestion.setQuestion(questionDAO.queryForId(formSectionQuestion.getQuestionId()));
+        formSectionQuestion.getQuestion().setProgram(getApplication().getProgramService().getById(formSectionQuestion.getQuestion().getProgramId()));
+        formSectionQuestion.setFormSection(getApplication().getFormSectionService().getById(formSectionQuestion.getFormSectionId()));
+        formSectionQuestion.getFormSection().setSection(getApplication().getSectionService().getById(formSectionQuestion.getFormSection().getSectionId()));
+        return formSectionQuestion;
     }
 
     @Override

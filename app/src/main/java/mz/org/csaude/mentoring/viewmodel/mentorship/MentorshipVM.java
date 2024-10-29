@@ -312,8 +312,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             } else {
                 this.mentorship.setTutored(this.session.getTutored());
             }
-
-            if (this.mentorship.getStartDate().before(this.mentorship.getSession().getStartDate())) {
+            if (DateUtilities.isDateBeforeIgnoringTime(this.mentorship.getStartDate(), this.mentorship.getSession().getStartDate())) {
                 Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.mentorship_start_date_error)).show();
                 return;
             }
@@ -333,12 +332,16 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.mentorship_start_date_empty)).show();
             return false;
         }
-        if (this.mentorship.getStartDate().before(this.mentorship.getSession().getStartDate())) {
+        if (this.mentorship.getSession().getRonda().isRondaZero()) {
+            this.mentorship.getSession().setStartDate(this.mentorship.getStartDate());
+        }
+        if (DateUtilities.isDateBeforeIgnoringTime(this.mentorship.getStartDate(), this.mentorship.getSession().getStartDate())) {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.mentorship_start_date_error)).show();
             return false;
 
         }
-        if (this.mentorship.getStartDate().after(DateUtilities.getCurrentDate())) {
+
+        if (DateUtilities.isDateAfterIgnoringTime(this.mentorship.getStartDate(), DateUtilities.getCurrentDate())) {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.mentorship_start_date_future)).show();
             return false;
         }
@@ -723,7 +726,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 }
             }
 
-            if (this.mentorship.getStartDate().before(this.mentorship.getSession().getStartDate())) {
+            if (DateUtilities.isDateBeforeIgnoringTime(this.mentorship.getStartDate(), this.mentorship.getSession().getStartDate())) {
                 runOnMainThread(()->{
                     Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.mentorship_start_date_error)).show();
                 });
@@ -738,11 +741,11 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             }
 
             this.mentorship.getSession().addMentorship(this.mentorship);
-            if (this.mentorship.getSession().canBeClosed()) {
+            /*if (this.mentorship.getSession().canBeClosed()) {
                 this.mentorship.getSession().setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.COMPLETE));
                 this.mentorship.getSession().setEndDate(DateUtilities.getCurrentDate());
                 this.mentorship.getSession().setSyncStatus(SyncSatus.PENDING);
-            }
+            }*/
 
             this.ronda.setSessions(getApplication().getSessionService().getAllOfRonda(this.ronda));
             this.ronda.addSession(this.mentorship.getSession());
@@ -751,7 +754,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             getApplication().getMentorshipService().save(this.mentorship);
             Log.i("Saved Mentorship", this.mentorship.toString());
             if (isMentoringMentorship()) {
-                if (this.mentorship.getSession().isCompleted()) {
+                if (this.mentorship.getSession().canBeClosed()) {
                     runOnMainThread(()->initSessionClosure(this.mentorship.getSession()));
                 } else {
                     if (this.mentorship.isPatientEvaluation()) {

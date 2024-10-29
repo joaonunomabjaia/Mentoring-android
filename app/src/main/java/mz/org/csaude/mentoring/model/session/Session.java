@@ -337,19 +337,19 @@ public class Session extends BaseModel {
         this.rondaId = rondaId;
     }
 
-    public int getMenteeId() {
+    public Integer getMenteeId() {
         return menteeId;
     }
 
-    public void setMenteeId(int menteeId) {
+    public void setMenteeId(Integer menteeId) {
         this.menteeId = menteeId;
     }
 
-    public int getFormId() {
+    public Integer getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(Integer formId) {
         this.formId = formId;
     }
 

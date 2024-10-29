@@ -304,6 +304,7 @@ public class Mentorship extends BaseModel {
         this.doorId = door.getId();
     }
 
+    @JsonIgnore
     public String getEvaluationTypeDescription() {
         return "Avaliação de " + evaluationType.getDescription();
     }
@@ -421,27 +422,27 @@ public class Mentorship extends BaseModel {
         this.sessionId = sessionId;
     }
 
-    public int getCabinetId() {
+    public Integer getCabinetId() {
         return cabinetId;
     }
 
-    public void setCabinetId(int cabinetId) {
+    public void setCabinetId(Integer cabinetId) {
         this.cabinetId = cabinetId;
     }
 
-    public int getEvaluationTypeId() {
+    public Integer getEvaluationTypeId() {
         return evaluationTypeId;
     }
 
-    public void setEvaluationTypeId(int evaluationTypeId) {
+    public void setEvaluationTypeId(Integer evaluationTypeId) {
         this.evaluationTypeId = evaluationTypeId;
     }
 
-    public int getDoorId() {
+    public Integer getDoorId() {
         return doorId;
     }
 
-    public void setDoorId(int doorId) {
+    public void setDoorId(Integer doorId) {
         this.doorId = doorId;
     }
 }

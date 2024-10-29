@@ -193,7 +193,18 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
 
     @Override
     public List<Mentorship> getAllNotSynced(Application application) throws SQLException {
-        return this.mentorshipDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        List<Mentorship> mentorships = this.mentorshipDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        for (Mentorship mentorship : mentorships) {
+            mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSessionId()));
+            mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
+            mentorship.setTutored(getApplication().getTutoredService().getById(mentorship.getTutoredId()));
+            mentorship.setTutor(getApplication().getTutorService().getById(mentorship.getTutorId()));
+            mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
+            mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+            mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
+            mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+        }
+        return mentorships;
     }
 
     @Override
