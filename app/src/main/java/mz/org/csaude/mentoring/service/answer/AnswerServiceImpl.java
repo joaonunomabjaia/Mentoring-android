@@ -63,6 +63,7 @@ public class AnswerServiceImpl extends BaseServiceImpl<Answer> implements Answer
             answer.setMentorship(mentorship);
             answer.setQuestion(getApplication().getQuestionService().getById(answer.getQuestionId()));
             answer.setForm(getApplication().getFormService().getById(answer.getFormId()));
+            answer.setFormSectionQuestion(getApplication().getFormSectionQuestionService().getById(answer.getFormSectionQuestionId()));
         }
         return answers;
     }

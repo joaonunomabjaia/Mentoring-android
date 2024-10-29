@@ -283,7 +283,7 @@
                             android:paddingHorizontal="@dimen/dimen_4dp"
                             android:layout_gravity="center_vertical"
                             style="@style/bottom_spinner_style"
-                            bind:selectedOpt="@={viewModel.currQuestionCategory}"/>
+                            bind:selectedOpt="@={viewModel.currentFormSection}"/>
                     </LinearLayout>
 
                     <ScrollView

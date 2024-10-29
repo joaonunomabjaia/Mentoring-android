@@ -37,6 +37,7 @@ public class Door extends BaseModel {
         this.setCode(doorDTO.getCode());
     }
 
+    @Ignore
     public Door(String description, String code) {
         this.description = description;
         this.code = code;

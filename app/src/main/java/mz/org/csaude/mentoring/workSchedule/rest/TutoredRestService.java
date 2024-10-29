@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -83,7 +84,7 @@ public class TutoredRestService extends BaseRestService {
                 @Override
                 public void onResponse(Call<List<TutoredDTO>> call, Response<List<TutoredDTO>> response) {
                     List<TutoredDTO> data = response.body();
-                    if (response.code() == 201) {
+                    if (response.code() == 200) {
                         getServiceExecutor().execute(()-> {
                             try {
                                 List<Tutored> tutoreds = getApplication().getTutoredService().getAllNotSynced();
@@ -105,6 +106,8 @@ public class TutoredRestService extends BaseRestService {
                     Log.i("METADATA LOAD --", t.getMessage(), t);
                 }
             });
+        }else {
+            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
         }
         } catch (SQLException e) {
             throw new RuntimeException(e);

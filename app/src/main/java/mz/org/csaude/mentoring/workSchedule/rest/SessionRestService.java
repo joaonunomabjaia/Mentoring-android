@@ -122,7 +122,7 @@ public class SessionRestService extends BaseRestService {
         for (AnswerDTO answerDTO: answers) {
             Answer answer = new Answer();
             answer.setMentorship(mentorship);
-            answer.setQuestion(getApplication().getQuestionService().getByuuid(answerDTO.getQuestion().getUuid()));
+            answer.setQuestion(getApplication().getQuestionService().getByuuid(answerDTO.getQuestionUUid()));
             answer.setForm(mentorship.getForm());
             answer.setSyncStatus(SyncSatus.SENT);
             answer.setUuid(answerDTO.getUuid());

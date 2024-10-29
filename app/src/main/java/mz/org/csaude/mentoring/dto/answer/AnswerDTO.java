@@ -13,11 +13,13 @@ public class AnswerDTO extends BaseEntityDTO {
 
     private String value;
 
-    private FormDTO form;
+    private String formUuid;
 
-    private MentorshipDTO mentorship;
+    private String mentorshipUuid;
 
-    private QuestionDTO question;
+    private String questionUUid;
+
+    private String formSectionQuestionUuid;
 
     public AnswerDTO() {
 
@@ -25,31 +27,18 @@ public class AnswerDTO extends BaseEntityDTO {
     public AnswerDTO(Answer answer) {
         super(answer);
         this.setValue(answer.getValue());
-        if(answer.getForm()!=null) {
-            this.setForm(new FormDTO(answer.getForm()));
+        if (answer.getForm() != null) {
+            this.setFormUuid(answer.getForm().getUuid());
         }
-        if(answer.getQuestion()!=null) {
-            this.setQuestion(new QuestionDTO(answer.getQuestion()));
+        if (answer.getMentorship() != null) {
+            this.setMentorshipUuid(answer.getMentorship().getUuid());
         }
-    }
-
-    public Answer getAnswer() {
-        Answer answer = new Answer();
-        answer.setUuid(this.getUuid());
-        answer.setCreatedAt(this.getCreatedAt());
-        answer.setUpdatedAt(this.getUpdatedAt());
-        answer.setLifeCycleStatus(this.getLifeCycleStatus());
-        answer.setValue(answer.getValue());
-        if(answer.getMentorship()!=null) {
-            answer.setMentorship(new Mentorship(this.getMentorship()));
+        if (answer.getQuestion() != null) {
+            this.setQuestionUUid(answer.getQuestion().getUuid());
         }
-        if(answer.getForm()!=null) {
-            answer.setForm(new Form(this.getForm()));
+        if (answer.getFormSectionQuestion() != null) {
+            this.setFormSectionQuestionUuid(answer.getFormSectionQuestion().getUuid());
         }
-        if(answer.getQuestion()!=null) {
-            answer.setQuestion(new Question(this.getQuestion()));
-        }
-        return answer;
     }
 
     public String getValue() {
@@ -60,27 +49,35 @@ public class AnswerDTO extends BaseEntityDTO {
         this.value = value;
     }
 
-    public FormDTO getForm() {
-        return form;
+    public String getFormUuid() {
+        return formUuid;
     }
 
-    public void setForm(FormDTO form) {
-        this.form = form;
+    public void setFormUuid(String formUuid) {
+        this.formUuid = formUuid;
     }
 
-    public MentorshipDTO getMentorship() {
-        return mentorship;
+    public String getMentorshipUuid() {
+        return mentorshipUuid;
     }
 
-    public void setMentorship(MentorshipDTO mentorship) {
-        this.mentorship = mentorship;
+    public void setMentorshipUuid(String mentorshipUuid) {
+        this.mentorshipUuid = mentorshipUuid;
     }
 
-    public QuestionDTO getQuestion() {
-        return question;
+    public String getQuestionUUid() {
+        return questionUUid;
     }
 
-    public void setQuestion(QuestionDTO question) {
-        this.question = question;
+    public void setQuestionUUid(String questionUUid) {
+        this.questionUUid = questionUUid;
+    }
+
+    public String getFormSectionQuestionUuid() {
+        return formSectionQuestionUuid;
+    }
+
+    public void setFormSectionQuestionUuid(String formSectionQuestionUuid) {
+        this.formSectionQuestionUuid = formSectionQuestionUuid;
     }
 }

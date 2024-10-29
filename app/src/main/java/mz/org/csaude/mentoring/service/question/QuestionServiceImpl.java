@@ -10,6 +10,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.question.QuestionDAO;
 import mz.org.csaude.mentoring.dto.question.QuestionDTO;
+import mz.org.csaude.mentoring.model.program.Program;
 import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 
@@ -52,7 +53,7 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     @Override
     public Question getById(int id) throws SQLException {
         Question question = this.questionDAO.queryForId(id);
-        question.setQuestionsCategory(getApplication().getQuestionsCategoryService().getById(question.getQuestionCategoryId()));
+        question.setProgram(getApplication().getProgramService().getById(question.getProgramId()));
         return question;
     }
 
@@ -67,12 +68,8 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     @Transaction
     public void saveOrUpdateQuestionList(List<Question> questions) throws SQLException {
         for (Question question: questions) {
-            QuestionsCategory qcOnDb = getApplication().getQuestionsCategoryService().getByuuid(question.getQuestionsCategory().getUuid());;
-            if(qcOnDb!=null) {
-                question.setQuestionsCategory(qcOnDb);
-            } else {
-                question.setQuestionsCategory(getApplication().getQuestionsCategoryService().saveOrUpdateQuestionCategory(question.getQuestionsCategory()));
-            }
+            Program qcOnDb = getApplication().getProgramService().getByuuid(question.getProgram().getUuid());;
+            question.setProgram(qcOnDb);
 
             Question qOnDb = this.questionDAO.getByUuid(question.getUuid());
             if(qOnDb!=null) {
@@ -87,8 +84,8 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     @Override
     public Question saveOrUpdateQuestion(QuestionDTO questionDTO) throws SQLException {
         Question q = this.questionDAO.getByUuid(questionDTO.getUuid());
-        Question question = questionDTO.getQuestionObj();
-        question.setQuestionsCategory(getApplication().getQuestionsCategoryService().getByuuid(questionDTO.getQuestionCategory().getUuid()));
+        Question question = new Question(questionDTO);
+        question.setProgram(getApplication().getProgramService().getByuuid(questionDTO.getProgramUuid()));
         if(q!=null) {
             question.setId(q.getId());
             this.update(question);

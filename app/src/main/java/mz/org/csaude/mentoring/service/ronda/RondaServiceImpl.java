@@ -107,7 +107,12 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public List<Ronda> getAllNotSynced() throws SQLException {
-        return this.rondaDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        List<Ronda> rondas = this.rondaDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        for (Ronda ronda: rondas) {
+            ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
+            ronda.setHealthFacility(getApplication().getHealthFacilityService().getById(ronda.getHealthFacilityId()));
+        }
+        return rondas;
     }
 
     @Override
@@ -166,8 +171,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public Ronda getFullyLoadedRonda(Ronda ronda) throws SQLException {
         Ronda r = this.rondaDAO.getByUuid(ronda.getUuid());
-        r.setRondaMentors(this.rondaMentorDAO.getRondaMentors(r.getId()));
-        r.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(r.getId()));
+        r.setRondaMentors(getApplication().getRondaMentorService().getRondaMentors(r));
+        r.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(r));
         r.setSessions(getApplication().getSessionService().getAllOfRonda(r));
         return r;
     }

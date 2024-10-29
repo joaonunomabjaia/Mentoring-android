@@ -30,6 +30,7 @@ public class PartnerDTO extends BaseEntityDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public Partner getPartner() {
         Partner partner = new Partner();
         partner.setUpdatedAt(this.getUpdatedAt());

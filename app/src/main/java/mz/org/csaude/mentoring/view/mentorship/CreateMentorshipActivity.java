@@ -1,29 +1,22 @@
 package mz.org.csaude.mentoring.view.mentorship;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 import mz.org.csaude.mentoring.R;
@@ -37,7 +30,8 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
 import mz.org.csaude.mentoring.model.form.Form;
-import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
+import mz.org.csaude.mentoring.model.form.FormSection;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
@@ -301,7 +295,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
     public void loadCategoryAdapter() {
         // Fetch the categories in a background thread
-            List<Listble> categories = getRelatedViewModel().getCategories();
+            List<FormSection> categories = getRelatedViewModel().getMentorship().getForm().getFormSections();
 
             // Update the UI on the main thread
             runOnUiThread(() -> {
@@ -320,7 +314,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     public void reloadCategoryAdapter() {
         // Fetch the categories in a background thread
         getRelatedViewModel().getExecutorService().execute(() -> {
-            List<Listble> categories = getRelatedViewModel().getCategories();
+            List<FormSection> categories = getRelatedViewModel().getMentorship().getForm().getFormSections();
 
             // Update the UI on the main thread
             runOnUiThread(() -> {
@@ -372,9 +366,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
 
     public void populateQuestionList() {
-        List<FormQuestion> updatedQuestionList = getRelatedViewModel()
-                .getQuestionMap()
-                .get(getRelatedViewModel().getCurrQuestionCategory());
+        List<FormSectionQuestion> updatedQuestionList = ((FormSection) getRelatedViewModel().getCurrentFormSection()).getFormSectionQuestions();
 
 
         if (questionAdapter == null) {

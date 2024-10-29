@@ -1,6 +1,5 @@
 package mz.org.csaude.mentoring.adapter.recyclerview.question;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -14,14 +13,12 @@ import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.generic.AbstractRecycleViewAdapter;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.databinding.QuestionListItemBinding;
-import mz.org.csaude.mentoring.databinding.RondaListItemBinding;
-import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
-import mz.org.csaude.mentoring.model.ronda.Ronda;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.viewmodel.mentorship.MentorshipVM;
 
-public class QuestionAdapter extends AbstractRecycleViewAdapter<FormQuestion> {
+public class QuestionAdapter extends AbstractRecycleViewAdapter<FormSectionQuestion> {
 
-    public QuestionAdapter(RecyclerView recyclerView, List<FormQuestion> records, BaseActivity activity) {
+    public QuestionAdapter(RecyclerView recyclerView, List<FormSectionQuestion> records, BaseActivity activity) {
         super(recyclerView, records, activity);
     }
 
@@ -34,7 +31,7 @@ public class QuestionAdapter extends AbstractRecycleViewAdapter<FormQuestion> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((FormQuestionViewHolder) holder).questionListItemBinding.setFormQuestion(super.records.get(position));
+        ((FormQuestionViewHolder) holder).questionListItemBinding.setFormSectionQuestion(super.records.get(position));
         ((FormQuestionViewHolder) holder).questionListItemBinding.setViewModel((MentorshipVM) getActivity().getRelatedViewModel());
     }
     @Override

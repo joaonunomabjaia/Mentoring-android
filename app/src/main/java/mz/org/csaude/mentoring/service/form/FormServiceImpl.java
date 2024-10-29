@@ -7,13 +7,19 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
+import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
 import mz.org.csaude.mentoring.dao.programmaticArea.TutorProgrammaticAreaDAO;
+import mz.org.csaude.mentoring.dao.section.SectionDAO;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.form.FormSection;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 
 public class FormServiceImpl extends BaseServiceImpl<Form> implements FormService{
     FormDAO formDAO;
     TutorProgrammaticAreaDAO tutorProgrammaticAreaDAO;
+    FormSectionDAO formSectionDAO;
+    SectionDAO sectionDAO;
+
     public FormServiceImpl(Application application) {
         super(application);
     }
@@ -24,6 +30,8 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
             super.init(application);
             this.formDAO = getDataBaseHelper().getFormDAO();
             this.tutorProgrammaticAreaDAO = getDataBaseHelper().getTutorProgrammaticAreaDAO();
+            this.formSectionDAO = getDataBaseHelper().getFormSectionDAO();
+            this.sectionDAO = getDataBaseHelper().getSectionDAO();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -76,6 +84,11 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
             this.update(form);
         } else {
             this.save(form);
+            for (FormSection formSection : form.getFormSections()) {
+                formSection.setForm(form);
+                formSection.setSection(sectionDAO.getByUuid(formSection.getSection().getUuid()));
+                this.formSectionDAO.insert(formSection);
+            }
         }
         return form;
     }
@@ -93,5 +106,11 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
     @Override
     public Form getByuuid(String uuid) throws SQLException {
         return formDAO.getByUuid(uuid);
+    }
+
+    public Form getFullByIdForEvaluation(int id, String evaluationType) throws SQLException {
+        Form form = this.formDAO.queryForId(id);
+        form.setFormSections(getApplication().getFormSectionService().getAllOfFormWithQuestions(form, evaluationType));
+        return form;
     }
 }

@@ -84,7 +84,7 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
             String intervalStr = syncInterval.getValue();
             if (validateSyncInterval(intervalStr)) {
                 int intervalHours = Integer.parseInt(intervalStr);
-                workerScheduleExecutor.schedulePeriodicSync(intervalHours * 60); // Convert hours to minutes
+                //workerScheduleExecutor.schedulePeriodicSync(intervalHours * 60); // Convert hours to minutes
             }
         } else {
             // Cancel periodic sync

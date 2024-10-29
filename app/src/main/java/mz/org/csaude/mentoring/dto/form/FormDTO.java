@@ -3,14 +3,12 @@ package mz.org.csaude.mentoring.dto.form;
 
 
 
+import java.util.List;
+
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.dto.partner.PartnerDTO;
 import mz.org.csaude.mentoring.dto.programmaticArea.ProgrammaticAreaDTO;
 import mz.org.csaude.mentoring.model.form.Form;
-import mz.org.csaude.mentoring.model.partner.Partner;
-import mz.org.csaude.mentoring.model.programmaticArea.ProgrammaticArea;
-
-
 
 
 public class FormDTO extends BaseEntityDTO {
@@ -20,7 +18,10 @@ public class FormDTO extends BaseEntityDTO {
     private int targetPatient;
     private int targetFile;
     private PartnerDTO partner;
-    private ProgrammaticAreaDTO programmaticArea;
+    private ProgrammaticAreaDTO programmaticAreaDTO;
+    private List<FormSectionDTO> formSections;
+
+
     public FormDTO(Form form) {
         super(form);
         this.setCode(form.getCode());
@@ -31,8 +32,10 @@ public class FormDTO extends BaseEntityDTO {
             this.setPartner(new PartnerDTO(form.getPartner()));
         }
         if(form.getProgrammaticArea()!=null) {
-            this.setProgrammaticArea(new ProgrammaticAreaDTO(form.getProgrammaticArea()));
+            this.setProgrammaticAreaDTO(new ProgrammaticAreaDTO(form.getProgrammaticArea()));
         }
+        this.setName(form.getName());
+
     }
     public FormDTO() {
     }
@@ -85,27 +88,19 @@ public class FormDTO extends BaseEntityDTO {
         this.partner = partner;
     }
 
-    public ProgrammaticAreaDTO getProgrammaticArea() {
-        return programmaticArea;
+    public ProgrammaticAreaDTO getProgrammaticAreaDTO() {
+        return programmaticAreaDTO;
     }
 
-    public void setProgrammaticArea(ProgrammaticAreaDTO programmaticArea) {
-        this.programmaticArea = programmaticArea;
+    public void setProgrammaticAreaDTO(ProgrammaticAreaDTO programmaticAreaDTO) {
+        this.programmaticAreaDTO = programmaticAreaDTO;
     }
 
-    public Form getForm() {
-        Form form = new Form();
-        form.setUuid(this.getUuid());
-        form.setCreatedAt(this.getCreatedAt());
-        form.setUpdatedAt(this.getUpdatedAt());
-        form.setLifeCycleStatus(this.getLifeCycleStatus());
-        form.setDescription(this.getDescription());
-        form.setName(this.getName());
-        form.setCode(this.getCode());
-        form.setTargetFile(this.getTargetFile());
-        form.setTargetPatient(this.getTargetPatient());
-        if(this.getPartner()!=null) form.setPartner(new Partner(this.getPartner()));
-        if(this.getProgrammaticArea()!=null) form.setProgrammaticArea(new ProgrammaticArea(this.getProgrammaticArea()));
-        return form;
+    public List<FormSectionDTO> getFormSections() {
+        return formSections;
+    }
+
+    public void setFormSections(List<FormSectionDTO> formSections) {
+        this.formSections = formSections;
     }
 }

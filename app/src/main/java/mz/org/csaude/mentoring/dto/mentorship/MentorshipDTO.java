@@ -47,6 +47,14 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
     private List<AnswerDTO> answers;
     private Date performedDate;
 
+    private String mentorUuid;
+    private String menteeUuid;
+    private String sessionUuid;
+    private String formUuid;
+    private String cabinetUuid;
+    private String doorUuid;
+    private String evaluationTypeUuid;
+
     public MentorshipDTO() {
     }
     public MentorshipDTO(Mentorship mentorship) {
@@ -58,25 +66,25 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         this.setDemonstrationDetails(mentorship.getDemonstrationDetails());
         this.setPerformedDate(mentorship.getPerformedDate());
         if(mentorship.getTutor()!=null) {
-            this.setMentor(new TutorDTO(mentorship.getTutor()));
+            this.setMentorUuid(mentorship.getTutor().getUuid());
         }
         if(mentorship.getTutored()!=null) {
-            this.setMentee(new TutoredDTO(mentorship.getTutored()));
+            this.setMenteeUuid(mentorship.getTutored().getUuid());
         }
         if(mentorship.getSession()!=null) {
-            this.setSession(new SessionDTO(mentorship.getSession()));
+            this.setSessionUuid(mentorship.getSession().getUuid());
         }
         if(mentorship.getForm()!=null) {
-            this.setForm(new FormDTO(mentorship.getForm()));
+            this.setFormUuid(mentorship.getForm().getUuid());
         }
         if(mentorship.getCabinet()!=null) {
-            this.setCabinet(new CabinetDTO(mentorship.getCabinet()));
+            this.setCabinetUuid(mentorship.getCabinet().getUuid());
         }
         if(mentorship.getDoor()!=null) {
-            this.setDoor(new DoorDTO(mentorship.getDoor()));
+            this.setDoorUuid(mentorship.getDoor().getUuid());
         }
         if(mentorship.getEvaluationType()!=null) {
-            this.setEvaluationType(new EvaluationTypeDTO(mentorship.getEvaluationType()));
+            this.setEvaluationTypeUuid(mentorship.getEvaluationType().getUuid());
         }
         if(mentorship.getAnswers()!=null) {
             List<AnswerDTO> answerDTOS = new ArrayList<>();
@@ -250,5 +258,61 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
             mentorship.setAnswers(answerList);
         }
         return mentorship;
+    }
+
+    public String getMentorUuid() {
+        return mentorUuid;
+    }
+
+    public void setMentorUuid(String mentorUuid) {
+        this.mentorUuid = mentorUuid;
+    }
+
+    public String getMenteeUuid() {
+        return menteeUuid;
+    }
+
+    public void setMenteeUuid(String menteeUuid) {
+        this.menteeUuid = menteeUuid;
+    }
+
+    public String getSessionUuid() {
+        return sessionUuid;
+    }
+
+    public void setSessionUuid(String sessionUuid) {
+        this.sessionUuid = sessionUuid;
+    }
+
+    public String getFormUuid() {
+        return formUuid;
+    }
+
+    public void setFormUuid(String formUuid) {
+        this.formUuid = formUuid;
+    }
+
+    public String getCabinetUuid() {
+        return cabinetUuid;
+    }
+
+    public void setCabinetUuid(String cabinetUuid) {
+        this.cabinetUuid = cabinetUuid;
+    }
+
+    public String getDoorUuid() {
+        return doorUuid;
+    }
+
+    public void setDoorUuid(String doorUuid) {
+        this.doorUuid = doorUuid;
+    }
+
+    public String getEvaluationTypeUuid() {
+        return evaluationTypeUuid;
+    }
+
+    public void setEvaluationTypeUuid(String evaluationTypeUuid) {
+        this.evaluationTypeUuid = evaluationTypeUuid;
     }
 }

@@ -20,8 +20,7 @@ import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
-                @Index(value = {HealthFacility.COLUMN_DISTRICT}),
-                @Index(value = {HealthFacility.COLUMN_NAME}, unique = true)
+                @Index(value = {HealthFacility.COLUMN_DISTRICT})
         })
 public class HealthFacility extends BaseModel implements Listble {
 

@@ -9,21 +9,19 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
-import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
-import mz.org.csaude.mentoring.util.Http;
-import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 
-public class FormQuestionWorker extends BaseWorker<FormQuestion> {
+public class FormSectionQuestionWorker extends BaseWorker<FormSectionQuestion> {
     private String requestType;
 
-    public FormQuestionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public FormSectionQuestionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         requestType = getInputData().getString("requestType");
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-            getApplication().getFormQuestionRestService().restGetFormQuestion(this, limit, offset);
+            getApplication().getFormQuestionRestService().restGetFormSectionQuestion(this, limit, offset);
     }
 
     @Override
@@ -36,9 +34,8 @@ public class FormQuestionWorker extends BaseWorker<FormQuestion> {
 
     }
 
-
     @Override
-    protected void doSave(List<FormQuestion> recs) {
+    protected void doSave(List<FormSectionQuestion> recs) {
 
     }
 }

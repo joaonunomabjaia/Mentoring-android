@@ -36,6 +36,7 @@ public interface SessionRecommendedResourceDAO {
     @Insert
     long insert(SessionRecommendedResource sessionRecommendedResource);
 
+    @Transaction
     @Update
     void update(SessionRecommendedResource sessionRecommendedResource);
 }

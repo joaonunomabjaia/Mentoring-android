@@ -30,6 +30,9 @@ public class Program extends BaseModel {
     public Program() {
         super();
     }
+    public Program(String uuid) {
+        super(uuid);
+    }
 
     @Ignore
     public Program(ProgramDTO programDTO) {

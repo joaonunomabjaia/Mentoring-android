@@ -15,4 +15,5 @@ public interface FormService extends BaseService<Form> {
     Form savedOrUpdateForm(Form form) throws SQLException;
     List<Form> getAllNotSynced() throws SQLException;
     List<Form> getAllSynced(Application application) throws SQLException;
+    Form getFullByIdForEvaluation(int id, String evaluationType) throws SQLException;
 }

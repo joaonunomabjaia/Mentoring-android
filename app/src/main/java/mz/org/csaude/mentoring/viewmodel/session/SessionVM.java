@@ -95,25 +95,63 @@ public class SessionVM extends BaseViewModel {
         // Show a progress dialog while saving
         Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
+        // Perform the retrieval of sessions in a background thread
+        getExecutorService().execute(() -> {
+            Ronda ronda = this.session.getRonda();
+            List<Session> sessions;
+            try {
+                sessions = getApplication().getSessionService().getAllOfRonda(ronda);
+                ronda.setSessions(sessions);
+
+                // Validate session dates on the background thread
+                if (Utilities.listHasElements(ronda.getSessions())) {
+                    // Find the session with the greatest endDate
+                    Session latestSession = null;
+                    for (Session s : ronda.getSessions()) {
+                        if (latestSession == null || s.getEndDate().after(latestSession.getEndDate())) {
+                            latestSession = s;
+                        }
+                    }
+
+                    // Validate that this.session's startDate is not before the latest session's endDate
+                    if (latestSession != null && DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), latestSession.getEndDate())) {
+                        runOnMainThread(() -> {
+                            progress.dismiss(); // Dismiss progress dialog before showing the error
+                            String dateError = getRelatedActivity().getString(R.string.prev_session_start_date_error);
+                            Utilities.displayAlertDialog(getRelatedActivity(), dateError).show();
+                        });
+                        return;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Additional validations on the main thread
+            runOnMainThread(() -> {
+                if (DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), this.session.getRonda().getStartDate())) {
+                    progress.dismiss(); // Dismiss progress dialog before showing the error
+                    String startDateError = getRelatedActivity().getString(R.string.session_start_date_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), startDateError).show();
+                    return;
+                }
+                if (this.session.getForm() == null) {
+                    progress.dismiss(); // Dismiss progress dialog before showing the error
+                    String selectTableError = getRelatedActivity().getString(R.string.select_competence_table);
+                    Utilities.displayAlertDialog(getRelatedActivity(), selectTableError).show();
+                    return;
+                }
+
+                // Perform the save operation
+                performSave(progress);
+            });
+        });
+    }
+
+    private void performSave(Dialog progress) {
         // Perform the save operation in a background thread
         getExecutorService().execute(() -> {
             try {
-                // Run validations on the main thread before proceeding with database operations
-                runOnMainThread(() -> {
-                    if (this.session.getStartDate().before(this.session.getRonda().getStartDate())) {
-                        progress.dismiss(); // Dismiss progress dialog before showing the error
-                        String startDateError = getRelatedActivity().getString(R.string.session_start_date_error);
-                        Utilities.displayAlertDialog(getRelatedActivity(), startDateError).show();
-                        return;
-                    }
-                    if (this.session.getForm() == null) {
-                        progress.dismiss(); // Dismiss progress dialog before showing the error
-                        String selectTableError = getRelatedActivity().getString(R.string.select_competence_table);
-                        Utilities.displayAlertDialog(getRelatedActivity(), selectTableError).show();
-                        return;
-                    }
-                });
-
                 // Perform the database operations in the background
                 if (getApplication().getApplicationStep().isApplicationStepEdit()) {
                     getApplication().getSessionService().update(this.session);
@@ -140,6 +178,7 @@ public class SessionVM extends BaseViewModel {
             }
         });
     }
+
 
 
 

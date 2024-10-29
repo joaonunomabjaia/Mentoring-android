@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.model.formQuestion;
+package mz.org.csaude.mentoring.model.formSectionQuestion;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
@@ -9,42 +9,44 @@ import androidx.room.Index;
 import androidx.room.Relation;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
-import mz.org.csaude.mentoring.dto.form.FormQuestionDTO;
+import mz.org.csaude.mentoring.dto.form.FormSectionQuestionDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.form.FormSection;
+import mz.org.csaude.mentoring.model.form.Section;
 import mz.org.csaude.mentoring.model.question.Question;
 import mz.org.csaude.mentoring.model.responseType.ResponseType;
 
-@Entity(tableName = FormQuestion.TABLE_NAME,
+@Entity(tableName = FormSectionQuestion.TABLE_NAME,
         foreignKeys = {
-                @ForeignKey(entity = Form.class,
+                @ForeignKey(entity = FormSection.class,
                         parentColumns = "id",
-                        childColumns = FormQuestion.COLUMN_FORM,
+                        childColumns = FormSectionQuestion.COLUMN_FORM_SECTION,
                         onDelete = ForeignKey.CASCADE),
                 @ForeignKey(entity = Question.class,
                         parentColumns = "id",
-                        childColumns = FormQuestion.COLUMN_QUESTION,
+                        childColumns = FormSectionQuestion.COLUMN_QUESTION,
                         onDelete = ForeignKey.CASCADE),
                 @ForeignKey(entity = EvaluationType.class,
                         parentColumns = "id",
-                        childColumns = FormQuestion.COLUMN_EVALUATION_TYPE,
+                        childColumns = FormSectionQuestion.COLUMN_EVALUATION_TYPE,
                         onDelete = ForeignKey.CASCADE),
                 @ForeignKey(entity = ResponseType.class,
                         parentColumns = "id",
-                        childColumns = FormQuestion.COLUMN_RESPONSE_TYPE,
+                        childColumns = FormSectionQuestion.COLUMN_RESPONSE_TYPE,
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
-                @Index(value = {FormQuestion.COLUMN_FORM}),
-                @Index(value = {FormQuestion.COLUMN_QUESTION}),
-                @Index(value = {FormQuestion.COLUMN_EVALUATION_TYPE}),
-                @Index(value = {FormQuestion.COLUMN_RESPONSE_TYPE})
+                @Index(value = {FormSectionQuestion.COLUMN_FORM_SECTION}),
+                @Index(value = {FormSectionQuestion.COLUMN_QUESTION}),
+                @Index(value = {FormSectionQuestion.COLUMN_EVALUATION_TYPE}),
+                @Index(value = {FormSectionQuestion.COLUMN_RESPONSE_TYPE})
         })
-public class FormQuestion extends BaseModel {
+public class FormSectionQuestion extends BaseModel {
 
-    public static final String TABLE_NAME = "form_question";
-    public static final String COLUMN_FORM = "form_id";
+    public static final String TABLE_NAME = "form_section_question";
+    public static final String COLUMN_FORM_SECTION = "form_section_id";
     public static final String COLUMN_QUESTION = "question_id";
     public static final String COLUMN_EVALUATION_TYPE = "evaluation_type_id";
     public static final String COLUMN_RESPONSE_TYPE = "response_type_id";
@@ -53,12 +55,11 @@ public class FormQuestion extends BaseModel {
     public static final String COLUMN_APPLICABLE = "applicable";
 
     @NonNull
-    @ColumnInfo(name = COLUMN_FORM)
-    private Integer formId;
+    @ColumnInfo(name = COLUMN_FORM_SECTION)
+    private Integer formSectionId;
 
     @Ignore
-    @Relation(parentColumn = COLUMN_FORM, entityColumn = "id")
-    private Form form;
+    private FormSection formSection;
 
     @NonNull
     @ColumnInfo(name = COLUMN_QUESTION)
@@ -99,21 +100,39 @@ public class FormQuestion extends BaseModel {
     @Ignore
     private Answer answer;
 
-    public FormQuestion() {
+    public FormSectionQuestion() {
     }
 
     @Ignore
-    public FormQuestion(FormQuestionDTO formQuestionDTO) {
-        super(formQuestionDTO);
-        this.setSequence(formQuestionDTO.getSequence());
-        if (formQuestionDTO.getQuestion() != null) this.setQuestion(new Question(formQuestionDTO.getQuestion()));
-        if (formQuestionDTO.getEvaluationType() != null) this.setEvaluationType(new EvaluationType(formQuestionDTO.getEvaluationType()));
-        if (formQuestionDTO.getResponseType() != null) this.setResponseType(new ResponseType(formQuestionDTO.getResponseType()));
-        if (formQuestionDTO.getForm() != null) this.setForm(new Form(formQuestionDTO.getForm()));
+    public FormSectionQuestion(FormSectionQuestionDTO formSectionQuestionDTO) {
+        super(formSectionQuestionDTO);
+        this.setSequence(formSectionQuestionDTO.getSequence());
+        this.setFormSection(new FormSection(formSectionQuestionDTO.getFormSectionUuid()));
+        this.setQuestion(new Question(formSectionQuestionDTO.getQuestionDTO()));
+        this.setEvaluationType(new EvaluationType(formSectionQuestionDTO.getEvaluationTypeUuid()));
+        this.setResponseType(new ResponseType(formSectionQuestionDTO.getResponseTypeUuid()));
     }
 
-    public Form getForm() {
-        return form;
+    public FormSectionQuestion(String formSectionQuestionUuid) {
+        super(formSectionQuestionUuid);
+    }
+
+    @NonNull
+    public Integer getFormSectionId() {
+        return formSectionId;
+    }
+
+    public void setFormSectionId(@NonNull Integer formSectionId) {
+        this.formSectionId = formSectionId;
+    }
+
+    public FormSection getFormSection() {
+        return formSection;
+    }
+
+    public void setFormSection(FormSection formSection) {
+        this.formSection = formSection;
+        this.formSectionId = formSection.getId();
     }
 
     public Question getQuestion() {
@@ -130,11 +149,6 @@ public class FormQuestion extends BaseModel {
 
     public Boolean getApplicable() {
         return applicable;
-    }
-
-    public void setForm(Form form) {
-        this.form = form;
-        this.formId = form.getId();
     }
 
     public void setQuestion(Question question) {
@@ -180,14 +194,6 @@ public class FormQuestion extends BaseModel {
         this.answer = answer;
     }
 
-    public Integer getFormId() {
-        return formId;
-    }
-
-    public void setFormId(Integer formId) {
-        this.formId = formId;
-    }
-
     public Integer getQuestionId() {
         return questionId;
     }
@@ -204,11 +210,13 @@ public class FormQuestion extends BaseModel {
         this.evaluationTypeId = evaluationTypeId;
     }
 
+
+    public void setResponseTypeId(@NonNull Integer responseTypeId) {
+        this.responseTypeId = responseTypeId;
+    }
+
     public Integer getResponseTypeId() {
         return responseTypeId;
     }
 
-    public void setResponseTypeId(int responseTypeId) {
-        this.responseTypeId = responseTypeId;
-    }
 }

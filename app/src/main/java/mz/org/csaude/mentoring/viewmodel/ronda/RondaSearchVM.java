@@ -120,54 +120,97 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     public void printRondaReport() {
-        try {
-            List<RondaSummary> rondaSummaryList = new ArrayList<>();
+        getExecutorService().execute(() -> {
+            try {
+                List<RondaSummary> rondaSummaryList = generateRondaSummaries(this.selectedRonda);
 
-            Ronda ronda = this.selectedRonda;
-            ronda = getApplication().getRondaService().getFullyLoadedRonda(ronda);
-
-            for (RondaMentee mentee : ronda.getRondaMentees()){
-                RondaSummary rondaSummary = new RondaSummary();
-                rondaSummary.setRonda(ronda);
-                rondaSummary.setZeroEvaluation(mentee.getTutored().getZeroEvaluationScore());
-                rondaSummary.setMentor(ronda.getActiveMentor().getEmployee().getFullName());
-                rondaSummary.setMentee(mentee.getTutored().getEmployee().getFullName());
-                rondaSummary.setNuit(mentee.getTutored().getEmployee().getNuit());
-                List<Session> sessions = new ArrayList<>();
-                for (Session session : ronda.getSessions()){
-                    if (session.getTutored().equals(mentee.getTutored())){
-                        sessions.add(session);
-                    }
-                }
-                sessions.sort(Comparator.comparing(Session::getStartDate));
-                rondaSummary.setSummaryDetails(new HashMap<>());
-                int i = 1;
-                for (Session session : sessions){
-                    rondaSummary.getSummaryDetails().put(i, getApplication().getSessionService().generateSessionSummary(session));
-
-                    i++;
-                }
-                rondaSummary.setSession1(determineSessionScore(rondaSummary.getSummaryDetails().get(1)));
-                rondaSummary.setSession2(determineSessionScore(rondaSummary.getSummaryDetails().get(2)));
-                rondaSummary.setSession3(determineSessionScore(rondaSummary.getSummaryDetails().get(3)));
-                rondaSummary.setSession4(determineSessionScore(rondaSummary.getSummaryDetails().get(4)));
-                rondaSummaryList.add(rondaSummary);
+                boolean printSuccessful = PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
+                getRelatedActivity().runOnUiThread(() -> showPrintResultMessage(printSuccessful));
+            } catch (SQLException e) {
+                Log.e("printRondaSummary", "Exception: ", e);
             }
-            boolean print = PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
-            if (print) {
-                String successMessage = getRelatedActivity().getString(R.string.ronda_print_success);
-                Utilities.displayAlertDialog(getRelatedActivity(), successMessage).show();
-            } else {
-                String failureMessage = getRelatedActivity().getString(R.string.ronda_print_failure);
-                Utilities.displayAlertDialog(getRelatedActivity(), failureMessage).show();
-            }
-
-        } catch (SQLException e) {
-            Log.e("printRondaSummary", "Exception: " + e.getMessage());
-        }
-
-
+        });
     }
+
+    private List<RondaSummary> generateRondaSummaries(Ronda selectedRonda) throws SQLException {
+        List<RondaSummary> rondaSummaryList = new ArrayList<>();
+
+        Ronda ronda = getApplication().getRondaService().getFullyLoadedRonda(selectedRonda);
+
+        for (RondaMentee mentee : ronda.getRondaMentees()) {
+            RondaSummary rondaSummary = new RondaSummary();
+            rondaSummary.setRonda(ronda);
+            rondaSummary.setZeroEvaluation(mentee.getTutored().getZeroEvaluationScore());
+            rondaSummary.setMentor(ronda.getActiveMentor().getEmployee().getFullName());
+            rondaSummary.setMentee(mentee.getTutored().getEmployee().getFullName());
+            rondaSummary.setNuit(mentee.getTutored().getEmployee().getNuit());
+
+            List<Session> sessions = getSessionsForMentee(ronda, mentee);
+            rondaSummary.setSummaryDetails(generateSessionSummaries(sessions));
+
+            // Assign session scores dynamically
+            assignSessionScores(rondaSummary);
+
+            rondaSummaryList.add(rondaSummary);
+        }
+        return rondaSummaryList;
+    }
+
+    private List<Session> getSessionsForMentee(Ronda ronda, RondaMentee mentee) {
+        List<Session> sessions = new ArrayList<>();
+        for (Session session : ronda.getSessions()) {
+            if (session.getTutored().equals(mentee.getTutored())) {
+                sessions.add(session);
+            }
+        }
+        sessions.sort(Comparator.comparing(Session::getStartDate));
+        return sessions;
+    }
+
+    private Map<Integer, List<SessionSummary>> generateSessionSummaries(List<Session> sessions) throws SQLException {
+        Map<Integer, List<SessionSummary>> summaryDetails = new HashMap<>();
+        int i = 1;
+        for (Session session : sessions) {
+            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session));
+            i++;
+        }
+        return summaryDetails;
+    }
+
+    private void assignSessionScores(RondaSummary rondaSummary) {
+        for (int i = 1; i <= 4; i++) {
+            List<SessionSummary> summaries = rondaSummary.getSummaryDetails().get(i);
+            if (summaries != null) {
+                double score = determineSessionScore(summaries);
+                setSessionScore(rondaSummary, i, score);
+            }
+        }
+    }
+
+    private void setSessionScore(RondaSummary rondaSummary, int sessionNumber, double score) {
+        switch (sessionNumber) {
+            case 1:
+                rondaSummary.setSession1(score);
+                break;
+            case 2:
+                rondaSummary.setSession2(score);
+                break;
+            case 3:
+                rondaSummary.setSession3(score);
+                break;
+            case 4:
+                rondaSummary.setSession4(score);
+                break;
+        }
+    }
+
+    private void showPrintResultMessage(boolean printSuccessful) {
+        String message = printSuccessful
+                ? getRelatedActivity().getString(R.string.ronda_print_success)
+                : getRelatedActivity().getString(R.string.ronda_print_failure);
+        Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+    }
+
 
     private double determineSessionScore(List<SessionSummary> sessionSummaries) {
         int yesCount = 0;
