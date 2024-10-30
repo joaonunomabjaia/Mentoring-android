@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.workSchedule.rest.EvaluationTypeRestService;
 
-public class EvaluationTypeWorker extends BaseWorker<EvaluationType> {
+public class GETEvaluationTypeWorker extends BaseWorker<EvaluationType> {
     private EvaluationTypeRestService evaluationTypeRestService;
-    public EvaluationTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETEvaluationTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.evaluationTypeRestService = new EvaluationTypeRestService((Application) getApplicationContext());
     }

@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.workSchedule.rest.RondaTypeRestService;
 
-public class RondaTypeWorker extends BaseWorker<RondaType> {
+public class GETRondaTypeWorker extends BaseWorker<RondaType> {
     private RondaTypeRestService rondaTypeRestService;
-    public RondaTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETRondaTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.rondaTypeRestService = new RondaTypeRestService((Application) getApplicationContext());
     }

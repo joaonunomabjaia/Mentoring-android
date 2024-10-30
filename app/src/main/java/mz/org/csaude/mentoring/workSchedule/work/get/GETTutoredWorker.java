@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.content.Context;
 
@@ -10,23 +10,17 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.util.Http;
-import mz.org.csaude.mentoring.util.Utilities;
 
-public class TutoredWorker extends BaseWorker<Tutored> {
+public class GETTutoredWorker extends BaseWorker<Tutored> {
 
 
-    public TutoredWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETTutoredWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-        if (isPOSTRequest()) {
-            getApplication().getTutoredRestService().restPostTutored(this);
-        } else {
-            getApplication().getTutoredRestService().restGetTutored(this, offset, limit);
-        }
+        getApplication().getTutoredRestService().restGetTutored(this, offset, limit);
     }
 
 

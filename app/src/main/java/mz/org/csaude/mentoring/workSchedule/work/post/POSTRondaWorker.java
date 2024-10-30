@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.post;
 
 import android.content.Context;
 
@@ -10,25 +10,18 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
-import mz.org.csaude.mentoring.util.Http;
-import mz.org.csaude.mentoring.util.Utilities;
 
-public class RondaWorker extends BaseWorker<Ronda> {
+public class POSTRondaWorker extends BaseWorker<Ronda> {
     private String requestType;
 
-    public RondaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public POSTRondaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         requestType = getInputData().getString("requestType");
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-        if (Utilities.stringHasValue(requestType) && requestType.equalsIgnoreCase(String.valueOf(Http.POST))) {
-            getApplication().getRondaRestService().restPostRondas(this);
-        }
-        else {
-            getApplication().getRondaRestService().restGetRondas(this);
-        }
+        getApplication().getRondaRestService().restPostRondas(this);
     }
 
     @Override

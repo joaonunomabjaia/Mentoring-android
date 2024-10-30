@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.responseType.ResponseType;
 import mz.org.csaude.mentoring.workSchedule.rest.ResponseTypeRestService;
 
-public class ResponseTypeWorker extends BaseWorker<ResponseType> {
+public class GETResponseTypeWorker extends BaseWorker<ResponseType> {
     private ResponseTypeRestService responseTypeRestService;
-    public ResponseTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETResponseTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.responseTypeRestService = new ResponseTypeRestService((Application) getApplicationContext());
     }

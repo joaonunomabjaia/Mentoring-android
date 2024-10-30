@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.workSchedule.rest.SessionStatusRestService;
 
-public class SessionStatusWorker extends BaseWorker<SessionStatus> {
+public class GETSessionStatusWorker extends BaseWorker<SessionStatus> {
     private SessionStatusRestService sessionStatusRestService;
-    public SessionStatusWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETSessionStatusWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.sessionStatusRestService = new SessionStatusRestService((Application) getApplicationContext());
     }

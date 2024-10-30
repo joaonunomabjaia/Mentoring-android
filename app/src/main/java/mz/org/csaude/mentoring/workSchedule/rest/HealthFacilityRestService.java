@@ -14,6 +14,7 @@ import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.location.Location;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.location.HealthFacilityService;
 import mz.org.csaude.mentoring.service.location.HealthFacilityServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
@@ -29,7 +30,20 @@ public class HealthFacilityRestService extends BaseRestService {
     public void restGetHealthFacility(RestResponseListener<HealthFacility> listener){
 
         List<String> districts = new ArrayList<>();
-        for (Location location : getApplication().getAuthenticatedUser().getEmployee().getLocations()) {
+        List<Location> locations = new ArrayList<>();
+        if (getApplication().getAuthenticatedUser() == null) {
+            try {
+                User user = getApplication().getUserService().getCurrentUser();
+                user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
+                locations = user.getEmployee().getLocations();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            locations = getApplication().getAuthenticatedUser().getEmployee().getLocations();
+        }
+
+        for (Location location : locations) {
             districts.add(location.getDistrict().getUuid());
         }
        Call<List<HealthFacilityDTO>> callHealthFacilith = syncDataService.getByDistricts(districts);

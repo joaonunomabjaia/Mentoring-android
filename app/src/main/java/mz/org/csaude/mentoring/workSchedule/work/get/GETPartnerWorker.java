@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.content.Context;
 
@@ -11,10 +11,10 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.partner.Partner;
 
-public class PartnerWorker extends BaseWorker<Partner> {
+public class GETPartnerWorker extends BaseWorker<Partner> {
 
 
-    public PartnerWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETPartnerWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 

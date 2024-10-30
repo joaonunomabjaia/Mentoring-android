@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,10 +13,10 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.workSchedule.rest.ProvinceRestService;
 
-public class ProvinceWorker extends BaseWorker<Province> {
+public class GETProvinceWorker extends BaseWorker<Province> {
 
     ProvinceRestService provinceRestService;
-    public ProvinceWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETProvinceWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
 
         provinceRestService = new ProvinceRestService((Application) this.context.getApplicationContext());

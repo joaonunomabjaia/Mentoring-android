@@ -2,35 +2,25 @@ package mz.org.csaude.mentoring.workSchedule.rest;
 
 import android.app.Application;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import mz.org.csaude.mentoring.base.service.BaseRestService;
-import mz.org.csaude.mentoring.dao.session.SessionDAO;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
 import mz.org.csaude.mentoring.dto.mentorship.MentorshipDTO;
-import mz.org.csaude.mentoring.dto.ronda.RondaDTO;
 import mz.org.csaude.mentoring.dto.session.SessionDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.form.Form;
-import mz.org.csaude.mentoring.model.location.Cabinet;
-import mz.org.csaude.mentoring.model.mentorship.Door;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
-import mz.org.csaude.mentoring.model.tutor.Tutor;
-import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.service.mentorship.MentorshipService;
-import mz.org.csaude.mentoring.service.session.SessionService;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.workSchedule.work.SessionPOSTWorker;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -122,8 +112,9 @@ public class SessionRestService extends BaseRestService {
         for (AnswerDTO answerDTO: answers) {
             Answer answer = new Answer();
             answer.setMentorship(mentorship);
+            answer.setFormSectionQuestion(getApplication().getFormSectionQuestionService().getByuuid(answerDTO.getFormSectionQuestionUuid()));
             answer.setQuestion(getApplication().getQuestionService().getByuuid(answerDTO.getQuestionUUid()));
-            answer.setForm(mentorship.getForm());
+            answer.setForm(getApplication().getFormService().getByuuid(answerDTO.getFormUuid()));
             answer.setSyncStatus(SyncSatus.SENT);
             answer.setUuid(answerDTO.getUuid());
             answer.setCreatedAt(answerDTO.getCreatedAt());

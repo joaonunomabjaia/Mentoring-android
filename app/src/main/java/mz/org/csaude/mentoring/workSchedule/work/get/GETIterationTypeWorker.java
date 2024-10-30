@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.mentorship.IterationType;
 import mz.org.csaude.mentoring.workSchedule.rest.IterationTypeRestService;
 
-public class IterationTypeWorker extends BaseWorker<IterationType> {
+public class GETIterationTypeWorker extends BaseWorker<IterationType> {
     private IterationTypeRestService iterationTypeRestService;
-    public IterationTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETIterationTypeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.iterationTypeRestService = new IterationTypeRestService((Application) getApplicationContext());
     }

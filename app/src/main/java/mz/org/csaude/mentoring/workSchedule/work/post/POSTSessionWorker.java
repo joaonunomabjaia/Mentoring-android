@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.post;
 
 import android.content.Context;
 
@@ -11,17 +11,17 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.session.Session;
 
-public class SessionGETWorker extends BaseWorker<Session> {
+public class POSTSessionWorker extends BaseWorker<Session> {
     private String requestType;
 
-    public SessionGETWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public POSTSessionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         requestType = getInputData().getString("requestType");
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-        getApplication().getSessionRestService().restGetSessions(this);
+        getApplication().getSessionRestService().restPostSessions(this);
     }
 
     @Override

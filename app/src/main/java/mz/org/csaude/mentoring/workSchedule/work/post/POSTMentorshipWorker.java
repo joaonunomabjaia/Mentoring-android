@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.post;
 
 import android.content.Context;
 
@@ -13,10 +13,10 @@ import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.util.Http;
 import mz.org.csaude.mentoring.util.Utilities;
 
-public class MentorshipWorker extends BaseWorker<Mentorship> {
+public class POSTMentorshipWorker extends BaseWorker<Mentorship> {
     private String requestType;
 
-    public MentorshipWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public POSTMentorshipWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         requestType = getInputData().getString("requestType");
     }

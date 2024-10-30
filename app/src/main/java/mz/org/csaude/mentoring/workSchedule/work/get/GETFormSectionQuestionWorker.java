@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.content.Context;
 
@@ -11,10 +11,10 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 
-public class FormSectionQuestionWorker extends BaseWorker<FormSectionQuestion> {
+public class GETFormSectionQuestionWorker extends BaseWorker<FormSectionQuestion> {
     private String requestType;
 
-    public FormSectionQuestionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETFormSectionQuestionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         requestType = getInputData().getString("requestType");
     }

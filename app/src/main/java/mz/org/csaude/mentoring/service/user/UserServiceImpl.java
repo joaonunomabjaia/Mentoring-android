@@ -94,6 +94,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public User getCurrentUser() throws SQLException {
-        return userDao.queryForAll().get(0);
+        User user = userDao.queryForAll().get(0);
+        user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
+        return user;
     }
 }

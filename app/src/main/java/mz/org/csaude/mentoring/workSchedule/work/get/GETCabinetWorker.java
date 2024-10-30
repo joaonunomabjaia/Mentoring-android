@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -10,23 +10,21 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
-import mz.org.csaude.mentoring.model.form.Section;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.workSchedule.rest.CabinetRestService;
-import mz.org.csaude.mentoring.workSchedule.rest.SectionRestService;
 
-public class SectionWorker extends BaseWorker<Section> {
+public class GETCabinetWorker extends BaseWorker<Cabinet> {
 
-    private SectionRestService sectionRestService;
+    private CabinetRestService cabinetRestService;
 
-    public SectionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETCabinetWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.sectionRestService = new SectionRestService((Application) getApplicationContext());
+        this.cabinetRestService = new CabinetRestService((Application) getApplicationContext());
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-        this.sectionRestService.restGetSections(this);
+        this.cabinetRestService.restGetCabinets(offset, limit, this);
     }
     @Override
     protected void doOnStart() {
@@ -39,7 +37,7 @@ public class SectionWorker extends BaseWorker<Section> {
     }
 
     @Override
-    protected void doSave(List<Section> recs) {
+    protected void doSave(List<Cabinet> recs) {
 
     }
 }
