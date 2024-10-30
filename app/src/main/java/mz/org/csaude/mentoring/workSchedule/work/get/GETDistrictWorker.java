@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -11,14 +11,13 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.location.District;
-import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.workSchedule.rest.DistrictRestService;
 
-public class DistrictWorker extends BaseWorker<District> {
+public class GETDistrictWorker extends BaseWorker<District> {
 
     private DistrictRestService districtRestService;
 
-    public DistrictWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETDistrictWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.districtRestService = new DistrictRestService((Application) this.context.getApplicationContext());
     }

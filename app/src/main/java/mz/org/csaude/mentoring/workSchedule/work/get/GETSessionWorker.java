@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.content.Context;
 
@@ -9,17 +9,19 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
-import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.session.Session;
 
-public class FormWorker extends BaseWorker<Form> {
+public class GETSessionWorker extends BaseWorker<Session> {
+    private String requestType;
 
-    public FormWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETSessionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
+        requestType = getInputData().getString("requestType");
     }
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-            getApplication().getFormRestService().restGetForm(this);
+        getApplication().getSessionRestService().restGetSessions(this);
     }
 
     @Override
@@ -28,7 +30,7 @@ public class FormWorker extends BaseWorker<Form> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Form> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Session> recs) throws SQLException {
         changeStatusToFinished();
         doOnFinish();
     }
@@ -39,7 +41,7 @@ public class FormWorker extends BaseWorker<Form> {
     }
 
     @Override
-    protected void doSave(List<Form> recs) {
+    protected void doSave(List<Session> recs) {
 
     }
 }

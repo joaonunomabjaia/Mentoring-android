@@ -79,7 +79,8 @@ public class SplashVM extends BaseViewModel implements RestResponseListener, Ser
     }
 
     void scheduleSyncDataTasks() {
-        WorkerScheduleExecutor.getInstance(getApplication()).syncPeriodicData();
+        WorkerScheduleExecutor.getInstance(getApplication()).schedulePeriodicDataSync();
+        WorkerScheduleExecutor.getInstance(getApplication()).schedulePeriodicMetaDataSync();
         getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
     }
 }

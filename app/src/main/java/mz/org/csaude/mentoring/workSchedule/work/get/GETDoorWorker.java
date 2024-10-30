@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.workSchedule.rest.DoorRestService;
 
-public class DoorWorker extends BaseWorker<Door> {
+public class GETDoorWorker extends BaseWorker<Door> {
     private DoorRestService doorRestService;
-    public DoorWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETDoorWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.doorRestService = new DoorRestService((Application) getApplicationContext());
     }

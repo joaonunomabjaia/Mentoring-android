@@ -26,6 +26,8 @@ import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
 import mz.org.csaude.mentoring.util.Constants;
+import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.SyncType;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 
@@ -43,6 +45,7 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
     private static final int MAX_SYNC_INTERVAL_HOURS = 24;   // Maximum allowed sync interval in hours (1 day)
     private static final int MIN_LOGOUT_TIME = 1;            // Minimum allowed auto logout time in minutes
     private static final int MAX_LOGOUT_TIME = 60;           // Maximum allowed auto logout time in minutes
+    private SyncType syncType;
 
     public SettingVM(@NonNull Application application) {
         super(application);
@@ -102,7 +105,8 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
             encryptedSharedPreferences.edit().putString(PREF_METADATA_SYNC_TIME, intervalStr).apply();
 
             if (Boolean.TRUE.equals(isAutoSyncEnabled.getValue())) {
-                workerScheduleExecutor.schedulePeriodicSync(intervalHours * 60); // Convert hours to minutes
+                workerScheduleExecutor.schedulePeriodicDataSync(); // Convert hours to minutes
+                workerScheduleExecutor.schedulePeriodicMetaDataSync();
                 Utilities.displayAlertDialog(
                         getRelatedActivity(),
                         getApplication().getString(R.string.auto_logout_time_validated_successfully)
@@ -186,6 +190,12 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
     }
 
     public void onSyncNowClicked() {
+        this.syncType = SyncType.DATA;
+        getApplication().isServerOnline(this);
+    }
+
+    public void onSyncMetadateNowClicked() {
+        this.syncType = SyncType.METADATA;
         getApplication().isServerOnline(this);
     }
 
@@ -201,14 +211,21 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
+        OneTimeWorkRequest request;
+        if (syncType == SyncType.METADATA) {
+            request = workerScheduleExecutor.syncNowMeteData();
+        } else {
+            request = workerScheduleExecutor.syncNowData();
+        }
         // Schedule the sync work
-        OneTimeWorkRequest request = workerScheduleExecutor.syncNowData();
+
         workerScheduleExecutor.getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), new Observer<WorkInfo>() {
             @Override
             public void onChanged(WorkInfo info) {
                 if (info != null) {
                     if (info.getState() == WorkInfo.State.SUCCEEDED) {
                         // Sync succeeded
+                        getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
                         Utilities.displayAlertDialog(
                                 getRelatedActivity(),
                                 getApplication().getString(R.string.sync_completed_successfully)

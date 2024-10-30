@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,9 +13,9 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.programmaticArea.ProgrammaticArea;
 import mz.org.csaude.mentoring.workSchedule.rest.ProgrammaticAreaRestService;
 
-public class ProgrammaticAreaWorker extends BaseWorker<ProgrammaticArea> {
+public class GETProgrammaticAreaWorker extends BaseWorker<ProgrammaticArea> {
     private ProgrammaticAreaRestService programmaticAreaRestService;
-    public ProgrammaticAreaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETProgrammaticAreaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.programmaticAreaRestService = new ProgrammaticAreaRestService((Application) getApplicationContext());
     }

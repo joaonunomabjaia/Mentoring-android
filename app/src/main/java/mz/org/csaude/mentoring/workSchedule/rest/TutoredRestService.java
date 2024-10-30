@@ -21,6 +21,7 @@ import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.tutored.TutoredService;
 import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
@@ -38,7 +39,20 @@ public class TutoredRestService extends BaseRestService {
 
     public void restGetTutored(RestResponseListener<Tutored> listener, Long offset, Long limit){
         List<String> uuids = new ArrayList<>();
-        for (Location location : getApplication().getCurrMentor().getEmployee().getLocations()) {
+        List<Location> locations = new ArrayList<>();
+        if (getApplication().getAuthenticatedUser() == null) {
+            try {
+                User user = getApplication().getUserService().getCurrentUser();
+                user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
+                locations = user.getEmployee().getLocations();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            locations = getApplication().getAuthenticatedUser().getEmployee().getLocations();
+        }
+
+        for (Location location : locations) {
             uuids.add(location.getHealthFacility().getUuid());
         }
         Call<List<TutoredDTO>> tutoredCall = syncDataService.getTutoreds(uuids, offset, limit);

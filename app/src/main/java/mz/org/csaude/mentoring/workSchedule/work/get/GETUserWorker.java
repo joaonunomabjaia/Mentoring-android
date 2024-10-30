@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,11 +13,11 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.workSchedule.rest.UserRestService;
 
-public class UserWorker extends BaseWorker<User> {
+public class GETUserWorker extends BaseWorker<User> {
 
     private final UserRestService userRestService;
 
-    public UserWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETUserWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.userRestService = new UserRestService((Application) getApplicationContext(), new User(getInputData().getString("username"), getInputData().getString("password")));
     }

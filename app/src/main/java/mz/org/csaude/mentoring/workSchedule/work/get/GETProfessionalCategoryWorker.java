@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,10 +13,10 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.workSchedule.rest.ProfessionalCategoryRestService;
 
-public class ProfessionalCategoryWorker extends BaseWorker<ProfessionalCategory> {
+public class GETProfessionalCategoryWorker extends BaseWorker<ProfessionalCategory> {
 
     private ProfessionalCategoryRestService professionalCategoryRestService;
-    public ProfessionalCategoryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETProfessionalCategoryWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.professionalCategoryRestService = new ProfessionalCategoryRestService((Application) this.context.getApplicationContext());
     }

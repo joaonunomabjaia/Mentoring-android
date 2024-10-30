@@ -105,6 +105,9 @@ public interface SyncDataService {
     @POST("tutored/save")
     Call<TutoredDTO> postTutored(@Body TutoredDTO tutoredDTO);
 
+    @PATCH("user/password-update")
+    Call<UserDTO> patchUser(@Body UserDTO userDTO);
+
     @PATCH("tutored/batch-update")
     Call<List<TutoredDTO>> postTutoreds(@Body List<TutoredDTO> tutoredDTOS);
     @GET("rondaTypes/getall")

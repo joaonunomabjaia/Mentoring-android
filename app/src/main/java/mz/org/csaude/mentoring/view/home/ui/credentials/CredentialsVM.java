@@ -7,6 +7,7 @@ import androidx.databinding.Bindable;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.service.user.UserService;
+import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.user.UserVM;
@@ -54,6 +55,7 @@ public class CredentialsVM extends UserVM {
             }else {
                 getRelatedRecord().setPassword(Utilities.encryptPassword(userNovaPassWord,getRelatedRecord().getSalt()));
                 getRelatedRecord().setSyncStatus(SyncSatus.PENDING);
+                getRelatedRecord().setUpdatedAt(DateUtilities.getCurrentDate());
                 super.updatePassword();
             }
         }else Utilities.displayAlertDialog(getRelatedFragment().getContext(), "A senha Corrente indicada é inválida.").show();

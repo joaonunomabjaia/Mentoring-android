@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.content.Context;
 
@@ -10,10 +10,9 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.setting.Setting;
-import mz.org.csaude.mentoring.workSchedule.rest.SettingRestService;
 
-public class SettingWorker extends BaseWorker<Setting> {
-    public SettingWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+public class GETSettingWorker extends BaseWorker<Setting> {
+    public GETSettingWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 

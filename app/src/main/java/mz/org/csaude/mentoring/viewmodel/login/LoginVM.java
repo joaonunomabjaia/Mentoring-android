@@ -1,9 +1,11 @@
 package mz.org.csaude.mentoring.viewmodel.login;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.Bindable;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -35,10 +37,11 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private boolean remeberMe;
 
     private boolean authenticating;
-
-
+    private static final int INACTIVE_USER_CHECK = 1;
+    private int serverOperation;
 
     private UserSyncService userSyncService;
+    private AlertDialog checkDlg;
 
 
     public LoginVM(@NonNull Application application) {
@@ -106,8 +109,12 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
             runOnMainThread(()->{
                 if (logedUser.get() != null) {
                     if (!logedUser.get().isActivated()) {
-                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
-                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_on_server);
+                        checkDlg = Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage);
+                        checkDlg.show();
+
+                        this.serverOperation = INACTIVE_USER_CHECK;
+                        getApplication().isServerOnline(this);
                         return;
                     }
                     getApplication().setAuthenticatedUser(logedUser.get(), remeberMe);
@@ -205,7 +212,33 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     @Override
     public void onServerStatusChecked(boolean isOnline) {
         if (isOnline) {
-            userSyncService.doOnlineLogin(this, remeberMe);
+            if (serverOperation == INACTIVE_USER_CHECK) {
+                OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
+                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
+                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                        getExecutorService().execute(()->{
+                            try {
+                                User u =userService.login(this.user);
+                                if (!u.isActivated()) {
+                                    checkDlg.dismiss();
+                                    String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
+                                    Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                                } else {
+                                    getApplication().setAuthenticatedUser(u, remeberMe);
+                                    goHome();
+                                }
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    } else {
+                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_error);
+                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                    }
+                });
+            } else {
+                userSyncService.doOnlineLogin(this, remeberMe);
+            }
         }else {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
         }

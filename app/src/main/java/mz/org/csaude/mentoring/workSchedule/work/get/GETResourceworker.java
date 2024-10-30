@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.workSchedule.work;
+package mz.org.csaude.mentoring.workSchedule.work.get;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,10 +13,10 @@ import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.resourceea.Resource;
 import mz.org.csaude.mentoring.workSchedule.rest.ResourceRestService;
 
-public class Resourceworker extends BaseWorker<Resource> {
+public class GETResourceworker extends BaseWorker<Resource> {
 
     ResourceRestService resourceRestService;
-    public Resourceworker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GETResourceworker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.resourceRestService = new ResourceRestService((Application) getApplicationContext());
     }

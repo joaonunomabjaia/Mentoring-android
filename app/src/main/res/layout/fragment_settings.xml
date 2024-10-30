@@ -72,6 +72,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
 
+            <Button
+                android:id="@+id/button_sync_meta_now"
+                android:text="@string/sync_metadata_now"
+                android:onClick="@{() -> viewModel.onSyncMetadateNowClicked()}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
             <!-- Auto Logout Time Input with Validation Button -->
             <TextView
                 android:text="@string/auto_logout_time"
