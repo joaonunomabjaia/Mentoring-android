@@ -27,13 +27,13 @@ public interface ProgrammaticAreaDAO {
     @Query("SELECT * FROM programmatic_area WHERE id = :id")
     ProgrammaticArea getById(int id);
 
-    @Query("SELECT * FROM programmatic_area")
+    @Query("SELECT * FROM programmatic_area WHERE life_cycle_status = 'ACTIVE'")
     List<ProgrammaticArea> getAll();
 
     @Query("SELECT * FROM programmatic_area WHERE uuid = :uuid LIMIT 1")
     ProgrammaticArea getByUuid(String uuid);
 
-    @Query("SELECT * FROM programmatic_area")
+    @Query("SELECT * FROM programmatic_area WHERE life_cycle_status = 'ACTIVE'")
     List<ProgrammaticArea> queryForAll();
 
     @Query("SELECT * FROM programmatic_area WHERE id = :id")

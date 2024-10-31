@@ -24,7 +24,7 @@ public interface TutorProgrammaticAreaDAO {
     @Delete
     int delete(TutorProgrammaticArea tutorProgrammaticArea);
 
-    @Query("SELECT * FROM tutor_programmatic_area WHERE tutor_id = :tutorId")
+    @Query("SELECT * FROM tutor_programmatic_area WHERE tutor_id = :tutorId and life_cycle_status = 'ACTIVE'")
     List<TutorProgrammaticArea> getAllOfTutor(int tutorId);
 
     @Query("SELECT * FROM tutor_programmatic_area WHERE id = :id")
@@ -33,7 +33,7 @@ public interface TutorProgrammaticAreaDAO {
     @Query("SELECT * FROM tutor_programmatic_area WHERE uuid = :uuid LIMIT 1")
     TutorProgrammaticArea getByUuid(String uuid);
 
-    @Query("SELECT * FROM tutor_programmatic_area")
+    @Query("SELECT * FROM tutor_programmatic_area WHERE life_cycle_status = 'ACTIVE'")
     List<TutorProgrammaticArea> queryForAll();
 
     @Query("SELECT * FROM tutor_programmatic_area WHERE id = :id")

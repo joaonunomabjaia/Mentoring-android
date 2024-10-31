@@ -27,7 +27,7 @@ public interface SettingDAO {
     @Query("SELECT COUNT(*) > 0 FROM setting WHERE uuid = :uuid")
     boolean checkSettingExistence(String uuid);
 
-    @Query("SELECT * FROM setting")
+    @Query("SELECT * FROM setting WHERE life_cycle_status = 'ACTIVE'")
     List<Setting> getAllSettings();
 
     @Delete
@@ -36,6 +36,6 @@ public interface SettingDAO {
     @Query("SELECT * FROM setting WHERE id = :id")
     Setting queryForId(int id);
 
-    @Query("SELECT * FROM setting")
+    @Query("SELECT * FROM setting WHERE life_cycle_status = 'ACTIVE'")
     List<Setting> queryForAll();
 }

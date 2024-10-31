@@ -66,8 +66,10 @@ public class SessionStatusServiceImpl extends BaseServiceImpl<SessionStatus> imp
         SessionStatus sessionStatus = sessionStatusDTO.getSessionStatus();
         if(ss!=null) {
             sessionStatus.setId(ss.getId());
+            sessionStatusDAO.update(sessionStatus);
+        } else {
+            sessionStatus.setId((int) sessionStatusDAO.insert(sessionStatus));
         }
-        this.sessionStatusDAO.createOrUpdate(sessionStatus);
         return sessionStatus;
     }
 

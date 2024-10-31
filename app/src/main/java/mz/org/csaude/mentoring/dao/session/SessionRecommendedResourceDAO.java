@@ -26,8 +26,12 @@ public interface SessionRecommendedResourceDAO {
     List<SessionRecommendedResource> findByTutoredId(int tutoredId);
 
     @Transaction
-    @Query("SELECT * FROM session_recommended_resource WHERE sync_status = :syncStatus")
+    @Query("SELECT * FROM session_recommended_resource srr " +
+            "JOIN session s ON srr.session_id = s.id " +
+            "WHERE srr.sync_status = :syncStatus " +
+            "AND s.sync_status = 'SENT'")
     List<SessionRecommendedResource> queryForAllPending(String syncStatus);
+
 
     @Transaction
     @Query("SELECT * FROM session_recommended_resource WHERE uuid = :uuid LIMIT 1")

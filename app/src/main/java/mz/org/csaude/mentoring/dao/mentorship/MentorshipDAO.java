@@ -31,9 +31,9 @@ public interface MentorshipDAO {
             "JOIN session s ON m.session_id = s.id " +
             "WHERE m.sync_status = :syncStatus " +
             "AND m.end_date IS NOT NULL " +
-            "AND s.session_status_id = (SELECT id FROM session_status WHERE code = 'COMPLETE')")
+            "AND s.session_status_id = (SELECT id FROM session_status WHERE code = 'COMPLETE') " +
+            "AND s.sync_status = 'SENT'")
     List<Mentorship> getAllNotSynced(String syncStatus);
-
 
     @Transaction
     @Query("SELECT * FROM mentorship WHERE session_id IN (SELECT id FROM session WHERE ronda_id = :rondaId)")

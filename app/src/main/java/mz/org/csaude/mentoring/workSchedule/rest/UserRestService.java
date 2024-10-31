@@ -184,7 +184,7 @@ public class UserRestService extends BaseRestService implements UserSyncService 
         UserDTO userDTO;
         try {
             User user = getApplication().getUserService().getCurrentUser();
-            if (user.getSyncStatus().equals(SyncSatus.SENT)) {
+            if (user.getSyncStatus() == null || user.getSyncStatus().equals(SyncSatus.SENT)) {
                 listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
                 return;
             }
