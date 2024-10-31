@@ -81,8 +81,7 @@ public class TutorRestService extends BaseRestService {
 
         if (getApplication().getAuthenticatedUser() == null) {
             try {
-                User user = getApplication().getUserService().getCurrentUser();
-                getApplication().setCurrTutor(getApplication().getTutorService().getByEmployee(user.getEmployee()));
+                getApplication().setAuthenticatedUser(getApplication().getUserService().getCurrentUser(), false);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

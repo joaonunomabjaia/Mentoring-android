@@ -13,6 +13,8 @@ import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.form.FormSectionDTO;
 import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
+import mz.org.csaude.mentoring.model.mentorship.Mentorship;
+import mz.org.csaude.mentoring.util.Utilities;
 
 @Entity(tableName = FormSection.TABLE_NAME,
         foreignKeys = {
@@ -141,5 +143,13 @@ public class FormSection extends BaseModel implements Listble {
     @Override
     public String getDescription() {
         return "[Secção: "+this.getSequence()+"] - "+this.getSection().getDescription();
+    }
+
+    public boolean hasQuestionsOnCurrMentorship(Mentorship mentorship) {
+        if (!Utilities.listHasElements(this.getFormSectionQuestions())) return false;
+        for (FormSectionQuestion formSectionQuestion : this.getFormSectionQuestions()) {
+            if (formSectionQuestion.getEvaluationType().equals(mentorship.getEvaluationType())) return true;
+        }
+        return false;
     }
 }

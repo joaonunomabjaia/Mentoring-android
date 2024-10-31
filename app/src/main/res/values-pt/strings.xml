@@ -64,7 +64,7 @@
     <string name="server_unavailable">Não foi possível conectar ao servidor. Verifique sua conexão com a Internet ou entre em contato com o administrador.</string>
     <string name="sess_es_de_mentoria">Sessões de Mentoria</string>
     <string name="fecho_da_sess_o">Fecho da Sessão</string>
-    <string name="sync_now">Sincronizar Agora</string>
+    <string name="sync_now">Sincronizar Dados Agora</string>
     <string name="session_sync_time_key">Chave de Tempo de Sincronização da Sessão</string>
     <string name="metadata_sync_time_key">Chave de Tempo de Sincronização de Metadados</string>
     <string name="no_record_found">Nenhum registro encontrado.</string>

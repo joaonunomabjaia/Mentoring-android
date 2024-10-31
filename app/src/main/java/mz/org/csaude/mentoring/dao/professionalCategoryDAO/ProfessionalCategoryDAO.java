@@ -38,7 +38,7 @@ public interface ProfessionalCategoryDAO {
     void deleteByUuid(String uuid);
 
     // Get all ProfessionalCategories
-    @Query("SELECT * FROM professional_category")
+    @Query("SELECT * FROM professional_category WHERE life_cycle_status = 'ACTIVE'")
     List<ProfessionalCategory> getAll();
 
     // Delete all ProfessionalCategories
@@ -46,7 +46,7 @@ public interface ProfessionalCategoryDAO {
     void deleteAll();
 
     // Get all ProfessionalCategories
-    @Query("SELECT * FROM professional_category")
+    @Query("SELECT * FROM professional_category WHERE life_cycle_status = 'ACTIVE'")
     List<ProfessionalCategory> queryForAll();
 
     // Get a ProfessionalCategory by its ID

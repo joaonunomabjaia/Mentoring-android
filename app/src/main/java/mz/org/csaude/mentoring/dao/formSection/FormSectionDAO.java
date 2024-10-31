@@ -44,7 +44,7 @@ public interface FormSectionDAO {
     FormSection getFormSectionByUuid(String uuid);
 
     // Query to retrieve FormSections based on formId.
-    @Query("SELECT * FROM " + FormSection.TABLE_NAME + " WHERE form_id = :formId ORDER BY sequence ASC")
+    @Query("SELECT * FROM " + FormSection.TABLE_NAME + " WHERE form_id = :formId and life_cycle_status = 'ACTIVE' ORDER BY sequence ASC")
     List<FormSection> getFormSectionsByFormId(int formId);
 
     // Query to retrieve FormSections based on sectionId.

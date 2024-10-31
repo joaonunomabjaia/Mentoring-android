@@ -27,13 +27,13 @@ public interface ProgramDAO {
     @Query("SELECT * FROM program WHERE id = :id")
     Program getById(int id);
 
-    @Query("SELECT * FROM program")
+    @Query("SELECT * FROM program WHERE life_cycle_status = 'ACTIVE'")
     List<Program> getAll();
 
     @Query("SELECT * FROM program WHERE uuid = :uuid LIMIT 1")
     Program getByUuid(String uuid);
 
-    @Query("SELECT * FROM program")
+    @Query("SELECT * FROM program WHERE life_cycle_status = 'ACTIVE'")
     List<Program> queryForAll();
 
     @Query("SELECT * FROM program WHERE id = :id LIMIT 1")

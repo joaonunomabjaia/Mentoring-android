@@ -31,7 +31,7 @@ public interface PartnerDao {
     @Insert
     void insertAll(List<Partner> partners);
 
-    @Query("SELECT * FROM partner")
+    @Query("SELECT * FROM partner WHERE life_cycle_status = 'ACTIVE'")
     List<Partner> getAll();
 
     @Update

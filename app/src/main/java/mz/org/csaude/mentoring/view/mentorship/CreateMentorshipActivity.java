@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -295,7 +296,12 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
     public void loadCategoryAdapter() {
         // Fetch the categories in a background thread
-            List<FormSection> categories = getRelatedViewModel().getMentorship().getForm().getFormSections();
+            List<FormSection> categories = new ArrayList<>();
+            for (FormSection fs : getRelatedViewModel().getMentorship().getForm().getFormSections()) {
+                if (fs.hasQuestionsOnCurrMentorship(getRelatedViewModel().getMentorship())) {
+                    categories.add(fs);
+                }
+            }
 
             // Update the UI on the main thread
             runOnUiThread(() -> {
@@ -367,7 +373,6 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
     public void populateQuestionList() {
         List<FormSectionQuestion> updatedQuestionList = ((FormSection) getRelatedViewModel().getCurrentFormSection()).getFormSectionQuestions();
-
 
         if (questionAdapter == null) {
             int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_qtns_spacing);

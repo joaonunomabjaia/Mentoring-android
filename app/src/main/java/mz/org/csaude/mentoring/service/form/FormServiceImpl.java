@@ -12,6 +12,7 @@ import mz.org.csaude.mentoring.dao.programmaticArea.TutorProgrammaticAreaDAO;
 import mz.org.csaude.mentoring.dao.section.SectionDAO;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
+import mz.org.csaude.mentoring.model.form.Section;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 
 public class FormServiceImpl extends BaseServiceImpl<Form> implements FormService{
@@ -82,6 +83,17 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
         if(f!=null) {
             form.setId(f.getId());
             this.update(form);
+            for (FormSection formSection : form.getFormSections()) {
+                FormSection fsection = formSectionDAO.getByUuid(formSection.getUuid());
+                formSection.setForm(form);
+                formSection.setSection(sectionDAO.getByUuid(formSection.getSection().getUuid()));
+                if(fsection!=null) {
+                    formSection.setId(fsection.getId());
+                    this.formSectionDAO.update(formSection);
+                } else {
+                    this.formSectionDAO.insert(formSection);
+                }
+            }
         } else {
             this.save(form);
             for (FormSection formSection : form.getFormSections()) {
