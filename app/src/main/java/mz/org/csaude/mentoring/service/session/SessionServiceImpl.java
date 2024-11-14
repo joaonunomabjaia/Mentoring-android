@@ -23,7 +23,6 @@ import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
@@ -139,7 +138,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
-    public List<SessionSummary> generateSessionSummary(Session session) {
+    public List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore) {
         List<SessionSummary> summaries = new ArrayList<>();
 
         SessionSummary sessionSummary = new SessionSummary();
@@ -161,7 +160,7 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
                     break;
                 }
             }
-            summaries.add(sessionSummary);
+            if (includeFinalScore) summaries.add(sessionSummary);
             return summaries;
         } catch (SQLException e) {
             throw new RuntimeException(e);

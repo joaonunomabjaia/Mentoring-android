@@ -37,7 +37,7 @@ public class Tutored extends BaseModel {
     private boolean zeroEvaluationDone;
 
     @ColumnInfo(name = COLUMN_ZERO_EVALUATION_SCORE)
-    private Double zeroEvaluationScore;
+    private double zeroEvaluationScore;
 
     public Tutored() {
     }
@@ -92,11 +92,11 @@ public class Tutored extends BaseModel {
         this.zeroEvaluationDone = zeroEvaluationDone;
     }
 
-    public Double getZeroEvaluationScore() {
+    public double getZeroEvaluationScore() {
         return zeroEvaluationScore;
     }
 
-    public void setZeroEvaluationScore(Double zeroEvaluationScore) {
+    public void setZeroEvaluationScore(double zeroEvaluationScore) {
         this.zeroEvaluationScore = zeroEvaluationScore;
     }
 

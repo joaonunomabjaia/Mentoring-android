@@ -1,6 +1,9 @@
 package mz.org.csaude.mentoring.viewmodel.session;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
+import android.app.Dialog;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,14 +12,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.R;
-import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
-import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.util.PDFGenerator;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.view.session.SessionEAResourceActivity;
 import mz.org.csaude.mentoring.view.session.SessionSummaryActivity;
 
 public class SessionSummaryVM extends BaseViewModel {
@@ -51,16 +51,28 @@ public class SessionSummaryVM extends BaseViewModel {
         return (SessionSummaryActivity) super.getRelatedActivity();
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void downloadFile() {
-        boolean print = PDFGenerator.createPDF(getRelatedActivity(), this.sessionSummaryList, this.session.getTutored());
+        new AsyncTask<Void, Void, Boolean>() {
+            private Dialog progress;
 
-        if (print) {
-            String successMessage = getRelatedActivity().getString(R.string.print_success);
-            Utilities.displayAlertDialog(getRelatedActivity(), successMessage).show();
-        } else {
-            String failureMessage = getRelatedActivity().getString(R.string.print_failure);
-            Utilities.displayAlertDialog(getRelatedActivity(), failureMessage).show();
-        }
+            @Override
+            protected void onPreExecute() {
+                progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                return PDFGenerator.createPDF(getRelatedActivity(), sessionSummaryList, session.getTutored());
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                dismissProgress(progress);
+                String message = result ? getRelatedActivity().getString(R.string.print_success) : getRelatedActivity().getString(R.string.print_failure);
+                Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+            }
+        }.execute();
     }
 
 
@@ -69,7 +81,7 @@ public class SessionSummaryVM extends BaseViewModel {
     }
 
     public void generateSessionSummary() {
-        sessionSummaryList = getApplication().getSessionService().generateSessionSummary(session);
+        sessionSummaryList = getApplication().getSessionService().generateSessionSummary(session, true);
         if (Utilities.listHasElements(sessionSummaryList)) {
             runOnMainThread(()->getRelatedActivity().displaySearchResults());
             if (session.getRonda().isRondaZero()) {

@@ -64,7 +64,9 @@ public class TutorServiceImpl extends BaseServiceImpl<Tutor> implements TutorSer
 
     @Override
     public Tutor getById(int id) throws SQLException {
-        return this.tutorDAO.queryForId(id);
+        Tutor tutor = this.tutorDAO.queryForId(id);
+        tutor.setEmployee(getApplication().getEmployeeService().getById(tutor.getEmployeeId()));
+        return tutor;
     }
 
     @Override

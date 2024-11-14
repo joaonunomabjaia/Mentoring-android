@@ -21,7 +21,7 @@ public class TutoredDTO extends BaseEntityDTO {
 
     private boolean zeroEvaluationDone;
 
-    private Double zeroEvaluationScore;
+    private double zeroEvaluationScore;
 
     public TutoredDTO() {
     }
@@ -49,11 +49,11 @@ public class TutoredDTO extends BaseEntityDTO {
         this.zeroEvaluationDone = zeroEvaluationDone;
     }
 
-    public Double getZeroEvaluationScore() {
+    public double getZeroEvaluationScore() {
         return zeroEvaluationScore;
     }
 
-    public void setZeroEvaluationScore(Double zeroEvaluationScore) {
+    public void setZeroEvaluationScore(double zeroEvaluationScore) {
         this.zeroEvaluationScore = zeroEvaluationScore;
     }
 
