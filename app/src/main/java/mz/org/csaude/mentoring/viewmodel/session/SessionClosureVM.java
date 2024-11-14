@@ -175,6 +175,7 @@ public class SessionClosureVM extends BaseViewModel {
                 // Perform updates in the background
                 getApplication().getSessionService().update(session);
                 session.getRonda().setRondaMentors(getApplication().getRondaMentorService().getRondaMentors(session.getRonda()));
+                getApplication().getRondaService().tryToCloseRonda(session.getRonda(), session.getEndDate());
 
                 // UI transition must be done on the main thread
                 getRelatedActivity().runOnUiThread(() -> {

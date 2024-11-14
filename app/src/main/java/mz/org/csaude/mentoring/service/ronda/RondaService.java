@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.service.ronda;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
@@ -25,4 +26,6 @@ public interface RondaService extends BaseService<Ronda> {
     Ronda getFullyLoadedRonda(Ronda ronda)  throws SQLException;
 
     List<Ronda> getAllByMentor(Tutor tutor, MentoringApplication mentoringApplication) throws SQLException;
+
+    void tryToCloseRonda(Ronda ronda, Date endDate);
 }

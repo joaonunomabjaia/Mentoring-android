@@ -24,7 +24,8 @@ import mz.org.csaude.mentoring.databinding.ActivitySessionListBinding;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.viewmodel.session.SessionListVM;
 
-public class SessionListActivity extends BaseActivity {
+public class
+SessionListActivity extends BaseActivity {
 
     private ActivitySessionListBinding sessionListBinding;
 

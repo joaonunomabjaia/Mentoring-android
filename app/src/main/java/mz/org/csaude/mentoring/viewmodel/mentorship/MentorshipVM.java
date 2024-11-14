@@ -698,7 +698,8 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     private void showMentorshipSummary() {
     }
 
-    private void doSaveMentorship() {
+    private void
+    doSaveMentorship() {
         try {
             this.mentorship.getAnswers().clear();
             for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
@@ -750,7 +751,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             this.ronda.setSessions(getApplication().getSessionService().getAllOfRonda(this.ronda));
             this.ronda.addSession(this.mentorship.getSession());
             ronda.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(this.ronda));
-            this.ronda.tryToCloseRonda();
+
             getApplication().getMentorshipService().save(this.mentorship);
             Log.i("Saved Mentorship", this.mentorship.toString());
             if (isMentoringMentorship()) {

@@ -1,7 +1,9 @@
 package mz.org.csaude.mentoring.viewmodel.ronda;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Dialog;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -119,18 +121,40 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         getRelatedActivity().checkStoragePermission();
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void printRondaReport() {
-        getExecutorService().execute(() -> {
-            try {
-                List<RondaSummary> rondaSummaryList = generateRondaSummaries(this.selectedRonda);
+        new AsyncTask<Void, Void, Boolean>() {
+            private Dialog progress;
 
-                boolean printSuccessful = PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
-                getRelatedActivity().runOnUiThread(() -> showPrintResultMessage(printSuccessful));
-            } catch (SQLException e) {
-                Log.e("printRondaSummary", "Exception: ", e);
+            @Override
+            protected void onPreExecute() {
+                // Show the progress dialog before starting the background task
+                progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
             }
-        });
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    // Generate Ronda summaries
+                    List<RondaSummary> rondaSummaryList = generateRondaSummaries(selectedRonda);
+
+                    // Create the Ronda summary PDF
+                    return PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
+                } catch (SQLException e) {
+                    Log.e("printRondaReport", "Exception: ", e);
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean printSuccessful) {
+                // Dismiss the progress dialog and show the result message
+                dismissProgress(progress);
+                showPrintResultMessage(printSuccessful, progress);
+            }
+        }.execute();
     }
+
 
     private List<RondaSummary> generateRondaSummaries(Ronda selectedRonda) throws SQLException {
         List<RondaSummary> rondaSummaryList = new ArrayList<>();
@@ -171,7 +195,7 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         Map<Integer, List<SessionSummary>> summaryDetails = new HashMap<>();
         int i = 1;
         for (Session session : sessions) {
-            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session));
+            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session, false));
             i++;
         }
         return summaryDetails;
@@ -204,7 +228,8 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         }
     }
 
-    private void showPrintResultMessage(boolean printSuccessful) {
+    private void showPrintResultMessage(boolean printSuccessful, Dialog progress) {
+        dismissProgress(progress);
         String message = printSuccessful
                 ? getRelatedActivity().getString(R.string.ronda_print_success)
                 : getRelatedActivity().getString(R.string.ronda_print_failure);
