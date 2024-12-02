@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
 import mz.org.csaude.mentoring.dto.partner.PartnerDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
@@ -26,13 +27,13 @@ public class PartnerRestService extends BaseRestService {
 
     public  void restGetPartners(RestResponseListener<Partner> listener){
 
-        Call<List<PartnerDTO>> partnerCall= syncDataService.getPartners();
+        Call<ApiResponse<PartnerDTO>> partnerCall= syncDataService.getPartners();
 
-        partnerCall.enqueue(new Callback<List<PartnerDTO>>() {
+        partnerCall.enqueue(new Callback<ApiResponse<PartnerDTO>>() {
             @Override
-            public void onResponse(Call<List<PartnerDTO>> call, Response<List<PartnerDTO>> response) {
+            public void onResponse(Call<ApiResponse<PartnerDTO>> call, Response<ApiResponse<PartnerDTO>> response) {
 
-                List<PartnerDTO> data = response.body();
+                List<PartnerDTO> data = response.body().getContent();
 
                 if(data == null){
 
@@ -55,7 +56,7 @@ public class PartnerRestService extends BaseRestService {
             }
 
             @Override
-            public void onFailure(Call<List<PartnerDTO>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<PartnerDTO>> call, Throwable t) {
                 Log.i("METADATA LOAD --", t.getMessage(), t);
                 listener.doOnRestErrorResponse(t.getMessage());
 

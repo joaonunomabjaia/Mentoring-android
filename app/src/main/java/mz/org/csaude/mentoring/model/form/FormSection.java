@@ -12,6 +12,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.form.FormSectionDTO;
+import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.util.Utilities;
@@ -148,7 +149,7 @@ public class FormSection extends BaseModel implements Listble {
     public boolean hasQuestionsOnCurrMentorship(Mentorship mentorship) {
         if (!Utilities.listHasElements(this.getFormSectionQuestions())) return false;
         for (FormSectionQuestion formSectionQuestion : this.getFormSectionQuestions()) {
-            if (formSectionQuestion.getEvaluationType().equals(mentorship.getEvaluationType())) return true;
+            if (formSectionQuestion.getEvaluationType().equals(mentorship.getEvaluationType()) || formSectionQuestion.getEvaluationType().getCode().equals(EvaluationType.AMBOS)) return true;
         }
         return false;
     }

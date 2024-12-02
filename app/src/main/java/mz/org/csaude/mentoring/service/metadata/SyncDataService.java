@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.service.metadata;
 
 import mz.org.csaude.mentoring.base.auth.LoginResponse;
+import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
@@ -59,7 +60,7 @@ public interface SyncDataService {
     Call<List<SettingDTO>> getSettings(@Path("uuid") final String uuid);
 
     @GET("healthFacilities/tutor/{uuid}")
-    Call<List<HealthFacilityDTO>> getHealthFacilities(@Path("uuid") final String uuid);
+    Call<ApiResponse<HealthFacilityDTO>> getHealthFacilities(@Path("uuid") final String uuid);
 
     @GET("cabinets/getall")
     Call<List<CabinetDTO>> getCabinets(@Query("offset") long offset, @Query("limit") long limit);
@@ -100,7 +101,7 @@ public interface SyncDataService {
     Call<List<ProfessionalCategoryDTO>> getProfessionalCategory(@Query("offset") long offset, @Query("limit") long limit);
 
     @GET("partner/getall")
-    Call<List<PartnerDTO>> getPartners();
+    Call<ApiResponse<PartnerDTO>> getPartners();
 
     @POST("tutored/save")
     Call<TutoredDTO> postTutored(@Body TutoredDTO tutoredDTO);
@@ -152,9 +153,9 @@ public interface SyncDataService {
     @PATCH("mentor/update")
     Call<TutorDTO> patchTutor(@Body TutorDTO tutorDTO);
     @GET("programs/getAll")
-    Call<List<ProgramDTO>> getAllPrograms();
+    Call<ApiResponse<ProgramDTO>> getAllPrograms();
     @GET("programmaticareas/getAll")
-    Call<List<ProgrammaticAreaDTO>> getAllProgrammaticAreas();
+    Call<ApiResponse<ProgrammaticAreaDTO>> getAllProgrammaticAreas();
     @GET("tutorprogrammaticareas/getByTutorUuidd/{tutorUuid}")
     Call<List<TutorProgrammaticAreaDTO>> getByTutorUuidd(@Path("tutorUuid") String tutorUuid);
 
