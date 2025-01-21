@@ -34,12 +34,11 @@ public interface FormSectionQuestionDAO {
     @Query("DELETE FROM form_section_question WHERE form_section_id = :formSectionId")
     void deleteByFormSectionId(int formSectionId);
 
-    // Retrieve all FormSectionQuestion records for a specific formSectionId, lifeCycleStatus, and evaluationType.
-    // Order by sequence.
     @Query("SELECT * FROM form_section_question WHERE form_section_id = :formSectionId AND life_cycle_status = :lifeCycleStatus " +
             "AND evaluation_type_id IN (SELECT id FROM evaluation_type WHERE code = :evaluationType OR code = 'Ambos') " +
+            "AND evaluation_location_id IN (SELECT id FROM evaluation_location WHERE id = :evaluationLocationId OR code = 'Ambos') " +
             "ORDER BY sequence ASC")
-    List<FormSectionQuestion> getAllOfFormSection(int formSectionId, String evaluationType, String lifeCycleStatus);
+    List<FormSectionQuestion> getAllOfFormSection(int formSectionId, String evaluationType, String lifeCycleStatus, int evaluationLocationId);
 
     // Retrieve a FormSectionQuestion by its uuid.
     @Query("SELECT * FROM form_section_question WHERE uuid = :uuid LIMIT 1")
