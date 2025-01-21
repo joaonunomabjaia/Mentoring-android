@@ -13,6 +13,7 @@ import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
 import mz.org.csaude.mentoring.dao.career.CareerTypeDAO;
 import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
 import mz.org.csaude.mentoring.dao.evaluation.EvaluationTypeDAO;
+import mz.org.csaude.mentoring.dao.evaluationLocation.EvaluationLocationDAO;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
 import mz.org.csaude.mentoring.dao.form.FormTypeDAO;
 import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
@@ -96,7 +97,7 @@ import mz.org.csaude.mentoring.util.Converters;
                 CareerType.class, FormType.class, Door.class, IterationType.class, Province.class, QuestionType.class,
                 SessionStatus.class, User.class, Ronda.class, RondaType.class, RondaMentee.class, RondaMentor.class,
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
-                Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class
+                Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class, EvaluationLocationDAO.class
         },
         version = 3,
         exportSchema = false
@@ -143,6 +144,7 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract SessionRecommendedResourceDAO getSessionRecommendedResourceDAO();
     public abstract SectionDAO getSectionDAO();
     public abstract FormSectionDAO getFormSectionDAO();
+    public abstract EvaluationLocationDAO getEvaluationLocationDAO();
 
     public static MentoringDatabase getInstance(Context context, String passphrase) {
         if (INSTANCE == null) {

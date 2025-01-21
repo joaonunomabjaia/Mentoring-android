@@ -42,6 +42,8 @@ import mz.org.csaude.mentoring.service.answer.AnswerService;
 import mz.org.csaude.mentoring.service.answer.AnswerServiceImpl;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.employee.EmployeeServiceImpl;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationService;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationServiceImpl;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeService;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.form.FormService;
@@ -200,6 +202,8 @@ public class MentoringApplication  extends Application {
     private SectionService sectionService;
 
     private FormSectionService formSectionService;
+
+    private EvaluationLocationService evaluationLocationService;
 
 
 
@@ -516,6 +520,11 @@ public class MentoringApplication  extends Application {
     public SessionRecommendedResourceRestService getSessionRecommendedResourceRestService() {
         if (sessionRecommendedResourceRestService == null) this.sessionRecommendedResourceRestService = new SessionRecommendedResourceRestService(this);
         return sessionRecommendedResourceRestService;
+    }
+
+    public EvaluationLocationService getEvaluationLocationService() {
+        if (evaluationLocationService == null) this.evaluationLocationService = new EvaluationLocationServiceImpl(this);
+        return evaluationLocationService;
     }
 
     public ApplicationStep getApplicationStep() {
