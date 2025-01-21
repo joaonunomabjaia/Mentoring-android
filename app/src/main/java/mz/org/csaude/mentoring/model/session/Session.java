@@ -49,6 +49,7 @@ public class Session extends BaseModel {
     public static final String COLUMN_WEAK_POINTS = "points_to_improve";
     public static final String COLUMN_WORK_PLAN = "work_plan";
     public static final String COLUMN_OBSERVATIONS = "observations";
+    public static final String COLUMN_NEXT_SESSION_DATE = "next_session_date";
 
     @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
@@ -56,6 +57,9 @@ public class Session extends BaseModel {
 
     @ColumnInfo(name = COLUMN_END_DATE)
     private Date endDate;
+
+    @ColumnInfo(name = COLUMN_NEXT_SESSION_DATE)
+    private Date nextSessionDate;
 
     @ColumnInfo(name = COLUMN_PERFORMED_DATE)
     private Date performedDate;
@@ -119,6 +123,8 @@ public class Session extends BaseModel {
         this.setPointsToImprove(sessionDTO.getPointsToImprove());
         this.setStrongPoints(sessionDTO.getStrongPoints());
         this.setObservations(sessionDTO.getObservations());
+        this.setWorkPlan(sessionDTO.getWorkPlan());
+        this.setNextSessionDate(sessionDTO.getNextSessionDate());
         if (sessionDTO.getSessionStatus() != null) {
             this.setStatus(new SessionStatus(sessionDTO.getSessionStatus()));
             this.statusId = this.status.getId();
@@ -331,19 +337,27 @@ public class Session extends BaseModel {
         this.rondaId = rondaId;
     }
 
-    public int getMenteeId() {
+    public Integer getMenteeId() {
         return menteeId;
     }
 
-    public void setMenteeId(int menteeId) {
+    public void setMenteeId(Integer menteeId) {
         this.menteeId = menteeId;
     }
 
-    public int getFormId() {
+    public Integer getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(Integer formId) {
         this.formId = formId;
+    }
+
+    public Date getNextSessionDate() {
+        return nextSessionDate;
+    }
+
+    public void setNextSessionDate(Date nextSessionDate) {
+        this.nextSessionDate = nextSessionDate;
     }
 }

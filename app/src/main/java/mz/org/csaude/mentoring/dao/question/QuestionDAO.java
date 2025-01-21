@@ -30,7 +30,7 @@ public interface QuestionDAO {
     @Query("SELECT * FROM question WHERE uuid = :uuid LIMIT 1")
     Question getByUuid(String uuid);
 
-    @Query("SELECT * FROM question")
+    @Query("SELECT * FROM question WHERE life_cycle_status = 'ACTIVE'")
     List<Question> getAll();
 
     @Query("SELECT * FROM question WHERE id = :id LIMIT 1")
@@ -39,7 +39,7 @@ public interface QuestionDAO {
     @Query("SELECT * FROM question WHERE uuid = :uuid LIMIT 1")
     Question queryForUuid(String uuid);
 
-    @Query("SELECT * FROM question")
+    @Query("SELECT * FROM question WHERE life_cycle_status = 'ACTIVE'")
     List<Question> queryForAll();
 
 }

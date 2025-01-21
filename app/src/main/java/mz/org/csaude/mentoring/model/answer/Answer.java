@@ -12,6 +12,7 @@ import androidx.room.Relation;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.question.Question;
 
@@ -25,6 +26,10 @@ import mz.org.csaude.mentoring.model.question.Question;
                         parentColumns = "id",
                         childColumns = "mentorship_id",
                         onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = FormSectionQuestion.class,
+                        parentColumns = "id",
+                        childColumns = Answer.COLUMN_FORM_SECTION_QUESTION,
+                        onDelete = ForeignKey.CASCADE),
                 @ForeignKey(entity = Question.class,
                         parentColumns = "id",
                         childColumns = "question_id",
@@ -33,6 +38,7 @@ import mz.org.csaude.mentoring.model.question.Question;
         indices = {
                 @Index(value = {"form_id"}),
                 @Index(value = {"mentorship_id"}),
+                @Index(value = {Answer.COLUMN_FORM_SECTION_QUESTION}),
                 @Index(value = {"question_id"})
         }
 )
@@ -43,6 +49,7 @@ public class Answer extends BaseModel {
     public static final String COLUMN_FORM = "form_id";
     public static final String COLUMN_MENTORSHIP = "mentorship_id";
     public static final String COLUMN_QUESTION = "question_id";
+    public static final String COLUMN_FORM_SECTION_QUESTION = "form_section_question_id";
     public static final String COLUMN_VALUE = "value";
 
     @NonNull
@@ -57,8 +64,15 @@ public class Answer extends BaseModel {
     @ColumnInfo(name = COLUMN_QUESTION)
     private Integer questionId;
 
+    @NonNull
+    @ColumnInfo(name = COLUMN_FORM_SECTION_QUESTION)
+    private Integer formSectionQuestionId;
+
     @ColumnInfo(name = COLUMN_VALUE)
     private String value;
+
+    @Ignore
+    private FormSectionQuestion formSectionQuestion;
 
     @Ignore
     @Relation(parentColumn = "form_id", entityColumn = "id")
@@ -78,15 +92,10 @@ public class Answer extends BaseModel {
     public Answer(AnswerDTO answerDTO) {
         super(answerDTO);
         this.setValue(answerDTO.getValue());
-        if (answerDTO.getForm() != null) {
-            this.setForm(answerDTO.getForm().getForm());
-        }
-        if (answerDTO.getQuestion() != null) {
-            this.setQuestion(answerDTO.getQuestion().getQuestionObj());
-        }
-        if (answerDTO.getMentorship() != null) {
-            this.setMentorship(new Mentorship(answerDTO.getMentorship()));
-        }
+        this.setForm(new Form(answerDTO.getFormUuid()));
+        this.setMentorship(new Mentorship(answerDTO.getMentorshipUuid()));
+        this.setQuestion(new Question(answerDTO.getQuestionUUid()));
+        this.setFormSectionQuestion(new FormSectionQuestion(answerDTO.getFormSectionQuestionUuid()));
     }
 
     public String getValue() {
@@ -146,5 +155,23 @@ public class Answer extends BaseModel {
 
     public void setMentorshipId(Integer mentorshipId) {
         this.mentorshipId = mentorshipId;
+    }
+
+    @NonNull
+    public Integer getFormSectionQuestionId() {
+        return formSectionQuestionId;
+    }
+
+    public void setFormSectionQuestionId(@NonNull Integer formSectionQuestionId) {
+        this.formSectionQuestionId = formSectionQuestionId;
+    }
+
+    public FormSectionQuestion getFormSectionQuestion() {
+        return formSectionQuestion;
+    }
+
+    public void setFormSectionQuestion(FormSectionQuestion formSectionQuestion) {
+        this.formSectionQuestion = formSectionQuestion;
+        this.formSectionQuestionId = formSectionQuestion.getId();
     }
 }

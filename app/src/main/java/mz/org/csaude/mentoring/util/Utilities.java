@@ -534,7 +534,7 @@ public class Utilities {
      */
     public static String generateSalt() {
         SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
+        byte[] salt = new byte[32];
         random.nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);
     }

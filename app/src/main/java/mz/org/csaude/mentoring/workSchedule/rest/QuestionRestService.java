@@ -39,12 +39,11 @@ public class QuestionRestService extends BaseRestService {
                     getServiceExecutor().execute(()-> {
                         try {
                             QuestionService questionService = getApplication().getQuestionService();
-                            List<Question> questions = new ArrayList<>();
-                            for (QuestionDTO questionDTO : data) {
-                                questionDTO.getQuestionObj().setSyncStatus(SyncSatus.SENT);
-                                questions.add(questionDTO.getQuestionObj());
+                            List<Question> questions = Utilities.parse(data, Question.class);
+                            for (Question q : questions) {
+                                q.setSyncStatus(SyncSatus.SENT);
                             }
-                            questionService.saveOrUpdateQuestions(data);
+                            questionService.saveOrUpdateQuestionList(questions);
                             listener.doOnResponse(BaseRestService.REQUEST_SUCESS, questions);
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
@@ -57,7 +56,7 @@ public class QuestionRestService extends BaseRestService {
 
             @Override
             public void onFailure(Call<List<QuestionDTO>> call, Throwable t) {
-                Log.i("METADATA LOAD --", t.getMessage(), t);
+                Log.i("QUESTIONS DOWNLOAD --", t.getMessage(), t);
             }
         });
 

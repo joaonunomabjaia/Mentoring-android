@@ -24,7 +24,7 @@ public interface DoorDAO {
     @Query("SELECT * FROM door WHERE id = :id")
     Door getDoorById(int id);
 
-    @Query("SELECT * FROM door")
+    @Query("SELECT * FROM door WHERE life_cycle_status = 'ACTIVE'")
     List<Door> getAllDoors();
 
     @Query("DELETE FROM door WHERE id = :id")
@@ -39,7 +39,7 @@ public interface DoorDAO {
     @Query("DELETE FROM door WHERE id = :id")
     int delete(int id);
 
-    @Query("SELECT * FROM door")
+    @Query("SELECT * FROM door WHERE life_cycle_status = 'ACTIVE'")
     List<Door> queryForAll();
 
     @Query("SELECT * FROM door WHERE id = :id LIMIT 1")

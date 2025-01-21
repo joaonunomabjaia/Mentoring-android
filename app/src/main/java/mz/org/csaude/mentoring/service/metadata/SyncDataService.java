@@ -1,11 +1,12 @@
 package mz.org.csaude.mentoring.service.metadata;
 
 import mz.org.csaude.mentoring.base.auth.LoginResponse;
+import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
-import mz.org.csaude.mentoring.dto.form.FormQuestionDTO;
+import mz.org.csaude.mentoring.dto.form.FormSectionQuestionDTO;
 import mz.org.csaude.mentoring.dto.location.CabinetDTO;
 import mz.org.csaude.mentoring.dto.location.DistrictDTO;
 import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
@@ -24,6 +25,7 @@ import mz.org.csaude.mentoring.dto.resource.ResourceDTO;
 import mz.org.csaude.mentoring.dto.responseType.ResponseTypeDTO;
 import mz.org.csaude.mentoring.dto.ronda.RondaDTO;
 import mz.org.csaude.mentoring.dto.ronda.RondaTypeDTO;
+import mz.org.csaude.mentoring.dto.section.SectionDTO;
 import mz.org.csaude.mentoring.dto.session.SessionDTO;
 import mz.org.csaude.mentoring.dto.session.SessionRecommendedResourceDTO;
 import mz.org.csaude.mentoring.dto.session.SessionStatusDTO;
@@ -58,7 +60,7 @@ public interface SyncDataService {
     Call<List<SettingDTO>> getSettings(@Path("uuid") final String uuid);
 
     @GET("healthFacilities/tutor/{uuid}")
-    Call<List<HealthFacilityDTO>> getHealthFacilities(@Path("uuid") final String uuid);
+    Call<ApiResponse<HealthFacilityDTO>> getHealthFacilities(@Path("uuid") final String uuid);
 
     @GET("cabinets/getall")
     Call<List<CabinetDTO>> getCabinets(@Query("offset") long offset, @Query("limit") long limit);
@@ -99,12 +101,15 @@ public interface SyncDataService {
     Call<List<ProfessionalCategoryDTO>> getProfessionalCategory(@Query("offset") long offset, @Query("limit") long limit);
 
     @GET("partner/getall")
-    Call<List<PartnerDTO>> getPartners();
+    Call<ApiResponse<PartnerDTO>> getPartners();
 
     @POST("tutored/save")
     Call<TutoredDTO> postTutored(@Body TutoredDTO tutoredDTO);
 
-    @POST("tutored/saveMany")
+    @PATCH("user/password-update")
+    Call<UserDTO> patchUser(@Body UserDTO userDTO);
+
+    @PATCH("tutored/batch-update")
     Call<List<TutoredDTO>> postTutoreds(@Body List<TutoredDTO> tutoredDTOS);
     @GET("rondaTypes/getall")
     Call<List<RondaTypeDTO>> getRondaTypes();
@@ -116,18 +121,19 @@ public interface SyncDataService {
     Call<List<EvaluationTypeDTO>> getEvaluationTypes();
     @GET("responseTypes/getAll")
     Call<List<ResponseTypeDTO>> getResponseTypes();
-    @GET("questionCategories/getAll")
-    Call<List<QuestionCategoryDTO>> getQuestionCategories();
+
+    @GET("section")
+    Call<List<SectionDTO>> getSections();
     @GET("utils/iterationTypes")
     Call<List<IterationTypeDTO>> getIterationTypes();
     @GET("utils/doors")
     Call<List<DoorDTO>> getDoors();
     @GET("questions/getAll")
     Call<List<QuestionDTO>> getAllQuestions();
-    @GET("formQuestions/getByFormsUuids")
-    Call<List<FormQuestionDTO>> getFormsQuestionsByFormsUuids(@Query("formsUuids") List<String> formsUuids,
-                                                              @Query("limit") Long limit,
-                                                              @Query("offset") Long offset);
+    @GET("formSectionQuestions/getByFormsUuids")
+    Call<List<FormSectionQuestionDTO>> getFormsQuestionsByFormsUuids(@Query("formsUuids") List<String> formsUuids,
+                                                                     @Query("limit") Long limit,
+                                                                     @Query("offset") Long offset);
     @GET("rondas/getAllRondasOfMentor")
     Call<List<RondaDTO>> getAllRondasOfMentor(@Query("mentorId") Long mentorId);
 
@@ -147,9 +153,9 @@ public interface SyncDataService {
     @PATCH("mentor/update")
     Call<TutorDTO> patchTutor(@Body TutorDTO tutorDTO);
     @GET("programs/getAll")
-    Call<List<ProgramDTO>> getAllPrograms();
+    Call<ApiResponse<ProgramDTO>> getAllPrograms();
     @GET("programmaticareas/getAll")
-    Call<List<ProgrammaticAreaDTO>> getAllProgrammaticAreas();
+    Call<ApiResponse<ProgrammaticAreaDTO>> getAllProgrammaticAreas();
     @GET("tutorprogrammaticareas/getByTutorUuidd/{tutorUuid}")
     Call<List<TutorProgrammaticAreaDTO>> getByTutorUuidd(@Path("tutorUuid") String tutorUuid);
 

@@ -91,6 +91,13 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
 
     public void createSession() {
         if (this.searchResults.size() < 4) {
+            for (Session session : this.searchResults) {
+                if (!session.isCompleted()) {
+                    String message = getRelatedActivity().getString(R.string.cannot_create_new_session_with_onpen_session);
+                    Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+                    return;
+                }
+            }
             Map<String, Object> params = new HashMap<>();
             params.put("ronda", this.currRonda);
             params.put("mentee", this.selectedMentee);

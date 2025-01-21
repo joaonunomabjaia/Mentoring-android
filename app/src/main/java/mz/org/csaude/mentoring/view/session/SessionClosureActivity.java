@@ -62,6 +62,18 @@ public class SessionClosureActivity extends BaseActivity {
             datePickerDialog.show();
         });
 
+        binding.nextSessionDate.setOnClickListener(view -> {
+            int mYear, mMonth, mDay;
+
+            final Calendar c = Calendar.getInstance();
+            mYear = c.get(Calendar.YEAR);
+            mMonth = c.get(Calendar.MONTH);
+            mDay = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(SessionClosureActivity.this, (view1, year, monthOfYear, dayOfMonth) -> getRelatedViewModel().setNextSessionDate(DateUtilities.createDate(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year, DateUtilities.DATE_FORMAT)), mYear, mMonth, mDay);
+            datePickerDialog.show();
+        });
+
         finishReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

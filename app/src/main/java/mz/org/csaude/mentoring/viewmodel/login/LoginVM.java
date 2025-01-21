@@ -1,9 +1,11 @@
 package mz.org.csaude.mentoring.viewmodel.login;
 
 import android.app.Application;
+import android.app.Dialog;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.Bindable;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -11,6 +13,7 @@ import androidx.work.WorkInfo;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
@@ -34,10 +37,11 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private boolean remeberMe;
 
     private boolean authenticating;
-
-
+    private static final int INACTIVE_USER_CHECK = 1;
+    private int serverOperation;
 
     private UserSyncService userSyncService;
+    private AlertDialog checkDlg;
 
 
     public LoginVM(@NonNull Application application) {
@@ -77,37 +81,52 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void doLogin() {
         getExecutorService().execute(()-> {
             setAuthenticating(true);
-            try {
-                if (AppHasUser()) {
-                    doLocalLogin();
-                } else {
-                    getApplication().isServerOnline(this);
-                }
-                getApplication().saveDefaultSyncSettings();
-                getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            if (AppHasUser()) {
+                runOnMainThread(() -> {
+                    try {
+                        doLocalLogin();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } else {
+                getApplication().isServerOnline(this);
             }
+            getApplication().saveDefaultSyncSettings();
+            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
         });
     }
 
     private void doLocalLogin() throws SQLException {
-        User logedUser = userService.login(this.user);
-
-        if (logedUser != null) {
-            if (!logedUser.isActivated()) {
-                String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
-                Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
-                return;
+        AtomicReference<User> logedUser = new AtomicReference<>();
+        getExecutorService().execute(()-> {
+            try {
+                logedUser.set(userService.login(this.user));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-            getApplication().setAuthenticatedUser(logedUser, remeberMe);
-            goHome();
-        } else {
-            String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
-            Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
-        }
 
-        setAuthenticating(false);
+            runOnMainThread(()->{
+                if (logedUser.get() != null) {
+                    if (!logedUser.get().isActivated()) {
+                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_on_server);
+                        checkDlg = Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage);
+                        checkDlg.show();
+
+                        this.serverOperation = INACTIVE_USER_CHECK;
+                        getApplication().isServerOnline(this);
+                        return;
+                    }
+                    getApplication().setAuthenticatedUser(logedUser.get(), remeberMe);
+                    goHome();
+                } else {
+                    String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
+                    Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
+                }
+
+                setAuthenticating(false);
+            });
+        });
     }
 
     private boolean AppHasUser() {
@@ -193,7 +212,33 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     @Override
     public void onServerStatusChecked(boolean isOnline) {
         if (isOnline) {
-            userSyncService.doOnlineLogin(this, remeberMe);
+            if (serverOperation == INACTIVE_USER_CHECK) {
+                OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
+                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
+                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                        getExecutorService().execute(()->{
+                            try {
+                                User u =userService.login(this.user);
+                                if (!u.isActivated()) {
+                                    checkDlg.dismiss();
+                                    String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
+                                    Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                                } else {
+                                    getApplication().setAuthenticatedUser(u, remeberMe);
+                                    goHome();
+                                }
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    } else {
+                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_error);
+                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                    }
+                });
+            } else {
+                userSyncService.doOnlineLogin(this, remeberMe);
+            }
         }else {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
         }

@@ -8,6 +8,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.user.UserDao;
 import mz.org.csaude.mentoring.model.user.User;
+import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 
 public class UserServiceImpl extends BaseServiceImpl<User> implements UserService {
@@ -33,6 +34,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public User update(User record) throws SQLException {
+        record.setUpdatedAt(DateUtilities.getCurrentDate());
         userDao.update(record);
         return record;
     }
@@ -61,7 +63,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public User login(User user) throws SQLException {
         User u = this.userDao.getByUserName(user.getUserName());
         if (u != null) {
-            user.setPassword(Utilities.MD5Crypt(u.getSalt()+":"+user.getPassword()));
+            user.setPassword(Utilities.encryptPassword(user.getPassword(), u.getSalt()));
             return this.userDao.getByCredentials(user.getUserName(), user.getPassword());
         } else return null;
     }
@@ -92,6 +94,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public User getCurrentUser() throws SQLException {
-        return userDao.queryForAll().get(0);
+        User user = userDao.queryForAll().get(0);
+        user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
+        return user;
     }
 }

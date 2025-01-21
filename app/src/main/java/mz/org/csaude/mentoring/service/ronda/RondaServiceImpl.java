@@ -4,12 +4,10 @@ import android.app.Application;
 
 import androidx.room.Transaction;
 
-import com.j256.ormlite.misc.TransactionManager;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
@@ -21,18 +19,15 @@ import mz.org.csaude.mentoring.dao.ronda.RondaMentorDAO;
 import mz.org.csaude.mentoring.dao.rondatype.RondaTypeDAO;
 import mz.org.csaude.mentoring.dao.tutor.TutorDAO;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
-import mz.org.csaude.mentoring.dto.location.HealthFacilityDTO;
 import mz.org.csaude.mentoring.dto.ronda.RondaDTO;
 import mz.org.csaude.mentoring.dto.ronda.RondaMenteeDTO;
 import mz.org.csaude.mentoring.dto.ronda.RondaMentorDTO;
-import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
-import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 
@@ -107,7 +102,12 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public List<Ronda> getAllNotSynced() throws SQLException {
-        return this.rondaDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        List<Ronda> rondas = this.rondaDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        for (Ronda ronda: rondas) {
+            ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
+            ronda.setHealthFacility(getApplication().getHealthFacilityService().getById(ronda.getHealthFacilityId()));
+        }
+        return rondas;
     }
 
     @Override
@@ -166,9 +166,11 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public Ronda getFullyLoadedRonda(Ronda ronda) throws SQLException {
         Ronda r = this.rondaDAO.getByUuid(ronda.getUuid());
-        r.setRondaMentors(this.rondaMentorDAO.getRondaMentors(r.getId()));
-        r.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(r.getId()));
+        r.setRondaMentors(getApplication().getRondaMentorService().getRondaMentors(r));
+        r.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(r));
         r.setSessions(getApplication().getSessionService().getAllOfRonda(r));
+        r.setRondaType(this.rondaTypeDAO.queryForId(r.getRondaTypeId()));
+        r.setHealthFacility(getApplication().getHealthFacilityService().getById(r.getHealthFacilityId()));
         return r;
     }
 
@@ -254,6 +256,21 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public List<Ronda> getAllByMentor(Tutor tutor, MentoringApplication mentoringApplication) throws SQLException {
         return this.rondaDAO.getAllByMentor(tutor.getId(), String.valueOf(LifeCycleStatus.ACTIVE));
+    }
+
+    @Override
+    public void tryToCloseRonda(Ronda ronda, Date endDate) {
+        try {
+            ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
+            ronda.tryToCloseRonda();
+
+            if (ronda.isRondaCompleted()) {
+                ronda.setEndDate(endDate);
+                this.rondaDAO.update(ronda);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -72,20 +72,37 @@ public class UserVM extends BaseViewModel {
     }
 
     public void updatePassword() {
-
         String errors = this.user.isValid();
 
         if (!Utilities.stringHasValue(errors)) {
+            getExecutorService().execute(() -> {
                 try {
+                    // Perform the password update in the background
                     getRelatedService().updatePassword(getRelatedRecord());
-                    Utilities.displayAlertDialog(getRelatedFragment().getContext(), "Operação efectuada com sucesso!").show();
+
+                    // Notify success on the main thread
+                    runOnMainThread(() ->
+                            Utilities.displayAlertDialog(
+                                    getRelatedFragment().getContext(),
+                                    "Operação efectuada com sucesso!"
+                            ).show()
+                    );
+
                 } catch (SQLException e) {
-                    Utilities.displayAlertDialog(getRelatedFragment().getContext(),"Ocorreu um erro ao tentar realizar a operação desejada" + " " + e.getMessage()).show();
+                    // Notify the error on the main thread
+                    runOnMainThread(() ->
+                            Utilities.displayAlertDialog(
+                                    getRelatedFragment().getContext(),
+                                    "Ocorreu um erro ao tentar realizar a operação desejada: " + e.getMessage()
+                            ).show()
+                    );
                     e.printStackTrace();
                 }
-
+            });
         } else {
+            // Display validation errors on the main thread
             Utilities.displayAlertDialog(getRelatedFragment().getContext(), errors).show();
         }
     }
+
 }

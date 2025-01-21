@@ -4,17 +4,11 @@ import android.app.Application;
 
 import androidx.room.Transaction;
 
-import com.j256.ormlite.misc.TransactionManager;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
@@ -29,8 +23,6 @@ import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionRecommendedResource;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.util.DateUtilities;
-import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
@@ -111,12 +103,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             session.setForm(getApplication().getFormService().getById(session.getFormId()));
             session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
             session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+            session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
             for (Mentorship mentorship : session.getMentorships()) {
                 mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getById(mentorship.getEvaluationTypeId()));
                 mentorship.setAnswers(this.getApplication().getAnswerService().getAllOfMentorship(mentorship));
             }
         }
         return sessions;
+    }
+
+    @Override
+    public int countAllOfRondaAndMentee(Ronda currRonda, Tutored selectedMentee) {
+        return this.sessionDAO.countAllOfRondaAndMentee(currRonda.getId(), selectedMentee.getId());
     }
 
     @Override
@@ -140,16 +138,19 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
-    public List<SessionSummary> generateSessionSummary(Session session) {
+    public List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore) {
         List<SessionSummary> summaries = new ArrayList<>();
 
+        SessionSummary sessionSummary = new SessionSummary();
+        sessionSummary.setTitle("Desempenho Final");
         try {
             session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
             for (Mentorship mentorship : session.getMentorships()) {
                 if (mentorship.isPatientEvaluation()) {
                     mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+                    determineFinalScore(sessionSummary, mentorship.getAnswers());
                     for (Answer answer : mentorship.getAnswers()) {
-                        String cat = answer.getQuestion().getQuestionsCategory().getCategory();
+                        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
                         if (categoryAlreadyExists(cat, summaries)){
                             doCountInCategory(cat, summaries, answer);
                         } else {
@@ -159,11 +160,40 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
                     break;
                 }
             }
+            if (includeFinalScore) summaries.add(sessionSummary);
             return summaries;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private void determineFinalScore(SessionSummary sessionSummary, List<Answer> answers) {
+        int simCount = 0;
+        int naoCount = 0;
+
+        // Loop through answers to count SIM and NÃO values
+        for (Answer answer : answers) {
+            String value = answer.getValue().trim().toUpperCase();
+            if (value.equals("SIM")) {
+                simCount++;
+            } else if (value.equals("NAO")) {
+                naoCount++;
+            }
+        }
+
+        sessionSummary.setSimCount(simCount);
+        sessionSummary.setNaoCount(naoCount);
+
+       /* // Calculate Desempenho Final using the provided formula
+        double finalPerformance = 0.0;
+        if (simCount + naoCount > 0) {
+            finalPerformance = ((double) simCount / (simCount + naoCount)) * 100;
+        }
+
+        // Set the final score in the session summary
+        sessionSummary.setProgressPercentage(finalPerformance+"%");*/
+    }
+
 
     @Override
     public void saveRecommendedResources(Session session, List<SessionRecommendedResource> recommendedResources) throws SQLException {
@@ -179,7 +209,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public List<SessionRecommendedResource> getPendingRecommendedResources() throws SQLException {
-        return this.sessionRecommendedResourceDAO.queryForAllPending(String.valueOf(SyncSatus.PENDING));
+        List<SessionRecommendedResource> resources = this.sessionRecommendedResourceDAO.queryForAllPending(String.valueOf(SyncSatus.PENDING));
+        for (SessionRecommendedResource resource : resources) {
+            resource.setSession(getApplication().getSessionService().getById(resource.getSessionId()));
+            resource.setTutored(getApplication().getTutoredService().getById(resource.getTutoredId()));
+            resource.setTutor(getApplication().getTutorService().getById(resource.getTutorId()));
+        }
+        return resources;
+    }
+
+    @Override
+    public SessionRecommendedResource getRecommendedResourceByUuid(String uuid) {
+        return this.sessionRecommendedResourceDAO.getByUuid(uuid);
     }
 
     private void doCountInCategory(String cat, List<SessionSummary> summaries, Answer answer) {
@@ -205,7 +246,8 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     private SessionSummary initSessionSummary(Answer answer) {
         SessionSummary sessionSummary = new SessionSummary();
-        sessionSummary.setTitle(answer.getQuestion().getQuestionsCategory().getCategory());
+        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
+        sessionSummary.setTitle(cat);
 
         if (answer.getValue().equals("SIM")) {
             sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);
@@ -245,7 +287,14 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public List<Session> getAllNotSynced() throws SQLException {
-        return sessionDAO.getAllNotSynced(String.valueOf(LifeCycleStatus.ACTIVE));
+        List<Session> sessions = this.sessionDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        for (Session session : sessions) {
+            session.setForm(getApplication().getFormService().getById(session.getFormId()));
+            session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
+            session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+            session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
+        }
+        return sessions;
     }
 
     @Override

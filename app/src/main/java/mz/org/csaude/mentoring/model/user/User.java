@@ -66,6 +66,7 @@ public class User extends BaseModel {
     }
     @Ignore
     public User(UserDTO userDTO) {
+        super(userDTO);
         this.userName = userDTO.getUsername();
         this.password = userDTO.getPassword();
         this.salt = userDTO.getSalt();

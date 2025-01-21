@@ -38,6 +38,7 @@ public class MentorshipActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_list_mentorship);
         binding.setViewModel(getRelatedViewModel());
 
@@ -78,15 +79,16 @@ public class MentorshipActivity extends BaseActivity {
 
 
     public void populateRecyclerView(){
-        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        binding.rcvMentorships.setLayoutManager(mLayoutManager);
-        binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
         if (adapter == null) {
             int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
             SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
             binding.rcvMentorships.addItemDecoration(itemDecoration);
         }
+        adapter = new MentorshipAdapter(binding.rcvMentorships, getRelatedViewModel().getSearchResults(), this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        binding.rcvMentorships.setLayoutManager(mLayoutManager);
+        binding.rcvMentorships.setItemAnimator(new DefaultItemAnimator());
+
         binding.rcvMentorships.setAdapter(adapter);
     }
 

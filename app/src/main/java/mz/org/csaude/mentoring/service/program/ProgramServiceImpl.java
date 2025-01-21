@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.service.program;
 
 import android.app.Application;
 
+import androidx.room.Transaction;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class ProgramServiceImpl extends BaseServiceImpl<Program> implements Prog
         this.programDAO = getDataBaseHelper().getProgramDAO();
     }
 
+    @Transaction
     @Override
     public Program save(Program record) throws SQLException {
         this.programDAO.insert(record);
@@ -64,8 +67,10 @@ public class ProgramServiceImpl extends BaseServiceImpl<Program> implements Prog
         Program program = programDTO.getProgram();
         if(p!=null) {
             program.setId(p.getId());
+            programDAO.update(program);
+        } else {
+            program.setId((int) programDAO.insert(program));
         }
-        this.programDAO.createOrUpdate(program);
         return program;
     }
 

@@ -65,6 +65,7 @@ public class SessionRecommendedResourceRestService extends BaseRestService {
                             List<SessionRecommendedResource> resources = convertFromSessionRecommendedResourceDTO(response.body());
                             for (SessionRecommendedResource resource : resources) {
                                 resource.setSyncStatus(SyncSatus.SENT);
+                                resource.setId(getApplication().getSessionService().getRecommendedResourceByUuid(resource.getUuid()).getId());
                                 getApplication().getSessionService().updateRecommendedResources(resource);
                             }
 

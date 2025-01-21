@@ -87,7 +87,7 @@ public interface TutoredDao {
     @Query("SELECT * FROM tutored")
     List<Tutored> queryForAll();
 
-    @Query("SELECT * FROM tutored LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM tutored  WHERE life_cycle_status = 'ACTIVE' LIMIT :limit OFFSET :offset")
     List<Tutored> getTutoredsPaginated(int limit, int offset);
 
 }

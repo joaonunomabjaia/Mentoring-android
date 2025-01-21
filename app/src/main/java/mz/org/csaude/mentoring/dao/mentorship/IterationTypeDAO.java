@@ -26,7 +26,7 @@ public interface IterationTypeDAO {
     @Query("SELECT * FROM iteration_type WHERE code = :code LIMIT 1")
     IterationType getByCode(String code);
 
-    @Query("SELECT * FROM iteration_type")
+    @Query("SELECT * FROM iteration_type WHERE life_cycle_status = 'ACTIVE'")
     List<IterationType> getAllIterationTypes();
 
     @Query("DELETE FROM iteration_type WHERE id = :id")
@@ -38,7 +38,7 @@ public interface IterationTypeDAO {
     @Query("SELECT * FROM iteration_type WHERE id = :id LIMIT 1")
     IterationType queryForId(int id);
 
-    @Query("SELECT * FROM iteration_type")
+    @Query("SELECT * FROM iteration_type WHERE life_cycle_status = 'ACTIVE'")
     List<IterationType> queryForAll();
 
     @Query("DELETE FROM iteration_type WHERE id = :id")

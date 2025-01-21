@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -20,6 +21,7 @@ import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.tutored.TutoredService;
 import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
@@ -37,7 +39,20 @@ public class TutoredRestService extends BaseRestService {
 
     public void restGetTutored(RestResponseListener<Tutored> listener, Long offset, Long limit){
         List<String> uuids = new ArrayList<>();
-        for (Location location : getApplication().getCurrMentor().getEmployee().getLocations()) {
+        List<Location> locations = new ArrayList<>();
+        if (getApplication().getAuthenticatedUser() == null) {
+            try {
+                User user = getApplication().getUserService().getCurrentUser();
+                user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
+                locations = user.getEmployee().getLocations();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            locations = getApplication().getAuthenticatedUser().getEmployee().getLocations();
+        }
+
+        for (Location location : locations) {
             uuids.add(location.getHealthFacility().getUuid());
         }
         Call<List<TutoredDTO>> tutoredCall = syncDataService.getTutoreds(uuids, offset, limit);
@@ -83,7 +98,7 @@ public class TutoredRestService extends BaseRestService {
                 @Override
                 public void onResponse(Call<List<TutoredDTO>> call, Response<List<TutoredDTO>> response) {
                     List<TutoredDTO> data = response.body();
-                    if (response.code() == 201) {
+                    if (response.code() == 200) {
                         getServiceExecutor().execute(()-> {
                             try {
                                 List<Tutored> tutoreds = getApplication().getTutoredService().getAllNotSynced();
@@ -105,6 +120,8 @@ public class TutoredRestService extends BaseRestService {
                     Log.i("METADATA LOAD --", t.getMessage(), t);
                 }
             });
+        }else {
+            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
         }
         } catch (SQLException e) {
             throw new RuntimeException(e);

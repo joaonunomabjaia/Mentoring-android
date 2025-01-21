@@ -8,7 +8,6 @@ import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.util.Log;
@@ -29,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.auth.AuthInterceptorImpl;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.common.ApplicationStep;
@@ -48,8 +46,10 @@ import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeService;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.form.FormService;
 import mz.org.csaude.mentoring.service.form.FormServiceImpl;
-import mz.org.csaude.mentoring.service.formQuestion.FormQuestionService;
-import mz.org.csaude.mentoring.service.formQuestion.FormQuestionServiceImpl;
+import mz.org.csaude.mentoring.service.formSection.FormSectionServiceImpl;
+import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionService;
+import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionServiceImpl;
+import mz.org.csaude.mentoring.service.fromSection.FormSectionService;
 import mz.org.csaude.mentoring.service.location.CabinetService;
 import mz.org.csaude.mentoring.service.location.CabinetServiceImpl;
 import mz.org.csaude.mentoring.service.location.DistrictService;
@@ -74,8 +74,6 @@ import mz.org.csaude.mentoring.service.program.ProgramService;
 import mz.org.csaude.mentoring.service.program.ProgramServiceImpl;
 import mz.org.csaude.mentoring.service.question.QuestionService;
 import mz.org.csaude.mentoring.service.question.QuestionServiceImpl;
-import mz.org.csaude.mentoring.service.question.QuestionsCategoryService;
-import mz.org.csaude.mentoring.service.question.QuestionsCategoryServiceImpl;
 import mz.org.csaude.mentoring.service.resource.ResourceService;
 import mz.org.csaude.mentoring.service.resource.ResourceServiceImpl;
 import mz.org.csaude.mentoring.service.responseType.ResponseTypeService;
@@ -88,6 +86,8 @@ import mz.org.csaude.mentoring.service.ronda.RondaService;
 import mz.org.csaude.mentoring.service.ronda.RondaServiceImpl;
 import mz.org.csaude.mentoring.service.ronda.RondaTypeService;
 import mz.org.csaude.mentoring.service.ronda.RondaTypeServiceImpl;
+import mz.org.csaude.mentoring.service.section.SectionService;
+import mz.org.csaude.mentoring.service.section.SectionServiceImpl;
 import mz.org.csaude.mentoring.service.session.SessionService;
 import mz.org.csaude.mentoring.service.session.SessionServiceImpl;
 import mz.org.csaude.mentoring.service.session.SessionStatusService;
@@ -104,7 +104,7 @@ import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
-import mz.org.csaude.mentoring.workSchedule.rest.FormQuestionRestService;
+import mz.org.csaude.mentoring.workSchedule.rest.FormSectionQuestionRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.FormRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.MentorshipRestService;
 import mz.org.csaude.mentoring.workSchedule.rest.PartnerRestService;
@@ -123,8 +123,8 @@ public class MentoringApplication  extends Application {
 
     private static MentoringApplication mInstance;
     public static final String BASE_URL = "https://mentdev.csaude.org.mz/api/";
-    //public static final String BASE_URL = "http://10.10.12.72:8087/api";
-    //public static final String BASE_URL = "http://10.10.2.30:8087";
+    //public static final String BASE_URL = "http://10.10.12.115:8087/api/";
+    //public static final String BASE_URL = "http://192.168.1.32:8087/api/";
     private User authenticatedUser;
 
     private Tutor tutor;
@@ -176,11 +176,9 @@ public class MentoringApplication  extends Application {
 
     private EvaluationTypeService evaluationTypeService;
 
-    private FormQuestionService formQuestionService;
+    private FormSectionQuestionService formSectionQuestionService;
 
     private QuestionService questionService;
-
-    private QuestionsCategoryService questionsCategoryService;
 
     private ResponseTypeService responseTypeService;
 
@@ -199,12 +197,18 @@ public class MentoringApplication  extends Application {
 
     private ResourceService resourceService;
 
+    private SectionService sectionService;
+
+    private FormSectionService formSectionService;
+
+
+
 
     // Rest Services
     private PartnerRestService partnerRestService;
     private FormRestService formRestService;
     private TutorRestService tutorRestService;
-    private FormQuestionRestService formQuestionRestService;
+    private FormSectionQuestionRestService formSectionQuestionRestService;
     private RondaRestService rondaRestService;
     private MentorshipRestService mentorshipRestService;
     private IterationTypeService iterationTypeService;
@@ -427,9 +431,9 @@ public class MentoringApplication  extends Application {
         if (tutorRestService == null) this.tutorRestService = new TutorRestService(this);
         return tutorRestService;
     }
-    public FormQuestionRestService getFormQuestionRestService() {
-        if (formQuestionRestService == null) this.formQuestionRestService = new FormQuestionRestService(this);
-        return formQuestionRestService;
+    public FormSectionQuestionRestService getFormQuestionRestService() {
+        if (formSectionQuestionRestService == null) this.formSectionQuestionRestService = new FormSectionQuestionRestService(this);
+        return formSectionQuestionRestService;
     }
     public RondaRestService getRondaRestService() {
         if (rondaRestService == null) this.rondaRestService = new RondaRestService(this);
@@ -462,17 +466,21 @@ public class MentoringApplication  extends Application {
         if (evaluationTypeService == null) this.evaluationTypeService = new EvaluationTypeServiceImpl(this);
         return evaluationTypeService;
     }
-    public FormQuestionService getFormQuestionService() {
-        if (formQuestionService == null) this.formQuestionService = new FormQuestionServiceImpl(this);
-        return formQuestionService;
+    public FormSectionQuestionService getFormSectionQuestionService() {
+        if (formSectionQuestionService == null) this.formSectionQuestionService = new FormSectionQuestionServiceImpl(this);
+        return formSectionQuestionService;
     }
     public QuestionService getQuestionService() {
         if (questionService == null) this.questionService = new QuestionServiceImpl(this);
         return questionService;
     }
-    public QuestionsCategoryService getQuestionsCategoryService() {
-        if (questionsCategoryService == null) this.questionsCategoryService = new QuestionsCategoryServiceImpl(this);
-        return questionsCategoryService;
+    public SectionService getSectionService() {
+        if (sectionService == null) this.sectionService = new SectionServiceImpl(this);
+        return sectionService;
+    }
+    public FormSectionService getFormSectionService() {
+        if (formSectionService == null) this.formSectionService = new FormSectionServiceImpl(this);
+        return formSectionService;
     }
     public ResponseTypeService getResponseTypeService() {
         if (responseTypeService == null) this.responseTypeService = new ResponseTypeServiceImpl(this);

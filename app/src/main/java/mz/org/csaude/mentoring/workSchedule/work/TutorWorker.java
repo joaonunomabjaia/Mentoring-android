@@ -29,7 +29,7 @@ public class TutorWorker extends BaseWorker<Tutor> {
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws SQLException {
-        this.tutorRestService.restGetByEmployeeUuid(this);
+        this.tutorRestService.restPatchTutor(getApplication().getCurrMentor(),this);
     }
 
     @Override

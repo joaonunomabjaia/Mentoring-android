@@ -24,8 +24,12 @@ public interface SessionDAO {
     @Query("SELECT * FROM session WHERE ronda_id = :rondaId AND start_date = :startDate AND end_date IS NULL ORDER BY start_date ASC")
     List<Session> getAllOfRondaPending(Integer rondaId, Date startDate);
 
-    @Query("SELECT * FROM session WHERE sync_status = :syncStatus")
+    @Query("SELECT s.* FROM session s " +
+            "JOIN session_status ss ON s.session_status_id = ss.id " +
+            "WHERE s.sync_status = :syncStatus " +
+            "AND ss.code = 'COMPLETE'")
     List<Session> getAllNotSynced(String syncStatus);
+
 
     @Query("SELECT * FROM session WHERE uuid = :uuid LIMIT 1")
     Session getByUuid(String uuid);
@@ -45,4 +49,6 @@ public interface SessionDAO {
     @Query("SELECT * FROM session WHERE id = :id")
     Session queryForId(Integer id);
 
+    @Query("SELECT count(*) FROM session WHERE ronda_id = :rondaId AND mentee_id = :menteeId")
+    int countAllOfRondaAndMentee(Integer rondaId, Integer menteeId);
 }

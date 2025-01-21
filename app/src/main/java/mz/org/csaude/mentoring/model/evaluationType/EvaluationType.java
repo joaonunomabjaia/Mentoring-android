@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.model.evaluationType;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +22,8 @@ public class EvaluationType extends BaseModel {
     public static final String COLUMN_CODE = "code";
 
     public static final String CONSULTA = "Consulta";
+
+    public static final String AMBOS = "Ambos";
     public static final String FICHA = "Ficha";
 
     @NonNull
@@ -34,15 +37,22 @@ public class EvaluationType extends BaseModel {
     public EvaluationType() {
     }
 
+    @Ignore
     public EvaluationType(String description, String code) {
         this.description = description;
         this.code = code;
     }
 
+    @Ignore
     public EvaluationType(EvaluationTypeDTO evaluationType) {
         super(evaluationType);
         this.setCode(evaluationType.getCode());
         this.setDescription(evaluationType.getDescription());
+    }
+
+    @Ignore
+    public EvaluationType(String uuid) {
+        super(uuid);
     }
 
     public String getDescription() {

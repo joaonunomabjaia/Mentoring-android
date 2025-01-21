@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseRestService;
@@ -91,7 +92,7 @@ public class RondaRestService extends BaseRestService {
                     @Override
                     public void onResponse(Call<List<RondaDTO>> call, Response<List<RondaDTO>> response) {
                         List<RondaDTO> data = response.body();
-                        if (response.code() == 201) {
+                        if (response.code() == 200) {
                             getServiceExecutor().execute(()-> {
                                 try {
                                     List<Ronda> rondaList = getApplication().getRondaService().getAllNotSynced();
@@ -114,6 +115,8 @@ public class RondaRestService extends BaseRestService {
                         listener.doOnRestErrorResponse(t.getMessage());
                     }
                 });
+            } else {
+                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
             }
         } catch (SQLException e) {
             listener.doOnRestErrorResponse(e.getMessage());

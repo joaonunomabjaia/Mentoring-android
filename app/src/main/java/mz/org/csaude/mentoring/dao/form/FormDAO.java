@@ -27,7 +27,7 @@ public interface FormDAO {
 
     @Query("SELECT f.* FROM form f " +
             "JOIN tutor_programmatic_area tpa ON f.programmatic_area_id = tpa.programmatic_area_id " +
-            "WHERE tpa.tutor_id = :tutorId")
+            "WHERE tpa.tutor_id = :tutorId and f.life_cycle_status = 'ACTIVE'")
     List<Form> getAllOfTutor(int tutorId);
 
     @Insert(onConflict = OnConflictStrategy.FAIL)

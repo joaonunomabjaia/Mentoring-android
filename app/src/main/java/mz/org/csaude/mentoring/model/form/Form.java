@@ -8,12 +8,16 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.Relation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
+import mz.org.csaude.mentoring.dto.form.FormSectionDTO;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.programmaticArea.ProgrammaticArea;
+import mz.org.csaude.mentoring.util.Utilities;
 
 @Entity(tableName = Form.TABLE_NAME,
         foreignKeys = {
@@ -78,6 +82,9 @@ public class Form extends BaseModel {
     @Relation(parentColumn = COLUMN_PARTNER, entityColumn = "id")
     private Partner partner;
 
+    @Ignore
+    private List<FormSection> formSections;
+
     public Form() {
     }
 
@@ -92,9 +99,19 @@ public class Form extends BaseModel {
         if (formDTO.getPartner() != null) {
             this.setPartner(new Partner(formDTO.getPartner()));
         }
-        if (formDTO.getProgrammaticArea() != null) {
-            this.setProgrammaticArea(new ProgrammaticArea(formDTO.getProgrammaticArea()));
+        if (formDTO.getProgrammaticAreaDTO() != null) {
+            this.setProgrammaticArea(new ProgrammaticArea(formDTO.getProgrammaticAreaDTO()));
         }
+        if (Utilities.listHasElements(formDTO.getFormSections())){
+            if (this.formSections == null) this.formSections = new ArrayList<>();
+            for (FormSectionDTO formSection : formDTO.getFormSections()) {
+                this.formSections.add(new FormSection(formSection));
+            }
+        }
+    }
+
+    public Form(String uuid) {
+        super(uuid);
     }
 
     public String getName() {
@@ -183,5 +200,13 @@ public class Form extends BaseModel {
 
     public void setPartnerId(Integer partnerId) {
         this.partnerId = partnerId;
+    }
+
+    public List<FormSection> getFormSections() {
+        return formSections;
+    }
+
+    public void setFormSections(List<FormSection> formSections) {
+        this.formSections = formSections;
     }
 }

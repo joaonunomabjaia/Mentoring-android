@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.view.ronda;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -83,9 +84,11 @@ public class RondaActivity extends BaseActivity {
         rondasRecyclerView.setLayoutManager(mLayoutManager);
         rondasRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
-        SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
-        rondasRecyclerView.addItemDecoration(itemDecoration);
+        if (rondaAdapter == null) {
+            int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
+            rondasRecyclerView.addItemDecoration(itemDecoration);
+        }
 
         rondasRecyclerView.setHasFixedSize(true);
         rondaAdapter = new RondaAdapter(rondasRecyclerView, getRelatedViewModel().getSearchResults(), this);
@@ -117,8 +120,27 @@ public class RondaActivity extends BaseActivity {
 
     public void checkStoragePermission() {
         boolean hasPermission = (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+
         if (!hasPermission) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
-        } else getRelatedViewModel().printRondaReport();
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show a rationale to the user, explaining why the permission is needed.
+                Utilities.displayAlertDialog(this, getString(R.string.permission_required_message),
+                        () -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE)
+                ).show();
+            } else {
+                // User has denied the permission twice, guide them to the app settings.
+                Utilities.displayAlertDialog(this, getString(R.string.permission_denied_forever_message),
+                        () -> {
+                            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.parse("package:" + getPackageName()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                ).show();
+            }
+        } else {
+            // Permission is already granted
+            getRelatedViewModel().printRondaReport();
+        }
     }
 }

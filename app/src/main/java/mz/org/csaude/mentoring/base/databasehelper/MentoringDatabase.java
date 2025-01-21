@@ -15,7 +15,8 @@ import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
 import mz.org.csaude.mentoring.dao.evaluation.EvaluationTypeDAO;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
 import mz.org.csaude.mentoring.dao.form.FormTypeDAO;
-import mz.org.csaude.mentoring.dao.formQuestion.FormQuestionDAO;
+import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
+import mz.org.csaude.mentoring.dao.formSectionQuestion.FormSectionQuestionDAO;
 import mz.org.csaude.mentoring.dao.location.CabinetDAO;
 import mz.org.csaude.mentoring.dao.location.DistrictDAO;
 import mz.org.csaude.mentoring.dao.location.HealthFacilityDAO;
@@ -38,6 +39,7 @@ import mz.org.csaude.mentoring.dao.ronda.RondaDAO;
 import mz.org.csaude.mentoring.dao.ronda.RondaMenteeDAO;
 import mz.org.csaude.mentoring.dao.ronda.RondaMentorDAO;
 import mz.org.csaude.mentoring.dao.rondatype.RondaTypeDAO;
+import mz.org.csaude.mentoring.dao.section.SectionDAO;
 import mz.org.csaude.mentoring.dao.session.SessionDAO;
 import mz.org.csaude.mentoring.dao.session.SessionRecommendedResourceDAO;
 import mz.org.csaude.mentoring.dao.session.SessionStatusDAO;
@@ -50,8 +52,10 @@ import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
+import mz.org.csaude.mentoring.model.form.FormSection;
 import mz.org.csaude.mentoring.model.form.FormType;
-import mz.org.csaude.mentoring.model.formQuestion.FormQuestion;
+import mz.org.csaude.mentoring.model.form.Section;
+import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.location.District;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
@@ -87,14 +91,14 @@ import mz.org.csaude.mentoring.util.Converters;
         entities = {
                 Tutored.class, Partner.class, Tutor.class,
                 Form.class, Session.class, HealthFacility.class, Cabinet.class,
-                District.class, Mentorship.class, Question.class, QuestionsCategory.class, Answer.class,
-                FormQuestion.class, Setting.class, Program.class, ProgrammaticArea.class, TutorProgrammaticArea.class,
+                District.class, Mentorship.class, Question.class, Answer.class,
+                FormSectionQuestion.class, Setting.class, Program.class, ProgrammaticArea.class, TutorProgrammaticArea.class,
                 CareerType.class, FormType.class, Door.class, IterationType.class, Province.class, QuestionType.class,
                 SessionStatus.class, User.class, Ronda.class, RondaType.class, RondaMentee.class, RondaMentor.class,
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
-                Resource.class, SessionRecommendedResource.class
+                Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class
         },
-        version = 2,
+        version = 3,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -113,9 +117,8 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract DistrictDAO getDistrictDAO();
     public abstract MentorshipDAO getMentorshipDAO();
     public abstract QuestionDAO getQuestionDAO();
-    public abstract QuestionsCategoryDAO getQuestionsCategoryDAO();
     public abstract AnswerDAO getAnswerDAO();
-    public abstract FormQuestionDAO getFormQuestionDAO();
+    public abstract FormSectionQuestionDAO getFormSectionQuestionDAO();
     public abstract SettingDAO getSettingDAO();
     public abstract TutorProgrammaticAreaDAO getTutorProgrammaticAreaDAO();
     public abstract CareerTypeDAO getCareerTypeDAO();
@@ -138,6 +141,8 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract ResourceDAO getResourceDAO();
     public abstract UserDao getUserDAO();
     public abstract SessionRecommendedResourceDAO getSessionRecommendedResourceDAO();
+    public abstract SectionDAO getSectionDAO();
+    public abstract FormSectionDAO getFormSectionDAO();
 
     public static MentoringDatabase getInstance(Context context, String passphrase) {
         if (INSTANCE == null) {

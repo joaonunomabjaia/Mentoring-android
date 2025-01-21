@@ -4,6 +4,9 @@ import android.app.Application;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 
@@ -11,7 +14,10 @@ import mz.org.csaude.mentoring.base.auth.LoginRequest;
 import mz.org.csaude.mentoring.base.auth.LoginResponse;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
+import mz.org.csaude.mentoring.common.HttpStatus;
+import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.role.UserRoleDTO;
+import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.dto.user.UserDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.user.User;
@@ -19,8 +25,11 @@ import mz.org.csaude.mentoring.service.metadata.SyncDataService;
 import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
 import mz.org.csaude.mentoring.service.user.UserSyncService;
+import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
+import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.work.post.PATCHUserWorker;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -130,7 +139,7 @@ public class UserRestService extends BaseRestService implements UserSyncService 
     public void getByUuid(RestResponseListener<User> listener) {
 
         try {
-            Call<UserDTO> call = syncDataService.getByuuid(getApplication().getUserService().getAll().get(0).getUuid());
+            Call<UserDTO> call = syncDataService.getByuuid(getApplication().getUserService().getCurrentUser().getUuid());
 
             call.enqueue(new Callback<UserDTO>() {
                 @Override
@@ -139,10 +148,17 @@ public class UserRestService extends BaseRestService implements UserSyncService 
                         UserDTO data = response.body();
                         getServiceExecutor().execute(()-> {
                             try {
-                                User user1 = new User(data);
-                                UserService userService = getApplication().getUserService();
-                                userService.savedOrUpdateUser(user1);
-                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(user1));
+                                User userOnServer = new User(data);
+                                User userOnDB = getApplication().getUserService().getByuuid(userOnServer.getUuid());
+                                if (userOnDB == null) {
+                                    userOnServer.setSyncStatus(SyncSatus.SENT);
+                                    getApplication().getUserService().savedOrUpdateUser(userOnServer);
+                                } else
+                                if (DateUtilities.isDateAfterIgnoringTime(userOnServer.getUpdatedAt(), userOnDB.getUpdatedAt())) {
+                                    userOnServer.setId(userOnDB.getId());
+                                    getApplication().getUserService().savedOrUpdateUser(userOnServer);
+                                }
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(userOnServer));
                             } catch (SQLException e) {
                                 Log.e("USER FETCH --", e.getMessage(), e);
                                 listener.doOnRestErrorResponse(e.getMessage());
@@ -163,4 +179,50 @@ public class UserRestService extends BaseRestService implements UserSyncService 
             listener.doOnRestErrorResponse(e.getMessage());
         }
     }
+
+    public void pacthUser(RestResponseListener<User> listener) {
+        UserDTO userDTO;
+        try {
+            User user = getApplication().getUserService().getCurrentUser();
+            if (user.getSyncStatus() == null || user.getSyncStatus().equals(SyncSatus.SENT)) {
+                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+                return;
+            }
+            userDTO = new UserDTO(user);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        Call<UserDTO> tutoredCall = syncDataService.patchUser(userDTO);
+        tutoredCall.enqueue(new Callback<UserDTO>() {
+            @Override
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                if (response.code() == 200) {
+                    listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+                } else {
+                    if (response.code() == HttpStatus.BAD_REQUEST) {
+                        // Parse custom error response
+                        try {
+                            Gson gson = new Gson();
+                            MentoringAPIError error = gson.fromJson(response.errorBody().string(), MentoringAPIError.class);
+                            listener.doOnRestErrorResponse(error.getMessage());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        // Handle other error responses
+                        listener.doOnRestErrorResponse(response.message());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserDTO> call, Throwable t) {
+                Log.i("pacthUser --", t.getMessage(), t);
+                listener.doOnRestErrorResponse(t.getMessage());
+            }
+        });
+
+    }
+    
 }

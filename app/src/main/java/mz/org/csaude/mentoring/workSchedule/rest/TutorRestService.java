@@ -19,6 +19,7 @@ import mz.org.csaude.mentoring.dto.tutor.TutorDTO;
 import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.tutor.TutorService;
 import mz.org.csaude.mentoring.service.tutor.TutorServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
@@ -78,6 +79,13 @@ public class TutorRestService extends BaseRestService {
 
     public void restGetByEmployeeUuid(RestResponseListener<Tutor> listener){
 
+        if (getApplication().getAuthenticatedUser() == null) {
+            try {
+                getApplication().setAuthenticatedUser(getApplication().getUserService().getCurrentUser(), false);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         Call<TutorDTO> tutorCall = syncDataService.getTutorByEmployeeUuid(getApplication().getAuthenticatedUser().getEmployee().getUuid());
         tutorCall.enqueue(new Callback<TutorDTO>() {
             @Override

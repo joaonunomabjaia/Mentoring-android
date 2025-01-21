@@ -4,7 +4,8 @@ public interface IDialogListener {
 
     void doOnConfirmed();
 
-    void doOnDeny();
-
+    default void doOnDeny() {
+        // Optional action
+    }
     default void doOnConfirmed(String value) {};
 }

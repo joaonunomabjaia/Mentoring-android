@@ -27,7 +27,12 @@ public interface MentorshipDAO {
     @Query("SELECT * FROM mentorship WHERE tutor_id = (SELECT id FROM tutor WHERE uuid = :uuidTutor)")
     List<Mentorship> getMentorshipByTutor(String uuidTutor);
 
-    @Query("SELECT * FROM mentorship WHERE sync_status = :syncStatus AND end_date IS NOT NULL")
+    @Query("SELECT m.* FROM mentorship m " +
+            "JOIN session s ON m.session_id = s.id " +
+            "WHERE m.sync_status = :syncStatus " +
+            "AND m.end_date IS NOT NULL " +
+            "AND s.session_status_id = (SELECT id FROM session_status WHERE code = 'COMPLETE') " +
+            "AND s.sync_status = 'SENT'")
     List<Mentorship> getAllNotSynced(String syncStatus);
 
     @Transaction

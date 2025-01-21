@@ -542,4 +542,26 @@ public class DateUtilities {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd_HHmmss");
         return dateFormatter.format(new Date());
     }
+
+    private static Date stripTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static boolean isDateBeforeIgnoringTime(Date firstDate, Date secondDate) {
+        Date strippedFirst = stripTime(firstDate);
+        Date strippedSecond = stripTime(secondDate);
+        return strippedFirst.before(strippedSecond);
+    }
+
+    public static boolean isDateAfterIgnoringTime(Date firstDate, Date secondDate) {
+        Date strippedFirst = stripTime(firstDate);
+        Date strippedSecond = stripTime(secondDate);
+        return strippedFirst.after(strippedSecond);
+    }
 }

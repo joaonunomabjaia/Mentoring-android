@@ -14,6 +14,7 @@ import mz.org.csaude.mentoring.dto.tutor.TutorDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.programmaticArea.TutorProgrammaticArea;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.ProgrammaticArea.TutorProgrammaticAreaService;
 import mz.org.csaude.mentoring.service.ProgrammaticArea.TutorProgrammaticAreaServiceImpl;
 import mz.org.csaude.mentoring.util.Utilities;
@@ -27,6 +28,15 @@ public class TutorProgrammaticAreaRestService extends BaseRestService {
     }
 
     public void restGetTutorProgrammaticAreas(RestResponseListener<TutorProgrammaticArea> listener){
+
+        if (getApplication().getCurrMentor() == null) {
+            try {
+                User user = getApplication().getUserService().getCurrentUser();
+                getApplication().setCurrTutor(getApplication().getTutorService().getByEmployee(user.getEmployee()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         Call<List<TutorProgrammaticAreaDTO>> tutorProgrammaticAreasCall = syncDataService.getByTutorUuidd(getApplication().getCurrMentor().getUuid());
 

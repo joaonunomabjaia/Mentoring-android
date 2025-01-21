@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
 import mz.org.csaude.mentoring.dto.programmaticArea.ProgrammaticAreaDTO;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
@@ -26,13 +27,13 @@ public class ProgrammaticAreaRestService extends BaseRestService {
 
     public void restGetProgrammaticAreas(RestResponseListener<ProgrammaticArea> listener){
 
-        Call<List<ProgrammaticAreaDTO>> programmaticAreasCall = syncDataService.getAllProgrammaticAreas();
+        Call<ApiResponse<ProgrammaticAreaDTO>> programmaticAreasCall = syncDataService.getAllProgrammaticAreas();
 
-        programmaticAreasCall.enqueue(new Callback<List<ProgrammaticAreaDTO>>() {
+        programmaticAreasCall.enqueue(new Callback<ApiResponse<ProgrammaticAreaDTO>>() {
             @Override
-            public void onResponse(Call<List<ProgrammaticAreaDTO>> call, Response<List<ProgrammaticAreaDTO>> response) {
+            public void onResponse(Call<ApiResponse<ProgrammaticAreaDTO>> call, Response<ApiResponse<ProgrammaticAreaDTO>> response) {
 
-                List<ProgrammaticAreaDTO> data = response.body();
+                List<ProgrammaticAreaDTO> data = response.body().getContent();
 
                 if(Utilities.listHasElements(data)){
                     getServiceExecutor().execute(()-> {
@@ -51,7 +52,7 @@ public class ProgrammaticAreaRestService extends BaseRestService {
             }
 
             @Override
-            public void onFailure(Call<List<ProgrammaticAreaDTO>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<ProgrammaticAreaDTO>> call, Throwable t) {
                 Log.i("METADATA LOAD --", t.getMessage(), t);
             }
         });

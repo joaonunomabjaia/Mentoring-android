@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -139,6 +140,7 @@ public class PDFGenerator {
         return false;
     }
 
+    @SuppressLint("DefaultLocale")
     public static boolean createRondaSummary(Context context, List<RondaSummary> rondaSummaryList) {
         String pdfPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
         File file = new File(pdfPath, "relatorio_da_ronda_" + DateUtilities.getCurrTimeStamp() + ".pdf");
@@ -228,7 +230,7 @@ public class PDFGenerator {
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(rondaSummary.getNuit()))).setBackgroundColor(cellColor));
                 table.addCell(new Cell().add(new Paragraph(rondaSummary.getMentee())).setBackgroundColor(cellColor));
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(rondaSummary.getZeroEvaluation()))).setBackgroundColor(cellColor));
-                table.addCell(new Cell().add(new Paragraph(rondaSummary.getSession1() + "%")).setBackgroundColor(cellColor));
+                table.addCell(new Cell().add(new Paragraph(String.format("%.2f", rondaSummary.getSession1()) + "%")).setBackgroundColor(cellColor));
                 table.addCell(new Cell().add(new Paragraph(rondaSummary.getSession2() + "%")).setBackgroundColor(cellColor));
                 table.addCell(new Cell().add(new Paragraph(rondaSummary.getSession3() + "%")).setBackgroundColor(cellColor));
                 table.addCell(new Cell().add(new Paragraph(rondaSummary.getSession4() + "%")).setBackgroundColor(cellColor));

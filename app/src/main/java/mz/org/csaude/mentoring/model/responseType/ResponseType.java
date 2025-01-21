@@ -40,6 +40,10 @@ public class ResponseType extends BaseModel {
         this.setDescription(responseTypeDTO.getDescription());
     }
 
+    public ResponseType(String uuid) {
+        super(uuid);
+    }
+
     public String getDescription() {
         return description;
     }
