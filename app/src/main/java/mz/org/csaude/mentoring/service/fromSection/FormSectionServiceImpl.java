@@ -1,4 +1,4 @@
-package mz.org.csaude.mentoring.service.formSection;
+package mz.org.csaude.mentoring.service.fromSection;
 
 import android.app.Application;
 
@@ -66,11 +66,11 @@ public class FormSectionServiceImpl extends BaseServiceImpl<FormSection> impleme
 
 
     @Override
-    public List<FormSection> getAllOfFormWithQuestions(Form form, String evaluationType) throws SQLException {
+    public List<FormSection> getAllOfFormWithQuestions(Form form, String evaluationType, int evaluationLocationId) throws SQLException {
         List<FormSection> formSections = this.formSectionDAO.getFormSectionsByFormId(form.getId());
         for (FormSection formSection : formSections) {
             formSection.setSection(getApplication().getSectionService().getById(formSection.getSectionId()));
-            formSection.setFormSectionQuestions(getApplication().getFormSectionQuestionService().getAllOfFormSection(formSection, evaluationType));
+            formSection.setFormSectionQuestions(getApplication().getFormSectionQuestionService().getAllOfFormSection(formSection, evaluationType, evaluationLocationId));
         }
         return formSections;
     }

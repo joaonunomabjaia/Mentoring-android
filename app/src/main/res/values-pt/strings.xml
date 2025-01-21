@@ -258,6 +258,8 @@
     <string name="user_inactive_cheking_error">Ocorreu um erro ao tentar verificar o estado do utilizador no servidor, por favor contacte o administrador.</string>
     <string name="permission_required_message">Este aplicativo requer acesso ao armazenamento para baixar arquivos. Por favor, permita essa permissão para continuar.</string>
     <string name="permission_denied_forever_message">A permissão de armazenamento foi negada. Por favor, ative-a nas configurações para continuar usando este recurso.</string>
+    <string name="evaluation_location">Local da avaliação</string>
+    <string name="no_ev_locations_available">Nenhuma localização definida para a avaliação</string>
 
 
     <string-array name="languages">

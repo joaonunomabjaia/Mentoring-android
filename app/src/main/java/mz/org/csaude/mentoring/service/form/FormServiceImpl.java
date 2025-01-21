@@ -10,9 +10,9 @@ import mz.org.csaude.mentoring.dao.form.FormDAO;
 import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
 import mz.org.csaude.mentoring.dao.programmaticArea.TutorProgrammaticAreaDAO;
 import mz.org.csaude.mentoring.dao.section.SectionDAO;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
-import mz.org.csaude.mentoring.model.form.Section;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 
 public class FormServiceImpl extends BaseServiceImpl<Form> implements FormService{
@@ -120,9 +120,9 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
         return formDAO.getByUuid(uuid);
     }
 
-    public Form getFullByIdForEvaluation(int id, String evaluationType) throws SQLException {
+    public Form getFullByIdForEvaluation(int id, String evaluationType, EvaluationLocation evaluationLocation) throws SQLException {
         Form form = this.formDAO.queryForId(id);
-        form.setFormSections(getApplication().getFormSectionService().getAllOfFormWithQuestions(form, evaluationType));
+        form.setFormSections(getApplication().getFormSectionService().getAllOfFormWithQuestions(form, evaluationType, evaluationLocation.getId()));
         return form;
     }
 }

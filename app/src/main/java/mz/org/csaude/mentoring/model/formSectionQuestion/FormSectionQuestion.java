@@ -11,6 +11,7 @@ import androidx.room.Relation;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.form.FormSectionQuestionDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
@@ -35,13 +36,18 @@ import mz.org.csaude.mentoring.model.responseType.ResponseType;
                 @ForeignKey(entity = ResponseType.class,
                         parentColumns = "id",
                         childColumns = FormSectionQuestion.COLUMN_RESPONSE_TYPE,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = EvaluationLocation.class,
+                        parentColumns = "id",
+                        childColumns = FormSectionQuestion.COLUMN_EVALUATION_LOCATION,
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
                 @Index(value = {FormSectionQuestion.COLUMN_FORM_SECTION}),
                 @Index(value = {FormSectionQuestion.COLUMN_QUESTION}),
                 @Index(value = {FormSectionQuestion.COLUMN_EVALUATION_TYPE}),
-                @Index(value = {FormSectionQuestion.COLUMN_RESPONSE_TYPE})
+                @Index(value = {FormSectionQuestion.COLUMN_RESPONSE_TYPE}),
+                @Index(value = {FormSectionQuestion.COLUMN_EVALUATION_LOCATION})
         })
 public class FormSectionQuestion extends BaseModel {
 
@@ -53,6 +59,8 @@ public class FormSectionQuestion extends BaseModel {
     public static final String COLUMN_MANDATORY = "mandatory";
     public static final String COLUMN_SEQUENCE = "sequence";
     public static final String COLUMN_APPLICABLE = "applicable";
+    public static final String COLUMN_EVALUATION_LOCATION = "evaluation_location_id";
+
 
     @NonNull
     @ColumnInfo(name = COLUMN_FORM_SECTION)
@@ -100,6 +108,14 @@ public class FormSectionQuestion extends BaseModel {
     @Ignore
     private Answer answer;
 
+    @NonNull
+    @ColumnInfo(name = COLUMN_EVALUATION_LOCATION)
+    private Integer evaluationLocationId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_EVALUATION_LOCATION, entityColumn = "id")
+    private EvaluationLocation evaluationLocation;
+
     public FormSectionQuestion() {
     }
 
@@ -111,6 +127,7 @@ public class FormSectionQuestion extends BaseModel {
         this.setQuestion(new Question(formSectionQuestionDTO.getQuestionDTO()));
         this.setEvaluationType(new EvaluationType(formSectionQuestionDTO.getEvaluationTypeUuid()));
         this.setResponseType(new ResponseType(formSectionQuestionDTO.getResponseTypeUuid()));
+        this.setEvaluationLocation(new EvaluationLocation(formSectionQuestionDTO.getEvaluationLocationUuid()));
     }
 
     public FormSectionQuestion(String formSectionQuestionUuid) {
@@ -217,6 +234,26 @@ public class FormSectionQuestion extends BaseModel {
 
     public Integer getResponseTypeId() {
         return responseTypeId;
+    }
+
+    @NonNull
+    public Integer getEvaluationLocationId() {
+        return evaluationLocationId;
+    }
+
+    public void setEvaluationLocationId(@NonNull Integer evaluationLocationId) {
+        this.evaluationLocationId = evaluationLocationId;
+    }
+
+    public EvaluationLocation getEvaluationLocation() {
+        return evaluationLocation;
+    }
+
+    public void setEvaluationLocation(EvaluationLocation evaluationLocation) {
+        if (evaluationLocation != null) {
+            this.evaluationLocationId = evaluationLocation.getId();
+        }
+        this.evaluationLocation = evaluationLocation;
     }
 
 }

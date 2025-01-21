@@ -9,5 +9,5 @@ import mz.org.csaude.mentoring.model.form.FormSection;
 
 public interface FormSectionService extends BaseService<FormSection> {
 
-    List<FormSection> getAllOfFormWithQuestions(Form form, String evaluationType) throws SQLException;
+    List<FormSection> getAllOfFormWithQuestions(Form form, String evaluationType, int evaluationLocationId) throws SQLException;
 }
