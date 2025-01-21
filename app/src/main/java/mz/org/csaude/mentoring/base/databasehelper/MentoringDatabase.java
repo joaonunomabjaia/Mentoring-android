@@ -100,7 +100,7 @@ import mz.org.csaude.mentoring.util.Converters;
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
                 Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class, EvaluationLocation.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
