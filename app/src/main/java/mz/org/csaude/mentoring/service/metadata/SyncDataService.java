@@ -4,6 +4,7 @@ import mz.org.csaude.mentoring.base.auth.LoginResponse;
 import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
+import mz.org.csaude.mentoring.dto.evaluationLocation.EvaluationLocationDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.dto.form.FormSectionQuestionDTO;
@@ -191,4 +192,9 @@ public interface SyncDataService {
 
     @POST("sessions/save")
     Call<List<SessionDTO>> postSessions(@Body List<SessionDTO> sessionDTOS);
+
+    @GET("/evaluation-locations/getAll")
+    Call<ApiResponse<EvaluationLocationDTO>> getAllEvaluationLocations();
+
+
 }

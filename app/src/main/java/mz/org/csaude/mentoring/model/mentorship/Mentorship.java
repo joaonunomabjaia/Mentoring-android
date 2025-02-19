@@ -19,6 +19,7 @@ import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
 import mz.org.csaude.mentoring.dto.mentorship.MentorshipDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.location.Cabinet;
@@ -55,6 +56,10 @@ import mz.org.csaude.mentoring.model.tutored.Tutored;
                 @ForeignKey(entity = Door.class,
                         parentColumns = "id",
                         childColumns = Mentorship.COLUMN_DOOR,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = EvaluationLocation.class,
+                        parentColumns = "id",
+                        childColumns = Mentorship.COLUMN_EVALUATION_LOCATION,
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
@@ -64,7 +69,8 @@ import mz.org.csaude.mentoring.model.tutored.Tutored;
                 @Index(value = {Mentorship.COLUMN_SESSION}),
                 @Index(value = {Mentorship.COLUMN_CABINET}),
                 @Index(value = {Mentorship.COLUMN_ITERATION_TYPE}),
-                @Index(value = {Mentorship.COLUMN_DOOR})
+                @Index(value = {Mentorship.COLUMN_DOOR}),
+                @Index(value = {Mentorship.COLUMN_EVALUATION_LOCATION})
         })
 public class Mentorship extends BaseModel {
 
@@ -82,6 +88,8 @@ public class Mentorship extends BaseModel {
     public static final String COLUMN_ITERATION_TYPE = "iteration_type_id";
     public static final String COLUMN_ITERATION_NUMBER = "iteration_number";
     public static final String COLUMN_DOOR = "door_id";
+    public static final String COLUMN_EVALUATION_LOCATION = "evaluation_location_id";
+
 
     @NonNull
     @ColumnInfo(name = COLUMN_START_DATE)
@@ -162,6 +170,14 @@ public class Mentorship extends BaseModel {
     @Ignore
     private List<Answer> answers;
 
+    @NonNull
+    @ColumnInfo(name = COLUMN_EVALUATION_LOCATION)
+    private Integer evaluationLocationId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_EVALUATION_LOCATION, entityColumn = "id")
+    private EvaluationLocation evaluationLocation;
+
     public Mentorship() {
     }
 
@@ -202,6 +218,9 @@ public class Mentorship extends BaseModel {
                 answerList.add(new Answer(answerDTO));
             }
             this.setAnswers(answerList);
+        }
+        if (mentorshipDTO.getEvaluationLocationDTO() != null) {
+            this.setEvaluationLocation(new EvaluationLocation(mentorshipDTO.getEvaluationLocationDTO()));
         }
     }
 
@@ -321,6 +340,7 @@ public class Mentorship extends BaseModel {
                 ", cabinet=" + cabinet +
                 ", evaluationType=" + evaluationType +
                 ", iterationNumber=" + iterationNumber +
+                ", evaluationLocation=" + evaluationLocation +
                 ", door=" + door +
                 ", demonstration=" + demonstration +
                 ", demonstrationDetails='" + demonstrationDetails +
@@ -445,4 +465,34 @@ public class Mentorship extends BaseModel {
     public void setDoorId(Integer doorId) {
         this.doorId = doorId;
     }
+
+    public Integer getEvaluationLocationId() {
+        return evaluationLocationId;
+    }
+
+    public void setEvaluationLocationId(Integer evaluationLocationId) {
+        this.evaluationLocationId = evaluationLocationId;
+    }
+
+    public EvaluationLocation getEvaluationLocation() {
+        return evaluationLocation;
+    }
+
+    public void setEvaluationLocation(EvaluationLocation evaluationLocation) {
+        this.evaluationLocation = evaluationLocation;
+        if (evaluationLocation != null) {
+            this.evaluationLocationId = evaluationLocation.getId();
+        }
+    }
+
+    @Ignore
+    public boolean isHealthFacilityEvaluation() {
+        return evaluationLocation != null && evaluationLocation.isHealthFacilityEvaluation();
+    }
+
+    @Ignore
+    public boolean isCommunityEvaluation() {
+        return evaluationLocation != null && evaluationLocation.isCommunityEvaluation();
+    }
+
 }
