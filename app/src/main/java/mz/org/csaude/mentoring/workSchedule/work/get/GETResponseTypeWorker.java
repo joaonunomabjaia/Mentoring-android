@@ -20,12 +20,12 @@ public class GETResponseTypeWorker extends BaseWorker<ResponseType> {
         this.responseTypeRestService = new ResponseTypeRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.responseTypeRestService.restGetResponseTypes(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<ResponseType> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<ResponseType> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

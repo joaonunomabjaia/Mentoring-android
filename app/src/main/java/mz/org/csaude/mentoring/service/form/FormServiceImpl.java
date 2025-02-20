@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
+import mz.org.csaude.mentoring.dao.evaluationLocation.EvaluationLocationDAO;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
 import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
 import mz.org.csaude.mentoring.dao.programmaticArea.TutorProgrammaticAreaDAO;
@@ -20,6 +21,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
     TutorProgrammaticAreaDAO tutorProgrammaticAreaDAO;
     FormSectionDAO formSectionDAO;
     SectionDAO sectionDAO;
+    EvaluationLocationDAO evaluationLocationDAO;
 
     public FormServiceImpl(Application application) {
         super(application);
@@ -33,6 +35,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
             this.tutorProgrammaticAreaDAO = getDataBaseHelper().getTutorProgrammaticAreaDAO();
             this.formSectionDAO = getDataBaseHelper().getFormSectionDAO();
             this.sectionDAO = getDataBaseHelper().getSectionDAO();
+            this.evaluationLocationDAO = getDataBaseHelper().getEvaluationLocationDAO();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +65,9 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     @Override
     public Form getById(int id) throws SQLException {
-        return this.formDAO.queryForId(id);
+        Form form = this.formDAO.queryForId(id);
+        form.setEvaluationLocation(this.evaluationLocationDAO.queryForId(form.getEvaluationLocationId()));
+        return form;
     }
 
     @Override
@@ -122,6 +127,7 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
 
     public Form getFullByIdForEvaluation(int id, String evaluationType, EvaluationLocation evaluationLocation) throws SQLException {
         Form form = this.formDAO.queryForId(id);
+        form.setEvaluationLocation(this.evaluationLocationDAO.queryForId(form.getEvaluationLocationId()));
         form.setFormSections(getApplication().getFormSectionService().getAllOfFormWithQuestions(form, evaluationType, evaluationLocation.getId()));
         return form;
     }

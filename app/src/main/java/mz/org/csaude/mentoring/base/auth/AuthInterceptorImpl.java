@@ -1,34 +1,36 @@
 package mz.org.csaude.mentoring.base.auth;
 
-
 import static mz.org.csaude.mentoring.base.application.MentoringApplication.BASE_URL;
 
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
+import java.sql.SQLException;
 
+import mz.org.csaude.mentoring.base.application.MentoringApplication;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.metadata.SyncDataService;
+import mz.org.csaude.mentoring.util.Utilities;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class AuthInterceptorImpl implements Interceptor {
 
-    private SessionManager sessionManager;
-    private Context context;
-    private static final int NEW_EXPIRATION_TIME = 6000;
+    private final SessionManager sessionManager;
+    private final Context context;
+    private static final int NEW_EXPIRATION_TIME = 900000;
 
     public AuthInterceptorImpl(Context context) {
         this.context = context;
@@ -37,15 +39,37 @@ public class AuthInterceptorImpl implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        String accessToken = sessionManager.fetchAuthToken();
+        String activeUser = sessionManager.getActiveUser();
+        String fallbackUserUuid = getCreatedByUuidFromRequest(chain.request());
+        String userToAuthenticate = determineUserToAuthenticate(activeUser, fallbackUserUuid);
 
-        // Check if the access token is expired and refresh it if necessary
-        if (accessToken != null && sessionManager.isAccessTokenExpired()) {
-            String refreshToken = sessionManager.getRefreshToken();
-            // Assume you have a method to refresh the token
-            accessToken = refreshToken(refreshToken);
-            if (accessToken == null) {
-                throw new IOException("Unable to refresh token");
+        /*if (userToAuthenticate == null) {
+            throw new IOException("No active user or creator found for authentication.");
+        }*/
+
+        // Retrieve user information using UserService
+        User user;
+        String accessToken = null;
+        if (Utilities.stringHasValue(userToAuthenticate)) {
+            try {
+                user = ((MentoringApplication) context).getUserService().getByuuid(userToAuthenticate);
+                if (user == null) {
+                    throw new IOException("User not found for UUID: " + userToAuthenticate);
+                }
+            } catch (SQLException e) {
+                throw new IOException("Error retrieving user from database: " + e.getMessage(), e);
+            }
+
+            accessToken = sessionManager.fetchAuthToken(user.getUserName());
+
+
+            // Check if the access token is expired and refresh if necessary
+            if (accessToken != null && sessionManager.getTokenExpiration(user.getUserName()) <= System.currentTimeMillis()) {
+                String refreshToken = sessionManager.getRefreshToken(user.getUserName());
+                accessToken = refreshToken(user.getUserName(), refreshToken);
+                if (accessToken == null) {
+                    throw new IOException("Unable to refresh token for user: " + user.getUserName());
+                }
             }
         }
 
@@ -56,14 +80,46 @@ public class AuthInterceptorImpl implements Interceptor {
         return chain.proceed(newRequest);
     }
 
-    private String refreshToken(String refreshToken) {
+    private String determineUserToAuthenticate(String activeUser, String createdByUuid) {
+        // Use the creator if it differs from the active user
+        if (createdByUuid != null && !createdByUuid.equals(activeUser)) {
+            return createdByUuid;
+        }
+        // Default to the active user
+        return activeUser;
+    }
+
+    private String getCreatedByUuidFromRequest(Request request) {
+        try {
+            RequestBody body = request.body();
+            if (body != null) {
+                Buffer buffer = new Buffer();
+                body.writeTo(buffer);
+                String bodyString = buffer.readUtf8();
+                // Parse the JSON to extract `createdByUuid`
+                JSONObject json = new JSONObject(bodyString);
+                return json.optString("createdByUuid", null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    private String refreshToken(String username, String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return null;
+        }
+
         // Convert refresh token to JSON or other required format
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), "{\"refresh_token\":\"" + refreshToken + "\"}");
 
         // Create Retrofit instance for auth service
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL) // Make sure to define your BASE_URL
-                .client(new OkHttpClient()) // Use a new client or configure it similarly to your main client
+                .baseUrl(BASE_URL)
+                .client(new OkHttpClient())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -71,13 +127,9 @@ public class AuthInterceptorImpl implements Interceptor {
         try {
             retrofit2.Response<ResponseBody> response = authService.refreshToken(body).execute();
             if (response.isSuccessful() && response.body() != null) {
-                // Assuming the response is just the new token
-                //String newToken = response.body().string();
-                //sessionManager.saveAuthToken(newToken, refreshToken, NEW_EXPIRATION_TIME); // Define NEW_EXPIRATION_TIME
-                return handleTokenResponse(response.body().string());
+                return handleTokenResponse(username, response.body().string());
             } else {
-                // Handle the scenario where the refresh token is no longer valid
-                return null;
+                return null; // Refresh token is invalid or expired
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,17 +137,15 @@ public class AuthInterceptorImpl implements Interceptor {
         }
     }
 
-    public String handleTokenResponse(String jsonResponse) {
+    private String handleTokenResponse(String username, String jsonResponse) {
         // Parse the JSON response
         Gson gson = new Gson();
-        Type listType = new TypeToken<List<TokenResponse>>() {}.getType();
-        List<TokenResponse> tokenResponses = gson.fromJson(jsonResponse, listType);
+        TokenResponse tokenResponse = gson.fromJson(jsonResponse, TokenResponse.class);
 
-        if (tokenResponses != null && !tokenResponses.isEmpty()) {
-            TokenResponse tokenResponse = tokenResponses.get(0);
-
-            // Save the tokens in the SessionManager
+        if (tokenResponse != null) {
+            // Save the tokens in the SessionManager for the active user
             sessionManager.saveAuthToken(
+                    username,
                     tokenResponse.getAccessToken(),
                     tokenResponse.getRefreshToken(),
                     NEW_EXPIRATION_TIME
@@ -104,5 +154,4 @@ public class AuthInterceptorImpl implements Interceptor {
         }
         return null;
     }
-
 }

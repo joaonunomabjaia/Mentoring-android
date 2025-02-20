@@ -33,6 +33,9 @@ public interface EvaluationLocationDAO {
     @Query("SELECT * FROM evaluation_location")
     List<EvaluationLocation> queryForAll();
 
+    @Query("SELECT * FROM evaluation_location WHERE code IN (:codes)")
+    List<EvaluationLocation> queryForAllInCodes(List<String> codes);
+
     @Query("DELETE FROM evaluation_location WHERE id = :id")
     int delete(long id);
 

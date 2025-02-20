@@ -23,12 +23,12 @@ public class GETEvaluationLocationWorker extends BaseWorker<EvaluationLocation> 
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.evaluationLocationRestService.restGetEvaluationLocations(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<EvaluationLocation> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<EvaluationLocation> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

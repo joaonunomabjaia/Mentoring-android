@@ -21,6 +21,7 @@ import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
+import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.base.fragment.GenericFragment;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.common.ApplicationStep;
@@ -35,6 +36,7 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
 
     private PropertyChangeRegistry callbacks;
     private BaseActivity relatedActivity;
+
 
 
     //protected AppSettingsService settingsService;
@@ -58,6 +60,7 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
     protected WorkerScheduleExecutor workerScheduleExecutor;
     protected int notificationId;
 
+    protected SessionManager sessionManager;
 
     protected GenericFragment relatedFragment;
 
@@ -68,6 +71,7 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
 
         notificationManager = NotificationManagerCompat.from(getApplication());
         this.notificationId = ThreadLocalRandom.current().nextInt();
+        this.sessionManager = new SessionManager(getApplication());
 
     }
 
@@ -92,6 +96,10 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
     @Override
     public void addOnPropertyChangedCallback(OnPropertyChangedCallback callback) {
         callbacks.add(callback);
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 
     @Override

@@ -1,15 +1,13 @@
 package mz.org.csaude.mentoring.dao.tutored;
 
-import androidx.paging.PagingSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-import androidx.room.Upsert;
 
 import java.util.List;
+import java.util.Set;
 
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
@@ -87,7 +85,13 @@ public interface TutoredDao {
     @Query("SELECT * FROM tutored")
     List<Tutored> queryForAll();
 
-    @Query("SELECT * FROM tutored  WHERE life_cycle_status = 'ACTIVE' LIMIT :limit OFFSET :offset")
-    List<Tutored> getTutoredsPaginated(int limit, int offset);
+    @Query("SELECT t.* FROM tutored t " +
+            "JOIN employee e ON t.employee_id = e.id " +
+            "JOIN location l ON e.id = l.employee_id " +
+            "WHERE l.health_facility_id IN (:healthFacilityIds) " +
+            "AND t.life_cycle_status = 'ACTIVE' " +
+            "ORDER BY COALESCE(e.name, '') LIMIT :limit OFFSET :offset")
+    List<Tutored> getTutoredsPaginated(List<Integer> healthFacilityIds, int limit, int offset);
+
 
 }

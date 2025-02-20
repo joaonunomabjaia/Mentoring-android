@@ -239,9 +239,19 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
         } else if (isPeriodSelectionStep()) {
             if (!isValidPeriod()) return;
-
             // Perform background operations (like loadQuestion and initial save) in a background thread
             getExecutorService().execute(() -> {
+                if (!isMentoringMentorship()) {
+                    try {
+                        this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    if (!mentorship.getSession().getForm().getEvaluationLocation().isBoth()) {
+                        this.mentorship.setEvaluationLocation(mentorship.getSession().getForm().getEvaluationLocation());
+                    }
+                }
                 loadQuestion();
 
                 for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
@@ -289,6 +299,10 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         notifyPropertyChanged(BR.currMentorshipStep);
     }
 
+    public boolean isSelectLocation(){
+        if (!isMentoringMentorship()) return false;
+        return mentorship.getSession().getForm().getEvaluationLocation().isBoth();
+    }
 
     public void setMentorship(Mentorship mentorship) {
         this.mentorship = mentorship;
@@ -931,13 +945,9 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     public List<EvaluationLocation> getEvaluationLocations() {
-        try {
-            List<EvaluationLocation> evaluationLocations = new ArrayList<>();
-            evaluationLocations.add(new EvaluationLocation());
-            evaluationLocations.addAll(getApplication().getEvaluationLocationService().getAll());
-            return evaluationLocations;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        List<EvaluationLocation> evaluationLocations = new ArrayList<>();
+        evaluationLocations.add(new EvaluationLocation());
+        evaluationLocations.addAll(getApplication().getEvaluationLocationService().getByCodes(List.of(EvaluationLocation.HEALTH_FACILITY, EvaluationLocation.COMMUNITY)));
+        return evaluationLocations;
     }
 }

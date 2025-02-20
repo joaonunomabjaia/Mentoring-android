@@ -65,18 +65,31 @@ public class SplashVM extends BaseViewModel implements RestResponseListener, Ser
         if (isOnline) {
             OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runInitialSync();
 
-            WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
-                if (workInfo != null) {
-                    if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        WorkInfo.State state = workInfo.getState();
-                        goToLogin();
-                    }
-                }
-            });
+            WorkerScheduleExecutor.getInstance(getApplication())
+                    .getWorkManager()
+                    .getWorkInfoByIdLiveData(request.getId())
+                    .observe(getRelatedActivity(), workInfo -> {
+                        if (workInfo != null) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                getApplication().setInitialSetUpComplete();
+                                goToLogin();
+                            } else if (workInfo.getState() == WorkInfo.State.FAILED) {
+                                // Display an error message if the work failed
+                                Utilities.displayAlertDialog(
+                                        getRelatedActivity(),
+                                        getRelatedActivity().getString(R.string.initial_sync_failed)
+                                ).show();
+                            }
+                        }
+                    });
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
+            Utilities.displayAlertDialog(
+                    getRelatedActivity(),
+                    getRelatedActivity().getString(R.string.server_unavailable)
+            ).show();
         }
     }
+
 
     void scheduleSyncDataTasks() {
         WorkerScheduleExecutor.getInstance(getApplication()).schedulePeriodicDataSync();

@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 
 import mz.org.csaude.mentoring.base.auth.LoginRequest;
 import mz.org.csaude.mentoring.base.auth.LoginResponse;
@@ -78,7 +79,8 @@ public class UserRestService extends BaseRestService implements UserSyncService 
 
                             // If the access token exists, save it
                             if (Utilities.stringHasValue(data.getAccess_token())) {
-                                sessionManager.saveAuthToken(data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
+                                sessionManager.saveAuthToken(data.getUsername(), data.getAccess_token(), data.getRefresh_token(), data.getExpires_in());
+                                sessionManager.setActiveUser(data.getUserUuid());
 
                                 // Notify success on the main thread
                                 listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
@@ -138,62 +140,56 @@ public class UserRestService extends BaseRestService implements UserSyncService 
     @Override
     public void getByUuid(RestResponseListener<User> listener) {
 
-        try {
-            Call<UserDTO> call = syncDataService.getByuuid(getApplication().getUserService().getCurrentUser().getUuid());
+        Call<UserDTO> call = syncDataService.getByuuid(getSessionManager().getActiveUser());
 
-            call.enqueue(new Callback<UserDTO>() {
-                @Override
-                public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                    if (response.code() == 200) {
-                        UserDTO data = response.body();
-                        getServiceExecutor().execute(()-> {
-                            try {
-                                User userOnServer = new User(data);
-                                User userOnDB = getApplication().getUserService().getByuuid(userOnServer.getUuid());
-                                if (userOnDB == null) {
-                                    userOnServer.setSyncStatus(SyncSatus.SENT);
-                                    getApplication().getUserService().savedOrUpdateUser(userOnServer);
-                                } else
-                                if (DateUtilities.isDateAfterIgnoringTime(userOnServer.getUpdatedAt(), userOnDB.getUpdatedAt())) {
-                                    userOnServer.setId(userOnDB.getId());
-                                    getApplication().getUserService().savedOrUpdateUser(userOnServer);
-                                }
-                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(userOnServer));
-                            } catch (SQLException e) {
-                                Log.e("USER FETCH --", e.getMessage(), e);
-                                listener.doOnRestErrorResponse(e.getMessage());
+        call.enqueue(new Callback<UserDTO>() {
+            @Override
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                if (response.code() == 200) {
+                    UserDTO data = response.body();
+                    getServiceExecutor().execute(()-> {
+                        try {
+                            User userOnServer = new User(data);
+                            User userOnDB = getApplication().getUserService().getByuuid(userOnServer.getUuid());
+                            if (userOnDB == null) {
+                                userOnServer.setSyncStatus(SyncSatus.SENT);
+                                getApplication().getUserService().savedOrUpdateUser(userOnServer);
+                            } else
+                            if (DateUtilities.isDateAfterIgnoringTime(userOnServer.getUpdatedAt(), userOnDB.getUpdatedAt())) {
+                                userOnServer.setId(userOnDB.getId());
+                                getApplication().getUserService().savedOrUpdateUser(userOnServer);
                             }
-                        });
-                    }
-
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(userOnServer));
+                        } catch (SQLException e) {
+                            Log.e("USER FETCH --", e.getMessage(), e);
+                            listener.doOnRestErrorResponse(e.getMessage());
+                        }
+                    });
                 }
 
-                @Override
-                public void onFailure(Call<UserDTO> call, Throwable t) {
-                    Log.e("USER FETCH --", t.getMessage(), t);
-                    listener.doOnRestErrorResponse(t.getMessage());
-                }
-            });
-        } catch (SQLException e) {
-            Log.e("USER FETCH --", e.getMessage(), e);
-            listener.doOnRestErrorResponse(e.getMessage());
-        }
+            }
+
+            @Override
+            public void onFailure(Call<UserDTO> call, Throwable t) {
+                Log.e("USER FETCH --", t.getMessage(), t);
+                listener.doOnRestErrorResponse(t.getMessage());
+            }
+        });
     }
 
     public void pacthUser(RestResponseListener<User> listener) {
-        UserDTO userDTO;
+        if (!getSessionManager().isAnyUserConfigured()) {
+            listener.doOnResponse(REQUEST_NO_DATA, null);
+            return;
+        }
+
+
+        Call<UserDTO> tutoredCall = null;
         try {
-            User user = getApplication().getUserService().getCurrentUser();
-            if (user.getSyncStatus() == null || user.getSyncStatus().equals(SyncSatus.SENT)) {
-                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
-                return;
-            }
-            userDTO = new UserDTO(user);
+            tutoredCall = syncDataService.patchUsers(Utilities.parse(getApplication().getUserService().getAll(), UserDTO.class));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        Call<UserDTO> tutoredCall = syncDataService.patchUser(userDTO);
         tutoredCall.enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {

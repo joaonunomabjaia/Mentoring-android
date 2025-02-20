@@ -23,7 +23,7 @@ public class GETSectionWorker extends BaseWorker<Section> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.sectionRestService.restGetSections(this);
     }
     @Override

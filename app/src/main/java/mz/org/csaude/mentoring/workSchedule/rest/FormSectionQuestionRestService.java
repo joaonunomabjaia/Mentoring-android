@@ -63,6 +63,7 @@ public class FormSectionQuestionRestService extends BaseRestService {
                                 formSectionQuestion.setFormSection(getApplication().getFormSectionService().getByuuid(formSectionQuestion.getFormSection().getUuid()));
                                 formSectionQuestion.setEvaluationType(getApplication().getEvaluationTypeService().getByuuid(formSectionQuestion.getEvaluationType().getUuid()));
                                 formSectionQuestion.setResponseType(getApplication().getResponseTypeService().getByuuid(formSectionQuestion.getResponseType().getUuid()));
+                                formSectionQuestion.setEvaluationLocation(getApplication().getEvaluationLocationService().getByuuid(formSectionQuestion.getEvaluationLocation().getUuid()));
                                 formSectionQuestions.add(formSectionQuestion);
                                 questions.add(formSectionQuestion.getQuestion());
                             }

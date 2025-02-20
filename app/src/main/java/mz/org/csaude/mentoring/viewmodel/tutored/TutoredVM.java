@@ -231,10 +231,13 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
                 location.setHealthFacility((HealthFacility) getHealthFacility());
                 location.setLocationLevel("N/A");
                 location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                location.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
                 tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().addLocation(location);
+                tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
+                tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
@@ -515,7 +518,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Override
     public List<Tutored> doSearch(long offset, long limit) throws SQLException {
-        return this.tutoredService.getAllPagenated(offset, limit);
+        return this.tutoredService.getAllPagenated(getApplication().getCurrMentor().getEmployee().getLocations(), offset, limit);
     }
 
     @Override

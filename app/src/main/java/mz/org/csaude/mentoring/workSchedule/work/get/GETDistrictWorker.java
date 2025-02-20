@@ -23,13 +23,13 @@ public class GETDistrictWorker extends BaseWorker<District> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<District> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<District> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.districtRestService.restGetDistricts(offset, limit, this);
     }
 

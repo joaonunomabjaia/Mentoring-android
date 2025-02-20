@@ -20,7 +20,7 @@ public class GETFormSectionQuestionWorker extends BaseWorker<FormSectionQuestion
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
             getApplication().getFormQuestionRestService().restGetFormSectionQuestion(this, limit, offset);
     }
 

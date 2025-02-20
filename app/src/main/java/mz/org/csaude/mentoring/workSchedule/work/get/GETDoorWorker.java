@@ -20,12 +20,12 @@ public class GETDoorWorker extends BaseWorker<Door> {
         this.doorRestService = new DoorRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.doorRestService.restGetDoors(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Door> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Door> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

@@ -29,16 +29,25 @@ public class TutorProgrammaticAreaRestService extends BaseRestService {
 
     public void restGetTutorProgrammaticAreas(RestResponseListener<TutorProgrammaticArea> listener){
 
-        if (getApplication().getCurrMentor() == null) {
+        if (!getSessionManager().isAnyUserConfigured()) {
+            listener.doOnResponse(REQUEST_NO_DATA, null);
+            return;
+        }
+        List<String> uuids = new ArrayList<>();
+        if (Utilities.stringHasValue(getSessionManager().getActiveUser())){
+            uuids.add(getApplication().getCurrMentor().getUuid());
+        } else {
             try {
-                User user = getApplication().getUserService().getCurrentUser();
-                getApplication().setCurrTutor(getApplication().getTutorService().getByEmployee(user.getEmployee()));
+                List<Tutor> tutors = getApplication().getTutorService().getAll();
+                for (Tutor tutor : tutors) {
+                    uuids.add(tutor.getUuid());
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        Call<List<TutorProgrammaticAreaDTO>> tutorProgrammaticAreasCall = syncDataService.getByTutorUuidd(getApplication().getCurrMentor().getUuid());
+        Call<List<TutorProgrammaticAreaDTO>> tutorProgrammaticAreasCall = syncDataService.getByTutorUuids(uuids);
 
         tutorProgrammaticAreasCall.enqueue(new Callback<List<TutorProgrammaticAreaDTO>>() {
             @Override

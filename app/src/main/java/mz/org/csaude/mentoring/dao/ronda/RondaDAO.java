@@ -2,11 +2,9 @@ package mz.org.csaude.mentoring.dao.ronda;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Delete;
-import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -43,8 +41,9 @@ public interface RondaDAO {
             "JOIN ronda_type rt ON r.ronda_type_id = rt.id " +
             "WHERE rt.code = :rondaTypeCode " +
             "AND r.life_cycle_status = :status " +
+            "AND r.created_by = :uuid " +
             "ORDER BY r.id")
-    List<Ronda> getAllByRondaType(String rondaTypeCode, String status);
+    List<Ronda> getAllByRondaType(String rondaTypeCode, String status, String uuid);
 
     // Get all Ronda by Mentor
     @Query("SELECT r.* FROM ronda r " +

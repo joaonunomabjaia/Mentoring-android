@@ -231,6 +231,8 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         mentorship.setDemonstration(this.isDemonstration());
         mentorship.setDemonstrationDetails(this.getDemonstrationDetails());
         mentorship.setPerformedDate(this.getPerformedDate());
+        mentorship.setCreatedByUuid(this.getCreatedByuuid());
+        mentorship.setUpdatedByUuid(this.getUpdatedByuuid());
 
         if(this.getMentor()!=null) {
             mentorship.setTutor(new Tutor(this.getMentor()));
