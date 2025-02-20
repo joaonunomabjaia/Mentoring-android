@@ -12,4 +12,6 @@ public interface EvaluationLocationService extends BaseService<EvaluationLocatio
     EvaluationLocation saveOrUpdateEvaluationLocation(EvaluationLocationDTO evaluationLocationDTO) throws SQLException;
 
     EvaluationLocation getByCode(String code) throws SQLException;
+
+    List<EvaluationLocation> getByCodes(List<String> codes);
 }

@@ -36,7 +36,7 @@ public interface FormSectionQuestionDAO {
 
     @Query("SELECT * FROM form_section_question WHERE form_section_id = :formSectionId AND life_cycle_status = :lifeCycleStatus " +
             "AND evaluation_type_id IN (SELECT id FROM evaluation_type WHERE code = :evaluationType OR code = 'Ambos') " +
-            "AND evaluation_location_id IN (SELECT id FROM evaluation_location WHERE id = :evaluationLocationId OR code = 'Ambos') " +
+            "AND evaluation_location_id IN (SELECT id FROM evaluation_location WHERE id = :evaluationLocationId OR code = 'BOTH') " +
             "ORDER BY sequence ASC")
     List<FormSectionQuestion> getAllOfFormSection(int formSectionId, String evaluationType, String lifeCycleStatus, int evaluationLocationId);
 

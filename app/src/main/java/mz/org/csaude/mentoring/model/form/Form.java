@@ -112,6 +112,7 @@ public class Form extends BaseModel {
         this.setName(formDTO.getName());
         this.setTargetFile(formDTO.getTargetFile());
         this.setTargetPatient(formDTO.getTargetPatient());
+        this.setEvaluationLocation(new EvaluationLocation(formDTO.getEvaluationLocationUuid()));
         if (formDTO.getPartner() != null) {
             this.setPartner(new Partner(formDTO.getPartner()));
         }

@@ -24,13 +24,13 @@ public class GETPartnerWorker extends BaseWorker<Partner> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         getApplication().getPartnerRestService().restGetPartners(this);
         super.doOnlineSearch(offset, limit);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Partner> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Partner> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

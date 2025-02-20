@@ -6,6 +6,7 @@ package mz.org.csaude.mentoring.dto.form;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
+import mz.org.csaude.mentoring.dto.evaluationLocation.EvaluationLocationDTO;
 import mz.org.csaude.mentoring.dto.partner.PartnerDTO;
 import mz.org.csaude.mentoring.dto.programmaticArea.ProgrammaticAreaDTO;
 import mz.org.csaude.mentoring.model.form.Form;
@@ -20,6 +21,9 @@ public class FormDTO extends BaseEntityDTO {
     private PartnerDTO partner;
     private ProgrammaticAreaDTO programmaticAreaDTO;
     private List<FormSectionDTO> formSections;
+    private EvaluationLocationDTO evaluationLocationDTO;
+
+    private String evaluationLocationUuid;
 
 
     public FormDTO(Form form) {
@@ -102,5 +106,21 @@ public class FormDTO extends BaseEntityDTO {
 
     public void setFormSections(List<FormSectionDTO> formSections) {
         this.formSections = formSections;
+    }
+
+    public EvaluationLocationDTO getEvaluationLocationDTO() {
+        return evaluationLocationDTO;
+    }
+
+    public void setEvaluationLocationDTO(EvaluationLocationDTO evaluationLocationDTO) {
+        this.evaluationLocationDTO = evaluationLocationDTO;
+    }
+
+    public String getEvaluationLocationUuid() {
+        return evaluationLocationUuid;
+    }
+
+    public void setEvaluationLocationUuid(String evaluationLocationUuid) {
+        this.evaluationLocationUuid = evaluationLocationUuid;
     }
 }

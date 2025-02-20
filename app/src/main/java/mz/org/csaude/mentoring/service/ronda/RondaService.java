@@ -11,6 +11,7 @@ import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.user.User;
 
 public interface RondaService extends BaseService<Ronda> {
     Ronda savedOrUpdateRonda(Ronda ronda) throws SQLException;
@@ -19,7 +20,7 @@ public interface RondaService extends BaseService<Ronda> {
     List<Ronda> doSearch(long offset, long limit);
 
     int countRondas() throws SQLException;
-    List<Ronda> getAllByRondaType(RondaType rondaType) throws SQLException;
+    List<Ronda> getAllByRondaType(RondaType rondaType, User authenticatedUser) throws SQLException;
     void saveOrUpdateRondas(List<RondaDTO> rondaDTOS) throws SQLException;
     Ronda saveOrUpdateRonda(RondaDTO rondaDTO) throws SQLException;
 

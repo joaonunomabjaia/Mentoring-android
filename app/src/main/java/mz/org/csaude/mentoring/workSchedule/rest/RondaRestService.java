@@ -34,17 +34,21 @@ public class RondaRestService extends BaseRestService {
     }
 
     public void restGetRondas(RestResponseListener<Ronda> listener){
-        Tutor mentor = getApplication().getCurrMentor();
-        if(mentor==null) {
-            try {
-                User user =  getApplication().getUserService().getCurrentUser();
-                if(user==null) return;
-                mentor = getApplication().getTutorService().getByEmployee(user.getEmployee());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        if (!getSessionManager().isAnyUserConfigured()){
+            listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
+            return;
         }
-        Call<List<RondaDTO>> rondasCall = syncDataService.getAllOfMentor(mentor.getUuid());
+        List<String> uuids = new ArrayList<>();
+        List<Tutor> tutores = null;
+        try {
+            tutores = getApplication().getTutorService().getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        for (Tutor tutor : tutores) {
+                uuids.add(tutor.getUuid());
+            }
+        Call<List<RondaDTO>> rondasCall = syncDataService.getRondasAllOfMentors(uuids);
 
         rondasCall.enqueue(new Callback<List<RondaDTO>>() {
             @Override

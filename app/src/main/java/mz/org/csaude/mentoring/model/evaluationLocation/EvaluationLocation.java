@@ -23,6 +23,7 @@ public class EvaluationLocation extends BaseModel {
 
     public static final String HEALTH_FACILITY = "HEALTH_FACILITY";
     public static final String COMMUNITY = "COMMUNITY";
+    public static final String BOTH = "BOTH";
 
     @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
@@ -77,5 +78,9 @@ public class EvaluationLocation extends BaseModel {
     @JsonIgnore
     public boolean isCommunityEvaluation() {
         return this.code.equals(EvaluationLocation.COMMUNITY);
+    }
+
+    public boolean isBoth() {
+        return this.code.equals(EvaluationLocation.BOTH);
     }
 }

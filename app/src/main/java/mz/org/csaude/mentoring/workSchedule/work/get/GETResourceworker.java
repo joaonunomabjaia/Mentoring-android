@@ -21,7 +21,7 @@ public class GETResourceworker extends BaseWorker<Resource> {
         this.resourceRestService = new ResourceRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.resourceRestService.restGetResources(this);
     }
 

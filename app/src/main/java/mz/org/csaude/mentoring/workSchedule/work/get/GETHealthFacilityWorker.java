@@ -27,12 +27,12 @@ public class GETHealthFacilityWorker extends BaseWorker<HealthFacility> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.healthFacilityRestService.restGetHealthFacility(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<HealthFacility> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<HealthFacility> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

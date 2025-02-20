@@ -19,7 +19,7 @@ public class GETTutoredWorker extends BaseWorker<Tutored> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         getApplication().getTutoredRestService().restGetTutored(this, offset, limit);
     }
 
@@ -31,7 +31,7 @@ public class GETTutoredWorker extends BaseWorker<Tutored> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Tutored> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Tutored> recs) throws Exception {
         if (isPOSTRequest()) {
             changeStatusToFinished();
             doOnFinish();

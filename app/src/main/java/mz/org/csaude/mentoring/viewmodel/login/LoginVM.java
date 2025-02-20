@@ -79,36 +79,51 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     }
 
     public void doLogin() {
-        getExecutorService().execute(()-> {
+        getExecutorService().execute(() -> {
             setAuthenticating(true);
             if (AppHasUser()) {
-                runOnMainThread(() -> {
-                    try {
-                        doLocalLogin();
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                try {
+                    doLocalLogin();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
-                getApplication().isServerOnline(this);
+                doOnlineLogin();
             }
             getApplication().saveDefaultSyncSettings();
             getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
         });
     }
 
+    private void doOnlineLogin() {
+        runOnMainThread(() -> setAuthenticating(true));
+
+        getApplication().isServerOnline(isOnline -> {
+            if (isOnline) {
+                userSyncService.doOnlineLogin(this, remeberMe);
+            } else {
+                runOnMainThread(() -> {
+                    String serverUnavailableMessage = getRelatedActivity().getString(R.string.server_unavailable);
+                    Utilities.displayAlertDialog(getRelatedActivity(), serverUnavailableMessage).show();
+                    setAuthenticating(false);
+                });
+            }
+        });
+    }
+
+
     private void doLocalLogin() throws SQLException {
-        AtomicReference<User> logedUser = new AtomicReference<>();
-        getExecutorService().execute(()-> {
+        AtomicReference<User> loggedUser = new AtomicReference<>();
+        getExecutorService().execute(() -> {
             try {
-                logedUser.set(userService.login(this.user));
+                loggedUser.set(userService.login(this.user));
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
 
-            runOnMainThread(()->{
-                if (logedUser.get() != null) {
-                    if (!logedUser.get().isActivated()) {
+            runOnMainThread(() -> {
+                if (loggedUser.get() != null) {
+                    if (!loggedUser.get().isActivated()) {
                         String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_on_server);
                         checkDlg = Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage);
                         checkDlg.show();
@@ -117,17 +132,19 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                         getApplication().isServerOnline(this);
                         return;
                     }
-                    getApplication().setAuthenticatedUser(logedUser.get(), remeberMe);
+                    getApplication().setAuthenticatedUser(loggedUser.get(), remeberMe);
                     goHome();
                 } else {
-                    String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
-                    Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
+                    // Fallback to online login if user is not found locally
+                    setAuthenticating(true);
+                    doOnlineLogin();
                 }
 
                 setAuthenticating(false);
             });
         });
     }
+
 
     private boolean AppHasUser() {
         try {
@@ -139,39 +156,45 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
     @Override
     public void doOnRestSucessResponse(User user) {
-        getRelatedActivity().runOnUiThread(() -> {
+        //getRelatedActivity().runOnUiThread(() -> {
             try {
-                if (getApplication().isInitialSetupComplete()) {
+                if (getSessionManager().isInitialSetupComplete(user.getUserName())) {
                     getApplication().init();
                     goHome();
                 } else {
                     OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
 
-                    WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
-                        if (workInfo != null) {
-                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                                try {
-                                    getApplication().init();
-                                } catch (SQLException e) {
-                                    throw new RuntimeException(e);
-                                }
-
-                                OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
-                                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
-                                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
-                                        getApplication().setInitialSetUpComplete();
-                                        getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-                                        goHome();
+                    runOnMainThread(() -> {
+                        WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
+                            if (workInfo != null) {
+                                if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                    try {
+                                        getApplication().init();
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException(e);
                                     }
-                                });
+
+                                    OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
+                                    WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
+                                        if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                                            getSessionManager().setInitialSetUpComplete(user.getUserName());
+                                            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                            goHome();
+                                        }
+                                    });
+                                } else if (workInfo.getState() == WorkInfo.State.FAILED) {
+                                    setAuthenticating(false);
+                                    String errorMessage = getRelatedActivity().getString(R.string.error_downloading_mentor_data);
+                                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                                }
                             }
-                        }
+                        });
                     });
                 }
             } catch (SQLException e) {
                 Log.e("LoginVM", "doOnRestSucessResponse: ", e);
             }
-        });
+        //});
     }
 
 
@@ -213,33 +236,33 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void onServerStatusChecked(boolean isOnline) {
         if (isOnline) {
             if (serverOperation == INACTIVE_USER_CHECK) {
-                OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
-                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
-                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
-                        getExecutorService().execute(()->{
-                            try {
-                                User u =userService.login(this.user);
-                                if (!u.isActivated()) {
-                                    checkDlg.dismiss();
-                                    String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
-                                    Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
-                                } else {
-                                    getApplication().setAuthenticatedUser(u, remeberMe);
-                                    goHome();
+                OneTimeWorkRequest syncRequest = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
+                WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager()
+                        .getWorkInfoByIdLiveData(syncRequest.getId())
+                        .observe(getRelatedActivity(), info -> {
+                            if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                                try {
+                                    User user = userService.login(this.user);
+                                    if (!user.isActivated()) {
+                                        checkDlg.dismiss();
+                                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive);
+                                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
+                                    } else {
+                                        getApplication().setAuthenticatedUser(user, remeberMe);
+                                        goHome();
+                                    }
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
                                 }
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
+                            } else {
+                                String errorMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_error);
+                                Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
                             }
                         });
-                    } else {
-                        String inactiveMessage = getRelatedActivity().getString(R.string.user_inactive_cheking_error);
-                        Utilities.displayAlertDialog(getRelatedActivity(), inactiveMessage).show();
-                    }
-                });
             } else {
-                userSyncService.doOnlineLogin(this, remeberMe);
+                doOnlineLogin();
             }
-        }else {
+        } else {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
         }
     }

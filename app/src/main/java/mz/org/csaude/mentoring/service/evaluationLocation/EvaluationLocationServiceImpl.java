@@ -3,12 +3,14 @@ package mz.org.csaude.mentoring.service.evaluationLocation;
 import android.app.Application;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.evaluationLocation.EvaluationLocationDAO;
 import mz.org.csaude.mentoring.dto.evaluationLocation.EvaluationLocationDTO;
 import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
+import mz.org.csaude.mentoring.util.Utilities;
 
 public class EvaluationLocationServiceImpl extends BaseServiceImpl<EvaluationLocation> implements EvaluationLocationService {
 
@@ -75,6 +77,13 @@ public class EvaluationLocationServiceImpl extends BaseServiceImpl<EvaluationLoc
     @Override
     public EvaluationLocation getByCode(String code) throws SQLException {
         return evaluationLocationDAO.findEvaluationLocationByCode(code);
+    }
+
+    @Override
+    public List<EvaluationLocation> getByCodes(List<String> codes) {
+        return Utilities.listHasElements(codes)
+                ? evaluationLocationDAO.queryForAllInCodes(codes)
+                : Collections.emptyList();
     }
 
     @Override

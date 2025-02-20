@@ -144,6 +144,8 @@ public class EmployeeDTO extends BaseEntityDTO {
         employee.setPhoneNumber(this.getPhoneNumber());
         employee.setEmail(this.getEmail());
         employee.setLifeCycleStatus(this.getLifeCycleStatus());
+        employee.setCreatedByUuid(this.getCreatedByuuid());
+        employee.setUpdatedByUuid(this.getUpdatedByuuid());
         if(this.getProfessionalCategoryDTO()!=null) {
             employee.setProfessionalCategory(this.getProfessionalCategoryDTO().getProfessionalCategory());
         }

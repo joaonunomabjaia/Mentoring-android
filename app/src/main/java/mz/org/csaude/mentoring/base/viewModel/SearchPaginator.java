@@ -9,13 +9,13 @@ import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
 
 public interface SearchPaginator<T extends BaseModel>{
 
-    List<T> doSearch(long offset, long limit) throws SQLException;
+    List<T> doSearch(long offset, long limit) throws Exception;
 
     void displaySearchResults();
 
     AbstractSearchParams<T> initSearchParams();
 
-    default void doOnlineSearch(long offset, long limit) throws SQLException {}
+    default void doOnlineSearch(long offset, long limit) throws Exception {}
 
     default void createPdfDocument() {}
 

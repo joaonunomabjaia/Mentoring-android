@@ -137,6 +137,8 @@ public class RondaDTO extends BaseEntityDTO {
         ronda.setUpdatedAt(this.getUpdatedAt());
         ronda.setLifeCycleStatus(this.getLifeCycleStatus());
         ronda.setMentorType(this.getMentorType());
+        ronda.setCreatedByUuid(this.getCreatedByuuid());
+        ronda.setUpdatedByUuid(this.getUpdatedByuuid());
         if(this.getHealthFacility()!=null) {
             ronda.setHealthFacility(this.getHealthFacility().getHealthFacilityObj());
         }

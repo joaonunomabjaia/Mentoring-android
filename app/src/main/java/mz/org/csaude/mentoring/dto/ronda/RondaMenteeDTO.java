@@ -70,6 +70,8 @@ public class RondaMenteeDTO extends BaseEntityDTO {
         rondaMentee.setCreatedAt(this.getCreatedAt());
         rondaMentee.setUpdatedAt(this.getUpdatedAt());
         rondaMentee.setLifeCycleStatus(this.getLifeCycleStatus());
+        rondaMentee.setCreatedByUuid(this.getCreatedByuuid());
+        rondaMentee.setUpdatedByUuid(this.getUpdatedByuuid());
         if(this.getMentee()!=null) {
             rondaMentee.setTutored(this.getMentee().getMentee());
         }
