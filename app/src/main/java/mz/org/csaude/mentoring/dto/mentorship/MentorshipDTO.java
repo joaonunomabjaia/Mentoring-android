@@ -57,6 +57,7 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
     private String cabinetUuid;
     private String doorUuid;
     private String evaluationTypeUuid;
+    private String evaluationLocationUuid;
 
     public MentorshipDTO() {
     }
@@ -88,6 +89,9 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         }
         if(mentorship.getEvaluationType()!=null) {
             this.setEvaluationTypeUuid(mentorship.getEvaluationType().getUuid());
+        }
+        if(mentorship.getEvaluationLocation()!=null) {
+            this.setEvaluationLocationUuid(mentorship.getEvaluationLocation().getUuid());
         }
         if(mentorship.getAnswers()!=null) {
             List<AnswerDTO> answerDTOS = new ArrayList<>();
@@ -330,5 +334,13 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
 
     public void setEvaluationLocationDTO(EvaluationLocationDTO evaluationLocationDTO) {
         this.evaluationLocationDTO = evaluationLocationDTO;
+    }
+
+    public String getEvaluationLocationUuid() {
+        return evaluationLocationUuid;
+    }
+
+    public void setEvaluationLocationUuid(String evaluationLocationUuid) {
+        this.evaluationLocationUuid = evaluationLocationUuid;
     }
 }

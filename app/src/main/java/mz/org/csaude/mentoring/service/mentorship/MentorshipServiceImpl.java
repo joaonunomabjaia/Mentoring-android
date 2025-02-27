@@ -203,6 +203,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
             mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
             mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
             mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+            mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getById(mentorship.getEvaluationLocationId()));
         }
         return mentorships;
     }

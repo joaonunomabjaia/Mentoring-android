@@ -144,7 +144,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public Ronda saveOrUpdateRonda(RondaDTO rondaDTO) throws SQLException {
         Ronda r = this.rondaDAO.getByUuid(rondaDTO.getUuid());
-        Ronda ronda = rondaDTO.getRonda();
+        Ronda ronda = new Ronda(rondaDTO);
 
         ronda.setHealthFacility(this.healthFacilityDAO.getByUuid(rondaDTO.getHealthFacility().getUuid()));
         ronda.setRondaType(this.rondaTypeDAO.getByUuid(rondaDTO.getRondaType().getUuid()));
