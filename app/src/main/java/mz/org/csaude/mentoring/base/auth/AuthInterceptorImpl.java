@@ -6,6 +6,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -92,11 +93,21 @@ public class AuthInterceptorImpl implements Interceptor {
     private String getCreatedByUuidFromRequest(Request request) {
         try {
             RequestBody body = request.body();
-            if (body != null) {
-                Buffer buffer = new Buffer();
-                body.writeTo(buffer);
-                String bodyString = buffer.readUtf8();
-                // Parse the JSON to extract `createdByUuid`
+            if (body == null) {
+                return null;
+            }
+
+            Buffer buffer = new Buffer();
+            body.writeTo(buffer);
+            String bodyString = buffer.clone().readUtf8(); // Clone buffer to prevent consumption issues
+
+            if (bodyString.startsWith("[")) { // Handle JSON Array case
+                JSONArray jsonArray = new JSONArray(bodyString);
+                if (jsonArray.length() > 0) {
+                    JSONObject json = jsonArray.getJSONObject(0);
+                    return json.optString("createdByUuid", null);
+                }
+            } else { // Handle JSON Object case
                 JSONObject json = new JSONObject(bodyString);
                 return json.optString("createdByUuid", null);
             }
@@ -105,6 +116,7 @@ public class AuthInterceptorImpl implements Interceptor {
         }
         return null;
     }
+
 
 
 

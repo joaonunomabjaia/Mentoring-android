@@ -184,15 +184,15 @@ public class UserRestService extends BaseRestService implements UserSyncService 
         }
 
 
-        Call<UserDTO> tutoredCall = null;
+        Call<Void> tutoredCall = null;
         try {
             tutoredCall = syncDataService.patchUsers(Utilities.parse(getApplication().getUserService().getAll(), UserDTO.class));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        tutoredCall.enqueue(new Callback<UserDTO>() {
+        tutoredCall.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.code() == 200) {
                     listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
                 } else {
@@ -213,7 +213,7 @@ public class UserRestService extends BaseRestService implements UserSyncService 
             }
 
             @Override
-            public void onFailure(Call<UserDTO> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Log.i("pacthUser --", t.getMessage(), t);
                 listener.doOnRestErrorResponse(t.getMessage());
             }

@@ -110,7 +110,7 @@ public interface SyncDataService {
     @PATCH("user/password-update")
     Call<UserDTO> patchUser(@Body UserDTO userDTO);
     @PATCH("user/password-update-batch")
-    Call<UserDTO> patchUsers(@Body List<UserDTO> userDTOS);
+    Call<Void> patchUsers(@Body List<UserDTO> userDTOS);
 
     @PATCH("tutored/batch-update")
     Call<List<TutoredDTO>> postTutoreds(@Body List<TutoredDTO> tutoredDTOS);
