@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.base.application;
 
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_COMPLETE;
+import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_CONFIGURE_NEW_USER;
 import static mz.org.csaude.mentoring.util.Constants.LAST_SYNC_DATE;
 import static mz.org.csaude.mentoring.util.Constants.LOGGED_USER;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
@@ -42,14 +43,16 @@ import mz.org.csaude.mentoring.service.answer.AnswerService;
 import mz.org.csaude.mentoring.service.answer.AnswerServiceImpl;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.employee.EmployeeServiceImpl;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationService;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationServiceImpl;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeService;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.form.FormService;
 import mz.org.csaude.mentoring.service.form.FormServiceImpl;
-import mz.org.csaude.mentoring.service.formSection.FormSectionServiceImpl;
 import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionService;
 import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionServiceImpl;
 import mz.org.csaude.mentoring.service.fromSection.FormSectionService;
+import mz.org.csaude.mentoring.service.fromSection.FormSectionServiceImpl;
 import mz.org.csaude.mentoring.service.location.CabinetService;
 import mz.org.csaude.mentoring.service.location.CabinetServiceImpl;
 import mz.org.csaude.mentoring.service.location.DistrictService;
@@ -122,8 +125,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class MentoringApplication  extends Application {
 
     private static MentoringApplication mInstance;
-    public static final String BASE_URL = "https://mentdev.csaude.org.mz/api/";
-    //public static final String BASE_URL = "http://10.10.12.115:8087/api/";
+    //public static final String BASE_URL = "https://mentdev.csaude.org.mz/api/";
+    public static final String BASE_URL = "http://10.10.12.115:8087/api/";
     //public static final String BASE_URL = "http://192.168.1.32:8087/api/";
     private User authenticatedUser;
 
@@ -200,6 +203,8 @@ public class MentoringApplication  extends Application {
     private SectionService sectionService;
 
     private FormSectionService formSectionService;
+
+    private EvaluationLocationService evaluationLocationService;
 
 
 
@@ -516,6 +521,11 @@ public class MentoringApplication  extends Application {
     public SessionRecommendedResourceRestService getSessionRecommendedResourceRestService() {
         if (sessionRecommendedResourceRestService == null) this.sessionRecommendedResourceRestService = new SessionRecommendedResourceRestService(this);
         return sessionRecommendedResourceRestService;
+    }
+
+    public EvaluationLocationService getEvaluationLocationService() {
+        if (evaluationLocationService == null) this.evaluationLocationService = new EvaluationLocationServiceImpl(this);
+        return evaluationLocationService;
     }
 
     public ApplicationStep getApplicationStep() {

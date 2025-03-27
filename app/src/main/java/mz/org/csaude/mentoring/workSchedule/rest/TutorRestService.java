@@ -78,41 +78,34 @@ public class TutorRestService extends BaseRestService {
 
 
     public void restGetByEmployeeUuid(RestResponseListener<Tutor> listener){
-
-        if (getApplication().getAuthenticatedUser() == null) {
-            try {
-                getApplication().setAuthenticatedUser(getApplication().getUserService().getCurrentUser(), false);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
         Call<TutorDTO> tutorCall = syncDataService.getTutorByEmployeeUuid(getApplication().getAuthenticatedUser().getEmployee().getUuid());
         tutorCall.enqueue(new Callback<TutorDTO>() {
             @Override
             public void onResponse(Call<TutorDTO> call, Response<TutorDTO> response) {
               TutorDTO  data = response.body();
 
-                if(data == null){
-
-                }
                 getServiceExecutor().execute(()-> {
-                    try {
+                    if(data == null){
+                        listener.doOnRestErrorResponse(BaseRestService.REQUEST_NO_DATA);
+                    } else {
+                        try {
+                            TutorService tutorService = getApplication().getTutorService();
 
-                        TutorService tutorService = getApplication().getTutorService();
+                            Tutor tutor = tutorService.saveOrUpdate(new Tutor(data));
 
-                        Tutor tutor = tutorService.saveOrUpdate(new Tutor(data));
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(tutor));
 
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(tutor));
-
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
+                        } catch (Exception e) {
+                            listener.doOnRestErrorResponse(e.getMessage());
+                        }
                     }
                 });
             }
 
             @Override
             public void onFailure(Call<TutorDTO> call, Throwable t) {
-                Log.i("METADATA LOAD --", t.getMessage(), t);
+                Log.i("Get Mentor --", t.getMessage(), t);
+                listener.doOnRestErrorResponse(t.getMessage());
             }
         });
     }

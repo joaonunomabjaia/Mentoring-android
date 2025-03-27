@@ -17,7 +17,7 @@ public class GETSettingWorker extends BaseWorker<Setting> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         //SettingRestService.restGetSettings(this);
     }
 

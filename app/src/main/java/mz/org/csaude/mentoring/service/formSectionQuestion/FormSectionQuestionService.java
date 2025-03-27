@@ -11,5 +11,5 @@ public interface FormSectionQuestionService extends BaseService<FormSectionQuest
 
     void saveOrUpdate(List<FormSectionQuestion> formSectionQuestionDTOS) throws SQLException;
 
-    List<FormSectionQuestion> getAllOfFormSection(FormSection formSection, String evaluationType) throws SQLException;
+    List<FormSectionQuestion> getAllOfFormSection(FormSection formSection, String evaluationType, int evaluationLocationId) throws SQLException;
 }

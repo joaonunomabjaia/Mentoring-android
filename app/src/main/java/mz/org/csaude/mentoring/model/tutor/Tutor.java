@@ -38,6 +38,10 @@ public class Tutor extends BaseModel {
   public Tutor() {
   }
 
+  public Tutor(String uuid) {
+    setUuid(uuid);
+  }
+
   @Ignore // This constructor should be ignored by Room.
   public Tutor(TutorDTO tutorDTO) {
     super(tutorDTO);

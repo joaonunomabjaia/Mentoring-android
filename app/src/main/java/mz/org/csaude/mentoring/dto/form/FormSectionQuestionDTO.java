@@ -24,6 +24,7 @@ public class FormSectionQuestionDTO extends BaseEntityDTO {
     private String responseTypeUuid;
     private String formSectionUuid;
     private QuestionDTO questionDTO;
+    private String evaluationLocationUuid;
 
     public FormSectionQuestionDTO() {
 
@@ -35,6 +36,7 @@ public class FormSectionQuestionDTO extends BaseEntityDTO {
         this.setEvaluationTypeUuid(formSectionQuestion.getEvaluationType().getUuid());
         this.setResponseTypeUuid(formSectionQuestion.getResponseType().getUuid());
         this.setFormSectionUuid(formSectionQuestion.getFormSection().getUuid());
+        this.setEvaluationLocationUuid(formSectionQuestion.getEvaluationLocation().getUuid());
     }
 
     public Integer getSequence() {
@@ -83,5 +85,13 @@ public class FormSectionQuestionDTO extends BaseEntityDTO {
 
     public void setQuestionDTO(QuestionDTO questionDTO) {
         this.questionDTO = questionDTO;
+    }
+
+    public String getEvaluationLocationUuid() {
+        return evaluationLocationUuid;
+    }
+
+    public void setEvaluationLocationUuid(String evaluationLocationUuid) {
+        this.evaluationLocationUuid = evaluationLocationUuid;
     }
 }

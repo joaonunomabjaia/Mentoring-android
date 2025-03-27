@@ -26,6 +26,8 @@ public abstract class BaseModel implements Serializable, Listble {
     public static final String COLUMN_SYNC_STATUS = "sync_status";
     public static final String COLUMN_CREATED_AT = "created_at";
     public static final String COLUMN_UPDATED_AT = "updated_at";
+    public static final String COLUMN_CREATED_BY = "created_by";
+    public static final String COLUMN_UPDATED_BY = "updated_by";
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = COLUMN_ID)
@@ -49,6 +51,12 @@ public abstract class BaseModel implements Serializable, Listble {
     @Ignore
     protected boolean selected;
 
+    @ColumnInfo(name = COLUMN_CREATED_BY)
+    private String createdByUuid;
+
+    @ColumnInfo(name = COLUMN_UPDATED_BY)
+    private String updatedByUuid;
+
     @ColumnInfo(name = COLUMN_LIFE_CYCLE_STATUS)
     private LifeCycleStatus lifeCycleStatus = LifeCycleStatus.ACTIVE;
 
@@ -69,6 +77,8 @@ public abstract class BaseModel implements Serializable, Listble {
         this.setCreatedAt(baseEntityDTO.getCreatedAt());
         this.setUpdatedAt(baseEntityDTO.getUpdatedAt());
         this.setLifeCycleStatus(baseEntityDTO.getLifeCycleStatus());
+        this.setCreatedByUuid(baseEntityDTO.getCreatedByuuid());
+        this.setUpdatedByUuid(baseEntityDTO.getUpdatedByuuid());
     }
 
     public Integer getId() {
@@ -174,6 +184,22 @@ public abstract class BaseModel implements Serializable, Listble {
     @JsonIgnore
     public boolean isPending() {
         return this.syncStatus.equals(SyncSatus.PENDING);
+    }
+
+    public String getCreatedByUuid() {
+        return createdByUuid;
+    }
+
+    public void setCreatedByUuid(String createdByUuid) {
+        this.createdByUuid = createdByUuid;
+    }
+
+    public String getUpdatedByUuid() {
+        return updatedByUuid;
+    }
+
+    public void setUpdatedByUuid(String updatedByUuid) {
+        this.updatedByUuid = updatedByUuid;
     }
 
     @Override

@@ -101,6 +101,7 @@ public class SessionRestService extends BaseRestService {
             mentorship.setDoor(getApplication().getDoorService().getByuuid(mentorshipDTO.getDoor().getUuid()));
             mentorship.setCabinet(getApplication().getCabinetService().getByuuid(mentorshipDTO.getCabinet().getUuid()));
             mentorship.setSyncStatus(SyncSatus.SENT);
+            mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByuuid(mentorshipDTO.getEvaluationLocationUuid()));
             mentorship.setSession(session);
             mentorship = getApplication().getMentorshipService().saveOrUpdate(mentorship);
             List<AnswerDTO> answers = mentorshipDTO.getAnswers();

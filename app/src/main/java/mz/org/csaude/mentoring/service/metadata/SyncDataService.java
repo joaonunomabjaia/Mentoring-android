@@ -4,6 +4,7 @@ import mz.org.csaude.mentoring.base.auth.LoginResponse;
 import mz.org.csaude.mentoring.base.service.ApiResponse;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.career.CareerTypeDTO;
+import mz.org.csaude.mentoring.dto.evaluationLocation.EvaluationLocationDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.dto.form.FormSectionQuestionDTO;
@@ -108,6 +109,8 @@ public interface SyncDataService {
 
     @PATCH("user/password-update")
     Call<UserDTO> patchUser(@Body UserDTO userDTO);
+    @PATCH("user/password-update-batch")
+    Call<Void> patchUsers(@Body List<UserDTO> userDTOS);
 
     @PATCH("tutored/batch-update")
     Call<List<TutoredDTO>> postTutoreds(@Body List<TutoredDTO> tutoredDTOS);
@@ -158,11 +161,18 @@ public interface SyncDataService {
     Call<ApiResponse<ProgrammaticAreaDTO>> getAllProgrammaticAreas();
     @GET("tutorprogrammaticareas/getByTutorUuidd/{tutorUuid}")
     Call<List<TutorProgrammaticAreaDTO>> getByTutorUuidd(@Path("tutorUuid") String tutorUuid);
+    @GET("tutorprogrammaticareas/getByTutorUuids")
+    Call<List<TutorProgrammaticAreaDTO>> getByTutorUuids(@Query("tutorUuids") List<String> tutorUuids);
 
     @GET("forms/getByTutorUuidd/{tutorUuid}")
     Call<List<FormDTO>> getFormsByMentor(@Path("tutorUuid") String tutorUuid);
+    @GET("forms/getByTutorUuids")
+    Call<List<FormDTO>> getFormsByTutorUuids(@Query("tutorUuids") List<String> tutorUuids);
+
     @GET("ronda/getAllOfMentor")
     Call<List<RondaDTO>> getAllOfMentor(@Query("mentorUuid") String mentorUuid);
+    @GET("ronda/getAllOfMentors")
+    Call<List<RondaDTO>> getRondasAllOfMentors(@Query("mentorUuids") List<String> mentorUuids);
 
     @GET("mentorships/getAllMentorshipSessionsOfMentorRondas")
     Call<List<MentorshipDTO>> getAllMentorshipSessionsOfMentorRondas(@Query("rondaUuidList") List<String> rondaUuidList);
@@ -191,4 +201,9 @@ public interface SyncDataService {
 
     @POST("sessions/save")
     Call<List<SessionDTO>> postSessions(@Body List<SessionDTO> sessionDTOS);
+
+    @GET("evaluationLocations/getAll")
+    Call<ApiResponse<EvaluationLocationDTO>> getAllEvaluationLocations();
+
+
 }

@@ -22,6 +22,7 @@ import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.answer.Answer;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
@@ -238,9 +239,19 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
         } else if (isPeriodSelectionStep()) {
             if (!isValidPeriod()) return;
-
             // Perform background operations (like loadQuestion and initial save) in a background thread
             getExecutorService().execute(() -> {
+                if (!isMentoringMentorship()) {
+                    try {
+                        this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    if (!mentorship.getSession().getForm().getEvaluationLocation().isBoth()) {
+                        this.mentorship.setEvaluationLocation(mentorship.getSession().getForm().getEvaluationLocation());
+                    }
+                }
                 loadQuestion();
 
                 for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
@@ -288,6 +299,10 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         notifyPropertyChanged(BR.currMentorshipStep);
     }
 
+    public boolean isSelectLocation(){
+        if (!isMentoringMentorship()) return false;
+        return mentorship.getSession().getForm().getEvaluationLocation().isBoth();
+    }
 
     public void setMentorship(Mentorship mentorship) {
         this.mentorship = mentorship;
@@ -435,6 +450,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 this.mentorship.setSession(generateZeroSession());
                 this.mentorship.setIterationNumber(1);
                 this.mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getByCode(EvaluationType.CONSULTA));
+                this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
             } else {
                 this.mentorship.setSession(this.session);
                 this.session.getRonda().addSession(this.mentorship.getSession());
@@ -545,6 +561,18 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     @Bindable
+    public Listble getSelectedEvaluationLocation() {
+        return this.mentorship.getEvaluationLocation();
+    }
+
+    public void setSelectedEvaluationLocation(Listble selectedEvaluationLocation) {
+        if (selectedEvaluationLocation == null || !Utilities.stringHasValue(selectedEvaluationLocation.getDescription())) return;
+
+        this.mentorship.setEvaluationLocation((EvaluationLocation) selectedEvaluationLocation);
+        notifyPropertyChanged(BR.selectedEvaluationLocation);
+    }
+
+    @Bindable
     public Listble getSelectedSector() {
         return this.mentorship.getCabinet();
     }
@@ -595,7 +623,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void loadQuestion() {
         try {
-            this.mentorship.setForm(getApplication().getFormService().getFullByIdForEvaluation(this.mentorship.getForm().getId(), this.mentorship.getEvaluationType().getCode()));
+            this.mentorship.setForm(getApplication().getFormService().getFullByIdForEvaluation(this.mentorship.getForm().getId(), this.mentorship.getEvaluationType().getCode(), this.mentorship.getEvaluationLocation()));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -742,11 +770,6 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             }
 
             this.mentorship.getSession().addMentorship(this.mentorship);
-            /*if (this.mentorship.getSession().canBeClosed()) {
-                this.mentorship.getSession().setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.COMPLETE));
-                this.mentorship.getSession().setEndDate(DateUtilities.getCurrentDate());
-                this.mentorship.getSession().setSyncStatus(SyncSatus.PENDING);
-            }*/
 
             this.ronda.setSessions(getApplication().getSessionService().getAllOfRonda(this.ronda));
             this.ronda.addSession(this.mentorship.getSession());
@@ -764,6 +787,10 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                     runOnMainThread(()->getRelatedActivity().finish());
                 }
             } else {
+                this.ronda.tryToCloseRonda();
+                if (this.ronda.isRondaCompleted()) {
+                    getApplication().getRondaService().update(this.ronda);
+                }
                 runOnMainThread(this::goToMentorshipSummary);
             }
         getCurrentStep().changeToList();
@@ -919,5 +946,12 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     public void doOnConfirmed(String value) {
         Log.i("MentorshipVM", value);
         getExecutorService().execute(this::doSaveMentorship);
+    }
+
+    public List<EvaluationLocation> getEvaluationLocations() {
+        List<EvaluationLocation> evaluationLocations = new ArrayList<>();
+        evaluationLocations.add(new EvaluationLocation());
+        evaluationLocations.addAll(getApplication().getEvaluationLocationService().getByCodes(List.of(EvaluationLocation.HEALTH_FACILITY, EvaluationLocation.COMMUNITY)));
+        return evaluationLocations;
     }
 }

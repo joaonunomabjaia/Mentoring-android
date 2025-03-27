@@ -126,7 +126,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
                     }
                 }
 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "initSearch: ", e.getCause());
                 runOnMainThread(() -> Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao executar a busca").show());
                 return;
@@ -206,7 +206,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
         return searchParams;
     }
 
-    protected void fullLoadRecords() throws SQLException {
+    protected void fullLoadRecords() throws Exception {
         if (!isOnlineSearch()) {
             List<T> recs = getNextRecordsToDisplay();
 
@@ -229,7 +229,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
         }
     }
 
-    private List<T> getNextRecordsToDisplay() throws SQLException {
+    private List<T> getNextRecordsToDisplay() throws Exception {
 
         int end = 0;
         List<T> recs = new ArrayList<>();
@@ -282,7 +282,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
                 getAllDisplyedRecords().addAll(newRecs);
                 try {
                     getNextRecordsToDisplay();
-                } catch (SQLException throwables) {
+                } catch (Exception throwables) {
                     throwables.printStackTrace();
                 }
             } else {
@@ -357,7 +357,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
 
                 try {
                     getNextRecordsToDisplay();
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 adapter.notifyDataSetChanged();
@@ -415,7 +415,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
 
         try {
             fullLoadRecords();
-        } catch (SQLException throwables) {
+        } catch (Exception throwables) {
             throwables.printStackTrace();
         }
     }

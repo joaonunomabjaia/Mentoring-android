@@ -96,15 +96,28 @@ public class FormSectionQuestionServiceImpl extends BaseServiceImpl<FormSectionQ
 
 
     @Override
-    public List<FormSectionQuestion> getAllOfFormSection(FormSection formSection, String evaluationType) throws SQLException {
-        List<FormSectionQuestion> formSectionQuestions = formSectionQuestionDAO.getAllOfFormSection(formSection.getId(), evaluationType, String.valueOf(LifeCycleStatus.ACTIVE));
+    public List<FormSectionQuestion> getAllOfFormSection(FormSection formSection, String evaluationType, int evaluationLocationId) throws SQLException {
+        // Retrieve filtered FormSectionQuestion records
+        List<FormSectionQuestion> formSectionQuestions = formSectionQuestionDAO.getAllOfFormSection(
+                formSection.getId(),
+                evaluationType,
+                String.valueOf(LifeCycleStatus.ACTIVE),
+                evaluationLocationId
+        );
+
+        // Populate related entities
         for (FormSectionQuestion formSectionQuestion : formSectionQuestions) {
             formSectionQuestion.setQuestion(questionDAO.queryForId(formSectionQuestion.getQuestionId()));
             formSectionQuestion.getQuestion().setProgram(getApplication().getProgramService().getById(formSectionQuestion.getQuestion().getProgramId()));
             formSectionQuestion.setFormSection(getApplication().getFormSectionService().getById(formSectionQuestion.getFormSectionId()));
             formSectionQuestion.setResponseType(responseTypeDAO.queryForId(formSectionQuestion.getResponseTypeId()));
             formSectionQuestion.setEvaluationType(evaluationTypeDAO.queryForId(formSectionQuestion.getEvaluationTypeId()));
+            formSectionQuestion.setEvaluationLocation(
+                    getApplication().getEvaluationLocationService().getById(formSectionQuestion.getEvaluationLocationId())
+            );
         }
+
         return formSectionQuestions;
     }
+
 }

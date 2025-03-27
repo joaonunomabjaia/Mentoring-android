@@ -20,7 +20,7 @@ public class POSTSessionRecommendedResourceWorker extends BaseWorker<SessionReco
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         getApplication().getSessionRecommendedResourceRestService().postSessionRecommendedResource(this);
     }
 
@@ -30,7 +30,7 @@ public class POSTSessionRecommendedResourceWorker extends BaseWorker<SessionReco
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<SessionRecommendedResource> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<SessionRecommendedResource> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

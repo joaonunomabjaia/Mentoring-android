@@ -22,7 +22,7 @@ public class GETProfessionalCategoryWorker extends BaseWorker<ProfessionalCatego
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.professionalCategoryRestService.restGetProfessionalCategory(offset, limit, this);
     }
     @Override
@@ -36,7 +36,7 @@ public class GETProfessionalCategoryWorker extends BaseWorker<ProfessionalCatego
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<ProfessionalCategory> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<ProfessionalCategory> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

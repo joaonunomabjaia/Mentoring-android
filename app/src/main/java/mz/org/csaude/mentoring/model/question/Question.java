@@ -106,6 +106,6 @@ public class Question extends BaseModel {
 
     public void setProgram(Program program) {
         this.program = program;
-        this.programId = program.getId();
+        if (program != null) this.programId = program.getId();
     }
 }

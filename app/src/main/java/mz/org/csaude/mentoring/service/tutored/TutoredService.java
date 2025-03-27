@@ -1,13 +1,11 @@
 package mz.org.csaude.mentoring.service.tutored;
 
-import androidx.paging.PagingData;
-
 import java.sql.SQLException;
 import java.util.List;
 
-import kotlinx.coroutines.flow.Flow;
 import mz.org.csaude.mentoring.base.service.BaseService;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
+import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
@@ -29,6 +27,6 @@ public interface TutoredService extends BaseService<Tutored> {
 
     List<Tutored> getAllOfRondaForNewRonda(HealthFacility healthFacility) throws SQLException;
 
-    List<Tutored> getAllPagenated(long offset, long limit);
+    List<Tutored> getAllPagenated(List<Location> locations, long offset, long limit);
 
 }

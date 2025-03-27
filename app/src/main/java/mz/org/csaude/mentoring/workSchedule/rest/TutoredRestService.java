@@ -11,7 +11,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
@@ -39,17 +41,23 @@ public class TutoredRestService extends BaseRestService {
 
     public void restGetTutored(RestResponseListener<Tutored> listener, Long offset, Long limit){
         List<String> uuids = new ArrayList<>();
-        List<Location> locations = new ArrayList<>();
+        Set<Location> locations = new HashSet<>();
+        if (!getSessionManager().isAnyUserConfigured()){
+            listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
+            return;
+        }
         if (getApplication().getAuthenticatedUser() == null) {
             try {
-                User user = getApplication().getUserService().getCurrentUser();
-                user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
-                locations = user.getEmployee().getLocations();
+                List<User> users = getApplication().getUserService().getAll();
+                for (User user : users) {
+                    user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
+                    locations.addAll(user.getEmployee().getLocations());
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            locations = getApplication().getAuthenticatedUser().getEmployee().getLocations();
+            locations.addAll(getApplication().getAuthenticatedUser().getEmployee().getLocations());
         }
 
         for (Location location : locations) {
@@ -112,7 +120,9 @@ public class TutoredRestService extends BaseRestService {
                                 throw new RuntimeException(e);
                             }
                         });
-                    } else listener.doOnRestErrorResponse(response.message());
+                    } else {
+                        listener.doOnRestErrorResponse(response.message());
+                    }
                 }
 
                 @Override

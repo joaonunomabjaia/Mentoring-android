@@ -20,12 +20,12 @@ public class GETIterationTypeWorker extends BaseWorker<IterationType> {
         this.iterationTypeRestService = new IterationTypeRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.iterationTypeRestService.restGetIterationTypes(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<IterationType> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<IterationType> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

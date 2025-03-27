@@ -25,6 +25,7 @@ import mz.org.csaude.mentoring.workSchedule.work.TriggerWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETCabinetWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETDistrictWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETDoorWorker;
+import mz.org.csaude.mentoring.workSchedule.work.get.GETEvaluationLocationWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETEvaluationTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETFormSectionQuestionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETFormWorker;
@@ -112,6 +113,10 @@ public class WorkerScheduleExecutor {
                 .addTag("INITIAL_SYNC_RESPONSE_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
 
+        OneTimeWorkRequest evaluationLocationWorkRequest = new OneTimeWorkRequest.Builder(GETEvaluationLocationWorker.class)
+                .addTag("INITIAL_SYNC_EVALUATION_LOCATION_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
         OneTimeWorkRequest evaluationTypeWorkRequest = new OneTimeWorkRequest.Builder(GETEvaluationTypeWorker.class)
                 .addTag("INITIAL_SYNC_EVALUATION_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
@@ -148,6 +153,7 @@ public class WorkerScheduleExecutor {
                         sectionWorkRequest,
                         responseTypeWorkRequest,
                         evaluationTypeWorkRequest,
+                        evaluationLocationWorkRequest,
                         iterationTypeWorkRequest,
                         doorWorkRequest,
                         sessionStatusWorkRequest,
@@ -402,6 +408,7 @@ public class WorkerScheduleExecutor {
                 createOneTimeWorkRequest(GETRondaTypeWorker.class, "SYNC_RONDA_TYPE"),
                 createOneTimeWorkRequest(GETResponseTypeWorker.class, "SYNC_RESPONSE_TYPE"),
                 createOneTimeWorkRequest(GETEvaluationTypeWorker.class, "SYNC_EVALUATION_TYPE"),
+                createOneTimeWorkRequest(GETEvaluationLocationWorker.class, "SYNC_EVALUATION_LOCATION"),
                 createOneTimeWorkRequest(GETIterationTypeWorker.class, "SYNC_ITERATION_TYPE"),
                 createOneTimeWorkRequest(GETDoorWorker.class, "SYNC_DOOR"),
                 createOneTimeWorkRequest(GETCabinetWorker.class, "SYNC_CABINET"),

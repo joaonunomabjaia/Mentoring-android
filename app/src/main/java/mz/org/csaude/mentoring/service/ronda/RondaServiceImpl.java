@@ -28,6 +28,7 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 
@@ -121,8 +122,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
 
     @Override
-    public List<Ronda> getAllByRondaType(RondaType rondaType) throws SQLException {
-        List<Ronda> rondas = this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE));
+    public List<Ronda> getAllByRondaType(RondaType rondaType, User authenticatedUser) throws SQLException {
+        List<Ronda> rondas = this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE), authenticatedUser.getUuid());
         for (Ronda ronda: rondas) {
             ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
             ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
@@ -143,14 +144,14 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Override
     public Ronda saveOrUpdateRonda(RondaDTO rondaDTO) throws SQLException {
         Ronda r = this.rondaDAO.getByUuid(rondaDTO.getUuid());
-        Ronda ronda = rondaDTO.getRonda();
+        Ronda ronda = new Ronda(rondaDTO);
 
         ronda.setHealthFacility(this.healthFacilityDAO.getByUuid(rondaDTO.getHealthFacility().getUuid()));
         ronda.setRondaType(this.rondaTypeDAO.getByUuid(rondaDTO.getRondaType().getUuid()));
 
         if(r!=null) {
             ronda.setId(r.getId());
-            this.rondaDAO.update(ronda);
+            //this.rondaDAO.update(ronda);
         } else {
             this.rondaDAO.insert(ronda);
             ronda.setId(this.rondaDAO.getByUuid(ronda.getUuid()).getId());

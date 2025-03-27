@@ -2,19 +2,18 @@ package mz.org.csaude.mentoring.service.tutored;
 
 import android.app.Application;
 
-import androidx.paging.Pager;
-import androidx.paging.PagingConfig;
-import androidx.paging.PagingData;
 import androidx.room.Transaction;
 
 import java.sql.SQLException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import kotlinx.coroutines.flow.Flow;
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
+import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
@@ -154,8 +153,12 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     }
 
     @Override
-    public List<Tutored> getAllPagenated(long offset, long limit) {
-        List<Tutored> tutoreds = this.tutoredDao.getTutoredsPaginated((int) limit, (int) offset);
+    public List<Tutored> getAllPagenated(List<Location> locations, long offset, long limit) {
+        List<Integer> locationIds = new ArrayList<>();
+        for (Location location : locations) {
+            locationIds.add(location.getHealthFacilityId());
+        }
+        List<Tutored> tutoreds = this.tutoredDao.getTutoredsPaginated(locationIds, (int) limit, (int) offset);
         for (Tutored tutored : tutoreds) {
             try {
                 tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));

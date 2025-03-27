@@ -8,7 +8,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.sql.SQLException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -70,19 +70,16 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
                 return Result.failure();
             }
             return Result.success();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             hasFailed.set(true);  // Mark as failed
             return Result.failure();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return Result.retry();
         }
     }
 
     private void waitUntilFinished() throws InterruptedException {
-        while (isRunning.get()) {
-            Thread.sleep(2000); // Non-blocking delay
+        while (workStatus.equals(WORK_STATUS_PERFORMING)) {
+            Thread.sleep(3000);
         }
     }
 
@@ -96,7 +93,7 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
     }
 
     @Override
-    public List<T> doSearch(long offset, long limit) throws SQLException {
+    public List<T> doSearch(long offset, long limit) throws Exception {
         return null;  // Override in subclasses with actual logic
     }
 
@@ -110,12 +107,12 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
         return null;  // Override in subclasses with actual logic
     }
 
-    protected void fullLoadRecords() throws SQLException {
+    protected void fullLoadRecords() throws Exception {
         isRunning.set(true);
         executorThreadProvider.getExecutorService().execute(() -> {
             try {
                 doOnlineSearch(offset, RECORDS_PER_SEARCH);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 hasFailed.set(true);  // Mark as failed on exception
             } finally {
@@ -124,7 +121,7 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
         });
     }
 
-    protected void doAfterSearch(String flag, List<T> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<T> recs) throws Exception {
         if ((Utilities.listHasElements(recs) || flag.equals(BaseRestService.REQUEST_SUCESS))
                 && recs.size() < RECORDS_PER_SEARCH) {
             changeStatusToFinished();
@@ -165,7 +162,7 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
     public void doOnResponse(String flag, List<T> objects) {
         try {
             doAfterSearch(flag, objects);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             hasFailed.set(true);  // Mark as failed on exception
         }

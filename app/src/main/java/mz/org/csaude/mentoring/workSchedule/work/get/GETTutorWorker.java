@@ -27,12 +27,16 @@ public class GETTutorWorker extends BaseWorker<Tutor> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
-        this.tutorRestService.restGetByEmployeeUuid(this);
+    public void doOnlineSearch(long offset, long limit) throws Exception {
+        try {
+            this.tutorRestService.restGetByEmployeeUuid(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Tutor> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Tutor> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }
