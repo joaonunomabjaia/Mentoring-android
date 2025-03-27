@@ -92,7 +92,9 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public Session getById(int id) throws SQLException {
-        return this.sessionDAO.queryForId(id);
+        Session session = this.sessionDAO.queryForId(id);
+        session.setForm(getApplication().getFormService().getById(session.getFormId()));
+        return session;
     }
 
     @Override

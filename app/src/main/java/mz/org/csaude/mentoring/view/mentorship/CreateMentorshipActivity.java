@@ -22,7 +22,6 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.form.FormAdapter;
-import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.adapter.recyclerview.question.QuestionAdapter;
 import mz.org.csaude.mentoring.adapter.recyclerview.tutored.TutoredAdapter;
 import mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter;
@@ -73,9 +72,12 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         if (intent != null && intent.getExtras() != null) {
 
             getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
-
             // Execute determineMentorshipType() on a background thread
             getRelatedViewModel().getExecutorService().execute(() -> {
+                if(getApplicationStep().isApplicationStepEdit()){
+                    getRelatedViewModel().loadMentorShipData();
+
+                }
                 loadSectorAdapter();
                 loadDoorAdapter();
                 loadEvaluationLocationAdapter();

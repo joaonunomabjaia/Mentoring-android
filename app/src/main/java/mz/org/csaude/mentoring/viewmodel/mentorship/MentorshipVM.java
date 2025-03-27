@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import mz.org.csaude.mentoring.BR;
@@ -30,13 +29,10 @@ import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
-import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
-import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
-import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.mentorship.CreateMentorshipActivity;
@@ -953,5 +949,13 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         evaluationLocations.add(new EvaluationLocation());
         evaluationLocations.addAll(getApplication().getEvaluationLocationService().getByCodes(List.of(EvaluationLocation.HEALTH_FACILITY, EvaluationLocation.COMMUNITY)));
         return evaluationLocations;
+    }
+
+    public void loadMentorShipData() {
+        try {
+            this.mentorship.setAnswers((getApplication().getAnswerService().getAllOfMentorship(mentorship)));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

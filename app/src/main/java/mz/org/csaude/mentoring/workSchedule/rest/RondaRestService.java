@@ -181,13 +181,16 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<RondaDTO> call, Response<RondaDTO> response) {
                 RondaDTO data = response.body();
                 if (response.code() == 201) {
-                    try {
-                        getApplication().getRondaService().savedOrUpdateRonda(ronda);
+                    getServiceExecutor().execute(()->{
+                        try {
+                            getApplication().getRondaService().savedOrUpdateRonda(ronda);
 
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
+                        } catch (SQLException  e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response
