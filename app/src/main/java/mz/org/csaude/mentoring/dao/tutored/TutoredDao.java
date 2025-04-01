@@ -26,6 +26,7 @@ public interface TutoredDao {
             "ORDER BY e.id")
     List<Tutored> getAllOfHealthFacility(final int healthFacilityId, final String lifeCycleStatus);
 
+
     @Query("SELECT t.* FROM tutored t " +
             "JOIN employee e ON t.employee_id = e.id " +
             "JOIN location l ON e.id = l.employee_id " +
@@ -57,6 +58,8 @@ public interface TutoredDao {
             "AND l.life_cycle_status = :lifeCycleStatus " +
             "AND t.life_cycle_status = :lifeCycleStatus " +
             "AND t.zero_evaluation_status = :zeroEvaluation " +
+            "AND NOT EXISTS (SELECT 1 FROM ronda_mentee rm " +
+            "JOIN ronda r WHERE rm.ronda_id = r.id AND rm.mentee_id = t.id AND r.end_date IS NULL) " +
             "ORDER BY e.id")
     List<Tutored> getAllForMentoringRound(final int healthFacilityId, final String lifeCycleStatus, final boolean zeroEvaluation);
 

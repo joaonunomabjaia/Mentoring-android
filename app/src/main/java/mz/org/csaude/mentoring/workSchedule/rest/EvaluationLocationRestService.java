@@ -31,6 +31,7 @@ public class EvaluationLocationRestService extends BaseRestService {
             @Override
             public void onResponse(Call<ApiResponse<EvaluationLocationDTO>> call, Response<ApiResponse<EvaluationLocationDTO>> response) {
 
+                assert response.body() != null;
                 List<EvaluationLocationDTO> data = response.body().getContent();
 
                 if (Utilities.listHasElements(data)) {
