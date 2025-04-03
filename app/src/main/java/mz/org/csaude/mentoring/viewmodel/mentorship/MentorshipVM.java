@@ -237,7 +237,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             if (!isValidPeriod()) return;
             // Perform background operations (like loadQuestion and initial save) in a background thread
             getExecutorService().execute(() -> {
-                if (!isMentoringMentorship()) {
+                if (!isMentoringMentorship()) { // Ronda Zero
                     try {
                         this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
                     } catch (SQLException e) {
@@ -246,8 +246,15 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 } else {
                     if (!mentorship.getSession().getForm().getEvaluationLocation().isBoth()) {
                         this.mentorship.setEvaluationLocation(mentorship.getSession().getForm().getEvaluationLocation());
+                } else if (!hasQuestionForSelectedLocation(mentorship.getSession().getForm(), mentorship.getEvaluationLocation())){
+                        runOnMainThread(() -> {
+                            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_questions_for_selected_location)).show();
+                        });
+
+                        return;
                     }
                 }
+
                 loadQuestion();
 
                 for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
@@ -293,6 +300,10 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         }
 
         notifyPropertyChanged(BR.currMentorshipStep);
+    }
+
+    private boolean hasQuestionForSelectedLocation(Form form, EvaluationLocation evaluationLocation) {
+        return getApplication().getFormService().hasQuestionsForSelectedLocation(form, evaluationLocation);
     }
 
     public boolean isSelectLocation(){

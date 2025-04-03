@@ -262,6 +262,7 @@
     <string name="no_ev_locations_available">Nenhuma localização definida para a avaliação</string>
     <string name="error_downloading_mentor_data">Ocorreu um erro ao baixar os dados do mentor, contacte o administrador.</string>
     <string name="initial_sync_failed">O sistema registou um erro na sincronização de parametros iniciais, por favor contacte o administrador.</string>
+    <string name="no_questions_for_selected_location">A tabela nao possui competencias associadas ao local de avaliacao selecionado. Impossivel avancar!</string>
 
 
     <string-array name="languages">

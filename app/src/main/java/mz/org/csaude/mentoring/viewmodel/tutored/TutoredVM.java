@@ -241,7 +241,10 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
-                    Utilities.displayAlertDialog(getRelatedActivity(), error).show();
+                    runOnMainThread(()-> {
+                        dismissProgress(loading);
+                        Utilities.displayAlertDialog(getRelatedActivity(), error).show();
+                    });
                     return;
                 }
                 getApplication().isServerOnline(this);

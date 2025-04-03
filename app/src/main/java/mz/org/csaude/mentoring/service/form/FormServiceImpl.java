@@ -131,4 +131,9 @@ public class FormServiceImpl extends BaseServiceImpl<Form> implements FormServic
         form.setFormSections(getApplication().getFormSectionService().getAllOfFormWithQuestions(form, evaluationType, evaluationLocation.getId()));
         return form;
     }
+
+    @Override
+    public boolean hasQuestionsForSelectedLocation(Form form, EvaluationLocation evaluationLocation) {
+        return formDAO.hasQuestionsForSelectedLocation(form.getId(), evaluationLocation.getId());
+    }
 }

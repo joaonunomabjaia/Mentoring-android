@@ -220,6 +220,7 @@
                             style="@style/input_labels"/>
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_evaluation_location"
+                            android:enabled="@{viewModel.currentStep.applicationstepCreate}"
                             android:layout_width="fill_parent"
                             style="@style/bottom_spinner_style"
                             android:layout_height="wrap_content"
