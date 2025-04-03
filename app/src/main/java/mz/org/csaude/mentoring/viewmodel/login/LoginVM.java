@@ -133,6 +133,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                         return;
                     }
                     getApplication().setAuthenticatedUser(loggedUser.get(), remeberMe);
+                    setAuthenticating(false);
                     goHome();
                 } else {
                     // Fallback to online login if user is not found locally
@@ -140,7 +141,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                     doOnlineLogin();
                 }
 
-                setAuthenticating(false);
+
             });
         });
     }
@@ -160,6 +161,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
             try {
                 if (getSessionManager().isInitialSetupComplete(user.getUserName())) {
                     getApplication().init();
+                    setAuthenticating(false);
                     goHome();
                 } else {
                     OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
@@ -179,6 +181,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                                         if (info.getState() == WorkInfo.State.SUCCEEDED) {
                                             getSessionManager().setInitialSetUpComplete(user.getUserName());
                                             getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                            setAuthenticating(false);
                                             goHome();
                                         }
                                     });
@@ -192,6 +195,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                     });
                 }
             } catch (SQLException e) {
+                setAuthenticating(false);
                 Log.e("LoginVM", "doOnRestSucessResponse: ", e);
             }
         //});
@@ -204,6 +208,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        setAuthenticating(false);
         Map<String, Object> params = new HashMap<>();
         getRelatedActivity().nextActivityFinishingCurrent(MainActivity.class, params);
     }
@@ -271,7 +276,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void doOnRestErrorResponse(String errormsg) {
         runOnMainThread(() -> {
             if (Utilities.stringHasValue(errormsg)) {
-                Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.invalid_user_or_password)).show();
             } else {
                 String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
                 Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();

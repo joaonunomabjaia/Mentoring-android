@@ -18,3 +18,7 @@ local.properties
 /.idea/deploymentTargetDropDown.xml
 /.idea/migrations.xml
 /.idea/codeStyles/Project.xml
+/.idea/deploymentTargetSelector.xml
+/app/debug/Mentoria-1.0.6-SNAPSHOT.apk
+/app/debug/output-metadata.json
+/.idea/inspectionProfiles/Project_Default.xml
