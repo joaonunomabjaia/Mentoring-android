@@ -14,4 +14,8 @@ public class Constants {
     public static final String PREF_SESSION_TIMEOUT = "pref_sync_interval";
     public static final String LAST_SYNC_DATE = "last_sync_date";
     public static final String PREF_SELECTED_LANGUAGE = "selected_language";
+    public static final String PREF_BIOMETRIC_ENABLED = "pref_biometric_enabled";
+    public static final String PREF_USER_CREDENTIALS_PREFIX = "user_credentials_";
+
+
 }

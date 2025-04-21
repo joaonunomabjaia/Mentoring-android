@@ -83,6 +83,7 @@ public class UserRestService extends BaseRestService implements UserSyncService 
                                 sessionManager.setActiveUser(data.getUserUuid());
 
                                 // Notify success on the main thread
+                                getApplication().getAuthenticatedUser().setPassword(currentUser.getPassword());
                                 listener.doOnRestSucessResponse(getApplication().getAuthenticatedUser());
                             }
 

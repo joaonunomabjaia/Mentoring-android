@@ -80,6 +80,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
 
+            <!-- Biometric Authentication Toggle -->
+            <TextView
+                android:text="@string/enable_biometric_auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <Switch
+                android:id="@+id/switch_biometric_auth"
+                android:checked="@{viewModel.isBiometricEnabled}"
+                android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onBiometricToggleChanged(isChecked)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
             <!-- Auto Logout Time Input with Validation Button -->
             <TextView
                 android:text="@string/auto_logout_time"
