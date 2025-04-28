@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +34,7 @@ import mz.org.csaude.mentoring.base.auth.AuthInterceptorImpl;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.common.ApplicationStep;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.ProgrammaticArea.ProgrammaticAreaService;
@@ -230,6 +232,8 @@ public class MentoringApplication  extends Application {
 
     private SharedPreferences encryptedSharedPreferences;
 
+    private List<Setting> settingList;
+
 
     @Override
     public void onCreate() {
@@ -258,6 +262,27 @@ public class MentoringApplication  extends Application {
         // Set the locale
         setLocale(selectedLanguageCode);
 
+        loadAppSettings();
+
+    }
+
+    private void loadAppSettings() {
+        getServiceExecutor().execute(() -> {
+            try {
+                this.settingList = getSettingService().getAll();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public Setting getSetting(String designation) {
+        for (Setting setting : settingList) {
+            if (setting.getDesignation().equals(designation)) {
+                return setting;
+            }
+        }
+        return null;
     }
 
     public static synchronized MentoringApplication getInstance() {

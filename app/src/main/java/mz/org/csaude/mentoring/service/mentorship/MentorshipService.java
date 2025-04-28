@@ -5,11 +5,13 @@ import android.app.Application;
 import java.sql.SQLException;
 import java.util.List;
 
+import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.service.BaseService;
 import mz.org.csaude.mentoring.dto.mentorship.MentorshipDTO;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
 
 public interface MentorshipService extends BaseService<Mentorship> {
     public List<Mentorship> getMentorshipByTutor(String uuidTutor) throws SQLException;
@@ -24,4 +26,5 @@ public interface MentorshipService extends BaseService<Mentorship> {
 
     Mentorship saveOrUpdate(Mentorship mentorship) throws SQLException;
 
+    int countMentorshipsOnLastDays(Tutored selectedMentee, Ronda ronda);
 }

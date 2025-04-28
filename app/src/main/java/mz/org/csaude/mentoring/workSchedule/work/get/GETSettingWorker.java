@@ -10,6 +10,7 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.setting.Setting;
+import mz.org.csaude.mentoring.workSchedule.rest.SettingRestService;
 
 public class GETSettingWorker extends BaseWorker<Setting> {
     public GETSettingWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -18,12 +19,18 @@ public class GETSettingWorker extends BaseWorker<Setting> {
 
     @Override
     public void doOnlineSearch(long offset, long limit) throws Exception {
-        //SettingRestService.restGetSettings(this);
+        SettingRestService settingRestService = new SettingRestService(getApplication());
+        settingRestService.restGetSettings(this);
     }
 
     @Override
     protected void doOnStart() {
 
+    }
+
+    protected void doAfterSearch(String flag, List<Setting> recs) throws Exception {
+        changeStatusToFinished();
+        doOnFinish();
     }
 
     @Override

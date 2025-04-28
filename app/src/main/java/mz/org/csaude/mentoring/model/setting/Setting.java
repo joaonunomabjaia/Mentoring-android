@@ -101,4 +101,26 @@ public class Setting extends BaseModel {
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
+
+    public int getSettingValueAsInt() {
+        try {
+            return Integer.parseInt(this.value);
+        } catch (NumberFormatException e) {
+            // Log the error or handle it appropriately
+            return 0; // or any sensible default
+        }
+    }
+
+    public double getSettingValueAsDouble() {
+        try {
+            return Double.parseDouble(this.value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public boolean getSettingValueAsBoolean() {
+        return Boolean.parseBoolean(this.value);
+    }
+
 }

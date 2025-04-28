@@ -8,6 +8,7 @@ import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Upsert;
 
+import java.util.Date;
 import java.util.List;
 
 import mz.org.csaude.mentoring.model.ronda.RondaMentee;
@@ -41,4 +42,13 @@ public interface RondaMenteeDAO {
 
     @Query("SELECT * FROM ronda_mentee WHERE id = :id LIMIT 1")
     RondaMentee queryForId(int id);
+
+    @Query("UPDATE ronda_mentee SET end_date = :endDate WHERE ronda_id = :rondaId and end_date IS NULL")
+    void closeAllActiveOnRonda(Integer rondaId, Date endDate);
+
+    @Query("UPDATE ronda_mentee SET end_date = :endDate WHERE ronda_id = :rondaId and mentee_id = :menteeId")
+    void closeOneActiveOnRonda(Integer rondaId, Date endDate, Integer menteeId);
+
+    @Query("SELECT * FROM ronda_mentee WHERE ronda_id = :rondaId and mentee_id = :tutoredId LIMIT 1")
+    RondaMentee getByMenteeId(Integer tutoredId, Integer rondaId);
 }

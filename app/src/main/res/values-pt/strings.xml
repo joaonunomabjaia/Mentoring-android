@@ -282,6 +282,8 @@
     <string name="biometric_subtitle">Use a sua impressão digital para aceder</string>
     <string name="enable_biometric_auth">Enable Biometric Authentication</string>
     <string name="login_with_fingerprint">Login with Fingerprint</string>
+    <string name="ronda_mentee_closed">Já passam %1$d dias sem registo de sessões de mentoria para o mentorando %2$s, este deverá ser integrado numa nova ronda</string>
+
 
 
 </resources>

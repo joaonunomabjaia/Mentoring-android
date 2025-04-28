@@ -42,6 +42,7 @@ import mz.org.csaude.mentoring.workSchedule.work.get.GETRondaTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETRondaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETSectionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETSessionStatusWorker;
+import mz.org.csaude.mentoring.workSchedule.work.get.GETSettingWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutorProgrammaticAreaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutoredWorker;
@@ -145,6 +146,10 @@ public class WorkerScheduleExecutor {
                 .addTag("INITIAL_SYNC_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
                 .build();
 
+        OneTimeWorkRequest settingsWorkRequest = new OneTimeWorkRequest.Builder(GETSettingWorker.class)
+                .addTag("INITIAL_SYNC_SETTINGS_" + ONE_TIME_REQUEST_JOB_ID)
+                .build();
+
         // Chain WorkRequests
         workManager.beginUniqueWork("INITIAL_APP_SETUP", ExistingWorkPolicy.KEEP, provinceWorkRequest)
                 .then(Arrays.asList(districtWorkRequest, partnerWorkRequest, cabinetWorkRequest))
@@ -157,7 +162,8 @@ public class WorkerScheduleExecutor {
                         iterationTypeWorkRequest,
                         doorWorkRequest,
                         sessionStatusWorkRequest,
-                        programWorkRequest
+                        programWorkRequest,
+                        settingsWorkRequest
                 ))
                 .then(programmaticAreaWorkRequest)
                 .then(professionalCategoryWorkRequest)
@@ -271,6 +277,7 @@ public class WorkerScheduleExecutor {
         schedulePeriodicWorker(POSTMentorshipWorker.class, "PERIODIC_SYNC_MENTORSHIP",  constraints);
         schedulePeriodicWorker(POSTSessionRecommendedResourceWorker.class, "PERIODIC_SYNC_SESSION_RECOMMENDED", constraints);
         schedulePeriodicWorker(PATCHUserWorker.class, "PERIODIC_SYNC_USER", constraints);
+        schedulePeriodicWorker(GETSettingWorker.class, "PERIODIC_SYNC_SETTINGS", constraints);
     }
 
     private void schedulePeriodicWorker(
@@ -414,7 +421,8 @@ public class WorkerScheduleExecutor {
                 createOneTimeWorkRequest(GETCabinetWorker.class, "SYNC_CABINET"),
                 createOneTimeWorkRequest(GETSessionStatusWorker.class, "SYNC_SESSION_STATUS"),
                 createOneTimeWorkRequest(GETProgramWorker.class, "SYNC_PROGRAM"),
-                createOneTimeWorkRequest(GETProgrammaticAreaWorker.class, "SYNC_PROGRAMMATIC_AREA")
+                createOneTimeWorkRequest(GETProgrammaticAreaWorker.class, "SYNC_PROGRAMMATIC_AREA"),
+                createOneTimeWorkRequest(GETSettingWorker.class, "SYNC_SETTINGS")
         );
 
         // Add new workers at the end

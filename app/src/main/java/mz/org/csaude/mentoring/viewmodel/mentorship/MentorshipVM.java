@@ -796,7 +796,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             } else {
                 this.ronda.tryToCloseRonda();
                 if (this.ronda.isRondaCompleted()) {
-                    getApplication().getRondaService().update(this.ronda);
+                    getApplication().getRondaService().closeRonda(this.ronda);
                 }
                 runOnMainThread(this::goToMentorshipSummary);
             }

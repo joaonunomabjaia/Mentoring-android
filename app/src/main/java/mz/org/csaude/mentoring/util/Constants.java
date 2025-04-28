@@ -18,4 +18,7 @@ public class Constants {
     public static final String PREF_USER_CREDENTIALS_PREFIX = "user_credentials_";
 
 
+    public static final String MUX_DAYS_ON_RONDA_WITHOUT_SESSION = "Mentee_ronda_removal_interval";
+
+
 }
