@@ -262,8 +262,12 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             doSync();
         } else {
             Utilities.displayAlertDialog(

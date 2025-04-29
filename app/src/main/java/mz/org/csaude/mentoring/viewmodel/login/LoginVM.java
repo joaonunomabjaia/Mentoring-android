@@ -113,8 +113,11 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private void doOnlineLogin() {
         runOnMainThread(() -> setAuthenticating(true));
 
-        getApplication().isServerOnline(isOnline -> {
+        getApplication().isServerOnline((isOnline, isSlow) -> {
             if (isOnline) {
+                if (isSlow) {
+                    showSlowConnectionWarning(getRelatedActivity());
+                }
                 userSyncService.doOnlineLogin(this, remeberMe);
             } else {
                 runOnMainThread(() -> {
@@ -255,8 +258,12 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             if (serverOperation == INACTIVE_USER_CHECK) {
                 OneTimeWorkRequest syncRequest = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
                 WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager()

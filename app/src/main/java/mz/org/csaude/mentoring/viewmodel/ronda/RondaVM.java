@@ -501,8 +501,12 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             if (getApplication().getApplicationStep().isApplicationStepEdit()) {
                 getApplication().getRondaRestService().restPatchRonda(this.ronda, this);
             } else {

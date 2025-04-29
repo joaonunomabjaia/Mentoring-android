@@ -9,6 +9,7 @@ import androidx.databinding.Bindable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -808,12 +809,19 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void goToMentorshipSummary() {
         Map<String, Object> params = new HashMap<>();
+
+        this.mentorship.getSession().setMentorships(Collections.emptyList());
+        this.mentorship.getSession().getRonda().setSessions(Collections.emptyList());
+        this.mentorship.getSession().getForm().setFormSections(Collections.emptyList());
         params.put("session", this.mentorship.getSession());
         getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
     }
 
     private void initSessionClosure(Session session) {
         Map<String, Object> params = new HashMap<>();
+        session.setMentorships(Collections.emptyList());
+        session.getRonda().setSessions(Collections.emptyList());
+        session.getForm().setFormSections(Collections.emptyList());
         params.put("session", session);
         getRelatedActivity().nextActivityFinishingCurrent(SessionClosureActivity.class, params);
     }

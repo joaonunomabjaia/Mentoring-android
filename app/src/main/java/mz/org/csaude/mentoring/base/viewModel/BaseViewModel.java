@@ -226,4 +226,8 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
     protected SharedPreferences getEncryptedSharedPreferences(){
         return getApplication().getEncryptedSharedPreferences();
     }
+
+    protected void showSlowConnectionWarning(BaseActivity activity) {
+        Utilities.displayAlertDialog(activity, activity.getString(R.string.server_slow)).show();
+    }
 }

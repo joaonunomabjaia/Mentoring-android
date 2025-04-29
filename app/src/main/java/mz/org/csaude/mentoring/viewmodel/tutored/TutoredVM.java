@@ -489,8 +489,12 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             getApplication().getTutoredRestService().restPostTutored(tutored, this);
         } else {
             dismissProgress(loading);

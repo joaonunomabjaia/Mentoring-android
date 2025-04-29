@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.util.Http;
+import mz.org.csaude.mentoring.workSchedule.work.CheckNextSessionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TriggerWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETCabinetWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETDistrictWorker;
@@ -270,6 +271,9 @@ public class WorkerScheduleExecutor {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
+        Constraints otherConstraints = new Constraints.Builder()
+                .build();
+
         // Schedule each task as a PeriodicWorkRequest
         schedulePeriodicWorker(POSTTutoredWorker.class, "PERIODIC_SYNC_TUTORED", constraints);
         schedulePeriodicWorker(POSTRondaWorker.class, "PERIODIC_SYNC_RONDA", constraints);
@@ -278,6 +282,7 @@ public class WorkerScheduleExecutor {
         schedulePeriodicWorker(POSTSessionRecommendedResourceWorker.class, "PERIODIC_SYNC_SESSION_RECOMMENDED", constraints);
         schedulePeriodicWorker(PATCHUserWorker.class, "PERIODIC_SYNC_USER", constraints);
         schedulePeriodicWorker(GETSettingWorker.class, "PERIODIC_SYNC_SETTINGS", constraints);
+        schedulePeriodicWorker(CheckNextSessionWorker.class, "PERIODIC_NEXT_SESSION_CHECKER", otherConstraints);
     }
 
     private void schedulePeriodicWorker(

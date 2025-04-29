@@ -283,7 +283,9 @@
     <string name="enable_biometric_auth">Enable Biometric Authentication</string>
     <string name="login_with_fingerprint">Login with Fingerprint</string>
     <string name="ronda_mentee_closed">Já passam %1$d dias sem registo de sessões de mentoria para o mentorando %2$s, este deverá ser integrado numa nova ronda</string>
-
+    <string name="server_slow">A conexão com o servidor está lenta. Algumas operações podem falhar.</string>
+    <string name="welcome_message">Bem-vindo a Mentoria!</string>
+    <string name="last_sessions_placeholder">Últimas sessões: 3 mentorias concluídas esta semana</string>
 
 
 </resources>

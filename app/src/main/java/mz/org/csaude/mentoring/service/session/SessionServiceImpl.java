@@ -7,8 +7,10 @@ import androidx.room.Transaction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
@@ -297,6 +299,13 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
         }
         return sessions;
+    }
+
+    @Override
+    public List<Session> getSessionsWithinNextDays(int i) {
+        Date today = new Date();
+        Date future = new Date(today.getTime() + TimeUnit.DAYS.toMillis(i));
+        return sessionDAO.getSessionsWithinNextDays(today, future);
     }
 
     @Override

@@ -242,7 +242,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
 
     @Override
-    public Ronda getById(int id) throws SQLException {
+    public Ronda getById(int id) {
         Ronda ronda = this.rondaDAO.queryForId(id);
         ronda.setHealthFacility(this.healthFacilityDAO.queryForId(ronda.getHealthFacilityId()));
         ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));

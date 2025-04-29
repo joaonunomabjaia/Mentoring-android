@@ -9,8 +9,11 @@ import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -258,6 +261,8 @@ public class MentoringApplication  extends Application {
         SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
         String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
 
+        createNotificationChannel();
+
         Log.d("SelectedLanguage", "Language selected: " + selectedLanguageCode);
         // Set the locale
         setLocale(selectedLanguageCode);
@@ -266,6 +271,19 @@ public class MentoringApplication  extends Application {
 
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "session_channel",
+                    "Sessões de Mentoria",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Notificações sobre sessões próximas.");
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
     private void loadAppSettings() {
         getServiceExecutor().execute(() -> {
             try {

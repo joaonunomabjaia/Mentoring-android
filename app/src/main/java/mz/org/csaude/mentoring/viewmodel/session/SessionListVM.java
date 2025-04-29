@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -276,6 +277,7 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
 
     public void printSummary(Session session) {
         Map<String, Object> params = new HashMap<>();
+        session.setMentorships(Collections.emptyList());
         params.put("session", session);
         if (!session.isCompleted()) {
             getRelatedActivity().nextActivity(SessionClosureActivity.class, params);

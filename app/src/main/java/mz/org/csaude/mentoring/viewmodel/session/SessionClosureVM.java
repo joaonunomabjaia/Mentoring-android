@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -181,6 +182,10 @@ public class SessionClosureVM extends BaseViewModel {
                 getRelatedActivity().runOnUiThread(() -> {
                     if (progress != null && progress.isShowing()) progress.dismiss();
                     Map<String, Object> params = new HashMap<>();
+                    session.setMentorships(Collections.emptyList());
+                    session.getForm().setFormSections(Collections.emptyList());
+                    session.getRonda().setSessions(Collections.emptyList());
+
                     params.put("session", session);
                     getRelatedActivity().nextActivity(SessionEAResourceActivity.class, params);
                 });

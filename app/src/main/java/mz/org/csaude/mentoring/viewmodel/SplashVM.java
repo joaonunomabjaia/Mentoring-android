@@ -61,8 +61,12 @@ public class SplashVM extends BaseViewModel implements RestResponseListener, Ser
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runInitialSync();
 
             WorkerScheduleExecutor.getInstance(getApplication())
