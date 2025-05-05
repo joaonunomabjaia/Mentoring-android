@@ -17,15 +17,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
+import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserSyncService;
+import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.home.MainActivity;
+import mz.org.csaude.mentoring.view.login.LoginActivity;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 import mz.org.csaude.mentoring.workSchedule.rest.UserRestService;
 
@@ -43,6 +46,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private UserSyncService userSyncService;
     private AlertDialog checkDlg;
 
+    private boolean biometricEnabled;
 
     public LoginVM(@NonNull Application application) {
         super(application);
@@ -53,6 +57,17 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
             setRemeberMe(true);
         }
         this.userSyncService = new UserRestService(application, this.user);
+        loadBiometricSetting();
+    }
+
+    public boolean isBiometricEnabled() {
+        return biometricEnabled;
+    }
+
+    private void loadBiometricSetting() {
+        biometricEnabled = getApplication()
+                .getEncryptedSharedPreferences()
+                .getBoolean(Constants.PREF_BIOMETRIC_ENABLED, false);
     }
 
     @Override
@@ -116,7 +131,9 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         AtomicReference<User> loggedUser = new AtomicReference<>();
         getExecutorService().execute(() -> {
             try {
+                String pass = this.user.getPassword();
                 loggedUser.set(userService.login(this.user));
+                loggedUser.get().setPassword(pass);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -133,6 +150,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                         return;
                     }
                     getApplication().setAuthenticatedUser(loggedUser.get(), remeberMe);
+                    setAuthenticating(false);
                     goHome();
                 } else {
                     // Fallback to online login if user is not found locally
@@ -140,7 +158,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                     doOnlineLogin();
                 }
 
-                setAuthenticating(false);
+
             });
         });
     }
@@ -160,6 +178,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
             try {
                 if (getSessionManager().isInitialSetupComplete(user.getUserName())) {
                     getApplication().init();
+                    setAuthenticating(false);
                     goHome();
                 } else {
                     OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
@@ -179,6 +198,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                                         if (info.getState() == WorkInfo.State.SUCCEEDED) {
                                             getSessionManager().setInitialSetUpComplete(user.getUserName());
                                             getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                            setAuthenticating(false);
                                             goHome();
                                         }
                                     });
@@ -192,6 +212,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                     });
                 }
             } catch (SQLException e) {
+                setAuthenticating(false);
                 Log.e("LoginVM", "doOnRestSucessResponse: ", e);
             }
         //});
@@ -204,6 +225,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        setAuthenticating(false);
         Map<String, Object> params = new HashMap<>();
         getRelatedActivity().nextActivityFinishingCurrent(MainActivity.class, params);
     }
@@ -268,15 +290,24 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     }
 
     @Override
+    public LoginActivity getRelatedActivity() {
+        return (LoginActivity) super.getRelatedActivity();
+    }
+
+    @Override
     public void doOnRestErrorResponse(String errormsg) {
         runOnMainThread(() -> {
             if (Utilities.stringHasValue(errormsg)) {
-                Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.invalid_user_or_password)).show();
             } else {
                 String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
                 Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();
             }
             setAuthenticating(false);
         });
+    }
+
+    public void showBiometricPrompt() {
+        getRelatedActivity().showBiometricPrompt();
     }
 }

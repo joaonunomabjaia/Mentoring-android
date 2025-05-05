@@ -277,4 +277,11 @@
         <item>fr</item>
         <!-- Adicione códigos de idioma correspondentes -->
     </string-array>
+    <string name="biometric_title">Login com impressão digital</string>
+    <string name="biometric_subtitle">Use a sua impressão digital para aceder</string>
+    <string name="enable_biometric_auth">Enable Biometric Authentication</string>
+    <string name="login_with_fingerprint">Login with Fingerprint</string>
+
+
+
 </resources>

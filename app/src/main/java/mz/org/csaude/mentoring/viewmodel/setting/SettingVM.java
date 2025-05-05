@@ -40,6 +40,8 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
     public MutableLiveData<String> syncInterval = new MutableLiveData<>();
     public MutableLiveData<String> autoLogoutTime = new MutableLiveData<>();
     public MutableLiveData<String> selectedLanguage = new MutableLiveData<>();
+    public MutableLiveData<Boolean> isBiometricEnabled = new MutableLiveData<>();
+
 
     private static final int MIN_SYNC_INTERVAL_HOURS = 1;    // Minimum allowed sync interval in hours
     private static final int MAX_SYNC_INTERVAL_HOURS = 24;   // Maximum allowed sync interval in hours (1 day)
@@ -64,11 +66,22 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         // Removed validations from observers as validations are now handled via buttons
         syncInterval.observeForever(this::onSyncIntervalChanged);
         autoLogoutTime.observeForever(this::onAutoLogoutTimeChanged);
+
+        isBiometricEnabled.setValue(encryptedSharedPreferences.getBoolean(Constants.PREF_BIOMETRIC_ENABLED, false));
+
+        isBiometricEnabled.observeForever(enabled ->
+                encryptedSharedPreferences.edit().putBoolean(Constants.PREF_BIOMETRIC_ENABLED, enabled).apply()
+        );
+
     }
 
     private void onAutoSyncChanged(Boolean isEnabled) {
         encryptedSharedPreferences.edit().putBoolean(PREF_METADATA_SYNC_STATUS, isEnabled).apply();
         handleAutoSyncChange(isEnabled);
+    }
+
+    public void onBiometricToggleChanged(boolean isEnabled) {
+        isBiometricEnabled.setValue(isEnabled);
     }
 
     private void onSyncIntervalChanged(String intervalStr) {

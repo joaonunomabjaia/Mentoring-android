@@ -126,7 +126,7 @@ public class MentoringApplication  extends Application {
 
     private static MentoringApplication mInstance;
     public static final String BASE_URL = "https://mentdev.csaude.org.mz/api/";
-//    public static final String BASE_URL = "http://10.10.12.39:8087/api/";
+    //public static final String BASE_URL = "http://10.10.12.115:8087/api/";
     //public static final String BASE_URL = "http://192.168.1.32:8087/api/";
     private User authenticatedUser;
 
@@ -544,6 +544,13 @@ public class MentoringApplication  extends Application {
         try {
             getServiceExecutor().submit(()->{
                 try {
+                    String prefix = Constants.PREF_USER_CREDENTIALS_PREFIX;
+
+                    encryptedSharedPreferences.edit()
+                            .putString(prefix + "username", getAuthenticatedUser().getUserName())
+                            .putString(prefix + "password", getAuthenticatedUser().getPassword())
+                            .apply();
+
                     this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
                     if (getAuthenticatedUser().getEmployee() == null) getAuthenticatedUser().setEmployee(getEmployeeService().getById(getAuthenticatedUser().getEmployeeId()));
                     setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));

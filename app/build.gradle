@@ -3,7 +3,7 @@ plugins {
 }
 ext.versionMajor = 1
 ext.versionMinor = 0
-ext.versionPatch = 10
+ext.versionPatch = 11
 ext.versionClassifier = null
 ext.isSnapshot = true
 ext.minimumSdkVersion = 28
@@ -117,5 +117,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
     implementation "androidx.paging:paging-runtime:3.1.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+    implementation "androidx.biometric:biometric:1.2.0-alpha05"
+
 
 }

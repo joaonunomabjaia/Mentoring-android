@@ -134,6 +134,21 @@
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
 
+                <ImageButton
+                    android:id="@+id/btn_biometric_login"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/button"
+                    android:layout_marginTop="50dp"
+                    android:onClick="@{()-> viewModel.showBiometricPrompt()}"
+                    android:padding="0dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/login_with_fingerprint"
+                    android:src="@drawable/ic_fingerprint"
+                    android:scaleType="centerInside"
+                    android:visibility="@{viewModel.biometricEnabled ? View.VISIBLE : View.GONE}" />
+
                 <LinearLayout
                     android:id="@+id/login_progress_box"
                     android:layout_width="match_parent"
@@ -159,6 +174,7 @@
                         android:textSize="16sp" />
                 </LinearLayout>
             </RelativeLayout>
+
         </LinearLayout>
 
         <LinearLayout
