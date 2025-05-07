@@ -305,7 +305,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     public List<Session> getSessionsWithinNextDays(int i) {
         Date today = new Date();
         Date future = new Date(today.getTime() + TimeUnit.DAYS.toMillis(i));
-        return sessionDAO.getSessionsWithinNextDays(today, future);
+        List<Session> sessions = sessionDAO.getSessionsWithinNextDays(today, future);
+        if (Utilities.listHasElements(sessions)) {
+            for (Session session : sessions) {
+                try {
+                    session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
+                    session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return sessions;
     }
 
     @Override

@@ -17,6 +17,8 @@ import java.util.List;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.util.NotificationHelper;
+import mz.org.csaude.mentoring.util.Utilities;
 
 public class CheckNextSessionWorker extends BaseWorker<Session> {
 
@@ -29,10 +31,12 @@ public class CheckNextSessionWorker extends BaseWorker<Session> {
         // Fetch sessions where nextSessionDate is 2 days ahead
         List<Session> upcomingSessions = getApplication().getSessionService().getSessionsWithinNextDays(2);
 
-        for (Session session : upcomingSessions) {
-            sendNotification(session);
-        }
 
+        if (Utilities.listHasElements(upcomingSessions) && upcomingSessions.size() == 1) {
+            NotificationHelper.notifyNextSession(context, upcomingSessions.get(0));
+        } else if (Utilities.listHasElements(upcomingSessions) && upcomingSessions.size() > 1) {
+            NotificationHelper.notifyMultipleUpcomingSessions(context, upcomingSessions);
+        }
     }
 
     private void sendNotification(Session session) {

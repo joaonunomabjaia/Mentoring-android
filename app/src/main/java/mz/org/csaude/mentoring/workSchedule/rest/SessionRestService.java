@@ -159,7 +159,7 @@ public class SessionRestService extends BaseRestService {
                         Log.i("METADATA LOAD --", t.getMessage(), t);
                     }
                 });
-            } else listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+            } else listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

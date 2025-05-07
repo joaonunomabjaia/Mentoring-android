@@ -5,30 +5,41 @@ import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
 
 import android.app.Application;
-import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import androidx.work.OneTimeWorkRequest;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import mz.org.csaude.mentoring.R;
+import mz.org.csaude.mentoring.adapter.recyclerview.sync.SyncStatusAdapter;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.sync.SyncStatus;
 import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.SyncType;
 import mz.org.csaude.mentoring.util.Utilities;
+import mz.org.csaude.mentoring.workSchedule.TaggedWorkRequest;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 
 public class SettingVM extends BaseViewModel implements ServerStatusListener {
@@ -59,7 +70,7 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         // Load saved settings
         isAutoSyncEnabled.setValue(encryptedSharedPreferences.getBoolean(PREF_METADATA_SYNC_STATUS, true));
         syncInterval.setValue(encryptedSharedPreferences.getString(PREF_METADATA_SYNC_TIME, "2"));
-        autoLogoutTime.setValue(encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, "5"));
+        autoLogoutTime.setValue(encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, "15"));
 
         // Observe changes and save them
         isAutoSyncEnabled.observeForever(this::onAutoSyncChanged);
@@ -217,49 +228,102 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         // Implement if needed
     }
 
-    private void doSync() {
-        // Create a ProgressDialog
-        ProgressDialog progressDialog = new ProgressDialog(getRelatedActivity());
-        progressDialog.setMessage(getApplication().getString(R.string.syncing_data_please_wait));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+    public void doSync() {
+        LayoutInflater inflater = LayoutInflater.from(getRelatedActivity());
+        View dialogView = inflater.inflate(R.layout.dialog_sync_status, null);
+        RecyclerView recyclerView = dialogView.findViewById(R.id.sync_status_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getRelatedActivity()));
 
-        OneTimeWorkRequest request;
-        if (syncType == SyncType.METADATA) {
-            request = workerScheduleExecutor.syncNowMeteData();
-        } else {
-            request = workerScheduleExecutor.syncNowData();
+        Button closeButton = dialogView.findViewById(R.id.btn_close_dialog);
+        Button retryButton = dialogView.findViewById(R.id.btn_retry_sync);
+        retryButton.setVisibility(View.GONE);
+        closeButton.setVisibility(View.GONE);
+
+        List<TaggedWorkRequest> requests = (syncType == SyncType.METADATA)
+                ? workerScheduleExecutor.syncNowMeteData()
+                : workerScheduleExecutor.syncNowData();
+
+        List<SyncStatus> syncStatuses = new ArrayList<>();
+        for (TaggedWorkRequest twr : requests) {
+            syncStatuses.add(new SyncStatus(twr.getTag(), WorkInfo.State.ENQUEUED));
         }
-        // Schedule the sync work
 
-        workerScheduleExecutor.getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), new Observer<WorkInfo>() {
-            @Override
-            public void onChanged(WorkInfo info) {
-                if (info != null) {
-                    if (info.getState() == WorkInfo.State.SUCCEEDED) {
-                        // Sync succeeded
-                        getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-                        Utilities.displayAlertDialog(
-                                getRelatedActivity(),
-                                getApplication().getString(R.string.sync_completed_successfully)
-                        ).show();
-                        if (progressDialog.isShowing()) {
-                            progressDialog.dismiss();
-                        }
-                    } else if (info.getState() == WorkInfo.State.FAILED) {
-                        // Sync failed
-                        Utilities.displayAlertDialog(
-                                getRelatedActivity(),
-                                getApplication().getString(R.string.sync_failed)
-                        ).show();
-                        if (progressDialog.isShowing()) {
-                            progressDialog.dismiss();
-                        }
-                    }
-                }
+        SyncStatusAdapter adapter = new SyncStatusAdapter(recyclerView, syncStatuses, getRelatedActivity());
+        recyclerView.setAdapter(adapter);
+
+        AlertDialog statusDialog = new AlertDialog.Builder(getRelatedActivity())
+                .setTitle(R.string.syncing_data_please_wait)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+        statusDialog.show();
+
+        closeButton.setOnClickListener(v -> statusDialog.dismiss());
+
+        retryButton.setOnClickListener(v -> {
+            statusDialog.dismiss();
+            doSync(); // Retry the whole sync process
+        });
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        List<UUID> completedRequests = new ArrayList<>();
+        AtomicBoolean alreadyHandled = new AtomicBoolean(false);
+
+        mainHandler.post(() -> {
+            for (int i = 0; i < requests.size(); i++) {
+                final int index = i;
+                TaggedWorkRequest twr = requests.get(i);
+                UUID id = twr.getRequest().getId();
+
+                workerScheduleExecutor.getWorkManager().getWorkInfoByIdLiveData(id)
+                        .observe(getRelatedActivity(), info -> {
+                            if (info != null) {
+                                syncStatuses.get(index).setState(info.getState());
+                                adapter.notifyItemChanged(index);
+
+                                if (info.getState().isFinished() && !completedRequests.contains(id)) {
+                                    completedRequests.add(id);
+
+                                    if (completedRequests.size() == requests.size() && !alreadyHandled.get()) {
+                                        alreadyHandled.set(true);
+
+                                        boolean allSucceeded = true;
+                                        for (UUID uid : completedRequests) {
+                                            try {
+                                                WorkInfo wInfo = workerScheduleExecutor.getWorkManager().getWorkInfoById(uid).get();
+                                                if (wInfo == null || wInfo.getState() != WorkInfo.State.SUCCEEDED) {
+                                                    allSucceeded = false;
+                                                    break;
+                                                }
+                                            } catch (Exception e) {
+                                                allSucceeded = false;
+                                                break;
+                                            }
+                                        }
+
+                                        if (allSucceeded) {
+                                            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                            statusDialog.setTitle("Sincronização concluída com sucesso!");
+                                            closeButton.setVisibility(View.VISIBLE);
+                                        } else {
+                                            retryButton.setVisibility(View.VISIBLE);
+                                            statusDialog.setTitle("Sincronização concluída com falhas!");
+                                        }
+                                    }
+
+                                    workerScheduleExecutor.getWorkManager()
+                                            .getWorkInfoByIdLiveData(id)
+                                            .removeObservers(getRelatedActivity());
+                                }
+                            }
+                        });
             }
         });
     }
+
+
+
+
 
     @Override
     public void onServerStatusChecked(boolean isOnline, boolean isSlow) {

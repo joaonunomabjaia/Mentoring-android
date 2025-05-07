@@ -166,6 +166,8 @@ public class UserRestService extends BaseRestService implements UserSyncService 
                             listener.doOnRestErrorResponse(e.getMessage());
                         }
                     });
+                } else {
+                    listener.doOnRestErrorResponse("Error on server updating user");
                 }
 
             }

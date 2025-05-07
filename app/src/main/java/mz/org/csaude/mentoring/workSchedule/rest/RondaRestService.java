@@ -120,7 +120,7 @@ public class RondaRestService extends BaseRestService {
                     }
                 });
             } else {
-                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+                listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
             }
         } catch (SQLException e) {
             listener.doOnRestErrorResponse(e.getMessage());

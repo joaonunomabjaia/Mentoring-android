@@ -286,6 +286,8 @@
     <string name="server_slow">A conexão com o servidor está lenta. Algumas operações podem falhar.</string>
     <string name="welcome_message">Bem-vindo a Mentoria!</string>
     <string name="last_sessions_placeholder">Últimas sessões: 3 mentorias concluídas esta semana</string>
+    <string name="error_ongoing_mentorship">Termine a avaliação em curso antes de iniciar nova!</string>
+    <string name="sync_timeout_cancelled">A sincronização foi cancelada por exceder o tempo limite. Verifique sua conexão ou tente novamente.</string>
 
 
 </resources>

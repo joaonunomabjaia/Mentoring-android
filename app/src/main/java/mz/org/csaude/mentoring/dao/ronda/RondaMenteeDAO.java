@@ -46,7 +46,7 @@ public interface RondaMenteeDAO {
     @Query("UPDATE ronda_mentee SET end_date = :endDate WHERE ronda_id = :rondaId and end_date IS NULL")
     void closeAllActiveOnRonda(Integer rondaId, Date endDate);
 
-    @Query("UPDATE ronda_mentee SET end_date = :endDate WHERE ronda_id = :rondaId and mentee_id = :menteeId")
+    @Query("UPDATE ronda_mentee SET end_date = :endDate, sync_status = 'PENDING' WHERE ronda_id = :rondaId and mentee_id = :menteeId")
     void closeOneActiveOnRonda(Integer rondaId, Date endDate, Integer menteeId);
 
     @Query("SELECT * FROM ronda_mentee WHERE ronda_id = :rondaId and mentee_id = :tutoredId LIMIT 1")
