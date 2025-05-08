@@ -279,7 +279,7 @@
     </string-array>
     <string name="biometric_title">Login com impressão digital</string>
     <string name="biometric_subtitle">Use a sua impressão digital para aceder</string>
-    <string name="enable_biometric_auth">Enable Biometric Authentication</string>
+    <string name="enable_biometric_auth">Activar Autenticação Biometrica</string>
     <string name="login_with_fingerprint">Login with Fingerprint</string>
     <string name="ronda_mentee_closed">Já passam %1$d dias sem registo de sessões de mentoria para o mentorando %2$s, este deverá ser integrado numa nova ronda.</string>
     <string name="server_slow">A conexão com o servidor está lenta. Algumas operações podem falhar.</string>
@@ -287,6 +287,7 @@
     <string name="last_sessions_placeholder">Últimas sessões: 3 mentorias concluídas esta semana</string>
     <string name="error_ongoing_mentorship">Termine a avaliação em curso antes de iniciar nova!</string>
     <string name="sync_timeout_cancelled">A sincronização foi cancelada por exceder o tempo limite. Verifique sua conexão ou tente novamente.</string>
+    <string name="save">Gravar</string>
 
 
 </resources>
