@@ -1,9 +1,9 @@
 package mz.org.csaude.mentoring.base.activity;
 
 import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT_MINUTES;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -53,7 +53,7 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
     private Integer positionRemoved;
 
     // Constants for auto logout
-    private static final long WARNING_BEFORE_LOGOUT = 10000; // 10 seconds before logout
+    private static final long WARNING_BEFORE_LOGOUT = 20000; // 10 seconds before logout
     private Handler autoLogoutHandler;
     private Runnable autoLogoutRunnable;
     private CountDownTimer countDownTimer;
@@ -199,13 +199,13 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
     private long getAutoLogoutDelay() {
         MentoringApplication app = (MentoringApplication) getApplication();
         SharedPreferences encryptedSharedPreferences = app.getEncryptedSharedPreferences();
-        String logoutTimeStr = encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, "5");
+        String logoutTimeStr = encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, String.valueOf(PREF_SESSION_TIMEOUT_MINUTES));
 
         int logoutTimeMinutes;
         try {
             logoutTimeMinutes = Integer.parseInt(logoutTimeStr);
         } catch (NumberFormatException e) {
-            logoutTimeMinutes = 5; // Default to 5 minutes if invalid
+            logoutTimeMinutes = PREF_SESSION_TIMEOUT_MINUTES; // Default to 5 minutes if invalid
         }
         return logoutTimeMinutes * 60 * 1000L; // Convert minutes to milliseconds
     }
@@ -221,7 +221,7 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
         builder.setTitle(getString(R.string.dialog_title));
 
         // Set the initial message with the remaining time
-        builder.setMessage(String.format(getString(R.string.dialog_message), 10));
+        builder.setMessage(String.format(getString(R.string.dialog_message), 20));
         builder.setCancelable(false);
         builder.setPositiveButton(getString(R.string.extend_session), new DialogInterface.OnClickListener() {
             @Override

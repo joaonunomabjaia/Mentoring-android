@@ -2,18 +2,16 @@ package mz.org.csaude.mentoring.base.application;
 
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_COMPLETE;
-import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_CONFIGURE_NEW_USER;
 import static mz.org.csaude.mentoring.util.Constants.LAST_SYNC_DATE;
 import static mz.org.csaude.mentoring.util.Constants.LOGGED_USER;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT_MINUTES;
 
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -261,6 +259,11 @@ public class MentoringApplication  extends Application {
         // Load the selected language from SharedPreferences
         SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
         String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
+
+        String autoLogoutDelay = encryptedSharedPreferences.getString(Constants.PREF_SESSION_TIMEOUT, null);
+        if (autoLogoutDelay == null) {
+            encryptedSharedPreferences.edit().putString(PREF_SESSION_TIMEOUT, String.valueOf(PREF_SESSION_TIMEOUT_MINUTES)).apply();
+        }
 
         NotificationHelper.createNotificationChannel(this);
 
