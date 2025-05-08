@@ -479,4 +479,6 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
     public void displaySearchResults() {
         // Implementation for displaying search results
     }
+
+
 }

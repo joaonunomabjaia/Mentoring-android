@@ -10,6 +10,7 @@ import java.util.List;
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.common.Syncable;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
+import mz.org.csaude.mentoring.dto.evaluationLocation.EvaluationLocationDTO;
 import mz.org.csaude.mentoring.dto.evaluationType.EvaluationTypeDTO;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.dto.location.CabinetDTO;
@@ -18,6 +19,7 @@ import mz.org.csaude.mentoring.dto.session.SessionDTO;
 import mz.org.csaude.mentoring.dto.tutor.TutorDTO;
 import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
 import mz.org.csaude.mentoring.model.answer.Answer;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.location.Cabinet;
@@ -46,6 +48,7 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
     private String demonstrationDetails;
     private List<AnswerDTO> answers;
     private Date performedDate;
+    private EvaluationLocationDTO evaluationLocationDTO;
 
     private String mentorUuid;
     private String menteeUuid;
@@ -54,6 +57,7 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
     private String cabinetUuid;
     private String doorUuid;
     private String evaluationTypeUuid;
+    private String evaluationLocationUuid;
 
     public MentorshipDTO() {
     }
@@ -85,6 +89,9 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         }
         if(mentorship.getEvaluationType()!=null) {
             this.setEvaluationTypeUuid(mentorship.getEvaluationType().getUuid());
+        }
+        if(mentorship.getEvaluationLocation()!=null) {
+            this.setEvaluationLocationUuid(mentorship.getEvaluationLocation().getUuid());
         }
         if(mentorship.getAnswers()!=null) {
             List<AnswerDTO> answerDTOS = new ArrayList<>();
@@ -228,6 +235,8 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         mentorship.setDemonstration(this.isDemonstration());
         mentorship.setDemonstrationDetails(this.getDemonstrationDetails());
         mentorship.setPerformedDate(this.getPerformedDate());
+        mentorship.setCreatedByUuid(this.getCreatedByuuid());
+        mentorship.setUpdatedByUuid(this.getUpdatedByuuid());
 
         if(this.getMentor()!=null) {
             mentorship.setTutor(new Tutor(this.getMentor()));
@@ -249,6 +258,9 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
         }
         if(this.getEvaluationType()!=null) {
             mentorship.setEvaluationType(new EvaluationType(this.getEvaluationType()));
+        }
+        if(this.getEvaluationLocationDTO()!=null) {
+            mentorship.setEvaluationLocation(new EvaluationLocation(this.getEvaluationLocationDTO()));
         }
         if(this.getAnswers()!=null) {
             List<Answer> answerList = new ArrayList<>();
@@ -314,5 +326,21 @@ public class MentorshipDTO extends BaseEntityDTO implements Syncable {
 
     public void setEvaluationTypeUuid(String evaluationTypeUuid) {
         this.evaluationTypeUuid = evaluationTypeUuid;
+    }
+
+    public EvaluationLocationDTO getEvaluationLocationDTO() {
+        return evaluationLocationDTO;
+    }
+
+    public void setEvaluationLocationDTO(EvaluationLocationDTO evaluationLocationDTO) {
+        this.evaluationLocationDTO = evaluationLocationDTO;
+    }
+
+    public String getEvaluationLocationUuid() {
+        return evaluationLocationUuid;
+    }
+
+    public void setEvaluationLocationUuid(String evaluationLocationUuid) {
+        this.evaluationLocationUuid = evaluationLocationUuid;
     }
 }

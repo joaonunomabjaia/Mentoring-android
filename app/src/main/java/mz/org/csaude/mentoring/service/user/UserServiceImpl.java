@@ -46,7 +46,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public List<User> getAll() throws SQLException {
-        return this.userDao.queryForAll();
+        List<User> userList = this.userDao.queryForAll();
+        for (User user : userList) {
+            user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
+        }
+        return userList;
     }
 
     @Override
@@ -93,7 +97,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public User getCurrentUser() throws SQLException {
+    public User getCurrentUser(String username) throws SQLException {
         User user = userDao.queryForAll().get(0);
         user.setEmployee(getApplication().getEmployeeService().getById(user.getEmployeeId()));
         return user;

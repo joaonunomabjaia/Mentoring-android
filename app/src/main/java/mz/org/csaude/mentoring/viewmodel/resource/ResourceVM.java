@@ -158,8 +158,12 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             getApplication().getResourceRestService().downloadFile(selectedNode.getName(), this);
         } else {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();

@@ -20,12 +20,12 @@ public class GETTutorProgrammaticAreaWorker extends BaseWorker<TutorProgrammatic
         this.tutorProgrammaticAreaRestService = new TutorProgrammaticAreaRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.tutorProgrammaticAreaRestService.restGetTutorProgrammaticAreas(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<TutorProgrammaticArea> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<TutorProgrammaticArea> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

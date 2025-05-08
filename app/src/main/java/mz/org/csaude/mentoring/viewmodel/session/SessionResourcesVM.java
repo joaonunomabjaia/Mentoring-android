@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -191,6 +192,7 @@ public class SessionResourcesVM extends SearchVM<Resource> implements IDialogLis
                 runOnMainThread(() -> {
                     dismissProgress(progress);
                     Map<String, Object> params = new HashMap<>();
+                    session.setMentorships(Collections.emptyList());
                     params.put("session", session);
                     getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
                 });

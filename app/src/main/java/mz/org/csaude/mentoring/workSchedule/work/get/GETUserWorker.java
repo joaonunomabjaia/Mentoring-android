@@ -28,12 +28,12 @@ public class GETUserWorker extends BaseWorker<User> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         userRestService.getByUuid(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<User> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<User> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

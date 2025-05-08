@@ -13,6 +13,7 @@ import mz.org.csaude.mentoring.model.tutor.Tutor;
 public class TutorProgrammaticAreaDTO extends BaseEntityDTO {
     private TutorDTO tutorDTO;
     private ProgrammaticAreaDTO programmaticAreaDTO;
+    private String tutoruuid;
     public TutorProgrammaticAreaDTO() {
         super();
     }
@@ -49,8 +50,16 @@ public class TutorProgrammaticAreaDTO extends BaseEntityDTO {
         tutorProgrammaticArea.setCreatedAt(this.getCreatedAt());
         tutorProgrammaticArea.setUpdatedAt(this.getUpdatedAt());
         tutorProgrammaticArea.setLifeCycleStatus(this.getLifeCycleStatus());
-        if(this.getTutorDTO()!=null) tutorProgrammaticArea.setTutor(new Tutor(this.getTutorDTO()));
+        tutorProgrammaticArea.setTutor(new Tutor(this.tutoruuid));
         if(this.getProgrammaticAreaDTO()!=null) tutorProgrammaticArea.setProgrammaticArea(new ProgrammaticArea(this.getProgrammaticAreaDTO()));
         return tutorProgrammaticArea;
+    }
+
+    public String getTutoruuid() {
+        return tutoruuid;
+    }
+
+    public void setTutoruuid(String tutoruuid) {
+        this.tutoruuid = tutoruuid;
     }
 }

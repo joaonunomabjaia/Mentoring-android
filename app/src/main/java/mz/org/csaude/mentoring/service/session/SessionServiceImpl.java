@@ -7,8 +7,10 @@ import androidx.room.Transaction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
@@ -92,7 +94,9 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
 
     @Override
     public Session getById(int id) throws SQLException {
-        return this.sessionDAO.queryForId(id);
+        Session session = this.sessionDAO.queryForId(id);
+        session.setForm(getApplication().getFormService().getById(session.getFormId()));
+        return session;
     }
 
     @Override
@@ -293,6 +297,24 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
             session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
             session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
+        }
+        return sessions;
+    }
+
+    @Override
+    public List<Session> getSessionsWithinNextDays(int i) {
+        Date today = new Date();
+        Date future = new Date(today.getTime() + TimeUnit.DAYS.toMillis(i));
+        List<Session> sessions = sessionDAO.getSessionsWithinNextDays(today, future);
+        if (Utilities.listHasElements(sessions)) {
+            for (Session session : sessions) {
+                try {
+                    session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
+                    session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         return sessions;
     }

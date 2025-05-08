@@ -22,7 +22,7 @@ public class POSTMentorshipWorker extends BaseWorker<Mentorship> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         if (Utilities.stringHasValue(requestType) && requestType.equalsIgnoreCase(String.valueOf(Http.POST))) {
             getApplication().getMentorshipRestService().restPostMentorships(this);
         }
@@ -34,7 +34,7 @@ public class POSTMentorshipWorker extends BaseWorker<Mentorship> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Mentorship> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Mentorship> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

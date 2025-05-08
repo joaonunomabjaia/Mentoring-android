@@ -9,11 +9,11 @@ import androidx.databinding.Bindable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import mz.org.csaude.mentoring.BR;
@@ -22,6 +22,7 @@ import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.answer.Answer;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
@@ -29,13 +30,10 @@ import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
 import mz.org.csaude.mentoring.model.location.Cabinet;
 import mz.org.csaude.mentoring.model.mentorship.Door;
 import mz.org.csaude.mentoring.model.mentorship.Mentorship;
-import mz.org.csaude.mentoring.model.question.QuestionsCategory;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
-import mz.org.csaude.mentoring.model.session.SessionStatus;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
-import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.mentorship.CreateMentorshipActivity;
@@ -238,9 +236,26 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
         } else if (isPeriodSelectionStep()) {
             if (!isValidPeriod()) return;
-
             // Perform background operations (like loadQuestion and initial save) in a background thread
             getExecutorService().execute(() -> {
+                if (!isMentoringMentorship()) { // Ronda Zero
+                    try {
+                        this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    if (!mentorship.getSession().getForm().getEvaluationLocation().isBoth()) {
+                        this.mentorship.setEvaluationLocation(mentorship.getSession().getForm().getEvaluationLocation());
+                } else if (!hasQuestionForSelectedLocation(mentorship.getSession().getForm(), mentorship.getEvaluationLocation())){
+                        runOnMainThread(() -> {
+                            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_questions_for_selected_location)).show();
+                        });
+
+                        return;
+                    }
+                }
+
                 loadQuestion();
 
                 for (FormSection formSection : this.mentorship.getForm().getFormSections()) {
@@ -288,6 +303,14 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         notifyPropertyChanged(BR.currMentorshipStep);
     }
 
+    private boolean hasQuestionForSelectedLocation(Form form, EvaluationLocation evaluationLocation) {
+        return getApplication().getFormService().hasQuestionsForSelectedLocation(form, evaluationLocation);
+    }
+
+    public boolean isSelectLocation(){
+        if (!isMentoringMentorship()) return false;
+        return mentorship.getSession().getForm().getEvaluationLocation().isBoth();
+    }
 
     public void setMentorship(Mentorship mentorship) {
         this.mentorship = mentorship;
@@ -435,6 +458,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                 this.mentorship.setSession(generateZeroSession());
                 this.mentorship.setIterationNumber(1);
                 this.mentorship.setEvaluationType(getApplication().getEvaluationTypeService().getByCode(EvaluationType.CONSULTA));
+                this.mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getByCode(EvaluationLocation.HEALTH_FACILITY));
             } else {
                 this.mentorship.setSession(this.session);
                 this.session.getRonda().addSession(this.mentorship.getSession());
@@ -545,6 +569,18 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     }
 
     @Bindable
+    public Listble getSelectedEvaluationLocation() {
+        return this.mentorship.getEvaluationLocation();
+    }
+
+    public void setSelectedEvaluationLocation(Listble selectedEvaluationLocation) {
+        if (selectedEvaluationLocation == null || !Utilities.stringHasValue(selectedEvaluationLocation.getDescription())) return;
+
+        this.mentorship.setEvaluationLocation((EvaluationLocation) selectedEvaluationLocation);
+        notifyPropertyChanged(BR.selectedEvaluationLocation);
+    }
+
+    @Bindable
     public Listble getSelectedSector() {
         return this.mentorship.getCabinet();
     }
@@ -595,7 +631,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void loadQuestion() {
         try {
-            this.mentorship.setForm(getApplication().getFormService().getFullByIdForEvaluation(this.mentorship.getForm().getId(), this.mentorship.getEvaluationType().getCode()));
+            this.mentorship.setForm(getApplication().getFormService().getFullByIdForEvaluation(this.mentorship.getForm().getId(), this.mentorship.getEvaluationType().getCode(), this.mentorship.getEvaluationLocation()));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -742,11 +778,6 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             }
 
             this.mentorship.getSession().addMentorship(this.mentorship);
-            /*if (this.mentorship.getSession().canBeClosed()) {
-                this.mentorship.getSession().setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.COMPLETE));
-                this.mentorship.getSession().setEndDate(DateUtilities.getCurrentDate());
-                this.mentorship.getSession().setSyncStatus(SyncSatus.PENDING);
-            }*/
 
             this.ronda.setSessions(getApplication().getSessionService().getAllOfRonda(this.ronda));
             this.ronda.addSession(this.mentorship.getSession());
@@ -764,6 +795,10 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
                     runOnMainThread(()->getRelatedActivity().finish());
                 }
             } else {
+                this.ronda.tryToCloseRonda();
+                if (this.ronda.isRondaCompleted()) {
+                    getApplication().getRondaService().closeRonda(this.ronda);
+                }
                 runOnMainThread(this::goToMentorshipSummary);
             }
         getCurrentStep().changeToList();
@@ -774,12 +809,19 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
     private void goToMentorshipSummary() {
         Map<String, Object> params = new HashMap<>();
+
+        this.mentorship.getSession().setMentorships(Collections.emptyList());
+        this.mentorship.getSession().getRonda().setSessions(Collections.emptyList());
+        this.mentorship.getSession().getForm().setFormSections(Collections.emptyList());
         params.put("session", this.mentorship.getSession());
         getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
     }
 
     private void initSessionClosure(Session session) {
         Map<String, Object> params = new HashMap<>();
+        session.setMentorships(Collections.emptyList());
+        session.getRonda().setSessions(Collections.emptyList());
+        session.getForm().setFormSections(Collections.emptyList());
         params.put("session", session);
         getRelatedActivity().nextActivityFinishingCurrent(SessionClosureActivity.class, params);
     }
@@ -919,5 +961,20 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     public void doOnConfirmed(String value) {
         Log.i("MentorshipVM", value);
         getExecutorService().execute(this::doSaveMentorship);
+    }
+
+    public List<EvaluationLocation> getEvaluationLocations() {
+        List<EvaluationLocation> evaluationLocations = new ArrayList<>();
+        evaluationLocations.add(new EvaluationLocation());
+        evaluationLocations.addAll(getApplication().getEvaluationLocationService().getByCodes(List.of(EvaluationLocation.HEALTH_FACILITY, EvaluationLocation.COMMUNITY)));
+        return evaluationLocations;
+    }
+
+    public void loadMentorShipData() {
+        try {
+            this.mentorship.setAnswers((getApplication().getAnswerService().getAllOfMentorship(mentorship)));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

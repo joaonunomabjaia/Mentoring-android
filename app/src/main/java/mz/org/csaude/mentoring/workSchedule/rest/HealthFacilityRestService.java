@@ -33,9 +33,11 @@ public class HealthFacilityRestService extends BaseRestService {
         List<Location> locations = new ArrayList<>();
         if (getApplication().getAuthenticatedUser() == null) {
             try {
-                User user = getApplication().getUserService().getCurrentUser();
-                user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
-                locations = user.getEmployee().getLocations();
+                List<User> users = getApplication().getUserService().getAll();
+                for (User user : users) {
+                    user.getEmployee().setLocations(getApplication().getLocationService().getAllOfEmploee(user.getEmployee()));
+                    locations.addAll(user.getEmployee().getLocations());
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

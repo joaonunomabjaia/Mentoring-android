@@ -80,4 +80,9 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
         }
         return rondaMentors;
     }
+
+    @Override
+    public void closeAllActiveOnRonda(Ronda ronda) {
+        rondaMentorDAO.closeAllActiveOnRonda(ronda.getId(), ronda.getEndDate());
+    }
 }

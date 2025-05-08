@@ -23,7 +23,7 @@ public class GETCabinetWorker extends BaseWorker<Cabinet> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.cabinetRestService.restGetCabinets(offset, limit, this);
     }
     @Override

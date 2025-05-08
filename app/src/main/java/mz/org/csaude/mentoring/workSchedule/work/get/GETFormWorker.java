@@ -18,7 +18,7 @@ public class GETFormWorker extends BaseWorker<Form> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
             getApplication().getFormRestService().restGetForm(this);
     }
 
@@ -28,7 +28,7 @@ public class GETFormWorker extends BaseWorker<Form> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Form> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Form> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

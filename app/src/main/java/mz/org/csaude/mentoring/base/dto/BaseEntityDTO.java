@@ -1,5 +1,7 @@
 package mz.org.csaude.mentoring.base.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -17,6 +19,10 @@ public class BaseEntityDTO implements Serializable {
     protected SyncSatus syncSatus;
     private Date createdAt;
     private Date updatedAt;
+    @JsonProperty(value = "createdBy")
+    private String createdByUuid;
+    @JsonProperty(value = "updatedBy")
+    private String updatedByUuid;
 
     public BaseEntityDTO() {
     }
@@ -26,6 +32,8 @@ public class BaseEntityDTO implements Serializable {
         this.setLifeCycleStatus(baseEntity.getLifeCycleStatus());
         this.setCreatedAt(baseEntity.getCreatedAt());
         this.setUpdatedAt(baseEntity.getUpdatedAt());
+        this.setCreatedByuuid(baseEntity.getCreatedByUuid());
+        this.setUpdatedByuuid(baseEntity.getUpdatedByUuid());
     }
 
     public String getUuid() {
@@ -58,5 +66,21 @@ public class BaseEntityDTO implements Serializable {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedByuuid() {
+        return createdByUuid;
+    }
+
+    public void setCreatedByuuid(String createdByuuid) {
+        this.createdByUuid = createdByuuid;
+    }
+
+    public String getUpdatedByuuid() {
+        return updatedByUuid;
+    }
+
+    public void setUpdatedByuuid(String updatedByuuid) {
+        this.updatedByUuid = updatedByuuid;
     }
 }

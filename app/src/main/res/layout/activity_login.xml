@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/dimen_30dp"
+        android:background="@drawable/background_gradient"
         android:orientation="vertical">
 
         <LinearLayout
@@ -79,6 +80,7 @@
                 android:background="@drawable/edit_text_border"
                 android:drawableStart="@drawable/ic_person"
                 app:startIconTint="@color/colorPrimaryDark"
+                android:enabled="@{!viewModel.authenticating}"
                 android:inputType="text"
                 android:padding="8dp"
                 android:text="@={viewModel.userName}" />
@@ -94,6 +96,7 @@
                 android:layout_height="wrap_content"
                 app:startIconDrawable="@drawable/ic_lock"
                 app:passwordToggleEnabled="true"
+                android:enabled="@{!viewModel.authenticating}"
                 app:startIconTint="@color/colorPrimaryDark"
                 app:passwordToggleTint="@color/colorPrimaryDark">
 
@@ -103,6 +106,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/edit_text_border"
                     android:inputType="textPassword"
+                    android:enabled="@{!viewModel.authenticating}"
                     android:padding="8dp"
                     android:layout_marginBottom="@dimen/dimen_10dp"
                     android:text="@={viewModel.userPassword}"/>
@@ -112,6 +116,7 @@
                 android:id="@+id/cbx_remember_me"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="@{!viewModel.authenticating}"
                 android:layout_marginBottom="@dimen/dimen_10dp"
                 android:checked="@{viewModel.remeberMe}"
                 android:onClick="@{() -> viewModel.changeRemeberMeStatus()}"
@@ -125,14 +130,29 @@
                     android:id="@+id/button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_shape"
-                    android:padding="@dimen/dimen_4dp"
+                    style="@style/MentoriaButton"
+                    android:padding="@dimen/dimen_8dp"
                     android:onClick="@{()-> viewModel.doLogin()}"
                     android:text="@string/login"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:visibility="@{!viewModel.authenticating ? View.VISIBLE : View.GONE}"
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
+
+                <ImageButton
+                    android:id="@+id/btn_biometric_login"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/button"
+                    android:layout_marginTop="50dp"
+                    android:onClick="@{()-> viewModel.showBiometricPrompt()}"
+                    android:padding="0dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/login_with_fingerprint"
+                    android:src="@drawable/ic_fingerprint"
+                    android:scaleType="centerInside"
+                    android:visibility="@{viewModel.biometricEnabled ? View.VISIBLE : View.GONE}" />
 
                 <LinearLayout
                     android:id="@+id/login_progress_box"
@@ -149,16 +169,18 @@
                         android:padding="@dimen/dimen_10dp" />
 
                     <TextView
+                        android:id="@+id/authenticating"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="3"
                         android:gravity="left"
-                        android:text="@string/authenticating"
+                        android:text="@{viewModel.authMesg}"
                         android:textColor="@color/logo"
                         android:textSize="16sp" />
                 </LinearLayout>
             </RelativeLayout>
+
         </LinearLayout>
 
         <LinearLayout

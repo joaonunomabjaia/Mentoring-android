@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import java.util.concurrent.ExecutorService;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
+import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.metadata.SyncDataService;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
@@ -24,6 +25,8 @@ public class BaseRestService {
     protected static SyncDataService syncDataService;
 
     protected Gson gson;
+
+    protected SessionManager sessionManager;
 
     public BaseRestService(Application application, User currentUser) {
         init((MentoringApplication) application,currentUser);
@@ -45,7 +48,7 @@ public class BaseRestService {
         this.application = application;
 
         this.gson = new Gson();
-
+        this.sessionManager = new SessionManager(application);
 
         syncDataService = getRetrofit().create(SyncDataService.class);
 
@@ -61,5 +64,9 @@ public class BaseRestService {
 
     public SyncDataService getSyncDataService() {
         return syncDataService;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 }

@@ -215,6 +215,21 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:text="@string/evaluation_location"
+                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}"
+                            style="@style/input_labels"/>
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/spn_evaluation_location"
+                            android:enabled="@{viewModel.currentStep.applicationstepCreate}"
+                            android:layout_width="fill_parent"
+                            style="@style/bottom_spinner_style"
+                            android:layout_height="wrap_content"
+                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}"
+                            bind:selectedOpt="@={viewModel.selectedEvaluationLocation}"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/dimen_10dp"
                             android:layout_marginBottom="@dimen/dimen_10dp"
                             android:background="@drawable/shape_normal"

@@ -11,4 +11,6 @@ public interface RondaMentorService extends BaseService<RondaMentor> {
     RondaMentor savedOrUpdateRondaMentor(RondaMentor rondaMentor) throws SQLException;
 
     List<RondaMentor> getRondaMentors(Ronda ronda) throws SQLException;
+
+    void closeAllActiveOnRonda(Ronda ronda);
 }

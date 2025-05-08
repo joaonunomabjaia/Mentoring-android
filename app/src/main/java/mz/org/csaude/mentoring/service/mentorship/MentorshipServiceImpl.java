@@ -25,6 +25,9 @@ import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionStatus;
+import mz.org.csaude.mentoring.model.setting.Setting;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 
@@ -203,6 +206,7 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
             mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
             mentorship.setForm(getApplication().getFormService().getById(mentorship.getFormId()));
             mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+            mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getById(mentorship.getEvaluationLocationId()));
         }
         return mentorships;
     }
@@ -250,6 +254,13 @@ public class MentorshipServiceImpl extends BaseServiceImpl<Mentorship> implement
             mentorship.setId(this.mentorshipDAO.getByUuid(mentorship.getUuid()).getId());
         }
         return mentorship;
+    }
+
+    @Override
+    public int countMentorshipsOnLastDays(Tutored selectedMentee, Ronda ronda) {
+        Setting setting = getApplication().getSetting(Constants.MUX_DAYS_ON_RONDA_WITHOUT_SESSION);
+        int days = Integer.parseInt(setting.getValue());
+        return mentorshipDAO.countMentorshipsOnLastDays(selectedMentee.getId(), days);
     }
 
 }

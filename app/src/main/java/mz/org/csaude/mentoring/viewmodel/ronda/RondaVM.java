@@ -54,7 +54,6 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     private SimpleValue mentorType;
     private District selectedDistrict;
     private HealthFacility selectedHealthFacility;
-    private Province province;
     private List<Province> provinces;
     private List<District> districts;
     private List<HealthFacility> healthFacilities;
@@ -349,6 +348,8 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                     return;
                 }
 
+
+                this.ronda.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
                 // Check if the server is online (this may run in a background thread, depending on your implementation)
                 getApplication().isServerOnline(this);
 
@@ -371,6 +372,7 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
             ronda.setUuid(Utilities.getNewUUID().toString());
             ronda.setCreatedAt(DateUtilities.getCurrentDate());
             ronda.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+            ronda.setUpdatedByUuid(getApplication().getAuthenticatedUser().getUuid());
         }
 
         ronda.setStartDate(this.getStartDate());
@@ -391,6 +393,7 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
             rondaMentee.setCreatedAt(DateUtilities.getCurrentDate());
             rondaMentee.setTutored(tutored);
             rondaMentee.setStartDate(this.getStartDate());
+            rondaMentee.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
             rondaMentees.add(rondaMentee);
         }
 
@@ -405,7 +408,10 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
         if (!getApplication().getApplicationStep().isApplicationStepEdit()) {
             rondaMentor.setUuid(Utilities.getNewUUID().toString());
             rondaMentor.setCreatedAt(DateUtilities.getCurrentDate());
+            rondaMentor.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
             rondaMentor.setStartDate(this.getStartDate());
+        } else {
+            rondaMentor.setUpdatedByUuid(getApplication().getAuthenticatedUser().getUuid());
         }
 
         rondaMentor.setSyncStatus(SyncSatus.SENT);
@@ -495,8 +501,12 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             if (getApplication().getApplicationStep().isApplicationStepEdit()) {
                 getApplication().getRondaRestService().restPatchRonda(this.ronda, this);
             } else {
@@ -553,9 +563,6 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
                 });
                 this.setMentorType(new SimpleValue(ronda.getMentorType()));
                 this.setStartDate(ronda.getStartDate());
-                //this.setSelectedProvince(getRonda().getHealthFacility().getDistrict().getProvince());
-                /*this.setSelectedDistrict(getRonda().getHealthFacility().getDistrict());
-                this.setHealthFacility(getRonda().getHealthFacility());*/
 
             } catch (Exception e) {
                 runOnMainThread(() -> {

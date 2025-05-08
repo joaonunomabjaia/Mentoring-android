@@ -15,6 +15,8 @@ import java.util.Objects;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.form.FormDTO;
 import mz.org.csaude.mentoring.dto.form.FormSectionDTO;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
+import mz.org.csaude.mentoring.model.mentorship.Mentorship;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.programmaticArea.ProgrammaticArea;
 import mz.org.csaude.mentoring.util.Utilities;
@@ -28,12 +30,17 @@ import mz.org.csaude.mentoring.util.Utilities;
                 @ForeignKey(entity = Partner.class,
                         parentColumns = "id",
                         childColumns = Form.COLUMN_PARTNER,
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = EvaluationLocation.class,
+                        parentColumns = "id",
+                        childColumns = Form.COLUMN_EVALUATION_LOCATION,
                         onDelete = ForeignKey.CASCADE)
         },
         indices = {
                 @Index(value = {Form.COLUMN_CODE}, unique = true),
                 @Index(value = {Form.COLUMN_PROGRAMMATIC_AREA}),
-                @Index(value = {Form.COLUMN_PARTNER})
+                @Index(value = {Form.COLUMN_PARTNER}),
+                @Index(value = {Mentorship.COLUMN_EVALUATION_LOCATION})
         })
 public class Form extends BaseModel {
 
@@ -45,6 +52,7 @@ public class Form extends BaseModel {
     public static final String COLUMN_TARGET_PATIENT = "target_patient";
     public static final String COLUMN_TARGET_FILE = "target_file";
     public static final String COLUMN_PARTNER = "partner_id";
+    public static final String COLUMN_EVALUATION_LOCATION = "evaluation_location_id";
 
     @NonNull
     @ColumnInfo(name = COLUMN_NAME)
@@ -85,6 +93,14 @@ public class Form extends BaseModel {
     @Ignore
     private List<FormSection> formSections;
 
+    @NonNull
+    @ColumnInfo(name = COLUMN_EVALUATION_LOCATION)
+    private Integer evaluationLocationId;
+
+    @Ignore
+    @Relation(parentColumn = COLUMN_EVALUATION_LOCATION, entityColumn = "id")
+    private EvaluationLocation evaluationLocation;
+
     public Form() {
     }
 
@@ -96,6 +112,7 @@ public class Form extends BaseModel {
         this.setName(formDTO.getName());
         this.setTargetFile(formDTO.getTargetFile());
         this.setTargetPatient(formDTO.getTargetPatient());
+        this.setEvaluationLocation(new EvaluationLocation(formDTO.getEvaluationLocationUuid()));
         if (formDTO.getPartner() != null) {
             this.setPartner(new Partner(formDTO.getPartner()));
         }
@@ -208,5 +225,23 @@ public class Form extends BaseModel {
 
     public void setFormSections(List<FormSection> formSections) {
         this.formSections = formSections;
+    }
+
+    @NonNull
+    public Integer getEvaluationLocationId() {
+        return evaluationLocationId;
+    }
+
+    public void setEvaluationLocationId(@NonNull Integer evaluationLocationId) {
+        this.evaluationLocationId = evaluationLocationId;
+    }
+
+    public EvaluationLocation getEvaluationLocation() {
+        return evaluationLocation;
+    }
+
+    public void setEvaluationLocation(EvaluationLocation evaluationLocation) {
+        if (evaluationLocation != null) this.evaluationLocationId = evaluationLocation.getId();
+        this.evaluationLocation = evaluationLocation;
     }
 }

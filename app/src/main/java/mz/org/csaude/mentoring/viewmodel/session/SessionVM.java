@@ -114,7 +114,7 @@ public class SessionVM extends BaseViewModel {
                     }
 
                     // Validate that this.session's startDate is not before the latest session's endDate
-                    if (latestSession != null && DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), latestSession.getEndDate())) {
+                    if (latestSession != null && latestSession.getEndDate() != null && DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), latestSession.getEndDate())) {
                         runOnMainThread(() -> {
                             progress.dismiss(); // Dismiss progress dialog before showing the error
                             String dateError = getRelatedActivity().getString(R.string.prev_session_start_date_error);

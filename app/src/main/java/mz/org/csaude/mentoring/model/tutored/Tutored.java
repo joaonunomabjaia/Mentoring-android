@@ -63,6 +63,10 @@ public class Tutored extends BaseModel {
         }
     }
 
+    @Override
+    public String validade() {
+        return employee.validade();
+    }
     // Getters and Setters
 
     public Integer getEmployeeId() {

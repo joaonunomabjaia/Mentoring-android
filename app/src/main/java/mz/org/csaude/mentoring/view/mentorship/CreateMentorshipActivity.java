@@ -22,7 +22,6 @@ import java.util.List;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.form.FormAdapter;
-import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.adapter.recyclerview.question.QuestionAdapter;
 import mz.org.csaude.mentoring.adapter.recyclerview.tutored.TutoredAdapter;
 import mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter;
@@ -30,6 +29,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityMentorshipBinding;
 import mz.org.csaude.mentoring.listner.recyclerView.ClickListener;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
 import mz.org.csaude.mentoring.model.formSectionQuestion.FormSectionQuestion;
@@ -58,6 +58,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
     private ListableSpinnerAdapter doorAdapter;
     private ListableSpinnerAdapter categorieAdapter;
+    private ListableSpinnerAdapter evaluationLocationAdapter;
 
     private QuestionAdapter questionAdapter;
 
@@ -71,11 +72,15 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         if (intent != null && intent.getExtras() != null) {
 
             getRelatedViewModel().setMentorship((Mentorship) intent.getExtras().get("mentorship"));
-
             // Execute determineMentorshipType() on a background thread
             getRelatedViewModel().getExecutorService().execute(() -> {
+                if(getApplicationStep().isApplicationStepEdit()){
+                    getRelatedViewModel().loadMentorShipData();
+
+                }
                 loadSectorAdapter();
                 loadDoorAdapter();
+                loadEvaluationLocationAdapter();
                 if (getRelatedViewModel().getMentorship() == null) {
                     getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
                     getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
@@ -292,6 +297,24 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
             });
     }
 
+    public void loadEvaluationLocationAdapter() {
+        // Fetch the evaluationLocations in a background thread
+        // Access the database in the background thread
+        List<EvaluationLocation> evaluationLocations = getRelatedViewModel().getEvaluationLocations();
+
+        // Update the UI on the main thread
+        runOnUiThread(() -> {
+            if (evaluationLocations != null && !evaluationLocations.isEmpty()) {
+                // Initialize and set the adapter if the evaluationLocations list is not null or empty
+                evaluationLocationAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, evaluationLocations);
+                mentorshipBinding.spnEvaluationLocation.setAdapter(evaluationLocationAdapter);
+            } else {
+                // Handle the case where no evaluationLocations are available
+                Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_ev_locations_available)).show();
+            }
+        });
+    }
+
 
 
     public void loadCategoryAdapter() {
@@ -391,11 +414,6 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                //getRelatedViewModel().tryToUpdateMentorship();
-                /*HashMap<String, Object> paras = new HashMap<>();
-                paras.put("session", this.getRelatedViewModel().getSession());
-                paras.put("ronda", this.getRelatedViewModel().getRonda());
-                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(MentorshipActivity.class, paras);*/
                 super.onBackPressed();
                 return true;
             default:

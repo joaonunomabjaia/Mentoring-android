@@ -30,7 +30,7 @@ public class POSTSessionWorker extends BaseWorker<Session> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Session> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Session> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

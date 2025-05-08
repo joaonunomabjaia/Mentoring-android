@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +24,12 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
+import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.Constants;
+import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.mentorship.MentorshipActivity;
 import mz.org.csaude.mentoring.view.ronda.RondaActivity;
@@ -39,6 +45,8 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
     private Tutored selectedMentee;
 
     private Session selectedSession;
+
+    private RondaMentee currRondaMentee;
 
 
 
@@ -69,15 +77,44 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
         Dialog progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
 
         getExecutorService().execute(() -> {
-            // Set the mentee in the background thread
             this.selectedMentee = (Tutored) selectedMentee;
-            initSearch(); 
+            try {
+                currRondaMentee = getApplication().getRondaMenteeService().getByMentee(this.selectedMentee,this.currRonda);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
-            // Handle UI interactions on the main thread
+            Setting setting = getApplication().getSetting(Constants.MUX_DAYS_ON_RONDA_WITHOUT_SESSION);
+            if (setting != null && setting.getEnabled()) {
+                int daysThreshold = setting.getSettingValueAsInt(); // safest
+
+                Date thresholdDate = DateUtilities.addDays(currRondaMentee.getStartDate(), daysThreshold);
+                Date now = DateUtilities.getCurrentDate();
+
+                if (now.compareTo(thresholdDate) > 0) {
+                    int mentorshipCount = getApplication().getMentorshipService().countMentorshipsOnLastDays((Tutored) selectedMentee, this.currRonda);
+
+                    if (mentorshipCount == 0) {
+                        getApplication().getRondaMenteeService().closeRondaMentee(this.currRonda, (Tutored) selectedMentee);
+                        runOnMainThread(() -> {
+                            String message = getRelatedActivity().getString(
+                                    R.string.ronda_mentee_closed,
+                                    daysThreshold,
+                                    ((Tutored) selectedMentee).getEmployee().getFullName()
+                            );
+
+                            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+                        });
+                    }
+                }
+            }
+
+            initSearch();
+
             getRelatedActivity().runOnUiThread(() -> {
-                notifyPropertyChanged(BR.selectedMentee); // Notify property change on the main thread
+                notifyPropertyChanged(BR.selectedMentee);
                 if (progress != null && progress.isShowing()) {
-                    progress.dismiss(); // Dismiss the progress dialog
+                    progress.dismiss();
                 }
             });
         });
@@ -90,6 +127,16 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
     }
 
     public void createSession() {
+
+        if (currRondaMentee.getEndDate() != null) {
+            Setting setting = getApplication().getSetting(Constants.MUX_DAYS_ON_RONDA_WITHOUT_SESSION);
+            String message = getRelatedActivity().getString(
+                    R.string.ronda_mentee_closed,
+                    setting.getSettingValueAsInt(),
+                    selectedMentee.getEmployee().getFullName()
+            );
+            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+        } else
         if (this.searchResults.size() < 4) {
             for (Session session : this.searchResults) {
                 if (!session.isCompleted()) {
@@ -230,6 +277,7 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
 
     public void printSummary(Session session) {
         Map<String, Object> params = new HashMap<>();
+        session.setMentorships(Collections.emptyList());
         params.put("session", session);
         if (!session.isCompleted()) {
             getRelatedActivity().nextActivity(SessionClosureActivity.class, params);

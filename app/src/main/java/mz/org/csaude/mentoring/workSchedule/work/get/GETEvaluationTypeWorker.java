@@ -20,12 +20,12 @@ public class GETEvaluationTypeWorker extends BaseWorker<EvaluationType> {
         this.evaluationTypeRestService = new EvaluationTypeRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.evaluationTypeRestService.restGetEvaluationTypes(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<EvaluationType> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<EvaluationType> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }
