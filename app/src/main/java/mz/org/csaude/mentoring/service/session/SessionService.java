@@ -31,4 +31,6 @@ public interface SessionService extends BaseService<Session> {
     Session saveOrUpdate(Session session) throws SQLException;
 
     List<Session> getAllNotSynced() throws SQLException;
+
+    List<Session> getSessionsWithinNextDays(int i);
 }

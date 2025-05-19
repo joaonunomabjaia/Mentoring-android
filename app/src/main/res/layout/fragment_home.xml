@@ -12,6 +12,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/background_gradient"
         tools:context=".view.home.ui.home.HomeFragment">
 
         <LinearLayout
@@ -19,22 +20,43 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="@dimen/dimen_20dp"
+            android:gravity="center_horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_0dp"
-                android:layout_weight="1"/>
 
             <ImageView
+                android:id="@+id/appLogo"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/mentoring"
+                android:layout_marginTop="30dp"
+                android:contentDescription="@string/app_name" />
+
+            <!-- Mensagem de Boas-vindas -->
+            <TextView
+                android:id="@+id/welcomeText"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="2"
-                android:layout_gravity="bottom"
-                android:src="@drawable/mentoring"/>
+                android:layout_height="wrap_content"
+                android:text="@string/welcome_message"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="16dp"
+                tools:text="Bem-vindo a Mentoria!" />
+
+            <!-- Prompt question -->
+            <TextView
+                android:id="@+id/questionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O que deseja fazer hoje?"
+                android:textSize="16sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="24dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,76 +64,76 @@
                 android:layout_weight="4"
                 android:orientation="vertical">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_rondas"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_shape"
-                    android:padding="@dimen/dimen_4dp"
+                    style="@style/MentoriaButton"
                     android:text="@string/rounds"
-                    android:onClick="@{()-> viewModel.goToMentoringRounds()}"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"/>
+                    app:icon="@drawable/ic_cicle"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:onClick="@{()-> viewModel.goToMentoringRounds()}" />
 
-                <Button
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_zero_sessions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_shape"
-                    android:padding="@dimen/dimen_4dp"
+                    style="@style/MentoriaButton"
                     android:text="@string/zero_sessions"
-                    android:onClick="@{()-> viewModel.goToBaseSessions()}"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="8dp"/>
+                    app:icon="@drawable/ic_monitor_heart"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:onClick="@{()-> viewModel.goToBaseSessions()}" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_mentees"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_shape"
-                    android:padding="@dimen/dimen_4dp"
+                    style="@style/MentoriaButton"
                     android:text="@string/mentees"
-                    android:onClick="@{()-> viewModel.goToMentees()}"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="8dp"/>
+                    app:icon="@drawable/ic_group"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:onClick="@{()-> viewModel.goToMentees()}" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ea_resources"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_shape"
-                    android:padding="@dimen/dimen_4dp"
+                    style="@style/MentoriaButton"
                     android:text="@string/ea_resources"
-                    android:onClick="@{()-> viewModel.goToLearningResources()}"
-                    android:layout_marginBottom="@dimen/dimen_8dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="8dp"/>
+                    app:icon="@drawable/ic_book"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:onClick="@{()-> viewModel.goToLearningResources()}" />
+
             </LinearLayout>
 
+            <!-- App version -->
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text="@{viewModel.appName}"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.appName}"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="2dp" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text="@{viewModel.appVersionName}"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.appVersionName}"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

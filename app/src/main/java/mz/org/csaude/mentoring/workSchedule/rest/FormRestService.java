@@ -67,6 +67,7 @@ public class FormRestService extends BaseRestService {
                             listener.doOnResponse(BaseRestService.REQUEST_SUCESS, forms);
                         } catch (SQLException e) {
                             Log.e("METADATA LOAD --", e.getMessage(), e);
+                            listener.doOnRestErrorResponse(e.getMessage());
                         }
                     });
                 } else {
@@ -77,6 +78,7 @@ public class FormRestService extends BaseRestService {
             @Override
             public void onFailure(Call<List<FormDTO>> call, Throwable t) {
                 Log.i("METADATA LOAD --", t.getMessage(), t);
+                listener.doOnRestErrorResponse(t.getMessage());
             }
         });
 

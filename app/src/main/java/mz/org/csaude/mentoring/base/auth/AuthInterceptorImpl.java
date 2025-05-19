@@ -5,12 +5,15 @@ import static mz.org.csaude.mentoring.base.application.MentoringApplication.BASE
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
+import java.util.List;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.model.user.User;
@@ -150,11 +153,14 @@ public class AuthInterceptorImpl implements Interceptor {
     }
 
     private String handleTokenResponse(String username, String jsonResponse) {
-        // Parse the JSON response
+        // Parse the JSON response as an array
         Gson gson = new Gson();
-        TokenResponse tokenResponse = gson.fromJson(jsonResponse, TokenResponse.class);
+        Type listType = new TypeToken<List<TokenResponse>>() {}.getType();
+        List<TokenResponse> tokenList = gson.fromJson(jsonResponse, listType);
 
-        if (tokenResponse != null) {
+        if (tokenList != null && !tokenList.isEmpty()) {
+            TokenResponse tokenResponse = tokenList.get(0);
+
             // Save the tokens in the SessionManager for the active user
             sessionManager.saveAuthToken(
                     username,
@@ -162,8 +168,11 @@ public class AuthInterceptorImpl implements Interceptor {
                     tokenResponse.getRefreshToken(),
                     NEW_EXPIRATION_TIME
             );
+
             return tokenResponse.getAccessToken();
         }
+
         return null;
     }
+
 }

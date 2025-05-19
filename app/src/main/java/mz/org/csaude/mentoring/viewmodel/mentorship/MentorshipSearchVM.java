@@ -75,15 +75,41 @@ public class MentorshipSearchVM extends AbstractSearchMentorshipVM {
     }
 
     public void createNewMentorship() {
-        if (this.searchResults.size() < 4) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("session", session);
-            params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
-            getCurrentStep().changetocreate();
-            getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
-        } else {
-            String message = getRelatedActivity().getString(R.string.error_max_evaluations, this.session.getTutored().getEmployee().getFullName());
-            Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+        getExecutorService().execute(()->{
+            if (isOnGoingMentorshuip()) {
+                String message = getRelatedActivity().getString(R.string.error_ongoing_mentorship);
+                runOnMainThread(()->{
+                    Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+                });
+            } else
+            if (this.searchResults.size() < 4) {
+                runOnMainThread(()->{
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("session", session);
+                    params.put("CURR_MENTORSHIP_STEP", MentorshipVM.CURR_MENTORSHIP_STEP_PERIOD_SELECTION);
+                    getCurrentStep().changetocreate();
+                    getRelatedActivity().nextActivity(CreateMentorshipActivity.class, params);
+                });
+            } else {
+                String message = getRelatedActivity().getString(R.string.error_max_evaluations, this.session.getTutored().getEmployee().getFullName());
+                runOnMainThread(()->{
+                    Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+                });
+
+            }
+        });
+
+    }
+
+    private boolean isOnGoingMentorshuip() {
+        try {
+            List<Mentorship> mentorships = getApplication().getMentorshipService().getAllOfSession(this.session);
+            for (Mentorship mentorship : mentorships) {
+                if (mentorship.getEndDate() == null) return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

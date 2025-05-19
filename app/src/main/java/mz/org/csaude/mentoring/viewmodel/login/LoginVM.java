@@ -2,6 +2,8 @@ package mz.org.csaude.mentoring.viewmodel.login;
 
 import android.app.Application;
 import android.app.Dialog;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,10 +11,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.Bindable;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import mz.org.csaude.mentoring.BR;
@@ -21,6 +29,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.sync.SyncStatus;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserSyncService;
@@ -29,6 +38,8 @@ import mz.org.csaude.mentoring.util.DateUtilities;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.view.home.MainActivity;
 import mz.org.csaude.mentoring.view.login.LoginActivity;
+import mz.org.csaude.mentoring.workSchedule.TaggedWorkRequest;
+import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 import mz.org.csaude.mentoring.workSchedule.rest.UserRestService;
 
@@ -46,6 +57,8 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private UserSyncService userSyncService;
     private AlertDialog checkDlg;
 
+    private String authMesg;
+
     private boolean biometricEnabled;
 
     public LoginVM(@NonNull Application application) {
@@ -58,6 +71,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         }
         this.userSyncService = new UserRestService(application, this.user);
         loadBiometricSetting();
+        this.authMesg = getApplication().getString(R.string.authenticating);
     }
 
     public boolean isBiometricEnabled() {
@@ -73,6 +87,16 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     @Override
     public void preInit() {
         getApplication().initSessionManager();
+    }
+
+    @Bindable
+    public String getAuthMesg() {
+        return authMesg;
+    }
+
+    public void setAuthMesg(String authMesg) {
+        this.authMesg = authMesg;
+        notifyPropertyChanged(BR.authMesg);
     }
 
     @Bindable
@@ -96,7 +120,7 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void doLogin() {
         getExecutorService().execute(() -> {
             setAuthenticating(true);
-            if (AppHasUser()) {
+            if (AppHasUser() && getApplication().isInitialSetupComplete()) {
                 try {
                     doLocalLogin();
                 } catch (SQLException e) {
@@ -113,8 +137,11 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     private void doOnlineLogin() {
         runOnMainThread(() -> setAuthenticating(true));
 
-        getApplication().isServerOnline(isOnline -> {
+        getApplication().isServerOnline((isOnline, isSlow) -> {
             if (isOnline) {
+                if (isSlow) {
+                    showSlowConnectionWarning(getRelatedActivity());
+                }
                 userSyncService.doOnlineLogin(this, remeberMe);
             } else {
                 runOnMainThread(() -> {
@@ -174,18 +201,33 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
 
     @Override
     public void doOnRestSucessResponse(User user) {
-        //getRelatedActivity().runOnUiThread(() -> {
-            try {
-                if (getSessionManager().isInitialSetupComplete(user.getUserName())) {
-                    getApplication().init();
-                    setAuthenticating(false);
-                    goHome();
-                } else {
-                    OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
+        try {
+            if (getSessionManager().isInitialSetupComplete(user.getUserName())) {
+                getApplication().init();
+                setAuthenticating(false);
+                goHome();
+                return;
+            }
 
-                    runOnMainThread(() -> {
-                        WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId()).observe(getRelatedActivity(), workInfo -> {
-                            if (workInfo != null) {
+            OneTimeWorkRequest mentorRequest = WorkerScheduleExecutor.getInstance(getApplication()).runPostLoginSync();
+
+            runOnMainThread(() -> {
+                WorkerScheduleExecutor.getInstance(getApplication())
+                        .getWorkManager()
+                        .getWorkInfoByIdLiveData(mentorRequest.getId())
+                        .observe(getRelatedActivity(), workInfo -> {
+                            if (workInfo == null) return;
+
+                            if (workInfo.getState() == WorkInfo.State.RUNNING) {
+                                setAuthMesg("➡ Sincronizando perfil do mentor...");
+                            }
+
+                            if (workInfo.getState().isFinished()) {
+                                WorkerScheduleExecutor.getInstance(getApplication())
+                                        .getWorkManager()
+                                        .getWorkInfoByIdLiveData(mentorRequest.getId())
+                                        .removeObservers(getRelatedActivity());
+
                                 if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                                     try {
                                         getApplication().init();
@@ -193,31 +235,127 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
                                         throw new RuntimeException(e);
                                     }
 
-                                    OneTimeWorkRequest downloadMentorData = WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
-                                    WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(downloadMentorData.getId()).observe(getRelatedActivity(), info -> {
-                                        if (info.getState() == WorkInfo.State.SUCCEEDED) {
-                                            getSessionManager().setInitialSetUpComplete(user.getUserName());
-                                            getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-                                            setAuthenticating(false);
-                                            goHome();
+                                    List<TaggedWorkRequest> downloadMentorData =
+                                            WorkerScheduleExecutor.getInstance(getApplication()).downloadMentorData();
+
+                                    AtomicBoolean alreadyHandled = new AtomicBoolean(false);
+                                    List<UUID> completedIds = new ArrayList<>();
+                                    int total = downloadMentorData.size();
+
+                                    Handler timeoutHandler = new Handler(Looper.getMainLooper());
+                                    timeoutHandler.postDelayed(() -> {
+                                        for (TaggedWorkRequest req : downloadMentorData) {
+                                            UUID id = req.getRequest().getId();
+
+                                            WorkManager.getInstance(getApplication())
+                                                    .getWorkInfoById(id)
+                                                    .addListener(() -> {
+                                                        try {
+                                                            WorkInfo info = WorkManager.getInstance(getApplication())
+                                                                    .getWorkInfoById(id)
+                                                                    .get();
+
+                                                            if (info != null && info.getState() == WorkInfo.State.RUNNING) {
+                                                                WorkManager.getInstance(getApplication())
+                                                                        .cancelWorkById(id);
+
+                                                                runOnMainThread(() -> {
+                                                                    setAuthMesg("⏱ Tempo excedido: " +
+                                                                            new SyncStatus(req.getTag(), info.getState()).getDisplayName());
+                                                                });
+                                                            }
+                                                        } catch (Exception ignored) {}
+                                                    }, ExecutorThreadProvider.getInstance().getExecutorService());
                                         }
-                                    });
-                                } else if (workInfo.getState() == WorkInfo.State.FAILED) {
-                                    setAuthenticating(false);
-                                    String errorMessage = getRelatedActivity().getString(R.string.error_downloading_mentor_data);
-                                    Utilities.displayAlertDialog(getRelatedActivity(), errorMessage).show();
+                                    }, 2 * 60 * 1000); // 2 minutos
+
+
+                                    for (TaggedWorkRequest twr : downloadMentorData) {
+                                        UUID id = twr.getRequest().getId();
+
+                                        WorkerScheduleExecutor.getInstance(getApplication())
+                                                .getWorkManager()
+                                                .getWorkInfoByIdLiveData(id)
+                                                .observe(getRelatedActivity(), info -> {
+                                                    if (info == null) return;
+
+                                                    if (info.getState() == WorkInfo.State.RUNNING) {
+                                                        int current = completedIds.size() + 1;
+                                                        SyncStatus status = new SyncStatus(twr.getTag(), WorkInfo.State.RUNNING);
+                                                        setAuthMesg("➡ " + status.getDisplayName() + " (" + current + "/" + total + ")");
+                                                    }
+
+                                                    if (info.getState().isFinished() && !completedIds.contains(id)) {
+                                                        completedIds.add(id);
+
+                                                        if (completedIds.size() == total && !alreadyHandled.get()) {
+                                                            alreadyHandled.set(true);
+
+                                                            List<String> failedSteps = new ArrayList<>();
+                                                            for (TaggedWorkRequest req : downloadMentorData) {
+                                                                try {
+                                                                    WorkInfo wInfo = WorkerScheduleExecutor.getInstance(getApplication())
+                                                                            .getWorkManager()
+                                                                            .getWorkInfoById(req.getRequest().getId())
+                                                                            .get();
+                                                                    if (wInfo == null || wInfo.getState() != WorkInfo.State.SUCCEEDED) {
+                                                                        failedSteps.add(new SyncStatus(req.getTag(), wInfo != null ? wInfo.getState() : null).getDisplayName());
+                                                                    }
+                                                                } catch (Exception e) {
+                                                                    failedSteps.add(new SyncStatus(req.getTag(), null).getDisplayName());
+                                                                }
+                                                            }
+
+                                                            if (failedSteps.isEmpty()) {
+                                                                getSessionManager().setInitialSetUpComplete(user.getUserName());
+                                                                getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
+                                                                setAuthenticating(false);
+                                                                goHome();
+                                                            } else {
+                                                                //setAuthenticating(false);
+                                                                StringBuilder msg = new StringBuilder("Falha ao sincronizar os seguintes passos:\n");
+                                                                for (String failed : failedSteps) {
+                                                                    msg.append("• ").append(failed).append("\n");
+                                                                }
+
+                                                                new AlertDialog.Builder(getRelatedActivity())
+                                                                        .setTitle("Erro na sincronização")
+                                                                        .setMessage(msg.toString())
+                                                                        .setCancelable(false)
+                                                                        .setPositiveButton("Tentar novamente", (dialog, which) -> doOnRestSucessResponse(user))
+                                                                        .setNegativeButton("Cancelar", null)
+                                                                        .show();
+                                                            }
+                                                        }
+
+                                                        WorkerScheduleExecutor.getInstance(getApplication())
+                                                                .getWorkManager()
+                                                                .getWorkInfoByIdLiveData(id)
+                                                                .removeObservers(getRelatedActivity());
+                                                    }
+                                                });
+                                    }
+                                } else {
+                                    new AlertDialog.Builder(getRelatedActivity())
+                                            .setTitle("Erro na sincronização")
+                                            .setMessage(R.string.error_downloading_mentor_data)
+                                            .setCancelable(false)
+                                            .setPositiveButton("Tentar novamente", (dialog, which) -> doOnRestSucessResponse(user))
+                                            .setNegativeButton("Cancelar", null)
+                                            .show();
+                                    /*Utilities.displayAlertDialog(
+                                            getRelatedActivity(),
+                                            getRelatedActivity().getString(R.string.error_downloading_mentor_data)
+                                    ).show();*/
                                 }
                             }
                         });
-                    });
-                }
-            } catch (SQLException e) {
-                setAuthenticating(false);
-                Log.e("LoginVM", "doOnRestSucessResponse: ", e);
-            }
-        //});
+            });
+        } catch (SQLException e) {
+            setAuthenticating(false);
+            Log.e("LoginVM", "doOnRestSucessResponse: ", e);
+        }
     }
-
 
     private void goHome() {
         try {
@@ -255,8 +393,12 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             if (serverOperation == INACTIVE_USER_CHECK) {
                 OneTimeWorkRequest syncRequest = WorkerScheduleExecutor.getInstance(getApplication()).syncUserFromServer();
                 WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager()

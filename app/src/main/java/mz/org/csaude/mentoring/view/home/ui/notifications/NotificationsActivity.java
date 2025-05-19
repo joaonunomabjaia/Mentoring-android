@@ -12,12 +12,15 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.List;
+
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.session.SessionMentorAdapter;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityNotificationsBinding;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
+import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.util.Utilities;
 
 public class NotificationsActivity extends BaseActivity implements IDialogListener {
@@ -98,12 +101,18 @@ public class NotificationsActivity extends BaseActivity implements IDialogListen
 
     public void populateSessionRecyclerView(){
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
+        getRelatedViewModel().getExecutorService().execute(()->{
+            List<Session> sessions = getRelatedViewModel().getSessionsByMentor();
+            runOnUiThread(()->{
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                recyclerView.setLayoutManager(mLayoutManager);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 0));
 
-        sessionMentorAdapter = new SessionMentorAdapter(recyclerView, getRelatedViewModel().getSessionsByMentor(), this);
-        recyclerView.setAdapter(sessionMentorAdapter);
+                sessionMentorAdapter = new SessionMentorAdapter(recyclerView, sessions, this);
+                recyclerView.setAdapter(sessionMentorAdapter);
+            });
+        });
+
     }
 }

@@ -29,4 +29,6 @@ public interface RondaService extends BaseService<Ronda> {
     List<Ronda> getAllByMentor(Tutor tutor, MentoringApplication mentoringApplication) throws SQLException;
 
     void tryToCloseRonda(Ronda ronda, Date endDate);
+
+    void closeRonda(Ronda ronda);
 }

@@ -60,4 +60,10 @@ public interface MentorshipDAO {
 
     @Query("DELETE FROM mentorship WHERE id = :id")
     int delete(int id);
+
+    @Query("SELECT COUNT(*) FROM mentorship " +
+            "WHERE tutored_id = :menteeId " +
+            "AND start_date >= strftime('%s', 'now', '-' || :days || ' day') * 1000")
+    int countMentorshipsOnLastDays(Integer menteeId, Integer days);
+
 }

@@ -58,7 +58,10 @@ public interface SyncDataService {
     @GET("settings/tutor/{uuid}/{offset}/{limit}")
     Call<List<SettingDTO>> getSettings(@Path("uuid") final String uuid, @Path("offset") long offset, @Path("limit") long limit);
     @GET("settings/tutor/{uuid}")
-    Call<List<SettingDTO>> getSettings(@Path("uuid") final String uuid);
+    Call<List<SettingDTO>> getSettingsbyUuid(@Path("uuid") final String uuid);
+
+    @GET("settings/getall")
+    Call<List<SettingDTO>> getSettings();
 
     @GET("healthFacilities/tutor/{uuid}")
     Call<ApiResponse<HealthFacilityDTO>> getHealthFacilities(@Path("uuid") final String uuid);
