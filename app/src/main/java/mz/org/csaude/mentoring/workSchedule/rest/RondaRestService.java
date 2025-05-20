@@ -73,6 +73,7 @@ public class RondaRestService extends BaseRestService {
                         listener.doOnResponse(BaseRestService.REQUEST_SUCESS, fetchedRondas);
                     } catch (SQLException e) {
                         Log.e("RondaRestService", e.getMessage(), e);
+                        listener.doOnRestErrorResponse(e.getMessage());
                     }
                 });
             }
@@ -80,6 +81,7 @@ public class RondaRestService extends BaseRestService {
             @Override
             public void onFailure(Call<List<RondaDTO>> call, Throwable t) {
                 Log.e("RondaRestService", "Failed to fetch Rondas", t);
+                listener.doOnRestErrorResponse(t.getMessage());
             }
         });
     }
@@ -126,8 +128,12 @@ public class RondaRestService extends BaseRestService {
                 mentorService.deleteByRondaId(localRonda.getId());
 
                 Ronda fetched = fetchedRondaMap.get(uuid);
+                if (fetched.isRondaZero()) continue;
+
                 if (Utilities.listHasElements(fetched.getRondaMentors())) {
                     for (RondaMentor newMentor : fetched.getRondaMentors()) {
+                        newMentor.setRonda(localRonda);
+                        newMentor.setTutor(getApplication().getTutorService().getByuuid(newMentor.getTutor().getUuid()));
                         mentorService.save(newMentor);
                     }
                 }
