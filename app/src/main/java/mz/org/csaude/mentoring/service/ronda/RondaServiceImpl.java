@@ -107,6 +107,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         for (Ronda ronda: rondas) {
             ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
             ronda.setHealthFacility(getApplication().getHealthFacilityService().getById(ronda.getHealthFacilityId()));
+            ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
+            ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
         }
         return rondas;
     }
@@ -122,8 +124,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     }
 
     @Override
-    public List<Ronda> getAllByRondaType(RondaType rondaType, User authenticatedUser) throws SQLException {
-        List<Ronda> rondas = this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE), authenticatedUser.getUuid());
+    public List<Ronda> getAllByRondaType(RondaType rondaType, Tutor tutor) throws SQLException {
+        List<Ronda> rondas = this.rondaDAO.getAllByRondaType(rondaType.getCode(), String.valueOf(LifeCycleStatus.ACTIVE), tutor.getId());
         for (Ronda ronda: rondas) {
             ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
             ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
@@ -238,7 +240,11 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
 
     @Override
     public List<Ronda> getAll() throws SQLException {
-        return this.rondaDAO.queryForAll();
+        List<Ronda> rondas = this.rondaDAO.queryForAll();
+        for (Ronda ronda: rondas) {
+            ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
+        }
+        return rondas;
     }
 
     @Override
@@ -246,6 +252,7 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         Ronda ronda = this.rondaDAO.queryForId(id);
         ronda.setHealthFacility(this.healthFacilityDAO.queryForId(ronda.getHealthFacilityId()));
         ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
+        ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
         return ronda;
     }
 

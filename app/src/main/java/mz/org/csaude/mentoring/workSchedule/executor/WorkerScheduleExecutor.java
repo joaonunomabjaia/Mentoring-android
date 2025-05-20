@@ -445,6 +445,14 @@ public class WorkerScheduleExecutor {
                 .putString("requestType", String.valueOf(Http.POST))
                 .build();
 
+        TaggedWorkRequest rondaGet = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETRondaWorker.class)
+                        .addTag("RONDA_GET_" + jobId)
+                        .setInputData(inputData)
+                        .build(),
+                "GETRondaWorker"
+        );
+
         TaggedWorkRequest rondaPost = new TaggedWorkRequest(
                 new OneTimeWorkRequest.Builder(POSTRondaWorker.class)
                         .addTag("RONDA_POST_" + jobId)
@@ -499,7 +507,8 @@ public class WorkerScheduleExecutor {
         );
 
         // Chain WorkRequests
-        workManager.beginUniqueWork("MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaPost.getRequest())
+        workManager.beginUniqueWork("MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaGet.getRequest())
+                .then(rondaPost.getRequest())
                 .then(sessionPost.getRequest())
                 .then(mentorshipPost.getRequest())
                 .then(sessionRecommended.getRequest())

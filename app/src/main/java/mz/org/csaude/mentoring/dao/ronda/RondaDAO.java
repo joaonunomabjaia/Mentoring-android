@@ -39,11 +39,12 @@ public interface RondaDAO {
     // Get all Ronda by RondaType
     @Query("SELECT r.* FROM ronda r " +
             "JOIN ronda_type rt ON r.ronda_type_id = rt.id " +
+            "JOIN ronda_mentor rm ON rm.ronda_id = r.id " +
             "WHERE rt.code = :rondaTypeCode " +
             "AND r.life_cycle_status = :status " +
-            "AND r.created_by = :uuid " +
+            "AND rm.mentor_id = :mentorId AND rm.end_date IS NULL " +
             "ORDER BY r.id")
-    List<Ronda> getAllByRondaType(String rondaTypeCode, String status, String uuid);
+    List<Ronda> getAllByRondaType(String rondaTypeCode, String status, int mentorId);
 
     // Get all Ronda by Mentor
     @Query("SELECT r.* FROM ronda r " +

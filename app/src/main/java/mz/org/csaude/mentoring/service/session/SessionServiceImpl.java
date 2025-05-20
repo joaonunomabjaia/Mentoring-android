@@ -292,13 +292,17 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     @Override
     public List<Session> getAllNotSynced() throws SQLException {
         List<Session> sessions = this.sessionDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        List<Session> sessionsToSync = new ArrayList<>();
         for (Session session : sessions) {
             session.setForm(getApplication().getFormService().getById(session.getFormId()));
             session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
             session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
             session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
+            if (session.getRonda().getRondaMentors().get(0).getEndDate() == null) {
+                sessionsToSync.add(session);
+            }
         }
-        return sessions;
+        return sessionsToSync;
     }
 
     @Override

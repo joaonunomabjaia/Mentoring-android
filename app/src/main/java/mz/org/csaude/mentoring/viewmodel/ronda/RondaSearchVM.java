@@ -84,7 +84,7 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
     @Override
     public List<Ronda> doSearch(long offset, long limit) throws SQLException {
-        return getApplication().getRondaService().getAllByRondaType(this.rondaType, getApplication().getAuthenticatedUser());
+        return getApplication().getRondaService().getAllByRondaType(this.rondaType, getApplication().getCurrMentor());
     }
 
     @Override
