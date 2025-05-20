@@ -562,7 +562,7 @@ public class WorkerScheduleExecutor {
     private List<TaggedWorkRequest> chainMetaDataSyncWorkers() {
         List<TaggedWorkRequest> taggedRequests = new ArrayList<>();
 
-        TaggedWorkRequest triggerWorker = createTaggedWorkRequest(TriggerWorker.class, "TriggerWorker");
+        TaggedWorkRequest triggerWorker = createTaggedWorkRequest(TriggerWorker.class, "Inicializando");
         TaggedWorkRequest formWorker = createTaggedWorkRequest(GETFormWorker.class, "GETFormWorker");
         TaggedWorkRequest formQuestionWorker = createTaggedWorkRequest(GETFormSectionQuestionWorker.class, "GETFormSectionQuestionWorker");
         TaggedWorkRequest provinceWorker = createTaggedWorkRequest(GETProvinceWorker.class, "GETProvinceWorker");

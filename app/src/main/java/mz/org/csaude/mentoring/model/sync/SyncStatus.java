@@ -78,6 +78,8 @@ public class SyncStatus extends BaseModel {
             case "INITIAL_SYNC_SECTION": return "Carregando Secções";
             case "INITIAL_SYNC_PROFESSIONAL_CATEGORY": return "Carregando Categorias Profissionais";
             case "INITIAL_SYNC_PARTNER": return "Carregando Instituições";
+
+            case "GETRondaTypeWorker": return "Carregando Tipos de Ronda";
             case "INITIAL_SYNC_RONDA_TYPE": return "Carregando Tipos de Ronda";
             case "INITIAL_SYNC_RESPONSE_TYPE": return "Carregando Tipos de Resposta";
             case "INITIAL_SYNC_EVALUATION_LOCATION": return "Carregando Locais de Avaliação";
