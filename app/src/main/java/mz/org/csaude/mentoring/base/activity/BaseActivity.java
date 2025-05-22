@@ -62,6 +62,8 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
 
     private long autoLogoutDelay;
 
+    private boolean isLogoutDelayManuallyUpdated = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,10 +133,12 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
     @Override
     protected void onPause() {
         if (isAutoLogoutEnabled()) {
-            stopLogoutTimer(); // Stop the logout timer when the activity is paused
+            stopLogoutTimer();
+            isLogoutDelayManuallyUpdated = false; // Reset ao pausar
         }
         super.onPause();
     }
+
 
     @Override
     public void onUserInteraction() {
@@ -163,26 +167,30 @@ public abstract class BaseActivity extends AppCompatActivity implements GenericA
     }
 
     public void updateAutoLogoutTime(int logoutTimeMinutes) {
-        // Update the auto logout delay
-        autoLogoutDelay = logoutTimeMinutes * 60 * 1000L; // Convert minutes to milliseconds
-
-        // Reset the logout timer with the new delay
+        autoLogoutDelay = logoutTimeMinutes * 60 * 1000L; // minutos para milissegundos
+        isLogoutDelayManuallyUpdated = true;
         resetLogoutTimer();
     }
 
 
+
     private void resetLogoutTimer() {
         stopLogoutTimer(); // Remove any pending callbacks
-        autoLogoutDelay = getAutoLogoutDelay(); // Update the auto logout delay
-        long warningTime = autoLogoutDelay - WARNING_BEFORE_LOGOUT; // Calculate when to show the warning dialog
 
-        // Ensure warningTime is not negative
+        // Só carrega do SharedPreferences se não foi alterado manualmente
+        if (!isLogoutDelayManuallyUpdated) {
+            autoLogoutDelay = getAutoLogoutDelay();
+        }
+
+        long warningTime = autoLogoutDelay - WARNING_BEFORE_LOGOUT;
+
         if (warningTime < 0) {
             warningTime = 0;
         }
 
-        autoLogoutHandler.postDelayed(autoLogoutRunnable, warningTime); // Start a new timer to show the warning dialog
+        autoLogoutHandler.postDelayed(autoLogoutRunnable, warningTime);
     }
+
 
     private void stopLogoutTimer() {
         autoLogoutHandler.removeCallbacks(autoLogoutRunnable);
