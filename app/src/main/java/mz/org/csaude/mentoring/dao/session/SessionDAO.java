@@ -52,7 +52,13 @@ public interface SessionDAO {
     @Query("SELECT count(*) FROM session WHERE ronda_id = :rondaId AND mentee_id = :menteeId")
     int countAllOfRondaAndMentee(Integer rondaId, Integer menteeId);
 
-    @Query("SELECT * FROM session WHERE next_session_date IS NOT NULL AND next_session_date BETWEEN :start AND :end")
+    @Query("SELECT s.* FROM session s " +
+            "INNER JOIN ronda r ON s.ronda_id = r.id " +
+            "WHERE s.next_session_date IS NOT NULL " +
+            "AND s.next_session_date BETWEEN :start AND :end " +
+            "AND EXISTS ( " +
+            "  SELECT 1 FROM ronda_mentor rm " +
+            "  WHERE rm.ronda_id = r.id AND rm.end_date IS NULL" +
+            ")")
     List<Session> getSessionsWithinNextDays(Date start, Date end);
-
 }

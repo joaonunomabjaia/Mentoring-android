@@ -109,6 +109,7 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
             node.setLabel(jsonObject.optString("label"));
             node.setClickable(jsonObject.optInt("clickable"));
             node.setIcon(jsonObject.optString("icon"));
+            if (jsonObject.has("isLink")) node.setLink(jsonObject.optBoolean("isLink"));
             node.setProgram(jsonObject.optString("greatGrandparentLabel"));
             node.setCategory(jsonObject.optString("grandparentLabel"));
             node.setSubCategory(jsonObject.optString("parentLabel"));

@@ -41,6 +41,7 @@
 
     <color name="progress_bar_tint">#FF0000</color>
     <color name="loading_message_color">#e91e63</color>
+    <color name="resource_color">#e9f1f7</color>
 
 
 </resources>

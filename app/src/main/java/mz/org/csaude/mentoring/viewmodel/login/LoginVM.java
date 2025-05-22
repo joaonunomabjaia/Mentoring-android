@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.viewmodel.login;
 
 import android.app.Application;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.Bindable;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -42,6 +44,7 @@ import mz.org.csaude.mentoring.workSchedule.TaggedWorkRequest;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.executor.WorkerScheduleExecutor;
 import mz.org.csaude.mentoring.workSchedule.rest.UserRestService;
+import mz.org.csaude.mentoring.workSchedule.work.CheckNextSessionWorker;
 
 public class LoginVM extends BaseViewModel implements RestResponseListener<User>, ServerStatusListener {
 
@@ -72,6 +75,13 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         this.userSyncService = new UserRestService(application, this.user);
         loadBiometricSetting();
         this.authMesg = getApplication().getString(R.string.authenticating);
+
+        //Test code
+        /*OneTimeWorkRequest testWorker = new OneTimeWorkRequest.Builder(CheckNextSessionWorker.class)
+                .build();
+
+        WorkManager.getInstance(getApplication())
+                .enqueueUniqueWork("check_next_session_test", ExistingWorkPolicy.REPLACE, testWorker);*/
     }
 
     public boolean isBiometricEnabled() {
@@ -365,7 +375,15 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         }
         setAuthenticating(false);
         Map<String, Object> params = new HashMap<>();
-        getRelatedActivity().nextActivityFinishingCurrent(MainActivity.class, params);
+        Intent redirectIntent = getRelatedActivity().getRedirectAfterLogin();
+
+        if (redirectIntent != null) {
+            getRelatedActivity().startActivity(redirectIntent);
+            getRelatedActivity().finish();
+        } else {
+            getRelatedActivity().nextActivityFinishingCurrent(MainActivity.class, params);
+        }
+
     }
 
     @Bindable

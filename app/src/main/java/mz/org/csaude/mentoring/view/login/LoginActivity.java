@@ -4,6 +4,7 @@ package mz.org.csaude.mentoring.view.login;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -28,6 +29,8 @@ public class LoginActivity extends BaseActivity {
 
     private ActivityLoginBinding loginBinding;
 
+    private Intent redirectAfterLogin;
+
     @Override
     protected boolean isAutoLogoutEnabled() {
         return false; // Disable auto logout in LoginActivity
@@ -38,6 +41,8 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         loginBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
         loginBinding.setViewModel(getRelatedViewModel());
+
+        this.redirectAfterLogin = getIntent().getParcelableExtra("redirectAfterLogin");
 
         if (getRelatedViewModel().isBiometricEnabled()) {
             showBiometricPrompt();
@@ -116,4 +121,7 @@ public class LoginActivity extends BaseActivity {
         finishAffinity(); // This exits the app completely from Login screen
     }
 
+    public Intent getRedirectAfterLogin() {
+        return redirectAfterLogin;
+    }
 }
