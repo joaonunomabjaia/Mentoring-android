@@ -70,6 +70,7 @@ public class NotificationHelper {
 
 
         String menteeName = session.getTutored() != null ? session.getTutored().getEmployee().getFullName() : "o mentorando";
+
         String dateStr = formatDate(session.getNextSessionDate());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -118,7 +119,6 @@ public class NotificationHelper {
 
     private static String formatDate(Date date) {
         if (date == null) return "breve";
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        return sdf.format(date);
+        return DateUtilities.formatToDDMMYYYY(date);
     }
 }

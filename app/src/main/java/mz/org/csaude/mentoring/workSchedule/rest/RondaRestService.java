@@ -27,6 +27,7 @@ import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.ronda.RondaMentorService;
 import mz.org.csaude.mentoring.service.ronda.RondaService;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import okhttp3.ResponseBody;
@@ -121,6 +122,7 @@ public class RondaRestService extends BaseRestService {
                 // Not in fetched list — update endDate of first mentor
                 if (Utilities.listHasElements(localRonda.getRondaMentors())) {
                     localRonda.getRondaMentors().get(0).setEndDate(DateUtilities.getCurrentDate());
+                    localRonda.getRondaMentors().get(0).setLifeCycleStatus(LifeCycleStatus.INACTIVE);
                     mentorService.update(localRonda.getRondaMentors().get(0));
                 }
             } else {

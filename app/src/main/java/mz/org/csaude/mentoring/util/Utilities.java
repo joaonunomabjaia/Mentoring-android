@@ -600,7 +600,7 @@ public class Utilities {
                 parsedList.add(classe.getDeclaredConstructor(t.getClass()).newInstance(t));
             } catch (IllegalAccessException | InstantiationException | InvocationTargetException |
                      NoSuchMethodException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
         }
         return parsedList;

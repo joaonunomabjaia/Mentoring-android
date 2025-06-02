@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.dao.ronda;
 
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -39,10 +40,12 @@ public interface RondaDAO {
     // Get all Ronda by RondaType
     @Query("SELECT r.* FROM ronda r " +
             "JOIN ronda_type rt ON r.ronda_type_id = rt.id " +
-            "JOIN ronda_mentor rm ON rm.ronda_id = r.id " +
             "WHERE rt.code = :rondaTypeCode " +
             "AND r.life_cycle_status = :status " +
-            "AND rm.mentor_id = :mentorId AND rm.end_date IS NULL " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM ronda_mentor rm " +
+            "  WHERE rm.ronda_id = r.id AND rm.mentor_id = :mentorId " +
+            ") " +
             "ORDER BY r.id")
     List<Ronda> getAllByRondaType(String rondaTypeCode, String status, int mentorId);
 
