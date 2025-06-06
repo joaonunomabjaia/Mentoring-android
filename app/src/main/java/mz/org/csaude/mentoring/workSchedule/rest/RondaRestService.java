@@ -123,15 +123,18 @@ public class RondaRestService extends BaseRestService {
                 if (Utilities.listHasElements(localRonda.getRondaMentors())) {
                     localRonda.getRondaMentors().get(0).setEndDate(DateUtilities.getCurrentDate());
                     localRonda.getRondaMentors().get(0).setLifeCycleStatus(LifeCycleStatus.INACTIVE);
+                    localRonda.setLifeCycleStatus(LifeCycleStatus.INACTIVE);
+                    getApplication().getRondaService().update(localRonda);
                     mentorService.update(localRonda.getRondaMentors().get(0));
                 }
             } else {
-                // Exists in both — delete old mentors and insert new ones
-                mentorService.deleteByRondaId(localRonda.getId());
-
                 Ronda fetched = fetchedRondaMap.get(uuid);
                 if (fetched.isRondaZero()) continue;
 
+                localRonda.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                getApplication().getRondaService().update(localRonda);
+                // Exists in both — delete old mentors and insert new ones
+                mentorService.deleteByRondaId(localRonda.getId());
                 if (Utilities.listHasElements(fetched.getRondaMentors())) {
                     for (RondaMentor newMentor : fetched.getRondaMentors()) {
                         newMentor.setRonda(localRonda);

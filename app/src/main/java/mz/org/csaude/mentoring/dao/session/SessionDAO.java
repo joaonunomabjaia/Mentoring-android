@@ -26,7 +26,9 @@ public interface SessionDAO {
 
     @Query("SELECT s.* FROM session s " +
             "JOIN session_status ss ON s.session_status_id = ss.id " +
+            "JOIN ronda r ON s.ronda_id = r.id " +
             "WHERE s.sync_status = :syncStatus " +
+            "AND r.life_cycle_status = 'ACTIVE' " +
             "AND ss.code = 'COMPLETE'")
     List<Session> getAllNotSynced(String syncStatus);
 
@@ -56,6 +58,7 @@ public interface SessionDAO {
             "INNER JOIN ronda r ON s.ronda_id = r.id " +
             "WHERE s.next_session_date IS NOT NULL " +
             "AND s.next_session_date BETWEEN :start AND :end " +
+            "AND r.life_cycle_status = 'ACTIVE' " +
             "AND EXISTS ( " +
             "  SELECT 1 FROM ronda_mentor rm " +
             "  WHERE rm.ronda_id = r.id AND rm.end_date IS NULL" +

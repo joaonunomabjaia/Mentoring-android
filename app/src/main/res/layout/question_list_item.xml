@@ -66,16 +66,17 @@
                 android:id="@+id/birth_date_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:checkedAnswer='@{formSectionQuestion.answer.value}'>
 
-                <!-- RadioButton: SIM -->
+
+            <!-- RadioButton: SIM -->
                 <RadioButton
                     android:id="@+id/rdb_yes"
                     android:layout_weight="2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "SIM")}'
-                    android:checked='@{formSectionQuestion.answer.value != null ? formSectionQuestion.answer.value.equals("SIM") : false}'
                     android:text="@string/yes"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="SIM"/>
@@ -87,7 +88,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "NAO")}'
-                    android:checked='@{formSectionQuestion.answer.value != null ? formSectionQuestion.answer.value.equals("NAO") : false}'
                     android:text="@string/no"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="NAO"/>
@@ -100,7 +100,6 @@
                     android:layout_height="wrap_content"
                     android:visibility='@{formSectionQuestion.responseType.code.equals("SIM/NAO/NA") ? View.VISIBLE : View.GONE}'
                     android:onClick='@{() -> viewModel.setQuestionAnswer(formSectionQuestion, "N/A")}'
-                    android:checked='@{formSectionQuestion.answer.value != null ? formSectionQuestion.answer.value.equals("N/A") : false}'
                     android:text="@string/na"
                     android:textColor="@color/colorPrimaryDark"
                     android:tag="N/A"/>

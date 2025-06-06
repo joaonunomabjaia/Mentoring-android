@@ -169,8 +169,14 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
         getExecutorService().execute(() -> {
             try {
                 String pass = this.user.getPassword();
-                loggedUser.set(userService.login(this.user));
-                loggedUser.get().setPassword(pass);
+                User localUser = userService.login(this.user);
+                if (localUser != null) {
+                    localUser.setPassword(pass);
+                    loggedUser.set(localUser);
+                } else {
+                    loggedUser.set(null);
+                }
+
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

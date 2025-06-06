@@ -34,7 +34,7 @@ public interface RondaDAO {
     List<Ronda> getAllByHealthFacilityAndMentor(int healthFacilityId, int mentorId, String status);
 
     // Get all Ronda not synced
-    @Query("SELECT * FROM ronda WHERE sync_status = :syncStatus")
+    @Query("SELECT * FROM ronda WHERE sync_status = :syncStatus AND life_cycle_status = 'ACTIVE'")
     List<Ronda> getAllNotSynced(String syncStatus);
 
     // Get all Ronda by RondaType
@@ -63,7 +63,7 @@ public interface RondaDAO {
     @Query("SELECT * FROM ronda WHERE uuid = :uuid LIMIT 1")
     Ronda getByUuid(String uuid);
 
-    @Query("SELECT * FROM ronda")
+    @Query("SELECT * FROM ronda WHERE life_cycle_status = 'ACTIVE' ORDER BY start_date")
     List<Ronda> queryForAll();
 
     @Query("DELETE FROM ronda WHERE id = :id")
