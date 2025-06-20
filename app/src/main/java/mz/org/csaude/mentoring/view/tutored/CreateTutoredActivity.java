@@ -39,6 +39,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getRelatedViewModel().preInit();
         activityCreateTutoredBinding = DataBindingUtil.setContentView(this, R.layout.activity_create_tutored);
         activityCreateTutoredBinding.setViewModel(getRelatedViewModel());
 

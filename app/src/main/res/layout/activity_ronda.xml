@@ -200,33 +200,14 @@
                         android:orientation="vertical"
                         android:padding="@dimen/dimen_4dp">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:visibility="@{viewModel.currentStep.applicationStepDisplay ? View.GONE : View.VISIBLE}"
-                            android:text="@string/name_nuit"
-                            style="@style/input_labels"/>
-
-                        <AutoCompleteTextView
-                            android:id="@+id/aut_cmp_mentees"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="40"
-                            android:dropDownWidth="wrap_content"
-                            android:drawableRight="@drawable/baseline_person_search_24"
-                            android:visibility="@{viewModel.currentStep.applicationStepDisplay ? View.GONE : View.VISIBLE}"
-                            style="@style/bottom_border_edit_text_style"
-                            android:text="@{viewModel.selectedMentee.employee.fullName}"
-                            android:padding="@dimen/dimen_4dp"/>
-
                         <ImageButton
                             android:id="@+id/imv_add_selected_mentee"
                             android:layout_width="90dp"
-                            android:layout_height="50dp"
-                            app:srcCompat="@drawable/baseline_arrow_circle_down_24"
+                            android:layout_height="60dp"
+                            app:srcCompat="@drawable/c_person_search"
                             android:visibility="@{viewModel.currentStep.applicationStepDisplay ? View.GONE : View.VISIBLE}"
                             android:clickable="@{!viewModel.currentStep.applicationStepDisplay}"
-                            android:onClick="@{() -> viewModel.addSelectedMentee()}"
+                            android:onClick="@{() -> viewModel.searchMentees()}"
                             android:layout_margin="@dimen/dimen_10dp"
                             android:background="@drawable/button_shape"
                             android:layout_gravity="center"/>

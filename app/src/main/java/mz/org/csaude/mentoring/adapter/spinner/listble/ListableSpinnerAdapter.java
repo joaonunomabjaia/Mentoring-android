@@ -20,109 +20,100 @@ import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.util.Utilities;
 
-public class ListableSpinnerAdapter extends ArrayAdapter {
+public class ListableSpinnerAdapter extends ArrayAdapter<Listble> {
 
-    private Context context;
-    private List<Listble> dataList;
-
-    private List<Listble> originalDataList;
-
-
-    LayoutInflater inflater;
-    Activity activity;
-
-    private ArrayList<Listble> suggestions;
+    private final Context context;
+    private final LayoutInflater inflater;
+    private final List<Listble> originalDataList;
+    private final List<Listble> suggestions;
 
     public ListableSpinnerAdapter(@NonNull Activity activity, int textViewResourceId, List dataList) {
-        super(activity, textViewResourceId, dataList);
+        super(activity, textViewResourceId, new ArrayList<>(dataList));
         this.context = activity.getApplicationContext();
-        this.dataList = dataList;
-        inflater = activity.getLayoutInflater();
-        this.activity = activity;
+        this.inflater = activity.getLayoutInflater();
+        this.originalDataList = new ArrayList<>(dataList);
         this.suggestions = new ArrayList<>();
-        this.originalDataList = new ArrayList<>();
-        this.originalDataList.addAll(dataList);
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.simple_auto_complete_item, parent, false);
-        }
-        Listble listble = dataList.get(position);
-
-        TextView label = convertView.findViewById(R.id.label);
-        ImageView icon = convertView.findViewById(R.id.item_icon);
-        TextView info = convertView.findViewById(R.id.extra_info);
-
-        if (!Utilities.stringHasValue(listble.getExtraInfo())) info.setVisibility(View.GONE);
-        info.setText(listble.getExtraInfo());
-        label.setText(listble.getDescription());
-        icon.setImageResource(listble.getDrawable());
-        return convertView;
+        return buildItemView(position, convertView, parent);
     }
 
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        return buildItemView(position, convertView, parent);
+    }
 
-        if(convertView == null){
-            convertView = inflater.inflate(R.layout.simple_auto_complete_item,parent, false);
+    private View buildItemView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null) {
+            convertView = inflater.inflate(R.layout.simple_auto_complete_item, parent, false);
         }
 
-        Listble listble = dataList.get(position);
+        Listble listble = getItem(position);
+        if (listble == null) return convertView;
 
         TextView label = convertView.findViewById(R.id.label);
         ImageView icon = convertView.findViewById(R.id.item_icon);
         TextView info = convertView.findViewById(R.id.extra_info);
 
-        //icon.setImageResource(R.drawable.ic_menu_camera);
-
-        if (!Utilities.stringHasValue(listble.getExtraInfo())) info.setVisibility(View.GONE);
-        info.setText(listble.getExtraInfo());
         label.setText(listble.getDescription());
+        icon.setImageResource(listble.getDrawable());
+
+        if (Utilities.stringHasValue(listble.getExtraInfo())) {
+            info.setVisibility(View.VISIBLE);
+            info.setText(listble.getExtraInfo());
+        } else {
+            info.setVisibility(View.GONE);
+        }
+
         return convertView;
     }
 
     @NonNull
     @Override
     public Filter getFilter() {
-        return nameFilter;
-    }
-
-    Filter nameFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            if(constraint != null) {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
                 suggestions.clear();
-                dataList.clear();
-                dataList.addAll(originalDataList);
 
-                for (Listble listble : dataList) {
-                    if(listble.getDescription().toLowerCase().contains(constraint.toString().toLowerCase())){
-                        suggestions.add(listble);
+                if (constraint == null || constraint.length() == 0) {
+                    // Show all items when nothing is typed
+                    suggestions.addAll(originalDataList);
+                } else {
+                    String query = constraint.toString().toLowerCase();
+                    for (Listble item : originalDataList) {
+                        if (item.getDescription() != null &&
+                                item.getDescription().toLowerCase().contains(query)) {
+                            suggestions.add(item);
+                        }
                     }
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = suggestions;
-                filterResults.count = suggestions.size();
-                return filterResults;
-            } else {
-                return new FilterResults();
-            }
-        }
 
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults results) {
-            ArrayList<Listble> filteredList = (ArrayList<Listble>) results.values;
-            if(results != null && results.count > 0) {
+                results.values = new ArrayList<>(suggestions);
+                results.count = suggestions.size();
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
                 clear();
-                for (Listble c : filteredList) {
-                    add(c);
+                if (results != null && results.values != null) {
+                    addAll((List<Listble>) results.values);
                 }
                 notifyDataSetChanged();
             }
-        }
-    };
+
+            @Override
+            public CharSequence convertResultToString(Object resultValue) {
+                if (resultValue instanceof Listble) {
+                    return ((Listble) resultValue).getDescription();
+                }
+                return super.convertResultToString(resultValue);
+            }
+        };
+    }
 }

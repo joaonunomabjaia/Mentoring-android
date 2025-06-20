@@ -111,10 +111,7 @@ public class Tutored extends BaseModel {
 
     @Override
     public String toString() {
-        return "Tutored{" +
-                "employee=" + employee +
-                ", zeroEvaluationDone=" + zeroEvaluationDone +
-                '}';
+        return this.getEmployee().getFullName(); // ou outro campo desejado
     }
 
     @Override
@@ -123,11 +120,11 @@ public class Tutored extends BaseModel {
         if (!(o instanceof Tutored)) return false;
         if (!super.equals(o)) return false;
         Tutored tutored = (Tutored) o;
-        return Objects.equals(employee, tutored.employee);
+        return Objects.equals(employeeId, tutored.employeeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), employee);
+        return Objects.hash(super.hashCode(), employeeId);
     }
 }

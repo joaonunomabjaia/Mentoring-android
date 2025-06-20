@@ -82,14 +82,18 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         this.tutoredService = getApplication().getTutoredService();
         this.employeeService = getApplication().getEmployeeService();
 
-        initNewRecord();
-        districts = new ArrayList<>();
-        healthFacilities = new ArrayList<>();
-        menteeLabors = new ArrayList<>();
-        location = new Location();
+        // ✅ Inicialização segura
+        this.tutored = new Tutored();
+        this.tutored.setEmployee(new Employee());
+
+        this.districts = new ArrayList<>();
+        this.healthFacilities = new ArrayList<>();
+        this.menteeLabors = new ArrayList<>();
+        this.location = new Location();
 
         loadMeteeLabors();
     }
+
 
     @Override
     protected void doOnNoRecordFound() {
@@ -97,6 +101,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
 
     private void initNewRecord() {
+        this.tutored = new Tutored();
+        this.tutored.setEmployee(new Employee());
     }
 
     @Override
@@ -106,16 +112,13 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Override
     public void preInit() {
-        if (getCurrentStep().isApplicationStepEdit()) {
-            this.tutored = (Tutored) this.selectedListble;
-        } else {
-            this.tutored = new Tutored();
-            this.tutored.setEmployee(new Employee());
-        }
+        this.tutored = new Tutored();
+        this.tutored.setEmployee(new Employee());
     }
 
     @Bindable
     public String getName() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getName();
     }
 
@@ -125,6 +128,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getSurname(){
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getSurname();
     }
 
@@ -133,7 +137,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getNuit() {
-        if (this.tutored.getEmployee().getNuit() <= 0) return null;
+        if (this.tutored == null || this.tutored.getEmployee() == null || this.tutored.getEmployee().getNuit() <= 0) return null;
         return Utilities.parseLongToString(this.tutored.getEmployee().getNuit());
     }
     public void setNuit(String nuit) {
@@ -147,6 +151,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public Listble getProfessionalCategory() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getProfessionalCategory();
     }
     public void setProfessionalCategory(Listble professionalCategory) {
@@ -156,7 +161,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Bindable
     public String getTrainingYear() {
-        if (this.tutored.getEmployee().getTrainingYear() == null || this.tutored.getEmployee().getTrainingYear() <= 0) return null;
+        if (this.tutored == null || this.tutored.getEmployee() == null || this.tutored.getEmployee().getTrainingYear() == null || this.tutored.getEmployee().getTrainingYear() <= 0) return null;
         return String.valueOf(this.tutored.getEmployee().getTrainingYear());
     }
     public void setTrainingYear(String trainingYear) {
@@ -166,6 +171,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getPhoneNumber() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getPhoneNumber();
     }
     public void setPhoneNumber(String phoneNumber) {
@@ -173,6 +179,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getEmail() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getEmail();
     }
 
@@ -181,6 +188,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public Listble getPartner() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getPartner();
     }
 
@@ -210,7 +218,8 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Bindable
     public Listble getSelectedNgo() {
-        return  this.tutored.getEmployee().getPartner();
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
+        return this.tutored.getEmployee().getPartner();
     }
 
     public void setSelectedNgo(Listble selectedNgo) {
@@ -404,6 +413,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Bindable
     public Listble getMenteeLabor(){
+        if (!Utilities.listHasElements(this.menteeLabors)) return null;
         return Utilities.findOnArray(this.menteeLabors, SimpleValue.fastCreate("SNS"));
     }
 
