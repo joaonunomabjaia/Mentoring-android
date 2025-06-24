@@ -464,7 +464,8 @@ public class LoginVM extends BaseViewModel implements RestResponseListener<User>
     public void doOnRestErrorResponse(String errormsg) {
         runOnMainThread(() -> {
             if (Utilities.stringHasValue(errormsg)) {
-                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.invalid_user_or_password)).show();
+                Log.e("LoginVM", "doOnRestErrorResponse: " + errormsg);
+                Utilities.displayAlertDialog(getRelatedActivity(), errormsg).show();
             } else {
                 String invalidMessage = getRelatedActivity().getString(R.string.invalid_user_or_password);
                 Utilities.displayAlertDialog(getRelatedActivity(), invalidMessage).show();

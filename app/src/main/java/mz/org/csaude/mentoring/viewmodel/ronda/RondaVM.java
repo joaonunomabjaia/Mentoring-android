@@ -543,8 +543,9 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
     public void edit(Ronda ronda) {
         Map<String, Object> params = new HashMap<>();
         params.put("relatedRecord", ronda);
+        params.put("title", ronda.isRondaZero() ? "Ronda Zero" : "Ronda de Mentoria");
         getCurrentStep().changeToEdit();
-        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
+        getRelatedActivity().nextActivityFinishingCurrent(CreateRondaActivity.class, params);
     }
 
     public void setSelectedMentees(List<Tutored> mentees) {

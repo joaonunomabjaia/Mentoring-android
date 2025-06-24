@@ -282,12 +282,13 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         // Prepare the parameters for the next activity
         Map<String, Object> params = new HashMap<>();
         params.put("ronda", ronda);
+        params.put("title", ronda.isRondaZero() ? getRelatedActivity().getString(R.string.ronda_zero) : getRelatedActivity().getString(R.string.ronda_mentoria));
 
         // Change the application step to "edit"
         getApplication().getApplicationStep().changeToEdit();
 
         // Navigate to the CreateRondaActivity
-        getRelatedActivity().nextActivity(CreateRondaActivity.class, params);
+        getRelatedActivity().nextActivityFinishingCurrent(CreateRondaActivity.class, params);
     }
 
 
