@@ -148,7 +148,7 @@ public class SessionRestService extends BaseRestService {
 
                                     listener.doOnResponse(BaseRestService.REQUEST_SUCESS, sessionList);
                                 } catch (SQLException e) {
-                                    throw new RuntimeException(e);
+                                    listener.doOnRestErrorResponse(e.getMessage());
                                 }
                             });
                         } else listener.doOnRestErrorResponse(response.message());
@@ -156,12 +156,13 @@ public class SessionRestService extends BaseRestService {
 
                     @Override
                     public void onFailure(Call<List<SessionDTO>> call, Throwable t) {
-                        Log.i("METADATA LOAD --", t.getMessage(), t);
+                        Log.e("METADATA LOAD --", t.getMessage(), t);
+                        listener.doOnRestErrorResponse(t.getMessage());
                     }
                 });
             } else listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            listener.doOnRestErrorResponse(e.getMessage());
         }
     }
 }

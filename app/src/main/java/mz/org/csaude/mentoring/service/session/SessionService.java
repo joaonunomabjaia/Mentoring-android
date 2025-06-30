@@ -33,4 +33,6 @@ public interface SessionService extends BaseService<Session> {
     List<Session> getAllNotSynced() throws SQLException;
 
     List<Session> getSessionsWithinNextDays(int i);
+
+    List<Session> getAllOfRondaAndMentee(Ronda ronda, Tutored tutored);
 }

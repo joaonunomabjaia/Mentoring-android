@@ -290,6 +290,7 @@
     <string name="sync_timeout_cancelled">A sincronização foi cancelada por exceder o tempo limite. Verifique sua conexão ou tente novamente.</string>
     <string name="save">Gravar</string>
     <string name="select_mentee">Seleccione</string>
+    <string name="session_start_date_future_error">A data de início da sessão não pode ser futura.</string>
 
 
 </resources>

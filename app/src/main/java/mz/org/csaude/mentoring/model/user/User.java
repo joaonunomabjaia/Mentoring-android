@@ -150,7 +150,7 @@ public class User extends BaseModel {
         if (!Utilities.stringHasValue(this.userName)) return "O campo Utilizador deve ser preenchido.";
         if (!Utilities.stringHasValue(this.password)) return "O campo Senha deve ser preenchido.";
         if (this.userName.length() <= 3) return "O nome do utilizador deve ter o mínimo de quatro caracteres.";
-        if (this.password.length() <= 3) return "A senha deve ter o mínimo de quatro caracteres.";
+        if (this.password.length() <= 5) return "A senha deve ter o mínimo de seis caracteres.";
         return "";
     }
 

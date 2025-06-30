@@ -99,32 +99,32 @@ public class SessionVM extends BaseViewModel {
         getExecutorService().execute(() -> {
             Ronda ronda = this.session.getRonda();
             List<Session> sessions;
-            try {
-                sessions = getApplication().getSessionService().getAllOfRonda(ronda);
-                ronda.setSessions(sessions);
+            sessions = getApplication().getSessionService().getAllOfRondaAndMentee(ronda, this.session.getTutored());
+            ronda.setSessions(sessions);
 
-                // Validate session dates on the background thread
-                if (Utilities.listHasElements(ronda.getSessions())) {
-                    // Find the session with the greatest endDate
-                    Session latestSession = null;
-                    for (Session s : ronda.getSessions()) {
-                        if (latestSession == null || s.getEndDate().after(latestSession.getEndDate())) {
-                            latestSession = s;
-                        }
-                    }
+            // Validate session dates on the background thread
+            if (Utilities.listHasElements(ronda.getSessions())) {
+                // Find the session with the greatest endDate (ignoring nulls)
+                Session latestSession = null;
+                for (Session s : ronda.getSessions()) {
+                    if (s.getEndDate() == null) continue; // Pula sessões sem data de fim
 
-                    // Validate that this.session's startDate is not before the latest session's endDate
-                    if (latestSession != null && latestSession.getEndDate() != null && DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), latestSession.getEndDate())) {
-                        runOnMainThread(() -> {
-                            progress.dismiss(); // Dismiss progress dialog before showing the error
-                            String dateError = getRelatedActivity().getString(R.string.prev_session_start_date_error);
-                            Utilities.displayAlertDialog(getRelatedActivity(), dateError).show();
-                        });
-                        return;
+                    if (latestSession == null || latestSession.getEndDate() == null ||
+                            s.getEndDate().after(latestSession.getEndDate())) {
+                        latestSession = s;
                     }
                 }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+
+
+                // Validate that this.session's startDate is not before the latest session's endDate
+                if (latestSession != null && latestSession.getEndDate() != null && DateUtilities.isDateBeforeIgnoringTime(this.session.getStartDate(), latestSession.getEndDate())) {
+                    runOnMainThread(() -> {
+                        progress.dismiss(); // Dismiss progress dialog before showing the error
+                        String dateError = getRelatedActivity().getString(R.string.prev_session_start_date_error);
+                        Utilities.displayAlertDialog(getRelatedActivity(), dateError).show();
+                    });
+                    return;
+                }
             }
 
             // Additional validations on the main thread
@@ -133,6 +133,12 @@ public class SessionVM extends BaseViewModel {
                     progress.dismiss(); // Dismiss progress dialog before showing the error
                     String startDateError = getRelatedActivity().getString(R.string.session_start_date_error);
                     Utilities.displayAlertDialog(getRelatedActivity(), startDateError).show();
+                    return;
+                }
+                if (DateUtilities.isDateAfterIgnoringTime(this.session.getStartDate(), DateUtilities.getCurrentDate())) {
+                    progress.dismiss();
+                    String futureDateError = getRelatedActivity().getString(R.string.session_start_date_future_error);
+                    Utilities.displayAlertDialog(getRelatedActivity(), futureDateError).show();
                     return;
                 }
                 if (this.session.getForm() == null) {

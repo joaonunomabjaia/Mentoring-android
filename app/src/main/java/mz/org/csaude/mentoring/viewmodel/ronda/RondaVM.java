@@ -652,6 +652,10 @@ public class RondaVM extends BaseViewModel implements RestResponseListener<Ronda
 
     public void addToSelected(Tutored tutored) {
         if (this.selectedMentees == null) this.selectedMentees = new ArrayList<>();
+        if (!this.ronda.isRondaZero() && this.selectedMentees.size() > 7) {
+            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.max_mentees_reached)).show();
+            return;
+        }
         this.selectedMentees.add(tutored);
         notifyPropertyChanged(BR.selectedMentees);
     }

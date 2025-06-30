@@ -342,6 +342,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
             this.mentorship.getSession().setForm(this.mentorship.getForm());
 
+            this.mentorship.setPerformedDate(this.mentorship.getStartDate());
             getApplication().getMentorshipService().save(this.mentorship);
             Log.i("Mentorship initial save", this.mentorship.toString());
 

@@ -324,6 +324,11 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
+    public List<Session> getAllOfRondaAndMentee(Ronda ronda, Tutored tutored) {
+        return sessionDAO.queryForAllOfRondaAndMentee(ronda.getId(), tutored.getId());
+    }
+
+    @Override
     public Session getByuuid(String uuid) throws SQLException {
         return sessionDAO.getByUuid(uuid);
     }

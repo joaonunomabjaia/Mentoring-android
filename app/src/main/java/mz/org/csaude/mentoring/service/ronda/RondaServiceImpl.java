@@ -31,6 +31,7 @@ import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
+import mz.org.csaude.mentoring.util.Utilities;
 
 public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaService {
     RondaDAO rondaDAO;
@@ -270,6 +271,9 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     public void tryToCloseRonda(Ronda ronda, Date endDate) {
         try {
             ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
+            if (!Utilities.listHasElements(ronda.getRondaMentees())) {
+                ronda.setRondaMentees(getApplication().getRondaMenteeService().getAllOfRonda(ronda));
+            }
             ronda.tryToCloseRonda();
 
             if (ronda.isRondaCompleted()) {
