@@ -108,8 +108,8 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         for (Ronda ronda: rondas) {
             ronda.setRondaType(this.rondaTypeDAO.queryForId(ronda.getRondaTypeId()));
             ronda.setHealthFacility(getApplication().getHealthFacilityService().getById(ronda.getHealthFacilityId()));
-            ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
-            ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
+            //ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
+            //ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
         }
         return rondas;
     }

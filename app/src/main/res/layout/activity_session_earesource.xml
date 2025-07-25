@@ -68,6 +68,7 @@
                 android:checked="@{viewModel.recommendResources}"
                 android:onClick="@{() -> viewModel.changeRecommendResourcesStatus()}"
                 android:text="@string/recommend_consultation"
+                android:textColor="@color/input_labels"
                 android:padding="8dp" />
 
             <!-- Search Bar -->

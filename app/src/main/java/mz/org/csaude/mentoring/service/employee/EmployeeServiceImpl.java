@@ -16,6 +16,7 @@ import mz.org.csaude.mentoring.dto.employee.EmployeeDTO;
 import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.location.Location;
+import mz.org.csaude.mentoring.util.Utilities;
 
 public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements EmployeeService {
 
@@ -91,16 +92,15 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
                 e.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
                 this.employeeDAO.insert(e);
                 e.setId(this.employeeDAO.getByUuid(e.getUuid()).getId());
-                saveLocationFromEmplyee(e.getLocations());
+                saveLocationFromEmplyee(e.getLocations(), e);
                 return e;
             } else {
                 e.setId(employee.getId());
-                employee.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
-                employee.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
-                employee.setLocations(e.getLocations());
-                this.employeeDAO.update(employee);
+                e.setProfessionalCategory(professionalCategoryDAO.getByUuid(e.getProfessionalCategory().getUuid()));
+                e.setPartner(partnerDao.getByUuid(e.getPartner().getUuid()));
+                this.employeeDAO.update(e);
                 e.setId(this.employeeDAO.getByUuid(e.getUuid()).getId());
-                saveLocationFromEmplyee(employee.getLocations());
+                saveLocationFromEmplyee(e.getLocations(), e);
                 return employee;
             }
         } catch (Exception ex) {
@@ -108,7 +108,14 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
         }
     }
 
-    private void saveLocationFromEmplyee(List<Location> locations) throws SQLException {
+    private void saveLocationFromEmplyee(List<Location> locations, Employee employee) throws SQLException {
+
+        List<Location> oldLocations = getApplication().getLocationService().getAllOfEmploee(employee);
+        if (Utilities.listHasElements(oldLocations)) {
+            for (Location location : oldLocations) {
+                getApplication().getLocationService().delete(location);
+            }
+        }
 
         for (Location location : locations){
             if (location.getProvince() != null) location.setProvince(getDataBaseHelper().getProvinceDAO().getByUuid(location.getProvince().getUuid()));
@@ -120,7 +127,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             } else {
                 location.getHealthFacility().setId(h.getId());
             }
-            location.setEmployee(location.getEmployee());
+            location.setEmployee(employee);
             location.setHealthFacility(location.getHealthFacility());
             getApplication().getLocationService().saveOrUpdate(location);
         }

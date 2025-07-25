@@ -35,6 +35,7 @@ import mz.org.csaude.mentoring.base.auth.AuthInterceptorImpl;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.common.ApplicationStep;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
@@ -567,6 +568,25 @@ public class MentoringApplication  extends Application {
     }
 
     public Tutor getCurrMentor() {
+        if (this.tutor == null && sessionManager.getActiveUser() != null) {
+            try {
+                User currUser = getUserService().getByuuid(sessionManager.getActiveUser());
+                this.tutor = getTutorService().getByEmployee(new Employee(currUser.getEmployeeId()));
+                this.tutor.setEmployee(getEmployeeService().getById(this.tutor.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else
+        if (this.tutor.getEmployee() == null && this.authenticatedUser.getEmployee() != null) {
+            this.tutor.setEmployee(this.authenticatedUser.getEmployee());
+        } else if (this.authenticatedUser.getEmployee() == null) {
+            try {
+                this.tutor.setEmployee(getEmployeeService().getById(this.tutor.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return this.tutor;
     }
 

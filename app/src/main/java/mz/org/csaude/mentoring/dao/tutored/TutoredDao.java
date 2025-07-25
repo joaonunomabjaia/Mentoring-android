@@ -58,8 +58,8 @@ public interface TutoredDao {
             "AND l.life_cycle_status = :lifeCycleStatus " +
             "AND t.life_cycle_status = :lifeCycleStatus " +
             "AND t.zero_evaluation_status = :zeroEvaluation " +
-            "AND NOT EXISTS (SELECT 1 FROM ronda_mentee rm " +
-            "JOIN ronda r WHERE rm.ronda_id = r.id AND rm.mentee_id = t.id AND r.end_date IS NULL) " +
+            //"AND NOT EXISTS (SELECT 1 FROM ronda_mentee rm " +
+            //"JOIN ronda r WHERE rm.ronda_id = r.id AND rm.mentee_id = t.id AND r.end_date IS NULL and r.ronda_type_id = 2) " +
             "ORDER BY e.id")
     List<Tutored> getAllForMentoringRound(final int healthFacilityId, final String lifeCycleStatus, final boolean zeroEvaluation);
 

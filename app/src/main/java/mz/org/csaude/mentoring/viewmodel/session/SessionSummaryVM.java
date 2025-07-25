@@ -3,11 +3,13 @@ package mz.org.csaude.mentoring.viewmodel.session;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Dialog;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -74,6 +76,35 @@ public class SessionSummaryVM extends BaseViewModel {
             }
         }.execute();
     }
+
+    public void generateAndWritePDFToUri(Uri uri) {
+        new AsyncTask<Void, Void, Boolean>() {
+            private Dialog progress;
+
+            @Override
+            protected void onPreExecute() {
+                progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try (OutputStream out = getRelatedActivity().getContentResolver().openOutputStream(uri)) {
+                    return PDFGenerator.createPDF(out, getRelatedActivity(), sessionSummaryList, session.getTutored());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                dismissProgress(progress);
+                String message = result ? getRelatedActivity().getString(R.string.print_success) : getRelatedActivity().getString(R.string.print_failure);
+                Utilities.displayAlertDialog(getRelatedActivity(), message).show();
+            }
+        }.execute();
+    }
+
 
 
     public List<SessionSummary> getSessionSummaryList() {

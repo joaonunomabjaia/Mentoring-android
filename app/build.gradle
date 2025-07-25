@@ -3,7 +3,7 @@ plugins {
 }
 ext.versionMajor = 1
 ext.versionMinor = 0
-ext.versionPatch = 15
+ext.versionPatch = 18
 ext.versionClassifier = null
 ext.isSnapshot = true
 ext.minimumSdkVersion = 28
@@ -79,6 +79,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'androidx.security:security-crypto:1.0.0'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

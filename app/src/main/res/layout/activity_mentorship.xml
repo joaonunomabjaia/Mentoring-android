@@ -260,6 +260,7 @@
                                     android:layout_height="wrap_content"
                                     android:checked="@{viewModel.consultaEvaluation}"
                                     android:onClick='@{()->viewModel.setEvaluationType(EvaluationType.CONSULTA)}'
+                                    android:textColor="@color/input_labels"
                                     android:text="@string/consulta" />
 
                                 <RadioButton
@@ -270,6 +271,7 @@
                                     android:layout_height="wrap_content"
                                     android:checked="@{viewModel.fichaEvaluation}"
                                     android:onClick='@{()->viewModel.setEvaluationType(EvaluationType.FICHA)}'
+                                    android:textColor="@color/input_labels"
                                     android:text="@string/ficha" />
                             </RadioGroup>
                         </LinearLayout>
@@ -351,6 +353,7 @@
                             android:checked="@{viewModel.demostrationMade}"
                             android:onClick="@{() -> viewModel.changeDemostrationStatus()}"
                             android:text="@string/demostration_needed"
+                            android:textColor="@color/input_labels"
                             android:padding="8dp" />
 
                         <TextView

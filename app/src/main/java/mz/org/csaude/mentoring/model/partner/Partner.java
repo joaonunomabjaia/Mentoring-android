@@ -70,4 +70,8 @@ public class Partner extends BaseModel implements Listble {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public boolean isMISAU() {
+        return MISAU_UUID.equals(getUuid());
+    }
 }

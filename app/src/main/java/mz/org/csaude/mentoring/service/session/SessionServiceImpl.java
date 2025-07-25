@@ -144,59 +144,54 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     @Override
     public List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore) {
         List<SessionSummary> summaries = new ArrayList<>();
+        SessionSummary finalSummary = new SessionSummary().setTitle("Desempenho Final");
 
-        SessionSummary sessionSummary = new SessionSummary();
-        sessionSummary.setTitle("Desempenho Final");
         try {
-            session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
+            session.setMentorships(getApplication()
+                    .getMentorshipService()
+                    .getAllOfSession(session));
+
             for (Mentorship mentorship : session.getMentorships()) {
-                if (mentorship.isPatientEvaluation()) {
-                    mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
-                    determineFinalScore(sessionSummary, mentorship.getAnswers());
-                    for (Answer answer : mentorship.getAnswers()) {
-                        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
-                        if (categoryAlreadyExists(cat, summaries)){
-                            doCountInCategory(cat, summaries, answer);
-                        } else {
-                            summaries.add(initSessionSummary(answer));
-                        }
+                if (!mentorship.isPatientEvaluation()) continue;
+
+                mentorship.setAnswers(getApplication()
+                        .getAnswerService()
+                        .getAllOfMentorship(mentorship));
+
+                determineFinalScore(finalSummary, mentorship.getAnswers());
+
+                for (Answer answer : mentorship.getAnswers()) {
+                    String category = answer.getFormSectionQuestion()
+                            .getFormSection()
+                            .getSection()
+                            .getDescription();
+
+                    if (categoryAlreadyExists(category, summaries)) {
+                        doCountInCategory(category, summaries, answer);
+                    } else {
+                        summaries.add(initSessionSummary(answer));
                     }
-                    break;
                 }
+                break; // Only process the first patient evaluation
             }
-            if (includeFinalScore) summaries.add(sessionSummary);
+
+            if (includeFinalScore) summaries.add(finalSummary);
             return summaries;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void determineFinalScore(SessionSummary sessionSummary, List<Answer> answers) {
-        int simCount = 0;
-        int naoCount = 0;
 
-        // Loop through answers to count SIM and NÃO values
-        for (Answer answer : answers) {
-            String value = answer.getValue().trim().toUpperCase();
-            if (value.equals("SIM")) {
-                simCount++;
-            } else if (value.equals("NAO")) {
-                naoCount++;
-            }
-        }
+    private void determineFinalScore(SessionSummary summary, List<Answer> answers) {
+        int sim = (int) answers.stream().filter(Answer::isYesAnswer).count();
+        int nao = (int) answers.stream().filter(Answer::isNoAnswer).count();
 
-        sessionSummary.setSimCount(simCount);
-        sessionSummary.setNaoCount(naoCount);
-
-       /* // Calculate Desempenho Final using the provided formula
-        double finalPerformance = 0.0;
-        if (simCount + naoCount > 0) {
-            finalPerformance = ((double) simCount / (simCount + naoCount)) * 100;
-        }
-
-        // Set the final score in the session summary
-        sessionSummary.setProgressPercentage(finalPerformance+"%");*/
+        summary.setSimCount(sim)
+                .setNaoCount(nao);
     }
+
 
 
     @Override
@@ -227,17 +222,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         return this.sessionRecommendedResourceDAO.getByUuid(uuid);
     }
 
-    private void doCountInCategory(String cat, List<SessionSummary> summaries, Answer answer) {
-        for (SessionSummary sessionSummary : summaries) {
-            if (sessionSummary.getTitle().equals(cat)) {
-                if (answer.getValue().equals("SIM")) {
-                    sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);
-                } else if (answer.getValue().equals("NAO")) {
-                    sessionSummary.setNaoCount(sessionSummary.getNaoCount() + 1);
-                }
+    private void doCountInCategory(String category, List<SessionSummary> summaries, Answer answer) {
+        for (SessionSummary summary : summaries) {
+            if (!summary.getTitle().equals(category)) continue;
+
+            if (answer.isYesAnswer()) {
+                summary.setSimCount(summary.getSimCount() + 1);
+            } else if (answer.isNoAnswer()) {
+                summary.setNaoCount(summary.getNaoCount() + 1);
             }
         }
     }
+
 
     private boolean categoryAlreadyExists(String cat, List<SessionSummary> summaries) {
         for (SessionSummary sessionSummary : summaries) {
@@ -249,17 +245,12 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     private SessionSummary initSessionSummary(Answer answer) {
-        SessionSummary sessionSummary = new SessionSummary();
-        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
-        sessionSummary.setTitle(cat);
-
-        if (answer.getValue().equals("SIM")) {
-            sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);
-        } else if (answer.getValue().equals("NAO")) {
-            sessionSummary.setNaoCount(sessionSummary.getNaoCount() + 1);
-        }
-        return sessionSummary;
+        return new SessionSummary()
+                .setTitle(answer.getFormSectionQuestion().getFormSection().getSection().getDescription())
+                .setSimCount(answer.isYesAnswer() ? 1 : 0)
+                .setNaoCount(answer.isNoAnswer() ? 1 : 0);
     }
+
 
     @Override
     public List<Session> getAllOfRondaPending(Ronda ronda) throws SQLException {

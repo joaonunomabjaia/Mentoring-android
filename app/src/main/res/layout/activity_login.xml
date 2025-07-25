@@ -120,6 +120,7 @@
                 android:layout_marginBottom="@dimen/dimen_10dp"
                 android:checked="@{viewModel.remeberMe}"
                 android:onClick="@{() -> viewModel.changeRemeberMeStatus()}"
+                style="@style/login_text_style"
                 android:text="@string/remember_me"/>
 
             <RelativeLayout
@@ -195,6 +196,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:gravity="center"
+                style="@style/login_text_style"
                 android:text="@{viewModel.appName}"/>
 
             <TextView
@@ -202,6 +204,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:gravity="center"
+                style="@style/login_text_style"
                 android:text="@{viewModel.appVersionName}"/>
         </LinearLayout>
 

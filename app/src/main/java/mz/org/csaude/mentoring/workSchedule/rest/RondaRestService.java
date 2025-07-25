@@ -172,7 +172,13 @@ public class RondaRestService extends BaseRestService {
         try {
             rondas = getApplication().getRondaService().getAllNotSynced();
             if (Utilities.listHasElements(rondas)) {
-                Call<List<RondaDTO>> rondaCall = syncDataService.updateRondaInfo(Utilities.parse(rondas, RondaDTO.class));
+                List<RondaDTO> rondaDTOs = new ArrayList<>();
+                for (Ronda ronda : rondas) {
+                    rondaDTOs.add(new RondaDTO(ronda));
+                }
+                Call<List<RondaDTO>> rondaCall = syncDataService.updateRondaInfo(rondaDTOs);
+
+                //Call<List<RondaDTO>> rondaCall = syncDataService.updateRondaInfo(Utilities.parse(rondas, RondaDTO.class));
                 rondaCall.enqueue(new Callback<List<RondaDTO>>() {
                     @Override
                     public void onResponse(Call<List<RondaDTO>> call, Response<List<RondaDTO>> response) {
@@ -188,22 +194,27 @@ public class RondaRestService extends BaseRestService {
 
                                     listener.doOnResponse(BaseRestService.REQUEST_SUCESS, rondaList);
                                 } catch (SQLException e) {
+                                    Log.e("RONDA CLOSE REST SERVICE --", e.getMessage(), e);
                                     listener.doOnRestErrorResponse(response.message());
                                 }
                             });
-                        } else listener.doOnRestErrorResponse(response.message());
+                        } else {
+                            Log.e("RONDA CLOSE REST SERVICE --", response.message());
+                            listener.doOnRestErrorResponse(response.message());
+                        }
                     }
 
                     @Override
                     public void onFailure(Call<List<RondaDTO>> call, Throwable t) {
-                        Log.i("RONDA REST SERVICE --", t.getMessage(), t);
+                        Log.e("RONDA CLOSE REST SERVICE --", t.getMessage(), t);
                         listener.doOnRestErrorResponse(t.getMessage());
                     }
                 });
             } else {
                 listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            Log.e("RONDA CLOSE REST SERVICE --", e.getMessage(), e);
             listener.doOnRestErrorResponse(e.getMessage());
         }
     }

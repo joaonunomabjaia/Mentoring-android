@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +24,7 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.FragmentTutoredsBinding;
 import mz.org.csaude.mentoring.listner.dialog.IListbleDialogListener;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.RecyclerItemTouchHelper;
 import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
@@ -30,7 +32,7 @@ import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
 /**
  * @author Jose Julai Ritsure
  */
-public class TutoredFragment extends GenericFragment implements IListbleDialogListener {
+public class TutoredFragment extends GenericFragment implements IListbleDialogListener, TutoredAdapter.OnTutoredActionListener {
     private FragmentTutoredsBinding fragmentTutoredBinding;
 
     private RecyclerView rcvTutoreds;
@@ -55,13 +57,41 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         fragmentTutoredBinding.setViewModel(getRelatedViewModel());
+
         this.rcvTutoreds = fragmentTutoredBinding.rcvTutoreds;
         getRelatedViewModel().initSearch();
+
+        displaySearchResults();
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, (viewHolder, direction, position) -> {
+            if (viewHolder instanceof TutoredAdapter.TutoredViewHolder) {
+                tutoredItemAdapter.setSwipedPosition(position); // marca como swiped
+                Tutored deleted = getRelatedViewModel().getSearchResults().get(position);
+                //tutoredItemAdapter.actionListener.onEdit(deleted); // trigger edit
+                //tutoredItemAdapter.notifyItemChanged(position); // reset
+            }
+        });
+
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rcvTutoreds);
+
+        rcvTutoreds.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING && !tutoredItemAdapter.isIgnoreCloseSwipe()) {
+                    tutoredItemAdapter.closeSwipedItem();
+                }
+                tutoredItemAdapter.setIgnoreCloseSwipe(false); // reset do flag
+            }
+        });
+
+
     }
+
 
     public void displaySearchResults() {
         try {
-            this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, getRelatedViewModel().getSearchResults(), getMyActivity());
+            this.tutoredItemAdapter = new TutoredAdapter(rcvTutoreds, getRelatedViewModel().getSearchResults(), getMyActivity(), this);
             displayDataOnRecyclerView(rcvTutoreds, tutoredItemAdapter, getContext(), LinearLayoutManager.VERTICAL);
         } catch (Exception e) {
             // Log the error or handle it as necessary
@@ -107,5 +137,13 @@ public class TutoredFragment extends GenericFragment implements IListbleDialogLi
     @Override
     public BaseViewModel initViewModel() {
         return new ViewModelProvider(this).get(TutoredVM.class);
+    }
+
+    @Override
+    public void onEdit(Tutored tutored) {
+
+        if (tutored != null) {
+            getRelatedViewModel().initMenteeEdition(tutored);
+        }
     }
 }

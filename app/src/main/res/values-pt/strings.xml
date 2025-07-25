@@ -45,7 +45,7 @@
     <string name="telephone">Telefone</string>
     <string name="career">Carreira</string>
     <string name="position">Posição</string>
-    <string name="vinculo_laboral">Contrato de Trabalho</string>
+    <string name="vinculo_laboral">Vínculo laboral</string>
     <string name="required_field">Campo obrigatório</string>
     <string name="phone_number_invalid">Número de telefone inválido</string>
     <string name="email_invalid">Email inválido</string>
@@ -236,7 +236,7 @@
     <string name="record_sucessfully_removed">Registro removido com sucesso.</string>
     <string name="session_start_date_error">A data de início da sessão não pode ser anterior à data de início da ronda.</string>
     <string name="select_competence_table">Por favor, selecione uma tabela de competências.</string>
-    <string name="print_success">Resumo impresso com sucesso. Encontre o documento no diretório de downloads.</string>
+    <string name="print_success">Resumo impresso com sucesso. Encontre o documento no diretório de downloads ou por si indicado.</string>
     <string name="print_failure">Não foi possível imprimir o documento.</string>
 
     <string name="configuracoes">Configurações</string>
@@ -291,6 +291,7 @@
     <string name="save">Gravar</string>
     <string name="select_mentee">Seleccione</string>
     <string name="session_start_date_future_error">A data de início da sessão não pode ser futura.</string>
+    <string name="verifying_connection">Verificando conexão ao servidor...</string>
 
 
 </resources>
