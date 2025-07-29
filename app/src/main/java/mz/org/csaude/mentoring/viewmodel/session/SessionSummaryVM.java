@@ -27,6 +27,8 @@ public class SessionSummaryVM extends BaseViewModel {
 
     private List<SessionSummary> sessionSummaryList;
 
+    private String mentorshipuuid;
+
     public SessionSummaryVM(@NonNull Application application) {
         super(application);
     }
@@ -45,7 +47,7 @@ public class SessionSummaryVM extends BaseViewModel {
     }
 
     public void print() {
-        getRelatedActivity().checkStoragePermission();
+        getRelatedActivity().createPDF();
     }
 
     @Override
@@ -112,7 +114,7 @@ public class SessionSummaryVM extends BaseViewModel {
     }
 
     public void generateSessionSummary() {
-        sessionSummaryList = getApplication().getSessionService().generateSessionSummary(session, true);
+        sessionSummaryList = getApplication().getSessionService().generateSessionSummary(session, mentorshipuuid, true);
         if (Utilities.listHasElements(sessionSummaryList)) {
             runOnMainThread(()->getRelatedActivity().displaySearchResults());
             if (session.getRonda().isRondaZero()) {
@@ -135,5 +137,9 @@ public class SessionSummaryVM extends BaseViewModel {
         } catch (SQLException e) {
             Log.e("SessionSummaryVM", "Exception: " + e.getMessage());
         }
+    }
+
+    public void setMentorshipUUID(String mentorshipuuid) {
+        this.mentorshipuuid = mentorshipuuid;
     }
 }

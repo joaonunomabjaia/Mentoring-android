@@ -29,11 +29,9 @@ import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.util.PDFGenerator;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.view.mentorship.MentorshipActivity;
 import mz.org.csaude.mentoring.view.mentorship.ZeroMentorshipListActivity;
 import mz.org.csaude.mentoring.view.ronda.CreateRondaActivity;
 import mz.org.csaude.mentoring.view.ronda.RondaActivity;
-import mz.org.csaude.mentoring.view.session.SessionActivity;
 import mz.org.csaude.mentoring.view.session.SessionListActivity;
 
 public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, ServerStatusListener {
@@ -197,7 +195,7 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         Map<Integer, List<SessionSummary>> summaryDetails = new HashMap<>();
         int i = 1;
         for (Session session : sessions) {
-            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session, false));
+            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session, null, false));
             i++;
         }
         return summaryDetails;

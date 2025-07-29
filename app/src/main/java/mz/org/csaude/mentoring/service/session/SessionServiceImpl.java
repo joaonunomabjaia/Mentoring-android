@@ -7,7 +7,6 @@ import androidx.room.Transaction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -142,37 +141,32 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
-    public List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore) {
+    public List<SessionSummary> generateSessionSummary(Session session, String mentorshipuuid, boolean includeFinalScore) {
         List<SessionSummary> summaries = new ArrayList<>();
         SessionSummary finalSummary = new SessionSummary().setTitle("Desempenho Final");
+        Mentorship currtentMentorship = null;
 
         try {
             session.setMentorships(getApplication()
                     .getMentorshipService()
                     .getAllOfSession(session));
 
-            for (Mentorship mentorship : session.getMentorships()) {
-                if (!mentorship.isPatientEvaluation()) continue;
+            if (mentorshipuuid != null) {
+                currtentMentorship = session.getMentorships().stream()
+                        .filter(mentorship -> mentorship.getUuid().equals(mentorshipuuid))
+                        .findFirst()
+                        .orElse(null);
+            }
 
-                mentorship.setAnswers(getApplication()
-                        .getAnswerService()
-                        .getAllOfMentorship(mentorship));
+            if (session.isCompleted()) {
+                for (Mentorship mentorship : session.getMentorships()) {
+                    if (!mentorship.isPatientEvaluation()) continue;
 
-                determineFinalScore(finalSummary, mentorship.getAnswers());
-
-                for (Answer answer : mentorship.getAnswers()) {
-                    String category = answer.getFormSectionQuestion()
-                            .getFormSection()
-                            .getSection()
-                            .getDescription();
-
-                    if (categoryAlreadyExists(category, summaries)) {
-                        doCountInCategory(category, summaries, answer);
-                    } else {
-                        summaries.add(initSessionSummary(answer));
-                    }
+                    processSummary(mentorship, finalSummary, summaries);
+                    break;
                 }
-                break; // Only process the first patient evaluation
+            } else if (currtentMentorship != null) {
+                processSummary(currtentMentorship, finalSummary, summaries);
             }
 
             if (includeFinalScore) summaries.add(finalSummary);
@@ -183,6 +177,26 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         }
     }
 
+    private void processSummary(Mentorship mentorship, SessionSummary finalSummary, List<SessionSummary> summaries) throws SQLException {
+        mentorship.setAnswers(getApplication()
+                .getAnswerService()
+                .getAllOfMentorship(mentorship));
+
+        determineFinalScore(finalSummary, mentorship.getAnswers());
+
+        for (Answer answer : mentorship.getAnswers()) {
+            String category = answer.getFormSectionQuestion()
+                    .getFormSection()
+                    .getSection()
+                    .getDescription();
+
+            if (categoryAlreadyExists(category, summaries)) {
+                doCountInCategory(category, summaries, answer);
+            } else {
+                summaries.add(initSessionSummary(answer));
+            }
+        }
+    }
 
     private void determineFinalScore(SessionSummary summary, List<Answer> answers) {
         int sim = (int) answers.stream().filter(Answer::isYesAnswer).count();
@@ -191,8 +205,6 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         summary.setSimCount(sim)
                 .setNaoCount(nao);
     }
-
-
 
     @Override
     public void saveRecommendedResources(Session session, List<SessionRecommendedResource> recommendedResources) throws SQLException {

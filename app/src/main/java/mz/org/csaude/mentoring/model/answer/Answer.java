@@ -47,9 +47,9 @@ import mz.org.csaude.mentoring.model.question.Question;
 public class Answer extends BaseModel {
 
     public static final String TABLE_NAME = "answer";
-    private final String YES_ANSWER = "SIM";
-    private final String NO_ANSWER = "NAO";
-    private final String NA_ANSWER = "NA";
+    private static final String YES_ANSWER = "SIM";
+    private static final String NO_ANSWER = "NAO";
+    private static final String NA_ANSWER = "NA";
 
     public static final String COLUMN_FORM = "form_id";
     public static final String COLUMN_MENTORSHIP = "mentorship_id";

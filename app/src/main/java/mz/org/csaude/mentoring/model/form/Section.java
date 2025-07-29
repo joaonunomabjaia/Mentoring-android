@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.model.form;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -21,10 +22,12 @@ public class Section extends BaseModel {
     public Section() {
     }
 
+    @Ignore
     public Section(String uuid) {
         super(uuid);
     }
 
+    @Ignore
     public Section(SectionDTO questionCategoryDTO){
         super(questionCategoryDTO);
         this.setDescription(questionCategoryDTO.getDescription());

@@ -815,6 +815,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         this.mentorship.getSession().getRonda().setSessions(Collections.emptyList());
         this.mentorship.getSession().getForm().setFormSections(Collections.emptyList());
         params.put("session", this.mentorship.getSession());
+        params.put("mentorshipuuid", this.mentorship.getUuid());
         getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
     }
 

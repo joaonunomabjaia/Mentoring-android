@@ -3,7 +3,7 @@ plugins {
 }
 ext.versionMajor = 1
 ext.versionMinor = 0
-ext.versionPatch = 18
+ext.versionPatch = 19
 ext.versionClassifier = null
 ext.isSnapshot = true
 ext.minimumSdkVersion = 28

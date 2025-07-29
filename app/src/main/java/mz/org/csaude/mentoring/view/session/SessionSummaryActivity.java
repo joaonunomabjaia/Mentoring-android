@@ -56,6 +56,7 @@ public class SessionSummaryActivity extends BaseActivity {
 
         Intent intent = this.getIntent();
         getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
+        getRelatedViewModel().setMentorshipUUID(intent.getExtras().getString("mentorshipuuid"));
 
         setSupportActionBar(binding.toolbar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -107,29 +108,8 @@ public class SessionSummaryActivity extends BaseActivity {
         createFileLauncher.launch(intent);
     }
 
-    public void checkStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            List<String> permissionsNeeded = new ArrayList<>();
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED)
-                permissionsNeeded.add(Manifest.permission.READ_MEDIA_IMAGES);
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED)
-                permissionsNeeded.add(Manifest.permission.READ_MEDIA_AUDIO);
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED)
-                permissionsNeeded.add(Manifest.permission.READ_MEDIA_VIDEO);
-
-            if (!permissionsNeeded.isEmpty()) {
-                ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), REQUEST_WRITE_STORAGE);
-            } else {
-                startPdfCreationFlow();
-            }
-        } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
-            } else {
-                startPdfCreationFlow();
-            }
-        }
+    public void createPDF() {
+        startPdfCreationFlow(); // Já usa SAF
     }
 
     @Override
