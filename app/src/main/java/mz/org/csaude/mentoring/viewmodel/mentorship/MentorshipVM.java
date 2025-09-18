@@ -979,4 +979,69 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
             throw new RuntimeException(e);
         }
     }
+
+    public void setEvaluationLocation(String locationCode) {
+        getExecutorService().execute(() -> {
+            try {
+                // Busca localização no BD
+                EvaluationLocation location =
+                        getApplication().getEvaluationLocationService().getByCode(locationCode);
+
+                Cabinet communityCabinet = null;
+                Door communityDoor = null;
+
+                if (location != null && location.isCommunityEvaluation()) {
+                    communityCabinet = getApplication()
+                            .getCabinetService()
+                            .getByuuid(Cabinet.COMMUNITY_CABINET_UUID);
+
+                    if (communityCabinet == null) {
+                        runOnMainThread(() ->
+                                Utilities.displayAlertDialog(
+                                        getRelatedActivity(),
+                                        getRelatedActivity().getString(R.string.error_evaluation_location)
+                                ).show()
+                        );
+                        return;
+                    }
+
+                    communityDoor = getApplication()
+                            .getDoorService()
+                            .getByCode(Door.COMMUNITY_DOOR);
+                }
+
+                Cabinet finalCommunityCabinet = communityCabinet;
+                Door finalCommunityDoor = communityDoor;
+
+                runOnMainThread(() -> {
+                    this.mentorship.setEvaluationLocation(location);
+
+                    if (location != null && location.isCommunityEvaluation()) {
+                        setCabinet(finalCommunityCabinet);
+                        setSelectedDoor(finalCommunityDoor);
+                    }
+
+                    notifyPropertyChanged(BR.selectedEvaluationLocation);
+                    notifyPropertyChanged(BR.communityLocation);
+                    notifyPropertyChanged(BR.healthFacilityLocation);
+                });
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
+    @Bindable
+    public boolean isCommunityLocation() {
+        EvaluationLocation loc = this.mentorship.getEvaluationLocation();
+        return loc != null && loc.isCommunityEvaluation(); // usa os helpers @JsonIgnore do seu model
+    }
+
+    @Bindable
+    public boolean isHealthFacilityLocation() {
+        EvaluationLocation loc = this.mentorship.getEvaluationLocation();
+        return loc != null && loc.isHealthFacilityEvaluation();
+    }
 }

@@ -30,4 +30,11 @@
         <!-- Custom selected state -->
         <item name="android:state_selected" tools:targetApi="lollipop">@drawable/selected_background</item>
     </style>
+
+    <style name="CustomDatePickerDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="colorOnBackground">#353434</item>
+        <item name="colorOnSurface">#353434</item>
+        <item name="android:textColorPrimary">#353434</item>
+    </style>
+
 </resources>

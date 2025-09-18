@@ -2,7 +2,9 @@ package mz.org.csaude.mentoring.view.ronda;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -113,13 +115,18 @@ public class CreateRondaActivity extends BaseActivity {
             int mMonth = c.get(Calendar.MONTH);
             int mDay = c.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(CreateRondaActivity.this,
+            DatePickerDialog datePickerDialog = new DatePickerDialog(CreateRondaActivity.this, R.style.CustomDatePickerDialogTheme,
                     (view1, year, monthOfYear, dayOfMonth) ->
                             getRelatedViewModel().setStartDate(DateUtilities.createDate(
                                     dayOfMonth + "-" + (monthOfYear + 1) + "-" + year,
                                     DateUtilities.DATE_FORMAT)),
                     mYear, mMonth, mDay);
             datePickerDialog.show();
+            Button positiveButton = datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            Button negativeButton = datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+
+            if (positiveButton != null) positiveButton.setTextColor(Color.BLACK);
+            if (negativeButton != null) negativeButton.setTextColor(Color.BLACK);
         });
     }
 

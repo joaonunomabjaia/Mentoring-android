@@ -80,6 +80,7 @@ public class EvaluationLocation extends BaseModel {
         return this.code.equals(EvaluationLocation.COMMUNITY);
     }
 
+    @JsonIgnore
     public boolean isBoth() {
         return this.code.equals(EvaluationLocation.BOTH);
     }
