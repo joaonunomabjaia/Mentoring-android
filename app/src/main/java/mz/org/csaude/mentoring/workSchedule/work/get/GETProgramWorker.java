@@ -19,12 +19,12 @@ public class GETProgramWorker extends BaseWorker<Program> {
         this.programRestService = new ProgramRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.programRestService.restGetPrograms(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Program> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Program> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
     @Override
     public List<Ronda> doSearch(long offset, long limit) throws SQLException {
-        return getApplication().getRondaService().getAllByRondaType(this.rondaType);
+        return getApplication().getRondaService().getAllByRondaType(this.rondaType, getApplication().getAuthenticatedUser());
     }
 
     @Override
@@ -111,6 +112,7 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
             getRelatedActivity().nextActivity(ZeroMentorshipListActivity.class, params);
         } else {
             Log.d("goToMentoriships", "Navigating to SessionListActivity with params: " + params);
+            ronda.setSessions(Collections.emptyList());
             getRelatedActivity().nextActivity(SessionListActivity.class, params);
         }
     }
@@ -332,9 +334,13 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
 
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             if (getApplication().getApplicationStep().isApplicationStepRemove()) {
                 getApplication().getRondaRestService().delete(selectedRonda, this);
             }

@@ -13,6 +13,7 @@ import mz.org.csaude.mentoring.dao.answer.AnswerDAO;
 import mz.org.csaude.mentoring.dao.career.CareerTypeDAO;
 import mz.org.csaude.mentoring.dao.employee.EmployeeDAO;
 import mz.org.csaude.mentoring.dao.evaluation.EvaluationTypeDAO;
+import mz.org.csaude.mentoring.dao.evaluationLocation.EvaluationLocationDAO;
 import mz.org.csaude.mentoring.dao.form.FormDAO;
 import mz.org.csaude.mentoring.dao.form.FormTypeDAO;
 import mz.org.csaude.mentoring.dao.formSection.FormSectionDAO;
@@ -50,6 +51,7 @@ import mz.org.csaude.mentoring.dao.user.UserDao;
 import mz.org.csaude.mentoring.model.answer.Answer;
 import mz.org.csaude.mentoring.model.career.CareerType;
 import mz.org.csaude.mentoring.model.employee.Employee;
+import mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation;
 import mz.org.csaude.mentoring.model.evaluationType.EvaluationType;
 import mz.org.csaude.mentoring.model.form.Form;
 import mz.org.csaude.mentoring.model.form.FormSection;
@@ -96,9 +98,9 @@ import mz.org.csaude.mentoring.util.Converters;
                 CareerType.class, FormType.class, Door.class, IterationType.class, Province.class, QuestionType.class,
                 SessionStatus.class, User.class, Ronda.class, RondaType.class, RondaMentee.class, RondaMentor.class,
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
-                Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class
+                Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class, EvaluationLocation.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -143,6 +145,7 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract SessionRecommendedResourceDAO getSessionRecommendedResourceDAO();
     public abstract SectionDAO getSectionDAO();
     public abstract FormSectionDAO getFormSectionDAO();
+    public abstract EvaluationLocationDAO getEvaluationLocationDAO();
 
     public static MentoringDatabase getInstance(Context context, String passphrase) {
         if (INSTANCE == null) {

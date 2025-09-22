@@ -231,14 +231,20 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
                 location.setHealthFacility((HealthFacility) getHealthFacility());
                 location.setLocationLevel("N/A");
                 location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                location.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
                 tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().addLocation(location);
+                tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
+                tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
-                    Utilities.displayAlertDialog(getRelatedActivity(), error).show();
+                    runOnMainThread(()-> {
+                        dismissProgress(loading);
+                        Utilities.displayAlertDialog(getRelatedActivity(), error).show();
+                    });
                     return;
                 }
                 getApplication().isServerOnline(this);
@@ -483,8 +489,12 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             getApplication().getTutoredRestService().restPostTutored(tutored, this);
         } else {
             dismissProgress(loading);
@@ -515,7 +525,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Override
     public List<Tutored> doSearch(long offset, long limit) throws SQLException {
-        return this.tutoredService.getAllPagenated(offset, limit);
+        return this.tutoredService.getAllPagenated(getApplication().getCurrMentor().getEmployee().getLocations(), offset, limit);
     }
 
     @Override

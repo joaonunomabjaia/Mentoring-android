@@ -75,16 +75,7 @@ public class TutorProgrammaticAreaServiceImpl extends BaseServiceImpl<TutorProgr
         TutorProgrammaticArea tutorProgrammaticArea = tutorProgrammaticAreaDTO.getTutorProgrammaticArea();
         tutorProgrammaticArea.setProgrammaticArea(getApplication().getProgrammaticAreaService().getByuuid(tutorProgrammaticArea.getProgrammaticArea().getUuid()));
 
-        if (getApplication().getAuthenticatedUser() == null) {
-            try {
-                User user = getApplication().getUserService().getCurrentUser();
-                getApplication().setAuthenticatedUser(user, false);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        Employee employee = getApplication().getAuthenticatedUser().getEmployee();
-        Tutor tutor = tutorDAO.getByEmployee(employee.getId());
+        Tutor tutor = tutorDAO.getByUuid(tutorProgrammaticArea.getTutor().getUuid());
         tutorProgrammaticArea.setTutor(tutor);
         if(tpa!=null) {
             tutorProgrammaticArea.setId(tpa.getId());

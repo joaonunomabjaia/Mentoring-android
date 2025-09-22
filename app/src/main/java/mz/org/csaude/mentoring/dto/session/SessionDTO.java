@@ -205,6 +205,9 @@ public class SessionDTO extends BaseEntityDTO implements Syncable {
         session.setObservations(this.getObservations());
         session.setWorkPlan(this.getWorkPlan());
         session.setNextSessionDate(this.getNextSessionDate());
+
+        session.setCreatedByUuid(this.getCreatedByuuid());
+        session.setUpdatedByUuid(this.getUpdatedByuuid());
         if(session.getStatus()!=null) {
             session.setStatus(new SessionStatus(this.getSessionStatus()));
         }

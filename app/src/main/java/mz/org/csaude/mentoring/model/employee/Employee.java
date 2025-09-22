@@ -149,6 +149,7 @@ public class Employee extends BaseModel implements Listble {
         return locations;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
@@ -157,6 +158,7 @@ public class Employee extends BaseModel implements Listble {
         this.name = name;
     }
 
+    @NonNull
     public String getSurname() {
         return surname;
     }
@@ -244,19 +246,20 @@ public class Employee extends BaseModel implements Listble {
 
     @Override
     public String validade() {
-        if (StringUtils.isEmpty(getName())) return "Campo nome não pode estar vazio ";
+//        if (getName() == null) return "Campo nome não pode estar vazio ";
+        if (!Utilities.stringHasValue(getName())) return "Campo nome não pode estar vazio ";
         if (getName().length() <= 2) return "Campo nome tem que ter mais de dois caracteres";
-        if (StringUtils.isEmpty(getSurname())) return "Campo apelido não pode estar vazio";
+        if (!Utilities.stringHasValue(getSurname())) return "Campo apelido não pode estar vazio";
         if (getSurname().length() <= 2) return "Campo apelido tem que ter mais de dois caracteres";
-        if (StringUtils.isEmpty(getPhoneNumber())) return "Campo Telefone não pode estar vazio";
+        if (!Utilities.stringHasValue(getPhoneNumber())) return "Campo Telefone não pode estar vazio";
         if (!(getPhoneNumber().startsWith("8") && getPhoneNumber().length() == 9)) return "Por favor indique um Telefone válido";
-        if (StringUtils.isEmpty(getEmail())) return "Campo Email não pode estar vazio";
+        if (!Utilities.stringHasValue(getEmail())) return "Campo Email não pode estar vazio";
         if (!PatternsCompat.EMAIL_ADDRESS.matcher(getEmail()).matches()) return "Por favor indique um endereço de Email válido";
         if (this.getProfessionalCategory() == null) return "Campo Categoria Profissional não pode estar vazio";
         if (!Utilities.listHasElements(this.locations)) return "Por favor indique a unidade sanitária.";
-        if (getNuit() == 0) return "Campo NUIT não pode estar vazio";
+        if (!Utilities.stringHasValue(String.valueOf(getNuit())) || getNuit() == 0L) return "Campo NUIT não pode estar vazio";
         if (Long.toString(getNuit()).length() != 9) return "Campo do NUIT tem que ter 9 dígitos";
-        if (getTrainingYear() == 0) return "Campo Ano não pode estar vazio";
+        if (getTrainingYear() == null) return "Campo Ano não pode estar vazio";
         if (getTrainingYear() < 1960 || getTrainingYear() > Calendar.getInstance().get(Calendar.YEAR)) return "Por favor indique um ano válido";
         return super.validade();
     }

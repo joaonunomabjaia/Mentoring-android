@@ -13,18 +13,23 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import mz.org.csaude.mentoring.base.application.MentoringApplication;
 import mz.org.csaude.mentoring.base.worker.BaseWorker;
 import mz.org.csaude.mentoring.util.Http;
+import mz.org.csaude.mentoring.workSchedule.TaggedWorkRequest;
+import mz.org.csaude.mentoring.workSchedule.work.CheckNextSessionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.TriggerWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETCabinetWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETDistrictWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETDoorWorker;
+import mz.org.csaude.mentoring.workSchedule.work.get.GETEvaluationLocationWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETEvaluationTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETFormSectionQuestionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETFormWorker;
@@ -41,6 +46,7 @@ import mz.org.csaude.mentoring.workSchedule.work.get.GETRondaTypeWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETRondaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETSectionWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETSessionStatusWorker;
+import mz.org.csaude.mentoring.workSchedule.work.get.GETSettingWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutorProgrammaticAreaWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutorWorker;
 import mz.org.csaude.mentoring.workSchedule.work.get.GETTutoredWorker;
@@ -68,6 +74,15 @@ public class WorkerScheduleExecutor {
         this.workManager = WorkManager.getInstance(application);
     }
 
+    public OneTimeWorkRequest testNextSessionCheckNow() {
+        OneTimeWorkRequest testWorkRequest = new OneTimeWorkRequest.Builder(CheckNextSessionWorker.class)
+                .addTag("TEST_CHECK_NEXT_SESSION_" + UUID.randomUUID())
+                .build();
+
+        workManager.enqueue(testWorkRequest);
+        return testWorkRequest;
+    }
+
     public static synchronized WorkerScheduleExecutor getInstance(Application application) {
         if (instance == null) {
             instance = new WorkerScheduleExecutor(application);
@@ -82,83 +97,161 @@ public class WorkerScheduleExecutor {
     /**
      * Runs the initial synchronization tasks required for the application setup.
      */
-    public OneTimeWorkRequest runInitialSync() {
-        // Create individual WorkRequests
-        OneTimeWorkRequest provinceWorkRequest = new OneTimeWorkRequest.Builder(GETProvinceWorker.class)
-                .addTag("INITIAL_SYNC_PROVINCE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+    public List<TaggedWorkRequest> runInitialSync() {
+        List<TaggedWorkRequest> requests = new ArrayList<>();
 
-        OneTimeWorkRequest districtWorkRequest = new OneTimeWorkRequest.Builder(GETDistrictWorker.class)
-                .addTag("INITIAL_SYNC_DISTRICT_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest province = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETProvinceWorker.class)
+                        .addTag("INITIAL_SYNC_PROVINCE")
+                        .build(),
+                "INITIAL_SYNC_PROVINCE"
+        );
 
-        OneTimeWorkRequest sectionWorkRequest = new OneTimeWorkRequest.Builder(GETSectionWorker.class)
-                .addTag("INITIAL_SYNC_SECTION_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest district = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETDistrictWorker.class)
+                        .addTag("INITIAL_SYNC_DISTRICT")
+                        .build(),
+                "INITIAL_SYNC_DISTRICT"
+        );
 
-        OneTimeWorkRequest professionalCategoryWorkRequest = new OneTimeWorkRequest.Builder(GETProfessionalCategoryWorker.class)
-                .addTag("INITIAL_SYNC_PROFESSIONAL_CATEGORY_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest section = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETSectionWorker.class)
+                        .addTag("INITIAL_SYNC_SECTION")
+                        .build(),
+                "INITIAL_SYNC_SECTION"
+        );
 
-        OneTimeWorkRequest partnerWorkRequest = new OneTimeWorkRequest.Builder(GETPartnerWorker.class)
-                .addTag("INITIAL_SYNC_PARTNER_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest professionalCategory = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETProfessionalCategoryWorker.class)
+                        .addTag("INITIAL_SYNC_PROFESSIONAL_CATEGORY")
+                        .build(),
+                "INITIAL_SYNC_PROFESSIONAL_CATEGORY"
+        );
 
-        OneTimeWorkRequest rondaTypeWorkRequest = new OneTimeWorkRequest.Builder(GETRondaTypeWorker.class)
-                .addTag("INITIAL_SYNC_RONDA_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest partner = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETPartnerWorker.class)
+                        .addTag("INITIAL_SYNC_PARTNER")
+                        .build(),
+                "INITIAL_SYNC_PARTNER"
+        );
 
-        OneTimeWorkRequest responseTypeWorkRequest = new OneTimeWorkRequest.Builder(GETResponseTypeWorker.class)
-                .addTag("INITIAL_SYNC_RESPONSE_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest rondaType = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETRondaTypeWorker.class)
+                        .addTag("INITIAL_SYNC_RONDA_TYPE")
+                        .build(),
+                "INITIAL_SYNC_RONDA_TYPE"
+        );
 
-        OneTimeWorkRequest evaluationTypeWorkRequest = new OneTimeWorkRequest.Builder(GETEvaluationTypeWorker.class)
-                .addTag("INITIAL_SYNC_EVALUATION_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest responseType = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETResponseTypeWorker.class)
+                        .addTag("INITIAL_SYNC_RESPONSE_TYPE")
+                        .build(),
+                "INITIAL_SYNC_RESPONSE_TYPE"
+        );
 
-        OneTimeWorkRequest iterationTypeWorkRequest = new OneTimeWorkRequest.Builder(GETIterationTypeWorker.class)
-                .addTag("INITIAL_SYNC_ITERATION_TYPE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest evaluationLocation = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETEvaluationLocationWorker.class)
+                        .addTag("INITIAL_SYNC_EVALUATION_LOCATION")
+                        .build(),
+                "INITIAL_SYNC_EVALUATION_LOCATION"
+        );
 
-        OneTimeWorkRequest doorWorkRequest = new OneTimeWorkRequest.Builder(GETDoorWorker.class)
-                .addTag("INITIAL_SYNC_DOOR_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest evaluationType = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETEvaluationTypeWorker.class)
+                        .addTag("INITIAL_SYNC_EVALUATION_TYPE")
+                        .build(),
+                "INITIAL_SYNC_EVALUATION_TYPE"
+        );
 
-        OneTimeWorkRequest cabinetWorkRequest = new OneTimeWorkRequest.Builder(GETCabinetWorker.class)
-                .addTag("INITIAL_SYNC_CABINET_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest iterationType = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETIterationTypeWorker.class)
+                        .addTag("INITIAL_SYNC_ITERATION_TYPE")
+                        .build(),
+                "INITIAL_SYNC_ITERATION_TYPE"
+        );
 
-        OneTimeWorkRequest sessionStatusWorkRequest = new OneTimeWorkRequest.Builder(GETSessionStatusWorker.class)
-                .addTag("INITIAL_SYNC_SESSION_STATUS_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest door = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETDoorWorker.class)
+                        .addTag("INITIAL_SYNC_DOOR")
+                        .build(),
+                "INITIAL_SYNC_DOOR"
+        );
 
-        OneTimeWorkRequest programWorkRequest = new OneTimeWorkRequest.Builder(GETProgramWorker.class)
-                .addTag("INITIAL_SYNC_PROGRAM_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest cabinet = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETCabinetWorker.class)
+                        .addTag("INITIAL_SYNC_CABINET")
+                        .build(),
+                "INITIAL_SYNC_CABINET"
+        );
 
-        OneTimeWorkRequest programmaticAreaWorkRequest = new OneTimeWorkRequest.Builder(GETProgrammaticAreaWorker.class)
-                .addTag("INITIAL_SYNC_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest sessionStatus = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETSessionStatusWorker.class)
+                        .addTag("INITIAL_SYNC_SESSION_STATUS")
+                        .build(),
+                "INITIAL_SYNC_SESSION_STATUS"
+        );
 
-        // Chain WorkRequests
-        workManager.beginUniqueWork("INITIAL_APP_SETUP", ExistingWorkPolicy.KEEP, provinceWorkRequest)
-                .then(Arrays.asList(districtWorkRequest, partnerWorkRequest, cabinetWorkRequest))
+        TaggedWorkRequest program = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETProgramWorker.class)
+                        .addTag("INITIAL_SYNC_PROGRAM")
+                        .build(),
+                "INITIAL_SYNC_PROGRAM"
+        );
+
+        TaggedWorkRequest programmaticArea = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETProgrammaticAreaWorker.class)
+                        .addTag("INITIAL_SYNC_PROGRAMMATIC_AREA")
+                        .build(),
+                "INITIAL_SYNC_PROGRAMMATIC_AREA"
+        );
+
+        TaggedWorkRequest settings = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETSettingWorker.class)
+                        .addTag("INITIAL_SYNC_SETTINGS")
+                        .build(),
+                "INITIAL_SYNC_SETTINGS"
+        );
+
+        // Build the full chain
+        workManager.beginUniqueWork("INITIAL_APP_SETUP", ExistingWorkPolicy.KEEP, province.getRequest())
+                .then(Arrays.asList(district.getRequest(), partner.getRequest(), cabinet.getRequest()))
                 .then(Arrays.asList(
-                        rondaTypeWorkRequest,
-                        sectionWorkRequest,
-                        responseTypeWorkRequest,
-                        evaluationTypeWorkRequest,
-                        iterationTypeWorkRequest,
-                        doorWorkRequest,
-                        sessionStatusWorkRequest,
-                        programWorkRequest
+                        rondaType.getRequest(),
+                        section.getRequest(),
+                        responseType.getRequest(),
+                        evaluationType.getRequest(),
+                        evaluationLocation.getRequest(),
+                        iterationType.getRequest(),
+                        door.getRequest(),
+                        sessionStatus.getRequest(),
+                        program.getRequest(),
+                        settings.getRequest()
                 ))
-                .then(programmaticAreaWorkRequest)
-                .then(professionalCategoryWorkRequest)
+                .then(programmaticArea.getRequest())
+                .then(professionalCategory.getRequest())
                 .enqueue();
 
-        return professionalCategoryWorkRequest;
+        // Return all for monitoring
+        requests.add(province);
+        requests.add(district);
+        requests.add(section);
+        requests.add(professionalCategory);
+        requests.add(partner);
+        requests.add(rondaType);
+        requests.add(responseType);
+        requests.add(evaluationLocation);
+        requests.add(evaluationType);
+        requests.add(iterationType);
+        requests.add(door);
+        requests.add(cabinet);
+        requests.add(sessionStatus);
+        requests.add(program);
+        requests.add(settings);
+        requests.add(programmaticArea);
+
+        return requests;
     }
+
 
     /**
      * Runs synchronization tasks that should occur after the user logs in.
@@ -174,52 +267,93 @@ public class WorkerScheduleExecutor {
     /**
      * Downloads data specific to the mentor after login.
      */
-    public OneTimeWorkRequest downloadMentorData() {
-        OneTimeWorkRequest formWorkRequest = new OneTimeWorkRequest.Builder(GETFormWorker.class)
-                .addTag("MENTOR_DATA_FORM_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+    public List<TaggedWorkRequest> downloadMentorData() {
+        List<TaggedWorkRequest> requests = new ArrayList<>();
 
-        OneTimeWorkRequest healthFacilityWorkRequest = new OneTimeWorkRequest.Builder(GETHealthFacilityWorker.class)
-                .addTag("MENTOR_DATA_HEALTH_FACILITY_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest formWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETFormWorker.class)
+                        .addTag("MENTOR_DATA_FORM")
+                        .build(),
+                "MENTOR_DATA_FORM"
+        );
 
-        OneTimeWorkRequest tutorProgrammaticAreaWorkRequest = new OneTimeWorkRequest.Builder(GETTutorProgrammaticAreaWorker.class)
-                .addTag("MENTOR_DATA_TUTOR_PROGRAMMATIC_AREA_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest healthFacilityWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETHealthFacilityWorker.class)
+                        .addTag("MENTOR_DATA_HEALTH_FACILITY")
+                        .build(),
+                "MENTOR_DATA_HEALTH_FACILITY"
+        );
 
-        OneTimeWorkRequest formQuestionWorkRequest = new OneTimeWorkRequest.Builder(GETFormSectionQuestionWorker.class)
-                .addTag("MENTOR_DATA_FORM_QUESTION_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest tutorProgrammaticAreaWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETTutorProgrammaticAreaWorker.class)
+                        .addTag("MENTOR_DATA_TUTOR_PROGRAMMATIC_AREA")
+                        .build(),
+                "MENTOR_DATA_TUTOR_PROGRAMMATIC_AREA"
+        );
 
-        OneTimeWorkRequest resourceWorkRequest = new OneTimeWorkRequest.Builder(GETResourceworker.class)
-                .addTag("MENTOR_DATA_RESOURCE_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest formQuestionWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETFormSectionQuestionWorker.class)
+                        .addTag("MENTOR_DATA_FORM_QUESTION")
+                        .build(),
+                "MENTOR_DATA_FORM_QUESTION"
+        );
 
-        OneTimeWorkRequest tutoredWorkRequest = new OneTimeWorkRequest.Builder(GETTutoredWorker.class)
-                .addTag("MENTOR_DATA_TUTORED_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest resourceWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETResourceworker.class)
+                        .addTag("MENTOR_DATA_RESOURCE")
+                        .build(),
+                "MENTOR_DATA_RESOURCE"
+        );
 
-        OneTimeWorkRequest rondaWorkRequest = new OneTimeWorkRequest.Builder(GETRondaWorker.class)
-                .addTag("MENTOR_DATA_RONDA_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest tutoredWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETTutoredWorker.class)
+                        .addTag("MENTOR_DATA_TUTORED")
+                        .build(),
+                "MENTOR_DATA_TUTORED"
+        );
 
-        OneTimeWorkRequest sessionGetWorkRequest = new OneTimeWorkRequest.Builder(GETSessionWorker.class)
-                .addTag("MENTOR_DATA_SESSION_GET_" + ONE_TIME_REQUEST_JOB_ID)
-                .build();
+        TaggedWorkRequest rondaWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETRondaWorker.class)
+                        .addTag("MENTOR_DATA_RONDA")
+                        .build(),
+                "MENTOR_DATA_RONDA"
+        );
 
-        // Chain WorkRequests
-        workManager.beginUniqueWork("INITIAL_MENTOR_DATA_SETUP", ExistingWorkPolicy.KEEP, formWorkRequest)
-                .then(healthFacilityWorkRequest)
-                .then(tutorProgrammaticAreaWorkRequest)
-                .then(formQuestionWorkRequest)
-                .then(resourceWorkRequest)
-                .then(tutoredWorkRequest)
-                .then(rondaWorkRequest)
-                .then(sessionGetWorkRequest)
+        TaggedWorkRequest sessionGetWorkRequest = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETSessionWorker.class)
+                        .addTag("MENTOR_DATA_SESSION_GET")
+                        .build(),
+                "MENTOR_DATA_SESSION_GET"
+        );
+
+        // Add all to list
+        requests.add(formWorkRequest);
+        requests.add(healthFacilityWorkRequest);
+        requests.add(tutorProgrammaticAreaWorkRequest);
+        requests.add(formQuestionWorkRequest);
+        requests.add(resourceWorkRequest);
+        requests.add(tutoredWorkRequest);
+        requests.add(rondaWorkRequest);
+        requests.add(sessionGetWorkRequest);
+
+        // Chain and enqueue
+        workManager.beginUniqueWork(
+                        "INITIAL_MENTOR_DATA_SETUP",
+                        ExistingWorkPolicy.REPLACE,
+                        formWorkRequest.getRequest()
+                )
+                .then(healthFacilityWorkRequest.getRequest())
+                .then(tutorProgrammaticAreaWorkRequest.getRequest())
+                .then(formQuestionWorkRequest.getRequest())
+                .then(resourceWorkRequest.getRequest())
+                .then(tutoredWorkRequest.getRequest())
+                .then(rondaWorkRequest.getRequest())
+                .then(sessionGetWorkRequest.getRequest())
                 .enqueue();
 
-        return sessionGetWorkRequest;
+        return requests;
     }
+
 
     /**
      * Uploads mentees data to the server.
@@ -241,11 +375,11 @@ public class WorkerScheduleExecutor {
     /**
      * Synchronizes data immediately by posting to the server.
      */
-    public OneTimeWorkRequest syncNowData() {
+    public List<TaggedWorkRequest> syncNowData() {
         return syncPostData();
     }
 
-    public OneTimeWorkRequest syncNowMeteData() {
+    public List<TaggedWorkRequest> syncNowMeteData() {
         return chainMetaDataSyncWorkers();
     }
 
@@ -258,6 +392,9 @@ public class WorkerScheduleExecutor {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
+        Constraints otherConstraints = new Constraints.Builder()
+                .build();
+
         // Schedule each task as a PeriodicWorkRequest
         schedulePeriodicWorker(POSTTutoredWorker.class, "PERIODIC_SYNC_TUTORED", constraints);
         schedulePeriodicWorker(POSTRondaWorker.class, "PERIODIC_SYNC_RONDA", constraints);
@@ -265,6 +402,8 @@ public class WorkerScheduleExecutor {
         schedulePeriodicWorker(POSTMentorshipWorker.class, "PERIODIC_SYNC_MENTORSHIP",  constraints);
         schedulePeriodicWorker(POSTSessionRecommendedResourceWorker.class, "PERIODIC_SYNC_SESSION_RECOMMENDED", constraints);
         schedulePeriodicWorker(PATCHUserWorker.class, "PERIODIC_SYNC_USER", constraints);
+        schedulePeriodicWorker(GETSettingWorker.class, "PERIODIC_SYNC_SETTINGS", constraints);
+        schedulePeriodicWorker(CheckNextSessionWorker.class, "PERIODIC_NEXT_SESSION_CHECKER", otherConstraints);
     }
 
     private void schedulePeriodicWorker(
@@ -298,153 +437,190 @@ public class WorkerScheduleExecutor {
         workManager.enqueue(userInfoUpdateWorkRequest);
         return  userInfoUpdateWorkRequest;
     }
-    /**
-     * Internal method to sync data by posting to the server.
-     */
-    private OneTimeWorkRequest syncPostData() {
+
+    private List<TaggedWorkRequest> syncPostData() {
         String jobId = "SYNC_POST_DATA_" + System.currentTimeMillis();
 
         Data inputData = new Data.Builder()
                 .putString("requestType", String.valueOf(Http.POST))
                 .build();
 
-        OneTimeWorkRequest sessionPostWorkRequest = new OneTimeWorkRequest.Builder(POSTSessionWorker.class)
-                .addTag("SESSION_POST_" + jobId)
-                .build();
+        TaggedWorkRequest rondaPost = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(POSTRondaWorker.class)
+                        .addTag("RONDA_POST_" + jobId)
+                        .setInputData(inputData)
+                        .build(),
+                "POSTRondaWorker"
+        );
 
-        OneTimeWorkRequest mentorshipPostWorkRequest = new OneTimeWorkRequest.Builder(POSTMentorshipWorker.class)
-                .addTag("MENTORSHIP_POST_" + jobId)
-                .setInputData(inputData)
-                .build();
+        TaggedWorkRequest sessionPost = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(POSTSessionWorker.class)
+                        .addTag("SESSION_POST_" + jobId)
+                        .build(),
+                "POSTSessionWorker"
+        );
 
-        OneTimeWorkRequest sessionRecommendedWorkRequest = new OneTimeWorkRequest.Builder(POSTSessionRecommendedResourceWorker.class)
-                .addTag("SESSION_RECOMMENDED_POST_" + jobId)
-                .setInputData(inputData)
-                .build();
+        TaggedWorkRequest mentorshipPost = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(POSTMentorshipWorker.class)
+                        .addTag("MENTORSHIP_POST_" + jobId)
+                        .setInputData(inputData)
+                        .build(),
+                "POSTMentorshipWorker"
+        );
 
-        OneTimeWorkRequest rondaPostWorkRequest = new OneTimeWorkRequest.Builder(POSTRondaWorker.class)
-                .addTag("RONDA_POST_" + jobId)
-                .setInputData(inputData)
-                .build();
+        TaggedWorkRequest sessionRecommended = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(POSTSessionRecommendedResourceWorker.class)
+                        .addTag("SESSION_RECOMMENDED_POST_" + jobId)
+                        .setInputData(inputData)
+                        .build(),
+                "POSTSessionRecommendedResourceWorker"
+        );
 
-        OneTimeWorkRequest userInfoUpdateWorkRequest = new OneTimeWorkRequest.Builder(GETUserWorker.class)
-                .addTag("USER_INFO_UPDATE_" + jobId)
-                .build();
+        TaggedWorkRequest tutoredUpdate = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(POSTTutoredWorker.class)
+                        .addTag("MENTEE_UPDATE_" + jobId)
+                        .setInputData(inputData)
+                        .build(),
+                "POSTTutoredWorker"
+        );
 
-        OneTimeWorkRequest tutoredUpdateWorkRequest = new OneTimeWorkRequest.Builder(POSTTutoredWorker.class)
-                .addTag("MENTEE_UPDATE_" + jobId)
-                .setInputData(inputData)
-                .build();
+        TaggedWorkRequest userInfoUpdate = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(GETUserWorker.class)
+                        .addTag("USER_INFO_UPDATE_" + jobId)
+                        .build(),
+                "GETUserWorker"
+        );
 
-        OneTimeWorkRequest userUpdateWorkRequest = new OneTimeWorkRequest.Builder(PATCHUserWorker.class)
-                .addTag("USER_INFO_UPDATE_" + jobId)
-                .build();
-
+        TaggedWorkRequest userUpdate = new TaggedWorkRequest(
+                new OneTimeWorkRequest.Builder(PATCHUserWorker.class)
+                        .addTag("USER_INFO_UPDATE_" + jobId)
+                        .build(),
+                "PATCHUserWorker"
+        );
 
         // Chain WorkRequests
-        workManager.beginUniqueWork("   MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaPostWorkRequest)
-                .then(sessionPostWorkRequest)
-                .then(mentorshipPostWorkRequest)
-                .then(sessionRecommendedWorkRequest)
-                .then(tutoredUpdateWorkRequest)
-                .then(userInfoUpdateWorkRequest)
-                .then(userUpdateWorkRequest)
+        workManager.beginUniqueWork("MENTORING_SYNC_NOW_DATA", ExistingWorkPolicy.REPLACE, rondaPost.getRequest())
+                .then(sessionPost.getRequest())
+                .then(mentorshipPost.getRequest())
+                .then(sessionRecommended.getRequest())
+                .then(tutoredUpdate.getRequest())
+                .then(userInfoUpdate.getRequest())
+                .then(userUpdate.getRequest())
                 .enqueue();
 
-        return userUpdateWorkRequest;
+        return Arrays.asList(
+                rondaPost,
+                sessionPost,
+                mentorshipPost,
+                sessionRecommended,
+                tutoredUpdate,
+                userInfoUpdate,
+                userUpdate
+        );
     }
+
+
 
     public MentoringApplication getApplication() {
         return application;
     }
 
-    public OneTimeWorkRequest schedulePeriodicMetaDataSync() {
-        // Define constraints for the periodic work
+    public List<TaggedWorkRequest> schedulePeriodicMetaDataSync() {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        // Create the periodic trigger worker to run at regular intervals
         PeriodicWorkRequest periodicTrigger = new PeriodicWorkRequest.Builder(
-                TriggerWorker.class, getApplication().getMetadataSyncInterval(), TimeUnit.HOURS)
+                TriggerWorker.class,
+                getApplication().getMetadataSyncInterval(),
+                TimeUnit.HOURS
+        )
                 .addTag("PERIODIC_TRIGGER_" + UUID.randomUUID())
                 .setConstraints(constraints)
                 .setInitialDelay(5, TimeUnit.HOURS)
                 .build();
 
-        // Enqueue the periodic trigger worker
         workManager.enqueueUniquePeriodicWork(
                 "PERIODIC_TRIGGER_WORK",
                 ExistingPeriodicWorkPolicy.KEEP,
                 periodicTrigger
         );
 
-        // Chain the metadata sync workers
         return chainMetaDataSyncWorkers();
     }
 
     @SuppressLint("EnqueueWork")
-    private OneTimeWorkRequest chainMetaDataSyncWorkers() {
-        // Create the initial trigger worker request
-        OneTimeWorkRequest triggerWorkerRequest = createOneTimeWorkRequest(TriggerWorker.class, "TRIGGER_WORKER");
+    private List<TaggedWorkRequest> chainMetaDataSyncWorkers() {
+        List<TaggedWorkRequest> taggedRequests = new ArrayList<>();
 
-        // Create OneTimeWorkRequests for metadata sync tasks
-        OneTimeWorkRequest formWorkerRequest = createOneTimeWorkRequest(GETFormWorker.class, "SYNC_FORM");
-        OneTimeWorkRequest formQuestionWorkerRequest = createOneTimeWorkRequest(GETFormSectionQuestionWorker.class, "SYNC_FORM_QUESTION");
-        OneTimeWorkRequest provinceWorkRequest = createOneTimeWorkRequest(GETProvinceWorker.class, "SYNC_PROVINCE");
-        OneTimeWorkRequest districtWorkRequest = createOneTimeWorkRequest(GETDistrictWorker.class, "SYNC_DISTRICT");
+        TaggedWorkRequest triggerWorker = createTaggedWorkRequest(TriggerWorker.class, "TriggerWorker");
+        TaggedWorkRequest formWorker = createTaggedWorkRequest(GETFormWorker.class, "GETFormWorker");
+        TaggedWorkRequest formQuestionWorker = createTaggedWorkRequest(GETFormSectionQuestionWorker.class, "GETFormSectionQuestionWorker");
+        TaggedWorkRequest provinceWorker = createTaggedWorkRequest(GETProvinceWorker.class, "GETProvinceWorker");
+        TaggedWorkRequest districtWorker = createTaggedWorkRequest(GETDistrictWorker.class, "GETDistrictWorker");
 
-        // Create parallel tasks as a list
-        List<OneTimeWorkRequest> parallelTasks = Arrays.asList(
-                createOneTimeWorkRequest(GETSectionWorker.class, "SYNC_SECTION"),
-                createOneTimeWorkRequest(GETProfessionalCategoryWorker.class, "SYNC_PROFESSIONAL_CATEGORY"),
-                createOneTimeWorkRequest(GETPartnerWorker.class, "SYNC_PARTNER"),
-                createOneTimeWorkRequest(GETRondaTypeWorker.class, "SYNC_RONDA_TYPE"),
-                createOneTimeWorkRequest(GETResponseTypeWorker.class, "SYNC_RESPONSE_TYPE"),
-                createOneTimeWorkRequest(GETEvaluationTypeWorker.class, "SYNC_EVALUATION_TYPE"),
-                createOneTimeWorkRequest(GETIterationTypeWorker.class, "SYNC_ITERATION_TYPE"),
-                createOneTimeWorkRequest(GETDoorWorker.class, "SYNC_DOOR"),
-                createOneTimeWorkRequest(GETCabinetWorker.class, "SYNC_CABINET"),
-                createOneTimeWorkRequest(GETSessionStatusWorker.class, "SYNC_SESSION_STATUS"),
-                createOneTimeWorkRequest(GETProgramWorker.class, "SYNC_PROGRAM"),
-                createOneTimeWorkRequest(GETProgrammaticAreaWorker.class, "SYNC_PROGRAMMATIC_AREA")
+        List<TaggedWorkRequest> parallelTagged = Arrays.asList(
+                createTaggedWorkRequest(GETSectionWorker.class, "GETSectionWorker"),
+                createTaggedWorkRequest(GETProfessionalCategoryWorker.class, "GETProfessionalCategoryWorker"),
+                createTaggedWorkRequest(GETPartnerWorker.class, "GETPartnerWorker"),
+                createTaggedWorkRequest(GETRondaTypeWorker.class, "GETRondaTypeWorker"),
+                createTaggedWorkRequest(GETResponseTypeWorker.class, "GETResponseTypeWorker"),
+                createTaggedWorkRequest(GETEvaluationTypeWorker.class, "GETEvaluationTypeWorker"),
+                createTaggedWorkRequest(GETEvaluationLocationWorker.class, "GETEvaluationLocationWorker"),
+                createTaggedWorkRequest(GETIterationTypeWorker.class, "GETIterationTypeWorker"),
+                createTaggedWorkRequest(GETDoorWorker.class, "GETDoorWorker"),
+                createTaggedWorkRequest(GETCabinetWorker.class, "GETCabinetWorker"),
+                createTaggedWorkRequest(GETSessionStatusWorker.class, "GETSessionStatusWorker"),
+                createTaggedWorkRequest(GETProgramWorker.class, "GETProgramWorker"),
+                createTaggedWorkRequest(GETProgrammaticAreaWorker.class, "GETProgrammaticAreaWorker"),
+                createTaggedWorkRequest(GETSettingWorker.class, "GETSettingWorker")
         );
 
-        // Add new workers at the end
-        OneTimeWorkRequest healthFacilityWorkerRequest = createOneTimeWorkRequest(GETHealthFacilityWorker.class, "SYNC_HEALTH_FACILITY");
-        OneTimeWorkRequest tutorProgrammaticAreaWorkerRequest = createOneTimeWorkRequest(GETTutorProgrammaticAreaWorker.class, "SYNC_TUTOR_PROGRAMMATIC_AREA");
-        OneTimeWorkRequest resourceWorkerRequest = createOneTimeWorkRequest(GETResourceworker.class, "SYNC_RESOURCE");
-        OneTimeWorkRequest tutorWorkerRequest = createOneTimeWorkRequest(GETTutorWorker.class, "SYNC_MENTOR");
+        TaggedWorkRequest healthFacilityWorker = createTaggedWorkRequest(GETHealthFacilityWorker.class, "GETHealthFacilityWorker");
+        TaggedWorkRequest tutorProgrammaticAreaWorker = createTaggedWorkRequest(GETTutorProgrammaticAreaWorker.class, "GETTutorProgrammaticAreaWorker");
+        TaggedWorkRequest resourceWorker = createTaggedWorkRequest(GETResourceworker.class, "GETResourceworker");
+        TaggedWorkRequest tutorWorker = createTaggedWorkRequest(GETTutorWorker.class, "GETTutorWorker");
 
-        // Start the chain with the trigger worker
-        WorkContinuation workChain = workManager.beginUniqueWork(
+        taggedRequests.addAll(Arrays.asList(
+                triggerWorker, formWorker, formQuestionWorker,
+                provinceWorker, districtWorker
+        ));
+        taggedRequests.addAll(parallelTagged);
+        taggedRequests.addAll(Arrays.asList(
+                healthFacilityWorker, tutorProgrammaticAreaWorker,
+                resourceWorker, tutorWorker
+        ));
+
+        WorkContinuation chain = workManager.beginUniqueWork(
                         "META_DATA_SYNC_CHAIN",
                         ExistingWorkPolicy.REPLACE,
-                        triggerWorkerRequest
-                ).then(formWorkerRequest)
-                .then(formQuestionWorkerRequest)
-                .then(provinceWorkRequest)
-                .then(districtWorkRequest);
+                        triggerWorker.getRequest()
+                ).then(formWorker.getRequest())
+                .then(formQuestionWorker.getRequest())
+                .then(provinceWorker.getRequest())
+                .then(districtWorker.getRequest());
 
-        // Add the parallel tasks to the chain using .then() with a list
-        workChain = workChain.then(parallelTasks);
+        chain = chain.then(parallelTagged.stream()
+                .map(TaggedWorkRequest::getRequest)
+                .collect(Collectors.toList()));
 
-        // Continue with sequential tasks after parallel tasks
-        workChain = workChain
-                .then(healthFacilityWorkerRequest)
-                .then(tutorProgrammaticAreaWorkerRequest)
-                .then(resourceWorkerRequest)
-                .then(tutorWorkerRequest);
+        chain = chain
+                .then(healthFacilityWorker.getRequest())
+                .then(tutorProgrammaticAreaWorker.getRequest())
+                .then(resourceWorker.getRequest())
+                .then(tutorWorker.getRequest());
 
-        // Enqueue the entire chain
-        workChain.enqueue();
-        return tutorWorkerRequest;
+        chain.enqueue();
+
+        return taggedRequests;
     }
 
-    private OneTimeWorkRequest createOneTimeWorkRequest(Class<? extends BaseWorker> workerClass, String tag) {
-        return new OneTimeWorkRequest.Builder(workerClass)
-                .addTag(tag + "_" + UUID.randomUUID())  // Add a unique tag
+    private TaggedWorkRequest createTaggedWorkRequest(Class<? extends BaseWorker> workerClass, String tag) {
+        String uniqueTag = tag + "_" + UUID.randomUUID();
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(workerClass)
+                .addTag(uniqueTag)
                 .build();
+        return new TaggedWorkRequest(request, tag);
     }
 
 

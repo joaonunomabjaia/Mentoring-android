@@ -20,12 +20,12 @@ public class GETProgrammaticAreaWorker extends BaseWorker<ProgrammaticArea> {
         this.programmaticAreaRestService = new ProgrammaticAreaRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.programmaticAreaRestService.restGetProgrammaticAreas(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<ProgrammaticArea> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<ProgrammaticArea> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

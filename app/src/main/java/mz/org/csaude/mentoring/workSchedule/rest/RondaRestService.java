@@ -34,17 +34,21 @@ public class RondaRestService extends BaseRestService {
     }
 
     public void restGetRondas(RestResponseListener<Ronda> listener){
-        Tutor mentor = getApplication().getCurrMentor();
-        if(mentor==null) {
-            try {
-                User user =  getApplication().getUserService().getCurrentUser();
-                if(user==null) return;
-                mentor = getApplication().getTutorService().getByEmployee(user.getEmployee());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        if (!getSessionManager().isAnyUserConfigured()){
+            listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, null);
+            return;
         }
-        Call<List<RondaDTO>> rondasCall = syncDataService.getAllOfMentor(mentor.getUuid());
+        List<String> uuids = new ArrayList<>();
+        List<Tutor> tutores = null;
+        try {
+            tutores = getApplication().getTutorService().getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        for (Tutor tutor : tutores) {
+                uuids.add(tutor.getUuid());
+            }
+        Call<List<RondaDTO>> rondasCall = syncDataService.getRondasAllOfMentors(uuids);
 
         rondasCall.enqueue(new Callback<List<RondaDTO>>() {
             @Override
@@ -116,7 +120,7 @@ public class RondaRestService extends BaseRestService {
                     }
                 });
             } else {
-                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.emptyList());
+                listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
             }
         } catch (SQLException e) {
             listener.doOnRestErrorResponse(e.getMessage());
@@ -177,13 +181,16 @@ public class RondaRestService extends BaseRestService {
             public void onResponse(Call<RondaDTO> call, Response<RondaDTO> response) {
                 RondaDTO data = response.body();
                 if (response.code() == 201) {
-                    try {
-                        getApplication().getRondaService().savedOrUpdateRonda(ronda);
+                    getServiceExecutor().execute(()->{
+                        try {
+                            getApplication().getRondaService().savedOrUpdateRonda(ronda);
 
-                        listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
-                    } catch (SQLException  e) {
-                        throw new RuntimeException(e);
-                    }
+                            listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Utilities.parseToList(ronda));
+                        } catch (SQLException  e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
                 } else {
                     if (response.code() == HttpStatus.BAD_REQUEST) {
                         // Parse custom error response

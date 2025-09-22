@@ -52,4 +52,7 @@ public interface FormDAO {
     void updateSyncStatus(int id, String syncStatus);
 
 
+    @Query("SELECT COUNT(*) > 0 FROM form_section_question fsq " +
+            "JOIN form_section fs ON fsq.form_section_id=fs.id WHERE fs.form_id = :formId AND fsq.evaluation_location_id = :evaluationLocationId")
+    boolean hasQuestionsForSelectedLocation(Integer formId, Integer evaluationLocationId);
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseRestService;
@@ -27,17 +28,25 @@ public class FormRestService extends BaseRestService {
     }
 
     public void restGetForm(RestResponseListener<Form> listener){
-        Tutor mentor = getApplication().getCurrMentor();
-        if(mentor==null) {
+        if (!getSessionManager().isAnyUserConfigured()) {
+            listener.doOnResponse(REQUEST_NO_DATA, null);
+            return;
+        }
+        List<String> uuids = new ArrayList<>();
+        if (Utilities.stringHasValue(getSessionManager().getActiveUser())){
+            uuids.add(getApplication().getCurrMentor().getUuid());
+        } else {
             try {
-                User user =  getApplication().getUserService().getCurrentUser();
-                if(user==null) return;
-                mentor = getApplication().getTutorService().getByEmployee(user.getEmployee());
+                List<Tutor> tutors = getApplication().getTutorService().getAll();
+                for (Tutor tutor : tutors) {
+                    uuids.add(tutor.getUuid());
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
-        Call<List<FormDTO>> formCall = syncDataService.getFormsByMentor(mentor.getUuid());
+
+        Call<List<FormDTO>> formCall = syncDataService.getFormsByTutorUuids(uuids);
         FormService formService = getApplication().getFormService();
 
         formCall.enqueue(new Callback<List<FormDTO>>() {
@@ -52,11 +61,13 @@ public class FormRestService extends BaseRestService {
                                 form.setSyncStatus(SyncSatus.SENT);
                                 form.setPartner(getApplication().getPartnerService().getByuuid(form.getPartner().getUuid()));
                                 form.setProgrammaticArea(getApplication().getProgrammaticAreaService().getByuuid(form.getProgrammaticArea().getUuid()));
+                                form.setEvaluationLocation(getApplication().getEvaluationLocationService().getByuuid(form.getEvaluationLocation().getUuid()));
                             }
                             formService.savedOrUpdateForms(forms);
                             listener.doOnResponse(BaseRestService.REQUEST_SUCESS, forms);
                         } catch (SQLException e) {
                             Log.e("METADATA LOAD --", e.getMessage(), e);
+                            listener.doOnRestErrorResponse(e.getMessage());
                         }
                     });
                 } else {
@@ -67,6 +78,7 @@ public class FormRestService extends BaseRestService {
             @Override
             public void onFailure(Call<List<FormDTO>> call, Throwable t) {
                 Log.i("METADATA LOAD --", t.getMessage(), t);
+                listener.doOnRestErrorResponse(t.getMessage());
             }
         });
 

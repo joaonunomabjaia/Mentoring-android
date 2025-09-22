@@ -51,7 +51,7 @@ public class LogoutFragment extends GenericFragment implements IDialogListener {
 
     @Override
     public void doOnConfirmed() {
-        //sessionManager.logoutUser();
+        //sessionManager.clearUserSession();
         getMyActivity().nextActivity(LoginActivity.class);
     }
 

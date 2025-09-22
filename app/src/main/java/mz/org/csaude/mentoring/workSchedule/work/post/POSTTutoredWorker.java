@@ -31,7 +31,7 @@ public class POSTTutoredWorker extends BaseWorker<Tutored> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Tutored> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Tutored> recs) throws Exception {
         if (isPOSTRequest()) {
             changeStatusToFinished();
             doOnFinish();

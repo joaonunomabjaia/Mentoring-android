@@ -33,9 +33,10 @@ public abstract class AbstractSearchMentorshipVM extends SearchVM<Mentorship> im
                 mentorship.setSession(getApplication().getSessionService().getById(mentorship.getSessionId()));
                 mentorship.getSession().setRonda(getApplication().getRondaService().getById(mentorship.getSession().getRondaId()));
                 mentorship.getSession().getRonda().addSession(getApplication().getSessionService().getAllOfRonda(mentorship.getSession().getRonda()));
-                mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
+//                mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
                 mentorship.setCabinet(getApplication().getCabinetService().getById(mentorship.getCabinetId()));
                 mentorship.setDoor(getApplication().getDoorService().getById(mentorship.getDoorId()));
+                mentorship.setEvaluationLocation(getApplication().getEvaluationLocationService().getById(mentorship.getEvaluationLocationId()));
                 this.selectedMentorship = mentorship;
             } catch (SQLException e) {
                 throw new RuntimeException(e);

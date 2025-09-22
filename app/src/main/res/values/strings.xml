@@ -258,6 +258,11 @@
     <string name="user_inactive_cheking_error">Ocorreu um erro ao tentar verificar o estado do utilizador no servidor, por favor contacte o administrador.</string>
     <string name="permission_required_message">Este aplicativo requer acesso ao armazenamento para baixar arquivos. Por favor, permita essa permissão para continuar.</string>
     <string name="permission_denied_forever_message">A permissão de armazenamento foi negada. Por favor, ative-a nas configurações para continuar usando este recurso.</string>
+    <string name="evaluation_location">Local da avaliação</string>
+    <string name="no_ev_locations_available">Nenhuma localização definida para a avaliação</string>
+    <string name="error_downloading_mentor_data">Ocorreu um erro ao baixar os dados do mentor, contacte o administrador.</string>
+    <string name="initial_sync_failed">O sistema registou um erro na sincronização de parametros iniciais, por favor contacte o administrador.</string>
+    <string name="no_questions_for_selected_location">A tabela nao possui competencias associadas ao local de avaliacao selecionado. Impossivel avancar!</string>
 
     <string-array name="languages">
         <item>Inglês</item>
@@ -272,4 +277,17 @@
         <item>fr</item>
         <!-- Adicione códigos de idioma correspondentes -->
     </string-array>
+    <string name="biometric_title">Login com impressão digital</string>
+    <string name="biometric_subtitle">Use a sua impressão digital para aceder</string>
+    <string name="enable_biometric_auth">Activar Autenticação Biometrica</string>
+    <string name="login_with_fingerprint">Login with Fingerprint</string>
+    <string name="ronda_mentee_closed">Já passam %1$d dias sem registo de sessões de mentoria para o mentorando %2$s, este deverá ser integrado numa nova ronda.</string>
+    <string name="server_slow">A conexão com o servidor está lenta. Algumas operações podem falhar.</string>
+    <string name="welcome_message">Bem-vindo a Mentoria!</string>
+    <string name="last_sessions_placeholder">Últimas sessões: 3 mentorias concluídas esta semana</string>
+    <string name="error_ongoing_mentorship">Termine a avaliação em curso antes de iniciar nova!</string>
+    <string name="sync_timeout_cancelled">A sincronização foi cancelada por exceder o tempo limite. Verifique sua conexão ou tente novamente.</string>
+    <string name="save">Gravar</string>
+
+
 </resources>

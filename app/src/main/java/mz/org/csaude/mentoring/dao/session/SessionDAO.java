@@ -15,7 +15,7 @@ import mz.org.csaude.mentoring.model.session.Session;
 @Dao
 public interface SessionDAO {
 
-    @Query("SELECT * FROM session WHERE ronda_id = :rondaId AND mentee_id = :menteeId")
+    @Query("SELECT * FROM session WHERE ronda_id = :rondaId AND mentee_id = :menteeId ORDER BY start_date DESC")
     List<Session> queryForAllOfRondaAndMentee(Integer rondaId, Integer menteeId);
 
     @Query("SELECT * FROM session WHERE ronda_id = :rondaId")
@@ -51,4 +51,8 @@ public interface SessionDAO {
 
     @Query("SELECT count(*) FROM session WHERE ronda_id = :rondaId AND mentee_id = :menteeId")
     int countAllOfRondaAndMentee(Integer rondaId, Integer menteeId);
+
+    @Query("SELECT * FROM session WHERE next_session_date IS NOT NULL AND next_session_date BETWEEN :start AND :end")
+    List<Session> getSessionsWithinNextDays(Date start, Date end);
+
 }

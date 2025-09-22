@@ -48,7 +48,7 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
 
         Intent intent = this.getIntent();
 
-        getRelatedViewModel().getExecutorService().execute(()->{
+        getRelatedViewModel().getExecutorService().execute(()-> {
             populateFormList();
 
             if (getApplicationStep().isApplicationStepEdit()) {

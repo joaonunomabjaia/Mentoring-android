@@ -6,6 +6,8 @@ import android.widget.Toast;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import mz.org.csaude.mentoring.base.service.BaseRestService;
@@ -27,7 +29,7 @@ public class SettingRestService extends BaseRestService {
 
     public void restGetSettings(RestResponseListener<Setting> listener){
 
-        Call<List<SettingDTO>> settingsCall = syncDataService.getSettings("0807983dd3b34f109fb75756862d4a72");
+        Call<List<SettingDTO>> settingsCall = syncDataService.getSettings();
 
        settingsCall.enqueue(new Callback<List<SettingDTO>>() {
            @Override
@@ -35,7 +37,8 @@ public class SettingRestService extends BaseRestService {
                List<SettingDTO> data = response.body();
 
                if(data == null){
-
+                   listener.doOnResponse(BaseRestService.REQUEST_NO_DATA, Collections.emptyList());
+                  return;
                }
                getServiceExecutor().execute(()-> {
                    try {
@@ -57,6 +60,7 @@ public class SettingRestService extends BaseRestService {
            @Override
            public void onFailure(Call<List<SettingDTO>> call, Throwable t) {
                Log.i("METADATA LOAD --", t.getMessage(), t);
+               listener.doOnRestErrorResponse(t.getMessage());
            }
        });
 

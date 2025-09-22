@@ -20,7 +20,7 @@ public class POSTRondaWorker extends BaseWorker<Ronda> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         getApplication().getRondaRestService().restPostRondas(this);
     }
 
@@ -30,7 +30,7 @@ public class POSTRondaWorker extends BaseWorker<Ronda> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Ronda> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Ronda> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

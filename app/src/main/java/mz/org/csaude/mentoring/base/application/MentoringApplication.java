@@ -2,14 +2,18 @@ package mz.org.csaude.mentoring.base.application;
 
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_COMPLETE;
+import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_CONFIGURE_NEW_USER;
 import static mz.org.csaude.mentoring.util.Constants.LAST_SYNC_DATE;
 import static mz.org.csaude.mentoring.util.Constants.LOGGED_USER;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -23,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +37,7 @@ import mz.org.csaude.mentoring.base.auth.AuthInterceptorImpl;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.common.ApplicationStep;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.service.ProgrammaticArea.ProgrammaticAreaService;
@@ -42,14 +48,16 @@ import mz.org.csaude.mentoring.service.answer.AnswerService;
 import mz.org.csaude.mentoring.service.answer.AnswerServiceImpl;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.employee.EmployeeServiceImpl;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationService;
+import mz.org.csaude.mentoring.service.evaluationLocation.EvaluationLocationServiceImpl;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeService;
 import mz.org.csaude.mentoring.service.evaluationType.EvaluationTypeServiceImpl;
 import mz.org.csaude.mentoring.service.form.FormService;
 import mz.org.csaude.mentoring.service.form.FormServiceImpl;
-import mz.org.csaude.mentoring.service.formSection.FormSectionServiceImpl;
 import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionService;
 import mz.org.csaude.mentoring.service.formSectionQuestion.FormSectionQuestionServiceImpl;
 import mz.org.csaude.mentoring.service.fromSection.FormSectionService;
+import mz.org.csaude.mentoring.service.fromSection.FormSectionServiceImpl;
 import mz.org.csaude.mentoring.service.location.CabinetService;
 import mz.org.csaude.mentoring.service.location.CabinetServiceImpl;
 import mz.org.csaude.mentoring.service.location.DistrictService;
@@ -102,6 +110,7 @@ import mz.org.csaude.mentoring.service.user.UserService;
 import mz.org.csaude.mentoring.service.user.UserServiceImpl;
 import mz.org.csaude.mentoring.util.Constants;
 import mz.org.csaude.mentoring.util.DateUtilities;
+import mz.org.csaude.mentoring.util.NotificationHelper;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.workSchedule.executor.ExecutorThreadProvider;
 import mz.org.csaude.mentoring.workSchedule.rest.FormSectionQuestionRestService;
@@ -201,6 +210,8 @@ public class MentoringApplication  extends Application {
 
     private FormSectionService formSectionService;
 
+    private EvaluationLocationService evaluationLocationService;
+
 
 
 
@@ -224,6 +235,8 @@ public class MentoringApplication  extends Application {
     private ExecutorService serviceExecutor;
 
     private SharedPreferences encryptedSharedPreferences;
+
+    private List<Setting> settingList;
 
 
     @Override
@@ -249,10 +262,33 @@ public class MentoringApplication  extends Application {
         SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
         String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
 
+        NotificationHelper.createNotificationChannel(this);
+
         Log.d("SelectedLanguage", "Language selected: " + selectedLanguageCode);
         // Set the locale
         setLocale(selectedLanguageCode);
 
+        loadAppSettings();
+
+    }
+
+    private void loadAppSettings() {
+        getServiceExecutor().execute(() -> {
+            try {
+                this.settingList = getSettingService().getAll();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public Setting getSetting(String designation) {
+        for (Setting setting : settingList) {
+            if (setting.getDesignation().equals(designation)) {
+                return setting;
+            }
+        }
+        return null;
     }
 
     public static synchronized MentoringApplication getInstance() {
@@ -518,6 +554,11 @@ public class MentoringApplication  extends Application {
         return sessionRecommendedResourceRestService;
     }
 
+    public EvaluationLocationService getEvaluationLocationService() {
+        if (evaluationLocationService == null) this.evaluationLocationService = new EvaluationLocationServiceImpl(this);
+        return evaluationLocationService;
+    }
+
     public ApplicationStep getApplicationStep() {
         return this.applicationStep;
     }
@@ -534,6 +575,13 @@ public class MentoringApplication  extends Application {
         try {
             getServiceExecutor().submit(()->{
                 try {
+                    String prefix = Constants.PREF_USER_CREDENTIALS_PREFIX;
+
+                    encryptedSharedPreferences.edit()
+                            .putString(prefix + "username", getAuthenticatedUser().getUserName())
+                            .putString(prefix + "password", getAuthenticatedUser().getPassword())
+                            .apply();
+
                     this.applicationStep = ApplicationStep.fastCreate(ApplicationStep.STEP_INIT);
                     if (getAuthenticatedUser().getEmployee() == null) getAuthenticatedUser().setEmployee(getEmployeeService().getById(getAuthenticatedUser().getEmployeeId()));
                     setCurrTutor(getTutorService().getByEmployee(getAuthenticatedUser().getEmployee()));

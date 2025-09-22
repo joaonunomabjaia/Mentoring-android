@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
+import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
@@ -39,19 +40,13 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
 
     private Tutor tutor;
     private TutorService tutorService;
-    private ProfessionalCategoryService professionalCategoryService;
-    private SessionService sessionService;
     private Location location;
-    private Province province;
-    private ProfessionalCategory professionalCategory;
-    private District district;
     private HealthFacility healthFacility;
     private boolean initialDataVisible;
     private List<District> districts;
     private List<HealthFacility> healthFacilities;
     private List<SimpleValue> menteeLabors;
     private boolean ONGEmployee;
-    private Partner selectedNgo;
 
     private String nuit;
     private String trainingYear;
@@ -145,12 +140,8 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
         this.tutor.getEmployee().setPartner(partner);
     }
 
-    public List<Tutor> getAllTutors() throws SQLException {
-        return tutorService.getAll();
-    }
     public List<Province> getAllProvince() throws SQLException {
         List<Province> provinceList = new ArrayList<>();
-        //provinceList.add(new Province());
         provinceList.addAll(getApplication().getProvinceService().getAllOfTutor(getApplication().getCurrMentor()));
         return provinceList;
     }
@@ -178,14 +169,6 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
             Utilities.displayAlertDialog(getRelatedActivity(), error).show();
             return;
         }
-
-       /* try {
-            getApplication().getEmployeeService().saveOrUpdateEmployee(tutor.getEmployee());
-            this.tutorService.saveOrUpdate(tutor);
-            this.getApplication().getLocationService().saveOrUpdate(location);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }*/
 
         getApplication().isServerOnline(this);
 
@@ -226,7 +209,6 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
                 this.districts.clear();
                 this.healthFacilities.clear();
                 if (province.getId() == null) return;
-                //this.districts.add(new District());
                 if (province.getId() == null) return;
                 this.districts.addAll(getApplication().getDistrictService().getByProvinceAndMentor(this.location.getProvince(), getApplication().getCurrMentor()));
                 getRelatedActivity().runOnUiThread(()-> {
@@ -248,7 +230,6 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
                 this.location.setDistrict((District) district);
                 this.healthFacilities.clear();
                 if (district.getId() == null) return;
-                //this.healthFacilities.add(new HealthFacility());
                 this.healthFacilities.addAll(getApplication().getHealthFacilityService().getHealthFacilityByDistrictAndMentor((District) district, getApplication().getCurrMentor()));
                 getRelatedActivity().runOnUiThread(()-> {
                     getPersonalInfoFragment().reloadHealthFacility();
@@ -395,11 +376,17 @@ public class MentorVM extends BaseViewModel implements RestResponseListener<Tuto
     }
 
     @Override
-    public void onServerStatusChecked(boolean isOnline) {
+    public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
+            if (isSlow) {
+                // Show warning: Server is slow
+                showSlowConnectionWarning(getRelatedActivity());
+            }
             getApplication().getTutorRestService().restPatchTutor(this.tutor, this);
         } else {
             Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
         }
     }
+
+
 }

@@ -20,12 +20,12 @@ public class GETSessionStatusWorker extends BaseWorker<SessionStatus> {
         this.sessionStatusRestService = new SessionStatusRestService((Application) getApplicationContext());
     }
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         this.sessionStatusRestService.restGetSessionStatuses(this);
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<SessionStatus> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<SessionStatus> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

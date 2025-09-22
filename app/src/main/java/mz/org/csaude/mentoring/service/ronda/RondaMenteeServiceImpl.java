@@ -9,6 +9,8 @@ import mz.org.csaude.mentoring.base.service.BaseServiceImpl;
 import mz.org.csaude.mentoring.dao.ronda.RondaMenteeDAO;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.ronda.RondaMentee;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.util.DateUtilities;
 
 public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> implements RondaMenteeService {
     private RondaMenteeDAO rondaMenteeDAO;
@@ -54,6 +56,15 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
     }
 
     @Override
+    public RondaMentee getByMentee(Tutored tutored, Ronda ronda) throws SQLException {
+        RondaMentee rondaMentee = this.rondaMenteeDAO.getByMenteeId(tutored.getId(), ronda.getId());
+        if(rondaMentee!=null) {
+            rondaMentee.setTutored(tutored);
+        }
+        return rondaMentee;
+    }
+
+    @Override
     public RondaMentee savedOrUpdateRondaMentee(RondaMentee rondaMentee) throws SQLException {
         RondaMentee rm = this.rondaMenteeDAO.getByUuid(rondaMentee.getUuid());
         if(rm!=null) {
@@ -73,6 +84,16 @@ public class RondaMenteeServiceImpl extends BaseServiceImpl<RondaMentee> impleme
             rondaMentee.setTutored(getApplication().getTutoredService().getById(rondaMentee.getMenteeId()));
         }
         return rondaMentees;
+    }
+
+    @Override
+    public void closeAllActiveOnRonda(Ronda ronda) {
+        rondaMenteeDAO.closeAllActiveOnRonda(ronda.getId(), ronda.getEndDate());
+    }
+
+    @Override
+    public void closeRondaMentee(Ronda currRonda, Tutored selectedMentee) {
+        rondaMenteeDAO.closeOneActiveOnRonda(currRonda.getId(), DateUtilities.getCurrentDate(), selectedMentee.getId());
     }
 
     @Override

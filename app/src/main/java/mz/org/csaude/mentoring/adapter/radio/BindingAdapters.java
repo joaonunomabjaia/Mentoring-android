@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.adapter.radio;
 
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -37,4 +38,10 @@ public class BindingAdapters {
             }
         });
     }
+
+    @BindingAdapter("app:srcCompat")
+    public static void setImageResource(ImageView imageView, int resId) {
+        imageView.setImageResource(resId);
+    }
+
 }

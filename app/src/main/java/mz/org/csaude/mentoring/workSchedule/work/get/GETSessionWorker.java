@@ -20,7 +20,7 @@ public class GETSessionWorker extends BaseWorker<Session> {
     }
 
     @Override
-    public void doOnlineSearch(long offset, long limit) throws SQLException {
+    public void doOnlineSearch(long offset, long limit) throws Exception {
         getApplication().getSessionRestService().restGetSessions(this);
     }
 
@@ -30,7 +30,7 @@ public class GETSessionWorker extends BaseWorker<Session> {
     }
 
     @Override
-    protected void doAfterSearch(String flag, List<Session> recs) throws SQLException {
+    protected void doAfterSearch(String flag, List<Session> recs) throws Exception {
         changeStatusToFinished();
         doOnFinish();
     }

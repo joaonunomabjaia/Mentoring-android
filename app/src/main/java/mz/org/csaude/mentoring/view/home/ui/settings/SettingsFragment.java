@@ -39,7 +39,7 @@ public class SettingsFragment extends GenericFragment {
 
         binding.setLifecycleOwner(this);
 
-        binding.rootLayout.setOnTouchListener((v, event) -> {
+        /*binding.rootLayout.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 hideKeyboardAndClearFocus();
             }
@@ -54,7 +54,7 @@ public class SettingsFragment extends GenericFragment {
         languageSpinner.setAdapter(adapter);
 
         // Set the selected language in the spinner
-        getRelatedViewModel().initSelectedLanguage(languageSpinner);
+        getRelatedViewModel().initSelectedLanguage(languageSpinner);*/
 
     }
 
