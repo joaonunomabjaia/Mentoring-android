@@ -568,7 +568,7 @@ public class MentoringApplication  extends Application {
     }
 
     public Tutor getCurrMentor() {
-        if (this.tutor == null && sessionManager.getActiveUser() != null) {
+        if (this.tutor == null && sessionManager != null && sessionManager.getActiveUser() != null) {
             try {
                 User currUser = getUserService().getByuuid(sessionManager.getActiveUser());
                 this.tutor = getTutorService().getByEmployee(new Employee(currUser.getEmployeeId()));
@@ -578,7 +578,7 @@ public class MentoringApplication  extends Application {
             }
 
         } else
-        if (this.tutor.getEmployee() == null && this.authenticatedUser.getEmployee() != null) {
+        if (this.tutor != null && this.tutor.getEmployee() == null && this.authenticatedUser != null && this.authenticatedUser.getEmployee() != null) {
             this.tutor.setEmployee(this.authenticatedUser.getEmployee());
         } else if (this.authenticatedUser.getEmployee() == null) {
             try {

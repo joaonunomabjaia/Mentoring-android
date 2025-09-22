@@ -610,7 +610,6 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     public List<Cabinet> getSectors() {
         try {
             List<Cabinet> cabinets = new ArrayList<>();
-            cabinets.add(new Cabinet());
             cabinets.addAll(getApplication().getCabinetService().getAll());
             return cabinets;
         } catch (SQLException e) {

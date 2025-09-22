@@ -381,6 +381,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
                 if (sectorAdapter != null) {
                     sectorAdapter.clear();
+                    sectorAdapter.add(new Cabinet());
                     sectorAdapter.addAll(visibleSectors);
                     sectorAdapter.notifyDataSetChanged();
                 } else {
