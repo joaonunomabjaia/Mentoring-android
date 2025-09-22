@@ -342,6 +342,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
 
             this.mentorship.getSession().setForm(this.mentorship.getForm());
 
+            this.mentorship.setPerformedDate(this.mentorship.getStartDate());
             getApplication().getMentorshipService().save(this.mentorship);
             Log.i("Mentorship initial save", this.mentorship.toString());
 
@@ -609,7 +610,6 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
     public List<Cabinet> getSectors() {
         try {
             List<Cabinet> cabinets = new ArrayList<>();
-            cabinets.add(new Cabinet());
             cabinets.addAll(getApplication().getCabinetService().getAll());
             return cabinets;
         } catch (SQLException e) {
@@ -814,6 +814,7 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         this.mentorship.getSession().getRonda().setSessions(Collections.emptyList());
         this.mentorship.getSession().getForm().setFormSections(Collections.emptyList());
         params.put("session", this.mentorship.getSession());
+        params.put("mentorshipuuid", this.mentorship.getUuid());
         getRelatedActivity().nextActivityFinishingCurrent(SessionSummaryActivity.class, params);
     }
 
@@ -976,5 +977,70 @@ public class MentorshipVM extends BaseViewModel implements IDialogListener {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setEvaluationLocation(String locationCode) {
+        getExecutorService().execute(() -> {
+            try {
+                // Busca localização no BD
+                EvaluationLocation location =
+                        getApplication().getEvaluationLocationService().getByCode(locationCode);
+
+                Cabinet communityCabinet = null;
+                Door communityDoor = null;
+
+                if (location != null && location.isCommunityEvaluation()) {
+                    communityCabinet = getApplication()
+                            .getCabinetService()
+                            .getByuuid(Cabinet.COMMUNITY_CABINET_UUID);
+
+                    if (communityCabinet == null) {
+                        runOnMainThread(() ->
+                                Utilities.displayAlertDialog(
+                                        getRelatedActivity(),
+                                        getRelatedActivity().getString(R.string.error_evaluation_location)
+                                ).show()
+                        );
+                        return;
+                    }
+
+                    communityDoor = getApplication()
+                            .getDoorService()
+                            .getByCode(Door.COMMUNITY_DOOR);
+                }
+
+                Cabinet finalCommunityCabinet = communityCabinet;
+                Door finalCommunityDoor = communityDoor;
+
+                runOnMainThread(() -> {
+                    this.mentorship.setEvaluationLocation(location);
+
+                    if (location != null && location.isCommunityEvaluation()) {
+                        setCabinet(finalCommunityCabinet);
+                        setSelectedDoor(finalCommunityDoor);
+                    }
+
+                    notifyPropertyChanged(BR.selectedEvaluationLocation);
+                    notifyPropertyChanged(BR.communityLocation);
+                    notifyPropertyChanged(BR.healthFacilityLocation);
+                });
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
+    @Bindable
+    public boolean isCommunityLocation() {
+        EvaluationLocation loc = this.mentorship.getEvaluationLocation();
+        return loc != null && loc.isCommunityEvaluation(); // usa os helpers @JsonIgnore do seu model
+    }
+
+    @Bindable
+    public boolean isHealthFacilityLocation() {
+        EvaluationLocation loc = this.mentorship.getEvaluationLocation();
+        return loc != null && loc.isHealthFacilityEvaluation();
     }
 }

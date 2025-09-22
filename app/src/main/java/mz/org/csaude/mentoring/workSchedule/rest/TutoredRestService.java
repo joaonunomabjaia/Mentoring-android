@@ -5,9 +5,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +19,7 @@ import java.util.Set;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
+import mz.org.csaude.mentoring.base.service.SuccessResponse;
 import mz.org.csaude.mentoring.common.HttpStatus;
 import mz.org.csaude.mentoring.common.MentoringAPIError;
 import mz.org.csaude.mentoring.dto.tutored.TutoredDTO;
@@ -28,6 +31,7 @@ import mz.org.csaude.mentoring.service.tutored.TutoredService;
 import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -182,5 +186,89 @@ public class TutoredRestService extends BaseRestService {
         });
 
     }
+
+    public void restGetTutoredByUuid(String uuid, RestResponseListener<Tutored> listener) {
+        Call<ResponseBody> call = syncDataService.getTutoredByUuid(uuid);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String json = response.body().string();
+                        Gson gson = new Gson();
+
+                        Type type = new TypeToken<SuccessResponse<TutoredDTO>>() {}.getType();
+                        SuccessResponse<TutoredDTO> successResponse = gson.fromJson(json, type);
+                        TutoredDTO dto = successResponse.getData();
+
+                        getServiceExecutor().execute(() -> {
+                            try {
+                                Tutored tutored = new Tutored(dto);
+                                tutored.setSyncStatus(SyncSatus.SENT);
+                                getApplication().getTutoredService().savedOrUpdateTutored(tutored);
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(tutored));
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+
+                    } catch (IOException e) {
+                        listener.doOnRestErrorResponse("Erro ao processar resposta: " + e.getMessage());
+                    }
+                } else {
+                    listener.doOnRestErrorResponse("Erro ao buscar mentorando: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("TUTORED_FETCH_ERROR", "Erro na chamada GET por UUID", t);
+                listener.doOnRestErrorResponse(t.getMessage());
+            }
+        });
+    }
+
+    public void restUpdateTutored(Tutored tutored, RestResponseListener<Tutored> listener) {
+        TutoredDTO dto = new TutoredDTO(tutored);
+        Call<ResponseBody> call = syncDataService.updateTutored(dto);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String json = response.body().string();
+                        Gson gson = new Gson();
+                        Type type = new TypeToken<SuccessResponse<TutoredDTO>>() {}.getType();
+                        SuccessResponse<TutoredDTO> success = gson.fromJson(json, type);
+
+                        TutoredDTO updatedDTO = success.getData();
+                        Tutored updated = new Tutored(updatedDTO);
+                        updated.setSyncStatus(SyncSatus.SENT);
+
+                        getServiceExecutor().execute(() -> {
+                            try {
+                                getApplication().getTutoredService().savedOrUpdateTutored(updated);
+                                listener.doOnResponse(BaseRestService.REQUEST_SUCESS, Collections.singletonList(updated));
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    } catch (IOException e) {
+                        listener.doOnRestErrorResponse("Erro ao processar resposta: " + e.getMessage());
+                    }
+                } else {
+                    listener.doOnRestErrorResponse("Erro na atualização: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                listener.doOnRestErrorResponse("Erro de conexão: " + t.getMessage());
+            }
+        });
+    }
+
 
 }

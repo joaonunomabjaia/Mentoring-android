@@ -27,6 +27,7 @@
                     android:text="@string/enable_auto_sync"
                     android:textSize="15sp"
                     android:layout_width="wrap_content"
+                    android:textColor="@color/text_primary_light"
                     android:layout_height="wrap_content" />
 
                 <Switch
@@ -49,6 +50,7 @@
                     android:text="@string/enable_biometric_auth"
                     android:textSize="15sp"
                     android:layout_width="wrap_content"
+                    android:textColor="@color/text_primary_light"
                     android:layout_height="wrap_content" />
 
                 <Switch
@@ -65,6 +67,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="@dimen/dimen_5dp"
                 android:layout_width="wrap_content"
+                android:textColor="@color/text_primary_light"
                 android:layout_height="wrap_content" />
 
             <LinearLayout
@@ -102,6 +105,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="@dimen/dimen_5dp"
                 android:layout_width="wrap_content"
+                android:textColor="@color/text_primary_light"
                 android:layout_height="wrap_content" />
 
             <LinearLayout

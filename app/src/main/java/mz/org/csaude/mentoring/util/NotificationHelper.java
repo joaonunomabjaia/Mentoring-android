@@ -20,6 +20,7 @@ import java.util.Locale;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.model.session.Session;
+import mz.org.csaude.mentoring.view.login.LoginActivity;
 import mz.org.csaude.mentoring.view.session.SessionListActivity;
 
 public class NotificationHelper {
@@ -51,22 +52,25 @@ public class NotificationHelper {
             return;
         }
 
-        Intent intent = new Intent(context, SessionListActivity.class);
-        intent.putExtra("source", "notification");
-        intent.putExtra("showUpcomingOnly", true);
-        intent.putExtra("showUpcomingOnly", true);
-        intent.putExtra("ronda", session.getRonda());
-        intent.putExtra("source", "notification");
-        intent.putExtra("showUpcomingOnly", true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent postLoginIntent = new Intent(context, SessionListActivity.class);
+        postLoginIntent.putExtra("source", "notification");
+        postLoginIntent.putExtra("showUpcomingOnly", true);
+        postLoginIntent.putExtra("ronda", session.getRonda());
+
+        Intent loginIntent = new Intent(context, LoginActivity.class);
+        loginIntent.putExtra("redirectAfterLogin", postLoginIntent);
+        loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
                 0,
-                intent,
+                loginIntent,
                 PendingIntent.FLAG_IMMUTABLE
         );
 
+
         String menteeName = session.getTutored() != null ? session.getTutored().getEmployee().getFullName() : "o mentorando";
+
         String dateStr = formatDate(session.getNextSessionDate());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -115,7 +119,6 @@ public class NotificationHelper {
 
     private static String formatDate(Date date) {
         if (date == null) return "breve";
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        return sdf.format(date);
+        return DateUtilities.formatToDDMMYYYY(date);
     }
 }

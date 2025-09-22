@@ -85,4 +85,10 @@ public class RondaMentorServiceImpl extends BaseServiceImpl<RondaMentor> impleme
     public void closeAllActiveOnRonda(Ronda ronda) {
         rondaMentorDAO.closeAllActiveOnRonda(ronda.getId(), ronda.getEndDate());
     }
+
+    @Override
+    public void deleteByRondaId(long rondaId) throws SQLException {
+        rondaMentorDAO.deleteByRondaId(rondaId);
+    }
+
 }

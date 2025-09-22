@@ -131,6 +131,7 @@ public class SessionClosureVM extends BaseViewModel {
             try {
                 session.setStatus(getApplication().getSessionStatusService().getByCode(SessionStatus.COMPLETE));
                 session.setSyncStatus(SyncSatus.PENDING);
+                session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
 
                 // Check if the end date is null
                 if (session.getEndDate() == null) {

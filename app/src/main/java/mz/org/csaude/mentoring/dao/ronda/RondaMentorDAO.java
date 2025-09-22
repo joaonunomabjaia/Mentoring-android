@@ -48,4 +48,8 @@ public interface RondaMentorDAO {
 
     @Query("UPDATE ronda_mentor SET end_date = :endDate, sync_status = 'PENDING' WHERE ronda_id = :rondaId and end_date IS NULL")
     void closeAllActiveOnRonda(Integer rondaId, Date endDate);
+
+    @Query("DELETE FROM ronda_mentor WHERE ronda_id = :rondaId")
+    int deleteByRondaId(long rondaId);
+
 }

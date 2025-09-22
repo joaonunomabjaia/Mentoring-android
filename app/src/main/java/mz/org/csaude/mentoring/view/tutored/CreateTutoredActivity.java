@@ -19,6 +19,7 @@ import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
@@ -39,16 +40,28 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 🔄 Recupera o ViewModel e faz setup inicial
+        getRelatedViewModel().preInit();
         activityCreateTutoredBinding = DataBindingUtil.setContentView(this, R.layout.activity_create_tutored);
         activityCreateTutoredBinding.setViewModel(getRelatedViewModel());
-
         getRelatedViewModel().setInitialDataVisible(true);
-
         setUpToolbar();
-
         initAdapters();
+        activityCreateTutoredBinding.setLifecycleOwner(this);
 
+        // ✅ Recupera o "relatedRecord" da Intent, se houver
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            Tutored relatedTutored = (Tutored) getIntent().getExtras().get("relatedRecord");
+
+            if (relatedTutored != null) {
+                getApplicationStep().changeToEdit();
+                getRelatedViewModel().setTutored(relatedTutored);
+            }
+            //activityCreateTutoredBinding.executePendingBindings();
+        }
     }
+
 
     private void setUpToolbar() {
         setSupportActionBar(activityCreateTutoredBinding.toolbar.toolbar);

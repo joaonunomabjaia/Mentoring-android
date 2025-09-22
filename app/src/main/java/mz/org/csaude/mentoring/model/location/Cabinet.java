@@ -16,6 +16,7 @@ public class Cabinet extends BaseModel {
 
     public static final String TABLE_NAME = "cabinet";
     public static final String COLUMN_NAME = "name";
+    public static final String COMMUNITY_CABINET_UUID = "e5f5ffee-8f90-4c92-9ad8-5280f62b7f33";
 
     @NonNull
     @ColumnInfo(name = COLUMN_NAME)
@@ -44,5 +45,9 @@ public class Cabinet extends BaseModel {
     @Override
     public String getDescription() {
         return name;
+    }
+
+    public boolean isCommunityCabinet() {
+        return getUuid().equals(COMMUNITY_CABINET_UUID);
     }
 }

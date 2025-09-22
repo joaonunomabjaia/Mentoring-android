@@ -45,7 +45,7 @@
     <string name="telephone">Telefone</string>
     <string name="career">Carreira</string>
     <string name="position">Posição</string>
-    <string name="vinculo_laboral">Contrato de Trabalho</string>
+    <string name="vinculo_laboral">Vínculo laboral</string>
     <string name="required_field">Campo obrigatório</string>
     <string name="phone_number_invalid">Número de telefone inválido</string>
     <string name="email_invalid">Email inválido</string>
@@ -177,7 +177,7 @@
     <string name="mentee">Mentorando</string>
     <string name="period_location">Período e Local da Sessão</string>
     <string name="sector">Setor</string>
-    <string name="consulta">Consulta</string>
+    <string name="consulta">Observação</string>
     <string name="ficha">Ficha</string>
     <string name="mentor_sessions">Sessões do Mentor</string>
     <string name="work_aspects">Aspectos a Melhorar no Desempenho Clínico</string>
@@ -236,7 +236,7 @@
     <string name="session_start_date_error">A data de início da sessão não pode ser anterior à data de início da ronda.</string>
     <string name="prev_session_start_date_error">A data de início da sessão não pode ser anterior à data de termino da sessão anterior.</string>
     <string name="select_competence_table">Por favor, selecione uma tabela de competências.</string>
-    <string name="print_success">Resumo impresso com sucesso. Encontre o documento no diretório de downloads.</string>
+    <string name="print_success">Resumo impresso com sucesso. Encontre o documento no diretório de downloads ou por si indicado.</string>
     <string name="print_failure">Não foi possível imprimir o documento.</string>
 
     <string name="configuracoes">Configurações</string>
@@ -280,14 +280,20 @@
     <string name="biometric_title">Login com impressão digital</string>
     <string name="biometric_subtitle">Use a sua impressão digital para aceder</string>
     <string name="enable_biometric_auth">Activar Autenticação Biometrica</string>
-    <string name="login_with_fingerprint">Login with Fingerprint</string>
+    <string name="login_with_fingerprint">Login com biometria</string>
     <string name="ronda_mentee_closed">Já passam %1$d dias sem registo de sessões de mentoria para o mentorando %2$s, este deverá ser integrado numa nova ronda.</string>
     <string name="server_slow">A conexão com o servidor está lenta. Algumas operações podem falhar.</string>
-    <string name="welcome_message">Bem-vindo a Mentoria!</string>
+    <string name="welcome_message">Bem-vindo!</string>
     <string name="last_sessions_placeholder">Últimas sessões: 3 mentorias concluídas esta semana</string>
     <string name="error_ongoing_mentorship">Termine a avaliação em curso antes de iniciar nova!</string>
     <string name="sync_timeout_cancelled">A sincronização foi cancelada por exceder o tempo limite. Verifique sua conexão ou tente novamente.</string>
     <string name="save">Gravar</string>
+    <string name="select_mentee">Seleccione</string>
+    <string name="session_start_date_future_error">A data de início da sessão não pode ser futura.</string>
+    <string name="verifying_connection">Verificando conexão ao servidor...</string>
+    <string name="community">Comunidade</string>
+    <string name="error_evaluation_location">Não possivel encontrar o parâmetro comunidade, sincronize os metadados.</string>
+    <string name="app_name_checkPoint">Checkpoint</string>
 
 
 </resources>

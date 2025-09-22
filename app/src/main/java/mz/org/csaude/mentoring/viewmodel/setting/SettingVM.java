@@ -3,6 +3,7 @@ package mz.org.csaude.mentoring.viewmodel.setting;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT_MINUTES;
 
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -70,7 +71,7 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
         // Load saved settings
         isAutoSyncEnabled.setValue(encryptedSharedPreferences.getBoolean(PREF_METADATA_SYNC_STATUS, true));
         syncInterval.setValue(encryptedSharedPreferences.getString(PREF_METADATA_SYNC_TIME, "2"));
-        autoLogoutTime.setValue(encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, "15"));
+        autoLogoutTime.setValue(encryptedSharedPreferences.getString(PREF_SESSION_TIMEOUT, String.valueOf(PREF_SESSION_TIMEOUT_MINUTES)));
 
         // Observe changes and save them
         isAutoSyncEnabled.observeForever(this::onAutoSyncChanged);
@@ -149,8 +150,8 @@ public class SettingVM extends BaseViewModel implements ServerStatusListener {
             encryptedSharedPreferences.edit().putString(PREF_SESSION_TIMEOUT, logoutTimeStr).apply();
 
             // Notify the BaseActivity to update its timer
-            if (getRelatedActivity() instanceof BaseActivity) {
-                BaseActivity baseActivity = (BaseActivity) getRelatedActivity();
+            if (getRelatedActivity() != null) {
+                BaseActivity baseActivity = getRelatedActivity();
                 baseActivity.updateAutoLogoutTime(logoutTimeMinutes);
             }
 

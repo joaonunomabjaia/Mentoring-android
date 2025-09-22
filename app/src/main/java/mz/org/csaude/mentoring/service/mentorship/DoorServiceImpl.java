@@ -76,4 +76,9 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
         }
         return door;
     }
+
+    @Override
+    public Door getByCode(String communityDoor) {
+        return doorDAO.getByCode(communityDoor);
+    }
 }

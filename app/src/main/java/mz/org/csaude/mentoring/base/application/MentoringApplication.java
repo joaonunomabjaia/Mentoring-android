@@ -2,18 +2,16 @@ package mz.org.csaude.mentoring.base.application;
 
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS;
 import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_COMPLETE;
-import static mz.org.csaude.mentoring.util.Constants.INITIAL_SETUP_STATUS_CONFIGURE_NEW_USER;
 import static mz.org.csaude.mentoring.util.Constants.LAST_SYNC_DATE;
 import static mz.org.csaude.mentoring.util.Constants.LOGGED_USER;
 import static mz.org.csaude.mentoring.util.Constants.PREF_METADATA_SYNC_TIME;
 import static mz.org.csaude.mentoring.util.Constants.PREF_SELECTED_LANGUAGE;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT;
+import static mz.org.csaude.mentoring.util.Constants.PREF_SESSION_TIMEOUT_MINUTES;
 
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -37,6 +35,7 @@ import mz.org.csaude.mentoring.base.auth.AuthInterceptorImpl;
 import mz.org.csaude.mentoring.base.auth.SessionManager;
 import mz.org.csaude.mentoring.common.ApplicationStep;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
+import mz.org.csaude.mentoring.model.employee.Employee;
 import mz.org.csaude.mentoring.model.setting.Setting;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.user.User;
@@ -261,6 +260,11 @@ public class MentoringApplication  extends Application {
         // Load the selected language from SharedPreferences
         SharedPreferences preferences = getEncryptedSharedPreferences(); // Make sure this returns encryptedSharedPreferences
         String selectedLanguageCode = preferences.getString(Constants.PREF_SELECTED_LANGUAGE, "pt"); // Default to English
+
+        String autoLogoutDelay = encryptedSharedPreferences.getString(Constants.PREF_SESSION_TIMEOUT, null);
+        if (autoLogoutDelay == null) {
+            encryptedSharedPreferences.edit().putString(PREF_SESSION_TIMEOUT, String.valueOf(PREF_SESSION_TIMEOUT_MINUTES)).apply();
+        }
 
         NotificationHelper.createNotificationChannel(this);
 
@@ -564,6 +568,25 @@ public class MentoringApplication  extends Application {
     }
 
     public Tutor getCurrMentor() {
+        if (this.tutor == null && sessionManager != null && sessionManager.getActiveUser() != null) {
+            try {
+                User currUser = getUserService().getByuuid(sessionManager.getActiveUser());
+                this.tutor = getTutorService().getByEmployee(new Employee(currUser.getEmployeeId()));
+                this.tutor.setEmployee(getEmployeeService().getById(this.tutor.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else
+        if (this.tutor != null && this.tutor.getEmployee() == null && this.authenticatedUser != null && this.authenticatedUser.getEmployee() != null) {
+            this.tutor.setEmployee(this.authenticatedUser.getEmployee());
+        } else if (this.authenticatedUser.getEmployee() == null) {
+            try {
+                this.tutor.setEmployee(getEmployeeService().getById(this.tutor.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return this.tutor;
     }
 

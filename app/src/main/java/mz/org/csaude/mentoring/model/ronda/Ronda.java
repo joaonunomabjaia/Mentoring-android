@@ -251,6 +251,10 @@ public class Ronda extends BaseModel implements Listble {
     }
 
     public void tryToCloseRonda() {
+        if (this.rondaMentees == null || this.rondaMentees.isEmpty()) {
+            return; // Não tenta fechar a ronda se não houver mentees associados
+        }
+
         boolean allSessionsClosed = true;
 
         for (RondaMentee rondaMentee : rondaMentees) {

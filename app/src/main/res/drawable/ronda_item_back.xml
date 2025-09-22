@@ -13,6 +13,6 @@
         android:top="@dimen/dimen_1dp"
         android:bottom="@dimen/dimen_1dp"/>
 
-    <solid android:color="#e9f1f7"/>
+    <solid android:color="@color/resource_color"/>
 
 </shape>

@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.workSchedule.rest;
 
 import android.app.Application;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +70,35 @@ public class ResourceRestService extends BaseRestService {
        });
 
    }
+
+    public void downloadFileToUri(String fileName, Uri uri, RestResponseListener<Resource> listener) {
+        Call<ResponseBody> call = syncDataService.downloadFile(fileName);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try (OutputStream outputStream = getApplication().getContentResolver().openOutputStream(uri)) {
+                        if (outputStream != null && response.body() != null) {
+                            outputStream.write(response.body().bytes());
+                            listener.doOnRestSucessResponse(BaseRestService.REQUEST_SUCESS);
+                        } else {
+                            listener.doOnRestErrorResponse(BaseRestService.REQUEST_ERROR);
+                        }
+                    } catch (IOException e) {
+                        listener.doOnRestErrorResponse(e.getMessage());
+                    }
+                } else {
+                    listener.doOnRestErrorResponse(BaseRestService.REQUEST_ERROR);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                listener.doOnRestErrorResponse(t.getMessage());
+            }
+        });
+    }
 
     public void downloadFile(String fileName, RestResponseListener<Resource> listener) {
         Call<ResponseBody> call = syncDataService.downloadFile(fileName);

@@ -19,6 +19,8 @@ public class Node extends BaseModel {
 
     private String program;
 
+    private boolean isLink;
+
     private String category;
 
     private String subCategory;
@@ -98,6 +100,14 @@ public class Node extends BaseModel {
 
     public void setResource(String resource) {
         this.resource = resource;
+    }
+
+    public boolean isLink() {
+        return isLink;
+    }
+
+    public void setLink(boolean link) {
+        isLink = link;
     }
 
     @Override

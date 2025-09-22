@@ -15,7 +15,24 @@
         <import type="android.view.View"/>
     </data>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <!-- Background (Edit/Delete buttons) -->
+    <LinearLayout
+        android:id="@+id/view_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@drawable/tutored_item_front">
+
+    </LinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/view_foreground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/tutored_item_back"
@@ -118,6 +135,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
+            <ImageButton
+                android:id="@+id/btn_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_edit"
+                android:background="@null"
+                android:onClick="@{()-> viewModel.initMenteeEdition(tutored)}"
+                android:contentDescription="Edit" />
             <!-- Cloud Sync Status -->
             <ImageView
                 android:layout_width="wrap_content"
@@ -130,4 +155,5 @@
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 </layout>

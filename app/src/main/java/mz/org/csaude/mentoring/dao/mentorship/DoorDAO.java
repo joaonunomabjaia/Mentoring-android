@@ -46,4 +46,6 @@ public interface DoorDAO {
     Door queryForId(int id);
 
 
+    @Query("SELECT * FROM door WHERE code = :communityDoor LIMIT 1")
+    Door getByCode(String communityDoor);
 }

@@ -30,6 +30,7 @@ import com.itextpdf.layout.properties.VerticalAlignment;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,99 @@ import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
 public class PDFGenerator {
+
+    public static boolean createPDF(OutputStream out, Context context, List<SessionSummary> sessionSummaryList, Tutored tutored) {
+        try {
+            PdfWriter writer = new PdfWriter(out);
+            PdfDocument pdfDocument = new PdfDocument(writer);
+            Document document = new Document(pdfDocument);
+
+            // Add logo
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.mz_emblem);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            ImageData imageData = ImageDataFactory.create(byteArray);
+            Image image = new Image(imageData);
+            image.setWidth(75);
+            image.setHeight(85);
+            image.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            document.add(image);
+
+            // Add title and headers
+            PdfFont font = PdfFontFactory.createFont();
+            document.add(new Paragraph("MINISTÉRIO DA SAÚDE")
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setBold()
+                    .setFontColor(DeviceRgb.BLACK)
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("DIRECÇÃO NACIONAL DE SAÚDE PÚBLICA")
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setBold()
+                    .setFontColor(DeviceRgb.BLACK)
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("Resumo da Sessão de Mentoria")
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setBold()
+                    .setUnderline()
+                    .setFontColor(DeviceRgb.BLACK)
+                    .setTextAlignment(TextAlignment.CENTER));
+
+            document.add(new Paragraph("Mentorando: " + tutored.getEmployee().getFullName())
+                    .setFont(font)
+                    .setFontSize(14)
+                    .setBold()
+                    .setMarginTop(10)
+                    .setUnderline()
+                    .setFontColor(DeviceRgb.BLACK)
+                    .setTextAlignment(TextAlignment.LEFT));
+
+            // Add table with data and colors
+            float[] columnWidths = {4, 0.6F, 0.6F, 2.3F};
+            Table table = new Table(UnitValue.createPercentArray(columnWidths));
+
+            // Define cell colors
+            DeviceRgb headerColor = new DeviceRgb(0, 122, 204); // Example color for headers
+            DeviceRgb blueColor = new DeviceRgb(0xD9, 0xE1, 0xF2); // Example color for cells
+            // Red color (assuming RGB values)
+            DeviceRgb redColor = new DeviceRgb(0xFF, 0x00, 0x00);
+
+            DeviceRgb whiteColor = new DeviceRgb(0xFF, 0xFF, 0xFF);
+            DeviceRgb yellowColor = new DeviceRgb(0xFF, 0xFF, 0x00);
+            DeviceRgb greenColor = new DeviceRgb(0x00, 0xFF, 0x00);
+
+
+            // Add header cells with colors
+            table.addHeaderCell(new Cell().add(new Paragraph("Secção")).setFontColor(whiteColor).setBold().setBackgroundColor(headerColor));
+            table.addHeaderCell(new Cell().add(new Paragraph("SIM")).setFontColor(whiteColor).setBold().setBackgroundColor(headerColor));
+            table.addHeaderCell(new Cell().add(new Paragraph("NÃO")).setFontColor(whiteColor).setBold().setBackgroundColor(headerColor));
+            table.addHeaderCell(new Cell().add(new Paragraph("Desempenho da Secção")).setFontColor(whiteColor).setBold().setBackgroundColor(headerColor));
+
+            for (SessionSummary sessionSummary : sessionSummaryList) {
+                table.addCell(new Cell().add(new Paragraph(sessionSummary.getTitle())));
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(sessionSummary.getSimCount()))).setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(sessionSummary.getNaoCount()))).setTextAlignment(TextAlignment.CENTER));
+                DeviceRgb color = sessionSummary.getProgressPercentage() < 64 ? redColor : sessionSummary.getProgressPercentage() < 86 ? yellowColor : greenColor;
+                table.addCell(new Cell().add(new Paragraph(sessionSummary.getProgressPercentage() + "%")).setBackgroundColor(color).setTextAlignment(TextAlignment.CENTER));
+            }
+
+            document.add(table);
+
+            // Add signatures
+            document.add(new Paragraph("\nAssinatura do Mentorando:").setFont(font).setFontSize(12));
+            document.add(new Paragraph("Assinatura do Mentor:").setFont(font).setFontSize(12));
+
+
+            document.close();
+            return true;
+        } catch (Exception e) {
+            Log.e("PDFGenerator", "Error writing PDF: " + e.getMessage());
+            return false;
+        }
+    }
 
     public static boolean createPDF(Context context, List<SessionSummary> sessionSummaryList, Tutored tutored) {
         String pdfPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
