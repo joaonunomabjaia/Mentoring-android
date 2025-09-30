@@ -147,7 +147,7 @@ public abstract class BaseViewModel extends AndroidViewModel implements Observab
     }
 
     public String getAppName() {
-        return getApplication().getString(R.string.app_name);
+        return getApplication().getString(R.string.app_name_checkPoint);
     }
     public boolean isViewListEditButton() {
         return viewListEditButton;

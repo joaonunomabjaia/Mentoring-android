@@ -1,6 +1,8 @@
 package mz.org.csaude.mentoring.adapter.resource;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,20 +42,32 @@ public class ResourceAdapter extends AbstractRecycleViewAdapter<Node> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Node node = records.get(position);
-        ((ResourceViewHolder) holder).resourceListemItemBinding.setNode(node);
-        //((ResourceViewHolder) holder).resourceListemItemBinding.setResourceVM((ResourceVM) this.activity.getRelatedViewModel());
+        ResourceViewHolder viewHolder = (ResourceViewHolder) holder;
+
+        viewHolder.resourceListemItemBinding.setNode(node);
+
         if (activity instanceof SessionEAResourceActivity) {
-            ((ResourceViewHolder) holder).resourceListemItemBinding.btnDownload.setImageResource(R.drawable.ic_done);
+            viewHolder.resourceListemItemBinding.btnDownload.setImageResource(R.drawable.ic_done);
         } else {
             node.setItemSelected(true);
-            ((ResourceViewHolder) holder).resourceListemItemBinding.btnDownload.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ((ResourceActivity)activity).downloadResource(node);
+            if (node.isLink()) {
+                viewHolder.resourceListemItemBinding.btnDownload.setImageResource(R.drawable.ic_link);
+            } else {
+                viewHolder.resourceListemItemBinding.btnDownload.setImageResource(R.drawable.ic_arrow_circle_down); // ou outro padrão
+            }
+            viewHolder.resourceListemItemBinding.btnDownload.setOnClickListener(view -> {
+                if (node.isLink()) {
+                    // Abre o link externo no navegador
+                    String url = node.getName(); // Certifique-se de que node.getName() seja uma URL válida
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    activity.startActivity(browserIntent);
+                } else {
+                    ((ResourceActivity) activity).downloadResource(node);
                 }
             });
         }
     }
+
 
     public class ResourceViewHolder extends RecyclerView.ViewHolder{
 

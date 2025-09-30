@@ -9,6 +9,8 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Relation;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.answer.AnswerDTO;
 import mz.org.csaude.mentoring.model.form.Form;
@@ -45,6 +47,9 @@ import mz.org.csaude.mentoring.model.question.Question;
 public class Answer extends BaseModel {
 
     public static final String TABLE_NAME = "answer";
+    private static final String YES_ANSWER = "SIM";
+    private static final String NO_ANSWER = "NAO";
+    private static final String NA_ANSWER = "NA";
 
     public static final String COLUMN_FORM = "form_id";
     public static final String COLUMN_MENTORSHIP = "mentorship_id";
@@ -174,4 +179,20 @@ public class Answer extends BaseModel {
         this.formSectionQuestion = formSectionQuestion;
         this.formSectionQuestionId = formSectionQuestion.getId();
     }
+
+    @JsonIgnore
+    public boolean isYesAnswer() {
+        return value.trim().toUpperCase().equals(YES_ANSWER);
+    }
+
+    @JsonIgnore
+    public boolean isNoAnswer() {
+        return value.trim().toUpperCase().equals(NO_ANSWER);
+    }
+
+    @JsonIgnore
+    public boolean isNaAnswer() {
+        return value.trim().toUpperCase().equals(NA_ANSWER);
+    }
+
 }

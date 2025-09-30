@@ -19,7 +19,7 @@
     <color name="button_stroke">#85D5FB</color>
     <color name="red_light">#F61909</color>
     <color name="red">#C11508</color>
-    <color name="input_labels">#6E6E6E</color>
+    <color name="input_labels">#5B5A5A</color>
     <color name="light_grey">#E0E0E0</color>
 
     <color name="input_border">#1D6B8F</color>
@@ -41,6 +41,7 @@
 
     <color name="progress_bar_tint">#FF0000</color>
     <color name="loading_message_color">#e91e63</color>
+    <color name="resource_color">#e9f1f7</color>
 
 
 </resources>

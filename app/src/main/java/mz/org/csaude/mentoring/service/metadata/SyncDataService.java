@@ -42,6 +42,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -74,6 +75,13 @@ public interface SyncDataService {
 
     @GET("tutored/getTutoreds")
     Call<List<TutoredDTO>> getTutoreds(@Query("uuids") List<String> uuids, @Query("offset") long offset, @Query("limit") long limit);
+
+    @GET("tutored/{uuid}")
+    Call<ResponseBody> getTutoredByUuid(@Path("uuid") String uuid);
+
+    @PUT("tutored")
+    Call<ResponseBody> updateTutored(@Body TutoredDTO tutoredDTO);
+
     @POST("login")
     Call<LoginResponse> login(@Body RequestBody body);
 

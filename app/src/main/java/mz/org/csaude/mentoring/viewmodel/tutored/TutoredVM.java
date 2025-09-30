@@ -14,19 +14,17 @@ import androidx.work.WorkInfo;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
-import mz.org.csaude.mentoring.base.fragment.GenericFragment;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
-import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
@@ -37,7 +35,6 @@ import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
-import mz.org.csaude.mentoring.model.tutor.Tutor;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.tutored.TutoredService;
@@ -46,8 +43,6 @@ import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
-import mz.org.csaude.mentoring.view.home.ui.personalinfo.PersonalInfoFragment;
-import mz.org.csaude.mentoring.view.ronda.RondaActivity;
 import mz.org.csaude.mentoring.view.tutored.CreateTutoredActivity;
 import mz.org.csaude.mentoring.view.tutored.TutoredActivity;
 import mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment;
@@ -66,6 +61,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     private List<HealthFacility> healthFacilities;
 
     private List<SimpleValue> menteeLabors;
+    private SimpleValue selectedMenteeLabor;
 
     private boolean ONGEmployee;
 
@@ -82,21 +78,22 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         this.tutoredService = getApplication().getTutoredService();
         this.employeeService = getApplication().getEmployeeService();
 
-        initNewRecord();
-        districts = new ArrayList<>();
-        healthFacilities = new ArrayList<>();
-        menteeLabors = new ArrayList<>();
-        location = new Location();
+        // ✅ Inicialização segura
+        this.tutored = new Tutored();
+        this.tutored.setEmployee(new Employee());
+
+        this.districts = new ArrayList<>();
+        this.healthFacilities = new ArrayList<>();
+        this.menteeLabors = new ArrayList<>();
+        this.location = new Location();
 
         loadMeteeLabors();
     }
 
+
     @Override
     protected void doOnNoRecordFound() {
         this.displaySearchResults();
-    }
-
-    private void initNewRecord() {
     }
 
     @Override
@@ -106,25 +103,24 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Override
     public void preInit() {
-        if (getCurrentStep().isApplicationStepEdit()) {
-            this.tutored = (Tutored) this.selectedListble;
-        } else {
-            this.tutored = new Tutored();
-            this.tutored.setEmployee(new Employee());
-        }
+        //this.tutored = new Tutored();
+       // this.tutored.setEmployee(new Employee());
     }
 
     @Bindable
     public String getName() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getName();
     }
 
     public void setName(String name) {
         this.tutored.getEmployee().setName(name);
-        notifyPropertyChanged(mz.org.csaude.mentoring.BR.name);
+        //notifyPropertyChanged(BR.name);
     }
+
     @Bindable
     public String getSurname(){
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getSurname();
     }
 
@@ -133,39 +129,41 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getNuit() {
-        if (this.tutored.getEmployee().getNuit() <= 0) return null;
+        if (this.tutored == null || this.tutored.getEmployee() == null || this.tutored.getEmployee().getNuit() <= 0) return null;
         return Utilities.parseLongToString(this.tutored.getEmployee().getNuit());
     }
     public void setNuit(String nuit) {
         if (!Utilities.stringHasValue(nuit)) return;
 
         this.tutored.getEmployee().setNuit(Long.parseLong(nuit));
-        notifyPropertyChanged(BR.nuit);
+        //notifyPropertyChanged(BR.nuit);
     }
     public List<ProfessionalCategory> getAllProfessionalCategys() throws SQLException{
         return getApplication().getProfessionalCategoryService().getAll();
     }
     @Bindable
     public Listble getProfessionalCategory() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getProfessionalCategory();
     }
     public void setProfessionalCategory(Listble professionalCategory) {
         this.tutored.getEmployee().setProfessionalCategory((ProfessionalCategory) professionalCategory);
-        notifyPropertyChanged(BR.professionalCategory);
+        //notifyPropertyChanged(BR.professionalCategory);
     }
 
     @Bindable
     public String getTrainingYear() {
-        if (this.tutored.getEmployee().getTrainingYear() == null || this.tutored.getEmployee().getTrainingYear() <= 0) return null;
+        if (this.tutored == null || this.tutored.getEmployee() == null || this.tutored.getEmployee().getTrainingYear() == null || this.tutored.getEmployee().getTrainingYear() <= 0) return null;
         return String.valueOf(this.tutored.getEmployee().getTrainingYear());
     }
     public void setTrainingYear(String trainingYear) {
         if (!Utilities.stringHasValue(trainingYear)) return;
         this.tutored.getEmployee().setTrainingYear(Integer.parseInt(trainingYear));
-        notifyPropertyChanged(BR.trainingYear);
+        //notifyPropertyChanged(BR.trainingYear);
     }
     @Bindable
     public String getPhoneNumber() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getPhoneNumber();
     }
     public void setPhoneNumber(String phoneNumber) {
@@ -173,6 +171,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public String getEmail() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getEmail();
     }
 
@@ -181,6 +180,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
     @Bindable
     public Listble getPartner() {
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
         return this.tutored.getEmployee().getPartner();
     }
 
@@ -210,12 +210,13 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Bindable
     public Listble getSelectedNgo() {
-        return  this.tutored.getEmployee().getPartner();
+        if (this.tutored == null || this.tutored.getEmployee() == null) return null;
+        return this.tutored.getEmployee().getPartner();
     }
 
     public void setSelectedNgo(Listble selectedNgo) {
         this.tutored.getEmployee().setPartner((Partner) selectedNgo);
-        notifyPropertyChanged(BR.selectedNgo);
+        //notifyPropertyChanged(BR.selectedNgo);
     }
 
     private void doSave(){
@@ -223,21 +224,26 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         getExecutorService().execute(() -> {
             try {
                 tutored.setSyncStatus(SyncSatus.SENT);
-                tutored.setUuid(Utilities.getNewUUID().toString());
-                tutored.getEmployee().setUuid(Utilities.getNewUUID().toString());
-                location.setUuid(Utilities.getNewUUID().toString());
+                if (!getCurrentStep().isApplicationStepEdit()) {
+                    tutored.setUuid(Utilities.getNewUUID().toString());
+                    tutored.getEmployee().setUuid(Utilities.getNewUUID().toString());
+                    location.setUuid(Utilities.getNewUUID().toString());
+                    location.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
+                    tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                    tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
+                    tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
+                    tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
+                } else {
+                    tutored.getEmployee().setLocations(new ArrayList<>());
+                }
+
                 location.setProvince((Province) getProvince());
                 location.setDistrict((District) getDistrict());
                 location.setHealthFacility((HealthFacility) getHealthFacility());
                 location.setLocationLevel("N/A");
                 location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
-                location.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
-                tutored.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
-                tutored.getEmployee().setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().addLocation(location);
-                tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
-                tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
 
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
@@ -262,9 +268,11 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     @Override
     public void doOnResponse(String flag, List<Tutored> objects) {
         try {
-            getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
-            this.tutoredService.savedOrUpdateTutored(tutored);
-            this.getApplication().getLocationService().saveOrUpdate(location);
+            if (!getCurrentStep().isApplicationStepEdit()) {
+                getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee());
+                this.tutoredService.savedOrUpdateTutored(tutored);
+                this.getApplication().getLocationService().saveOrUpdate(location);
+            }
 
             runOnMainThread(() -> {
                 dismissProgress(loading);
@@ -299,8 +307,52 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     }
 
     public void setTutored(Tutored tutored) {
-        this.tutored = tutored;
+        getExecutorService().execute(()->{
+            this.tutored = tutored;
+
+            try {
+                this.tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+           runOnMainThread(()->{
+               // Seta localização se houver
+               if (this.tutored.getEmployee() != null && Utilities.listHasElements(this.tutored.getEmployee().getLocations())) {
+                   this.location = this.tutored.getEmployee().getLocations().get(0);
+               }
+
+               if (!this.tutored.getEmployee().getPartner().isMISAU()) {
+                   setONGEmployee(true);
+                   Optional<SimpleValue> snsLabor = this.menteeLabors.stream()
+                           .filter(labor -> "ONG".equals(labor.getDescription()))
+                           .findFirst();
+
+                   snsLabor.ifPresent(this::setMenteeLabor);
+               } else {
+                   setONGEmployee(false);
+                   Optional<SimpleValue> snsLabor = this.menteeLabors.stream()
+                           .filter(labor -> "SNS".equals(labor.getDescription()))
+                           .findFirst();
+
+                   snsLabor.ifPresent(this::setMenteeLabor);
+               }
+
+
+               // Atualiza campos observáveis
+               notifyPropertyChanged(BR.name);
+               notifyPropertyChanged(BR.surname);
+               notifyPropertyChanged(BR.nuit);
+               notifyPropertyChanged(BR.professionalCategory);
+               notifyPropertyChanged(BR.trainingYear);
+               notifyPropertyChanged(BR.phoneNumber);
+               notifyPropertyChanged(BR.email);
+               notifyPropertyChanged(BR.selectedNgo);
+           });
+        });
+
     }
+
 
     public Location getLocation() {
         return location;
@@ -404,26 +456,44 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     @Bindable
     public Listble getMenteeLabor(){
-        return Utilities.findOnArray(this.menteeLabors, SimpleValue.fastCreate("SNS"));
+        return this.selectedMenteeLabor;
+        /*
+        if (!Utilities.listHasElements(this.menteeLabors)) return null;
+        return Utilities.findOnArray(this.menteeLabors, SimpleValue.fastCreate("SNS"));*/
     }
 
     public void setMenteeLabor(Listble menteeLabor){
-        getExecutorService().execute(()-> {
-            if (this.tutored.getEmployee() == null) return;
-            SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
-            if (selectSimpleValue.getDescription().equals("ONG")) {
-                setONGEmployee(true);
-            } else {
-                setONGEmployee(false);
-                getExecutorService().execute(() -> {
-                    try {
-                        this.tutored.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        });
+        this.selectedMenteeLabor = (SimpleValue) menteeLabor;
+
+        if (selectedMenteeLabor.getDescription().equals("ONG")) {
+            setONGEmployee(true);
+        } else {
+            setONGEmployee(false);
+            getExecutorService().execute(() -> {
+                try {
+                    this.tutored.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        /*if (this.tutored.getEmployee() == null) return;
+        SimpleValue selectSimpleValue = (SimpleValue) menteeLabor;
+        if (selectSimpleValue.getDescription().equals("ONG")) {
+            setONGEmployee(true);
+        } else {
+            setONGEmployee(false);
+            *//*getExecutorService().execute(() -> {
+                try {
+                    this.tutored.getEmployee().setPartner(getApplication().getPartnerService().getMISAU());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });*//*
+        }*/
+        notifyPropertyChanged(BR.menteeLabor);
+        notifyPropertyChanged(BR.oNGEmployee);
     }
 
     @Bindable
@@ -433,7 +503,7 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
 
     public void setONGEmployee(boolean ONGEmployee) {
         this.ONGEmployee = ONGEmployee;
-        notifyPropertyChanged(BR.oNGEmployee);
+
     }
 
     private TutoredActivity getTutoredActivity() {
@@ -491,18 +561,22 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
     @Override
     public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
-            if (isSlow) {
-                // Show warning: Server is slow
-                showSlowConnectionWarning(getRelatedActivity());
+            if (isSlow) showSlowConnectionWarning(getRelatedActivity());
+
+            if (getCurrentStep().isApplicationStepEdit()) {
+                getApplication().getTutoredRestService().restUpdateTutored(tutored, this);
+            } else {
+                getApplication().getTutoredRestService().restPostTutored(tutored, this);
             }
-            getApplication().getTutoredRestService().restPostTutored(tutored, this);
         } else {
             dismissProgress(loading);
-            runOnMainThread(()-> {
-                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(mz.org.csaude.mentoring.R.string.server_unavailable)).show();
-            });
+            runOnMainThread(() -> Utilities.displayAlertDialog(
+                    getRelatedActivity(),
+                    getRelatedActivity().getString(R.string.server_unavailable)).show()
+            );
         }
     }
+
     public void nextStep() {
 
     }
@@ -548,4 +622,45 @@ public class TutoredVM extends SearchVM<Tutored> implements RestResponseListener
         }
         return (TutoredFragment) super.getRelatedFragment();
     }
+
+    private void editTutoredFromServer(String uuid) {
+        loading = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+
+        getApplication().getTutoredRestService().restGetTutoredByUuid(uuid, new RestResponseListener<Tutored>() {
+            @Override
+            public void doOnResponse(String flag, List<Tutored> tutoreds) {
+                dismissProgress(loading);
+                Tutored updatedTutored = tutoreds.get(0);
+                runOnMainThread(() -> {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("relatedRecord", updatedTutored);
+                    getCurrentStep().changeToEdit();
+                    getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class, params);
+                });
+            }
+
+            @Override
+            public void doOnRestErrorResponse(String errorMsg) {
+                dismissProgress(loading);
+                runOnMainThread(() -> Utilities.displayAlertDialog(getRelatedActivity(), errorMsg).show());
+            }
+        });
+    }
+
+    public void initMenteeEdition(Tutored selectedTutored) {
+        loading = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.verifying_connection));
+
+        getApplication().isServerOnline((isOnline, isSlow) -> {
+            dismissProgress(loading);
+            if (isOnline) {
+                if (isSlow) {
+                    showSlowConnectionWarning(getRelatedActivity());
+                }
+                editTutoredFromServer(selectedTutored.getUuid());
+            } else {
+                Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
+            }
+        });
+    }
+
 }

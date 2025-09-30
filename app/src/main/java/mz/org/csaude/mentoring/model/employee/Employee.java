@@ -119,6 +119,10 @@ public class Employee extends BaseModel implements Listble {
         this.partnerId = partner.getId();
     }
 
+    public Employee(Integer id) {
+        super(id);
+    }
+
     @Ignore
     public Employee(EmployeeDTO employeeDTO) {
         super(employeeDTO);
@@ -246,11 +250,8 @@ public class Employee extends BaseModel implements Listble {
 
     @Override
     public String validade() {
-//        if (getName() == null) return "Campo nome não pode estar vazio ";
         if (!Utilities.stringHasValue(getName())) return "Campo nome não pode estar vazio ";
-        if (getName().length() <= 2) return "Campo nome tem que ter mais de dois caracteres";
         if (!Utilities.stringHasValue(getSurname())) return "Campo apelido não pode estar vazio";
-        if (getSurname().length() <= 2) return "Campo apelido tem que ter mais de dois caracteres";
         if (!Utilities.stringHasValue(getPhoneNumber())) return "Campo Telefone não pode estar vazio";
         if (!(getPhoneNumber().startsWith("8") && getPhoneNumber().length() == 9)) return "Por favor indique um Telefone válido";
         if (!Utilities.stringHasValue(getEmail())) return "Campo Email não pode estar vazio";
@@ -258,8 +259,8 @@ public class Employee extends BaseModel implements Listble {
         if (this.getProfessionalCategory() == null) return "Campo Categoria Profissional não pode estar vazio";
         if (!Utilities.listHasElements(this.locations)) return "Por favor indique a unidade sanitária.";
         if (!Utilities.stringHasValue(String.valueOf(getNuit())) || getNuit() == 0L) return "Campo NUIT não pode estar vazio";
-        if (Long.toString(getNuit()).length() != 9) return "Campo do NUIT tem que ter 9 dígitos";
-        if (getTrainingYear() == null) return "Campo Ano não pode estar vazio";
+        if (Long.toString(getNuit()).length() != 9) return "Campo do NUIT deve ter 9 dígitos";
+        if (getTrainingYear() == null) return "Campo Ano de formação não pode estar vazio";
         if (getTrainingYear() < 1960 || getTrainingYear() > Calendar.getInstance().get(Calendar.YEAR)) return "Por favor indique um ano válido";
         return super.validade();
     }

@@ -17,7 +17,7 @@ public interface SessionService extends BaseService<Session> {
 
     List<Session> getAllOfRonda(Ronda ronda) throws SQLException;
 
-    List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore);
+    List<SessionSummary> generateSessionSummary(Session session, String mentorshipuuid, boolean includeFinalScore);
 
     void saveRecommendedResources(Session session, List<SessionRecommendedResource> recommendedResources) throws SQLException;
     void updateRecommendedResources(SessionRecommendedResource recommendedResources) throws SQLException;
@@ -33,4 +33,6 @@ public interface SessionService extends BaseService<Session> {
     List<Session> getAllNotSynced() throws SQLException;
 
     List<Session> getSessionsWithinNextDays(int i);
+
+    List<Session> getAllOfRondaAndMentee(Ronda ronda, Tutored tutored);
 }

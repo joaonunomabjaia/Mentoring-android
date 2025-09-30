@@ -16,6 +16,8 @@ public class Constants {
     public static final String PREF_SELECTED_LANGUAGE = "selected_language";
     public static final String PREF_BIOMETRIC_ENABLED = "pref_biometric_enabled";
     public static final String PREF_USER_CREDENTIALS_PREFIX = "user_credentials_";
+    public static final int PREF_SESSION_TIMEOUT_MINUTES = 15;
+
 
 
     public static final String MUX_DAYS_ON_RONDA_WITHOUT_SESSION = "Mentee_ronda_removal_interval";

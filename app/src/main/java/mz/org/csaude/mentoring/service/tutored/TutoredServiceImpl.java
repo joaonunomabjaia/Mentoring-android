@@ -89,11 +89,12 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
     public Tutored savedOrUpdateTutored(Tutored tutored) throws SQLException {
 
         Tutored t = this.tutoredDao.getByUuid(tutored.getUuid());
-        tutored.setEmployee(getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee()));
         if (t != null) {
             tutored.setId(t.getId());
+            tutored.setEmployee(getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee()));
             this.update(tutored);
         } else {
+            tutored.setEmployee(getApplication().getEmployeeService().saveOrUpdateEmployee(tutored.getEmployee()));
             this.save(tutored);
         }
 

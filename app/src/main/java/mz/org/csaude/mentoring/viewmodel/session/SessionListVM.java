@@ -315,6 +315,12 @@ public class SessionListVM extends SearchVM<Session>  implements IDialogListener
         });
     }
 
+    public void showAISummary(Session session) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("session", session);
+        getRelatedActivity().nextActivity(SessionSummaryActivity.class, params);
+    }
+
 
     @Override
     public void doOnDeny() {

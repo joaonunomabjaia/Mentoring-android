@@ -82,7 +82,7 @@
                     android:textColor="?attr/textColorPrimary"
                     android:gravity="center_vertical"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:text="@{DateUtilities.formatToDDMMYYYY(mentorship.performedDate)}"
+                    android:text="@{DateUtilities.formatToDDMMYYYY(mentorship.startDate)}"
                    />
             </LinearLayout>
             <LinearLayout

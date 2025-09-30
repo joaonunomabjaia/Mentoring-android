@@ -1,11 +1,14 @@
 package mz.org.csaude.mentoring.view.session;
 
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.DatePicker;
 
 import androidx.annotation.Nullable;
@@ -78,9 +81,14 @@ public class SessionActivity extends BaseActivity implements ClickListener.OnIte
                 mMonth = c.get(Calendar.MONTH);
                 mDay = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(SessionActivity.this, (view1, year, monthOfYear, dayOfMonth) ->
+                DatePickerDialog datePickerDialog = new DatePickerDialog(SessionActivity.this, R.style.CustomDatePickerDialogTheme, (view1, year, monthOfYear, dayOfMonth) ->
                         getRelatedViewModel().setStartDate(DateUtilities.createDate(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year, DateUtilities.DATE_FORMAT)), mYear, mMonth, mDay);
                 datePickerDialog.show();
+                Button positiveButton = datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                Button negativeButton = datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+
+                if (positiveButton != null) positiveButton.setTextColor(Color.BLACK);
+                if (negativeButton != null) negativeButton.setTextColor(Color.BLACK);
             }
         });
 

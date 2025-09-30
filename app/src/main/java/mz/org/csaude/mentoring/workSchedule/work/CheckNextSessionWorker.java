@@ -22,6 +22,8 @@ import mz.org.csaude.mentoring.util.Utilities;
 
 public class CheckNextSessionWorker extends BaseWorker<Session> {
 
+    public static final int NEXT_SESSION_NOTIFICATION_INTERVAL = 2;
+
     public CheckNextSessionWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
@@ -29,7 +31,7 @@ public class CheckNextSessionWorker extends BaseWorker<Session> {
     @Override
     public void doOnlineSearch(long offset, long limit) throws Exception {
         // Fetch sessions where nextSessionDate is 2 days ahead
-        List<Session> upcomingSessions = getApplication().getSessionService().getSessionsWithinNextDays(2);
+        List<Session> upcomingSessions = getApplication().getSessionService().getSessionsWithinNextDays(NEXT_SESSION_NOTIFICATION_INTERVAL);
 
 
         if (Utilities.listHasElements(upcomingSessions) && upcomingSessions.size() == 1) {
@@ -37,29 +39,6 @@ public class CheckNextSessionWorker extends BaseWorker<Session> {
         } else if (Utilities.listHasElements(upcomingSessions) && upcomingSessions.size() > 1) {
             NotificationHelper.notifyMultipleUpcomingSessions(context, upcomingSessions);
         }
-    }
-
-    private void sendNotification(Session session) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "session_channel")
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("Sessão de Mentoria Aproximando-se")
-                .setContentText("Sua próxima sessão com " + session.getTutored().getEmployee().getFullName() + " será em breve!")
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationManager.notify(session.getId(), builder.build());
-            } else {
-                // Permission not granted, maybe log or silently skip
-                Log.w("Notification", "POST_NOTIFICATIONS permission not granted.");
-            }
-        } else {
-            // Android 12 or lower, permission not needed
-            notificationManager.notify(session.getId(), builder.build());
-        }
-
     }
 
     @Override

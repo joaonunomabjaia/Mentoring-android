@@ -7,7 +7,6 @@ import androidx.room.Transaction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -142,62 +141,70 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     @Override
-    public List<SessionSummary> generateSessionSummary(Session session, boolean includeFinalScore) {
+    public List<SessionSummary> generateSessionSummary(Session session, String mentorshipuuid, boolean includeFinalScore) {
         List<SessionSummary> summaries = new ArrayList<>();
+        SessionSummary finalSummary = new SessionSummary().setTitle("Desempenho Final");
+        Mentorship currtentMentorship = null;
 
-        SessionSummary sessionSummary = new SessionSummary();
-        sessionSummary.setTitle("Desempenho Final");
         try {
-            session.setMentorships(getApplication().getMentorshipService().getAllOfSession(session));
-            for (Mentorship mentorship : session.getMentorships()) {
-                if (mentorship.isPatientEvaluation()) {
-                    mentorship.setAnswers(getApplication().getAnswerService().getAllOfMentorship(mentorship));
-                    determineFinalScore(sessionSummary, mentorship.getAnswers());
-                    for (Answer answer : mentorship.getAnswers()) {
-                        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
-                        if (categoryAlreadyExists(cat, summaries)){
-                            doCountInCategory(cat, summaries, answer);
-                        } else {
-                            summaries.add(initSessionSummary(answer));
-                        }
-                    }
+            session.setMentorships(getApplication()
+                    .getMentorshipService()
+                    .getAllOfSession(session));
+
+            if (mentorshipuuid != null) {
+                currtentMentorship = session.getMentorships().stream()
+                        .filter(mentorship -> mentorship.getUuid().equals(mentorshipuuid))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (session.isCompleted()) {
+                for (Mentorship mentorship : session.getMentorships()) {
+                    if (!mentorship.isPatientEvaluation()) continue;
+
+                    processSummary(mentorship, finalSummary, summaries);
                     break;
                 }
+            } else if (currtentMentorship != null) {
+                processSummary(currtentMentorship, finalSummary, summaries);
             }
-            if (includeFinalScore) summaries.add(sessionSummary);
+
+            if (includeFinalScore) summaries.add(finalSummary);
             return summaries;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void determineFinalScore(SessionSummary sessionSummary, List<Answer> answers) {
-        int simCount = 0;
-        int naoCount = 0;
+    private void processSummary(Mentorship mentorship, SessionSummary finalSummary, List<SessionSummary> summaries) throws SQLException {
+        mentorship.setAnswers(getApplication()
+                .getAnswerService()
+                .getAllOfMentorship(mentorship));
 
-        // Loop through answers to count SIM and NÃO values
-        for (Answer answer : answers) {
-            String value = answer.getValue().trim().toUpperCase();
-            if (value.equals("SIM")) {
-                simCount++;
-            } else if (value.equals("NAO")) {
-                naoCount++;
+        determineFinalScore(finalSummary, mentorship.getAnswers());
+
+        for (Answer answer : mentorship.getAnswers()) {
+            String category = answer.getFormSectionQuestion()
+                    .getFormSection()
+                    .getSection()
+                    .getDescription();
+
+            if (categoryAlreadyExists(category, summaries)) {
+                doCountInCategory(category, summaries, answer);
+            } else {
+                summaries.add(initSessionSummary(answer));
             }
         }
-
-        sessionSummary.setSimCount(simCount);
-        sessionSummary.setNaoCount(naoCount);
-
-       /* // Calculate Desempenho Final using the provided formula
-        double finalPerformance = 0.0;
-        if (simCount + naoCount > 0) {
-            finalPerformance = ((double) simCount / (simCount + naoCount)) * 100;
-        }
-
-        // Set the final score in the session summary
-        sessionSummary.setProgressPercentage(finalPerformance+"%");*/
     }
 
+    private void determineFinalScore(SessionSummary summary, List<Answer> answers) {
+        int sim = (int) answers.stream().filter(Answer::isYesAnswer).count();
+        int nao = (int) answers.stream().filter(Answer::isNoAnswer).count();
+
+        summary.setSimCount(sim)
+                .setNaoCount(nao);
+    }
 
     @Override
     public void saveRecommendedResources(Session session, List<SessionRecommendedResource> recommendedResources) throws SQLException {
@@ -227,17 +234,18 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
         return this.sessionRecommendedResourceDAO.getByUuid(uuid);
     }
 
-    private void doCountInCategory(String cat, List<SessionSummary> summaries, Answer answer) {
-        for (SessionSummary sessionSummary : summaries) {
-            if (sessionSummary.getTitle().equals(cat)) {
-                if (answer.getValue().equals("SIM")) {
-                    sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);
-                } else if (answer.getValue().equals("NAO")) {
-                    sessionSummary.setNaoCount(sessionSummary.getNaoCount() + 1);
-                }
+    private void doCountInCategory(String category, List<SessionSummary> summaries, Answer answer) {
+        for (SessionSummary summary : summaries) {
+            if (!summary.getTitle().equals(category)) continue;
+
+            if (answer.isYesAnswer()) {
+                summary.setSimCount(summary.getSimCount() + 1);
+            } else if (answer.isNoAnswer()) {
+                summary.setNaoCount(summary.getNaoCount() + 1);
             }
         }
     }
+
 
     private boolean categoryAlreadyExists(String cat, List<SessionSummary> summaries) {
         for (SessionSummary sessionSummary : summaries) {
@@ -249,17 +257,12 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     }
 
     private SessionSummary initSessionSummary(Answer answer) {
-        SessionSummary sessionSummary = new SessionSummary();
-        String cat = answer.getFormSectionQuestion().getFormSection().getSection().getDescription();
-        sessionSummary.setTitle(cat);
-
-        if (answer.getValue().equals("SIM")) {
-            sessionSummary.setSimCount(sessionSummary.getSimCount() + 1);
-        } else if (answer.getValue().equals("NAO")) {
-            sessionSummary.setNaoCount(sessionSummary.getNaoCount() + 1);
-        }
-        return sessionSummary;
+        return new SessionSummary()
+                .setTitle(answer.getFormSectionQuestion().getFormSection().getSection().getDescription())
+                .setSimCount(answer.isYesAnswer() ? 1 : 0)
+                .setNaoCount(answer.isNoAnswer() ? 1 : 0);
     }
+
 
     @Override
     public List<Session> getAllOfRondaPending(Ronda ronda) throws SQLException {
@@ -292,13 +295,17 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
     @Override
     public List<Session> getAllNotSynced() throws SQLException {
         List<Session> sessions = this.sessionDAO.getAllNotSynced(String.valueOf(SyncSatus.PENDING));
+        List<Session> sessionsToSync = new ArrayList<>();
         for (Session session : sessions) {
             session.setForm(getApplication().getFormService().getById(session.getFormId()));
             session.setTutored(getApplication().getTutoredService().getById(session.getMenteeId()));
             session.setRonda(getApplication().getRondaService().getById(session.getRondaId()));
             session.setStatus(getApplication().getSessionStatusService().getById(session.getStatusId()));
+            if (session.getRonda().getRondaMentors().get(0).getEndDate() == null) {
+                sessionsToSync.add(session);
+            }
         }
-        return sessions;
+        return sessionsToSync;
     }
 
     @Override
@@ -317,6 +324,11 @@ public class SessionServiceImpl extends BaseServiceImpl<Session> implements Sess
             }
         }
         return sessions;
+    }
+
+    @Override
+    public List<Session> getAllOfRondaAndMentee(Ronda ronda, Tutored tutored) {
+        return sessionDAO.queryForAllOfRondaAndMentee(ronda.getId(), tutored.getId());
     }
 
     @Override

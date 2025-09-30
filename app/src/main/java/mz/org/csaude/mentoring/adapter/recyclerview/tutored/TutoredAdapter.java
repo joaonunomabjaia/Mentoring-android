@@ -41,6 +41,7 @@ public class TutoredAdapter extends AbstractRecycleViewAdapter<Tutored> {
                 ((RondaVM) activity.getRelatedViewModel()).removeFromSelected(tutored);
             }
         });
+        ((TutoredViewHolder) holder).tutoredListItemBinding.btnEdit.setVisibility(View.GONE);
     }
 
     public class TutoredViewHolder extends RecyclerView.ViewHolder {

@@ -81,6 +81,10 @@ public abstract class BaseModel implements Serializable, Listble {
         this.setUpdatedByUuid(baseEntityDTO.getUpdatedByuuid());
     }
 
+    public BaseModel(Integer id) {
+        this.id = id;
+    }
+
     public Integer getId() {
         return id;
     }

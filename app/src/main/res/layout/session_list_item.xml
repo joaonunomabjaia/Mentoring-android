@@ -19,44 +19,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/dimen_10dp"
+        android:orientation="vertical"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/ronda_item_back"
-        android:padding="@dimen/dimen_10dp">
+        android:padding="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Mentee Name -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{session.tutored.employee.fullName}"
-                android:padding="@dimen/dimen_4dp"
+                android:padding="4dp"
                 android:drawableLeft="@drawable/ic_person"
                 android:textColor="@color/colorPrimaryDark"
-                android:layout_marginBottom="@dimen/dimen_5dp"
+                android:layout_marginBottom="5dp"
                 android:layout_gravity="center_vertical|start"
                 android:textSize="14dp"
                 android:drawablePadding="8dp"
                 android:textStyle="bold" />
+
+            <!-- Location & Date -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
                     android:text="@{session.ronda.healthFacility.description}"
-                    android:padding="@dimen/dimen_4dp"
+                    android:padding="4dp"
                     android:drawableLeft="@drawable/baseline_local_hospital_24"
-                    android:textSize="@dimen/dimen_12dp"
+                    android:textSize="12dp"
                     android:textColor="?attr/textColorPrimary"
                     android:gravity="center_vertical"
                     android:drawablePadding="8dp"
                     android:textStyle="bold" />
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -65,88 +70,99 @@
                     android:gravity="center_vertical"
                     android:textColor="?attr/textColorPrimary"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:text="@{DateUtilities.formatToDDMMYYYY(session.startDate)}"
-                   />
+                    android:text="@{DateUtilities.formatToDDMMYYYY(session.startDate)}" />
             </LinearLayout>
 
+            <!-- Form Name -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@{session.form.name}"
-                android:padding="@dimen/dimen_4dp"
-                android:textSize="@dimen/dimen_12dp"
+                android:padding="4dp"
+                android:textSize="12dp"
                 android:textColor="?attr/textColorPrimary"
                 android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/dimen_5dp"
+                android:layout_marginTop="5dp"
                 android:layout_height="1dp"
                 android:background="@color/spinner_back_color"/>
 
+            <!-- Session Actions -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/dimen_5dp"
+                android:paddingTop="5dp"
                 android:gravity="end"
                 android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/view_summary"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_summary"
+                    android:visibility="gone"
+                    android:onClick="@{()-> viewModel.showAISummary(session)}"
+                    android:layout_marginEnd="2dp"/>
+
                 <ImageButton
                     android:id="@+id/details"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:background="@android:color/transparent"
-                    android:layout_gravity="end"
                     android:scaleType="fitXY"
                     android:src="@drawable/baseline_open_in_new_24"
                     android:onClick="@{()-> viewModel.openSession(session)}"
-                    android:layout_marginRight="@dimen/dimen_2dp"/>
+                    android:layout_marginEnd="2dp"/>
+
                 <ImageButton
                     android:id="@+id/print_summary"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:background="@android:color/transparent"
-                    android:layout_gravity="end"
                     android:scaleType="fitXY"
-                    android:visibility='@{session.canBeClosed() ? View.VISIBLE : View.GONE}'
+                    android:visibility="@{session.canBeClosed() ? View.VISIBLE : View.GONE}"
                     android:src="@drawable/ic_print"
                     android:onClick="@{()-> viewModel.printSummary(session)}"
-                    android:layout_marginRight="@dimen/dimen_2dp"/>
+                    android:layout_marginEnd="2dp"/>
+
                 <ImageButton
                     android:id="@+id/edit"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:background="@android:color/transparent"
-                    android:layout_gravity="end"
-                    android:layout_marginHorizontal="@dimen/dimen_20dp"
+                    android:layout_marginHorizontal="20dp"
                     android:onClick="@{()-> viewModel.editSession(session)}"
                     android:scaleType="fitXY"
                     android:src="@drawable/baseline_edit_square_24"
                     android:visibility="@{(!session.completed &amp;&amp; session.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
-                    android:layout_marginRight="@dimen/dimen_2dp"/>
+                    android:layout_marginEnd="2dp"/>
+
                 <ImageButton
                     android:id="@+id/delete"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:background="@android:color/transparent"
-                    android:layout_gravity="end"
                     android:scaleType="fitXY"
                     android:src="@drawable/baseline_delete_forever_24"
                     android:onClick="@{()-> viewModel.deleteSession(session)}"
                     android:visibility="@{(!session.completed &amp;&amp; session.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
-                    android:layout_marginRight="@dimen/dimen_2dp"/>
+                    android:layout_marginEnd="2dp"/>
+
                 <ImageView
                     android:id="@+id/sync"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
                     android:background="@android:color/transparent"
-                    android:layout_gravity="end"
                     android:scaleType="fitXY"
                     android:src="@drawable/baseline_cloud_done_24"
                     android:visibility="@{session.pending ? View.GONE : View.VISIBLE}"
-                    android:layout_marginRight="@dimen/dimen_2dp"/>
-
+                    android:layout_marginEnd="2dp"/>
             </LinearLayout>
 
         </LinearLayout>
-
     </LinearLayout>
 </layout>

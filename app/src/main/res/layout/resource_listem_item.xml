@@ -49,10 +49,11 @@
         <ImageButton
             android:id="@+id/btn_download"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:visibility="@{node.selected ? View.VISIBLE : View.GONE}"
-            android:src="@drawable/ic_circle_down"
-            android:paddingLeft="8dp" />
+            android:src="@drawable/ic_arrow_circle_down"
+            android:background="@color/resource_color"
+            android:paddingStart="8dp" />
     </LinearLayout>
 
 

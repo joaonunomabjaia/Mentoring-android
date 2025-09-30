@@ -18,6 +18,7 @@ public class Door extends BaseModel {
     public static final String TABLE_NAME = "door";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_CODE = "code";
+    public static final String COMMUNITY_DOOR= "COMMUNITY";
 
     @NonNull
     @ColumnInfo(name = COLUMN_DESCRIPTION)
@@ -58,5 +59,9 @@ public class Door extends BaseModel {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public boolean isCommunityDoor() {
+        return COMMUNITY_DOOR.equals(this.code);
     }
 }

@@ -247,7 +247,6 @@
                             style="@style/bottom_spinner_style"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            app:adapter="@{menteeLaborfoAdapter}"
                             bind:selectedOpt="@={viewModel.menteeLabor}" />
 
                         <TextView

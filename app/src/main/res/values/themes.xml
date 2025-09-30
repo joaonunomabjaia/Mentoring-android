@@ -130,4 +130,55 @@
         <item name="android:layout_marginEnd">16dp</item>
     </style>
 
+    <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="RedButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/red</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="CustomAlertDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <!-- Dialog background color -->
+        <item name="android:background">@android:color/white</item>
+
+        <!-- Rounded corners -->
+        <item name="shapeAppearanceOverlay">@style/CustomDialogShape</item>
+
+        <!-- Title and body text color -->
+        <item name="android:textColorPrimary">@color/black</item>
+
+        <!-- Optional: window animation -->
+        <item name="android:windowAnimationStyle">@style/CustomDialogAnimation</item>
+    </style>
+
+
+    <!-- Optional: rounded corner shape -->
+    <style name="CustomDialogShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <!-- Optional: custom animations (fade in/out for example) -->
+    <style name="CustomDialogAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="CustomDatePickerDialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorOnBackground">#000000</item>
+        <item name="colorOnSurface">#000000</item>
+        <item name="android:textColorPrimary">#000000</item>
+    </style>
+
+
+
 </resources>

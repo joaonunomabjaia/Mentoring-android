@@ -128,6 +128,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
 
             } catch (Exception e) {
                 Log.e(TAG, "initSearch: ", e.getCause());
+                e.printStackTrace();
                 runOnMainThread(() -> Utilities.displayAlertDialog(getRelatedActivity(), "Erro ao executar a busca").show());
                 return;
             }

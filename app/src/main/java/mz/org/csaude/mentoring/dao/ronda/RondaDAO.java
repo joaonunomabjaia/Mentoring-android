@@ -1,5 +1,6 @@
 package mz.org.csaude.mentoring.dao.ronda;
 
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -33,7 +34,7 @@ public interface RondaDAO {
     List<Ronda> getAllByHealthFacilityAndMentor(int healthFacilityId, int mentorId, String status);
 
     // Get all Ronda not synced
-    @Query("SELECT * FROM ronda WHERE sync_status = :syncStatus")
+    @Query("SELECT * FROM ronda WHERE sync_status = :syncStatus AND life_cycle_status = 'ACTIVE'")
     List<Ronda> getAllNotSynced(String syncStatus);
 
     // Get all Ronda by RondaType
@@ -41,9 +42,12 @@ public interface RondaDAO {
             "JOIN ronda_type rt ON r.ronda_type_id = rt.id " +
             "WHERE rt.code = :rondaTypeCode " +
             "AND r.life_cycle_status = :status " +
-            "AND r.created_by = :uuid " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM ronda_mentor rm " +
+            "  WHERE rm.ronda_id = r.id AND rm.mentor_id = :mentorId " +
+            ") " +
             "ORDER BY r.id")
-    List<Ronda> getAllByRondaType(String rondaTypeCode, String status, String uuid);
+    List<Ronda> getAllByRondaType(String rondaTypeCode, String status, int mentorId);
 
     // Get all Ronda by Mentor
     @Query("SELECT r.* FROM ronda r " +
@@ -59,7 +63,7 @@ public interface RondaDAO {
     @Query("SELECT * FROM ronda WHERE uuid = :uuid LIMIT 1")
     Ronda getByUuid(String uuid);
 
-    @Query("SELECT * FROM ronda")
+    @Query("SELECT * FROM ronda WHERE life_cycle_status = 'ACTIVE' ORDER BY start_date")
     List<Ronda> queryForAll();
 
     @Query("DELETE FROM ronda WHERE id = :id")

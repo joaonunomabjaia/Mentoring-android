@@ -20,7 +20,7 @@ public interface RondaService extends BaseService<Ronda> {
     List<Ronda> doSearch(long offset, long limit);
 
     int countRondas() throws SQLException;
-    List<Ronda> getAllByRondaType(RondaType rondaType, User authenticatedUser) throws SQLException;
+    List<Ronda> getAllByRondaType(RondaType rondaType, Tutor tutor) throws SQLException;
     void saveOrUpdateRondas(List<RondaDTO> rondaDTOS) throws SQLException;
     Ronda saveOrUpdateRonda(RondaDTO rondaDTO) throws SQLException;
 

@@ -35,6 +35,8 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
     public static final String WORK_STATUS_FINISHED = "FINISHED";
     public static final String WORK_STATUS_STARTING = "STARTING";
 
+    private static final long MAX_DURATION_MS = 5 * 60 * 1000;
+
     protected int offset = 0;
     protected long newRecsQty;
     protected long updatedRecsQty;
@@ -58,13 +60,15 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
         return (MentoringApplication) getApplicationContext();
     }
 
+    @NonNull
     @Override
     public Result doWork() {
+        long startTime = System.currentTimeMillis();
         try {
             doOnStart();
             changeStatusToPerforming();
             fullLoadRecords();
-            waitUntilFinished();
+            waitUntilFinished(startTime);
 
             if (hasFailed.get()) {
                 return Result.failure();
@@ -81,6 +85,23 @@ public abstract class BaseWorker<T extends BaseModel> extends Worker
         while (workStatus.equals(WORK_STATUS_PERFORMING)) {
             Thread.sleep(3000);
         }
+    }
+    private void waitUntilFinished(long startTime) throws InterruptedException {
+        while (workStatus.equals(WORK_STATUS_PERFORMING)) {
+            long elapsed = System.currentTimeMillis() - startTime;
+            if (elapsed > MAX_DURATION_MS) {
+                hasFailed.set(true);
+                changeStatusToFinished();
+                logTimeout();
+                break;
+            }
+            Thread.sleep(3000);
+        }
+    }
+
+    private void logTimeout() {
+        String msg = getClass().getSimpleName() + " cancelled due to timeout after 5 minutes.";
+        System.err.println("⏱ " + msg);
     }
 
     protected abstract void doOnStart();

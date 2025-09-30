@@ -49,7 +49,8 @@ public class SyncStatus extends BaseModel {
             case "MENTOR_DATA_SESSION_GET": return "Carregando Sessões";
 
             case "POSTSessionWorker": return "Sincronizando Sessões";
-            case "POSTRondaWorker": return "Sincronizando Rondas";
+            case "POSTRondaWorker": return "Sincronizando Rondas para o Servidor";
+            case "GETRondaWorker": return "Actualizando Mentores das Rondas";
             case "POSTMentorshipWorker": return "Sincronizando Avaliações";
             case "POSTTutoredWorker": return "Sincronizando Mentorados";
             case "POSTSessionRecommendedResourceWorker": return "Sincronizando Recursos de EA Recomendados";
@@ -77,6 +78,8 @@ public class SyncStatus extends BaseModel {
             case "INITIAL_SYNC_SECTION": return "Carregando Secções";
             case "INITIAL_SYNC_PROFESSIONAL_CATEGORY": return "Carregando Categorias Profissionais";
             case "INITIAL_SYNC_PARTNER": return "Carregando Instituições";
+
+            case "GETRondaTypeWorker": return "Carregando Tipos de Ronda";
             case "INITIAL_SYNC_RONDA_TYPE": return "Carregando Tipos de Ronda";
             case "INITIAL_SYNC_RESPONSE_TYPE": return "Carregando Tipos de Resposta";
             case "INITIAL_SYNC_EVALUATION_LOCATION": return "Carregando Locais de Avaliação";

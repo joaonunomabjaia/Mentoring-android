@@ -49,16 +49,16 @@ public class CredentialsVM extends UserVM {
 
     @Override
     public void updatePassword() {
-        if (Utilities.encryptPassword(userPassWordCorrente,getCurrentUser().getSalt()).equals(getPassword())){
-            if (!userNovaPassWord.equals(getUserPassRepeat())){
+        if (Utilities.encryptPassword(userPassWordCorrente.trim(),getCurrentUser().getSalt()).equals(Utilities.encryptPassword(getPassword(),getCurrentUser().getSalt()))){
+            if (!userNovaPassWord.trim().equals(getUserPassRepeat())){
                 Utilities.displayAlertDialog(getRelatedFragment().getContext(), "As senhas indicadas não conferem, por favor verificar.").show();
             }else {
-                getRelatedRecord().setPassword(Utilities.encryptPassword(userNovaPassWord,getRelatedRecord().getSalt()));
+                getRelatedRecord().setPassword(Utilities.encryptPassword(userNovaPassWord.trim(),getRelatedRecord().getSalt()));
                 getRelatedRecord().setSyncStatus(SyncSatus.PENDING);
                 getRelatedRecord().setUpdatedAt(DateUtilities.getCurrentDate());
                 super.updatePassword();
             }
-        }else Utilities.displayAlertDialog(getRelatedFragment().getContext(), "A senha Corrente indicada é inválida.").show();
+        }else Utilities.displayAlertDialog(getRelatedFragment().getContext(), "A senha corrente indicada é inválida.").show();
     }
 
 }

@@ -1,6 +1,7 @@
 package mz.org.csaude.mentoring.viewmodel.resource;
 
 import android.app.Application;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
@@ -183,4 +184,13 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
     public void setSelectNode(Node node) {
         this.selectedNode = node;
     }
+
+    public Node getSelectedNode() {
+        return selectedNode;
+    }
+
+    public void downloadResourceToUri(Uri uri) {
+        getApplication().getResourceRestService().downloadFileToUri(selectedNode.getName(), uri, this);
+    }
+
 }

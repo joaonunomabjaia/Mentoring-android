@@ -37,6 +37,14 @@
             android:gravity="center"
             android:text="@string/app_name"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.3"
+            style="@style/splash_app_name_style"
+            android:gravity="center"
+            android:text="@string/app_name_checkPoint"/>
+
         <ProgressBar
             android:layout_width="150dp"
             style="?android:attr/progressBarStyleLarge"

@@ -2,11 +2,14 @@ package mz.org.csaude.mentoring.view.mentorship;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TimePicker;
 
@@ -80,7 +83,6 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
                 }
                 loadSectorAdapter();
                 loadDoorAdapter();
-                loadEvaluationLocationAdapter();
                 if (getRelatedViewModel().getMentorship() == null) {
                     getRelatedViewModel().setSession((Session) intent.getExtras().get("session"));
                     getRelatedViewModel().setRonda((Ronda) intent.getExtras().get("ronda"));
@@ -189,10 +191,15 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         int mMonth = c.get(Calendar.MONTH);
         int mDay = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, monthOfYear, dayOfMonth) -> {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, R.style.CustomDatePickerDialogTheme, (view, year, monthOfYear, dayOfMonth) -> {
             getRelatedViewModel().setStartDate(DateUtilities.createDate(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year, DateUtilities.DATE_FORMAT));
         }, mYear, mMonth, mDay);
         datePickerDialog.show();
+        Button positiveButton = datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        Button negativeButton = datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+
+        if (positiveButton != null) positiveButton.setTextColor(Color.BLACK);
+        if (negativeButton != null) negativeButton.setTextColor(Color.BLACK);
     }
 
 
@@ -202,7 +209,7 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
         int minute = calendar.get(Calendar.MINUTE);
 
         // Show the time picker dialog
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, R.style.CustomDatePickerDialogTheme,  new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 // Handle the time set event
@@ -280,41 +287,33 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
     }
 
     public void loadDoorAdapter() {
-        // Fetch the doors in a background thread
-            // Access the database in the background thread
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            // Busca as portas
             List<Door> doors = getRelatedViewModel().getDoors();
 
-            // Update the UI on the main thread
+            // Garante lista mutável e filtra "Comunidade"
+            List<Door> visibleDoors = (doors == null) ? new ArrayList<>() : new ArrayList<>(doors);
+            visibleDoors.removeIf(Door::isCommunityDoor);
+
             runOnUiThread(() -> {
-                if (doors != null && !doors.isEmpty()) {
-                    // Initialize and set the adapter if the doors list is not null or empty
-                    doorAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, doors);
+                if (visibleDoors != null && !visibleDoors.isEmpty()) {
+                    // Inicializa e seta o adapter com a lista filtrada
+                    doorAdapter = new ListableSpinnerAdapter(
+                            CreateMentorshipActivity.this,
+                            R.layout.simple_auto_complete_item,
+                            visibleDoors
+                    );
                     mentorshipBinding.spnDoor.setAdapter(doorAdapter);
                 } else {
-                    // Handle the case where no doors are available
-                    Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_doors_available)).show();
+                    // Caso não tenha portas disponíveis
+                    Utilities.displayAlertDialog(
+                            CreateMentorshipActivity.this,
+                            getString(R.string.no_doors_available)
+                    ).show();
                 }
             });
-    }
-
-    public void loadEvaluationLocationAdapter() {
-        // Fetch the evaluationLocations in a background thread
-        // Access the database in the background thread
-        List<EvaluationLocation> evaluationLocations = getRelatedViewModel().getEvaluationLocations();
-
-        // Update the UI on the main thread
-        runOnUiThread(() -> {
-            if (evaluationLocations != null && !evaluationLocations.isEmpty()) {
-                // Initialize and set the adapter if the evaluationLocations list is not null or empty
-                evaluationLocationAdapter = new ListableSpinnerAdapter(CreateMentorshipActivity.this, R.layout.simple_auto_complete_item, evaluationLocations);
-                mentorshipBinding.spnEvaluationLocation.setAdapter(evaluationLocationAdapter);
-            } else {
-                // Handle the case where no evaluationLocations are available
-                Utilities.displayAlertDialog(CreateMentorshipActivity.this, getString(R.string.no_ev_locations_available)).show();
-            }
         });
     }
-
 
 
     public void loadCategoryAdapter() {
@@ -367,26 +366,26 @@ public class CreateMentorshipActivity extends BaseActivity implements ClickListe
 
 
     public void loadSectorAdapter() {
-
-        // Fetch sectors in the background thread
         getRelatedViewModel().getExecutorService().execute(() -> {
             List<Cabinet> sectors = getRelatedViewModel().getSectors();
 
-            // Ensure we update the UI on the main thread
-            runOnUiThread(() -> {
+            // Garante lista mutável e filtra "Comunidade"
+            List<Cabinet> visibleSectors = (sectors == null) ? new ArrayList<>() : new ArrayList<>(sectors);
+            visibleSectors.removeIf(Cabinet::isCommunityCabinet);
 
-                // Check if the sectors list is null or empty
-                if (sectors == null || sectors.isEmpty()) {
-                    // Handle no sectors case (e.g., show a message)
+            runOnUiThread(() -> {
+                if (visibleSectors.isEmpty()) {
+                    // opcional: mentorshipBinding.spnSector.setAdapter(null);
                     return;
                 }
 
                 if (sectorAdapter != null) {
-                    // Notify adapter only if sectors list has changed
+                    sectorAdapter.clear();
+                    sectorAdapter.add(new Cabinet());
+                    sectorAdapter.addAll(visibleSectors);
                     sectorAdapter.notifyDataSetChanged();
                 } else {
-                    // Initialize and set adapter if it doesn't exist
-                    sectorAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, sectors);
+                    sectorAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, visibleSectors);
                     mentorshipBinding.spnSector.setAdapter(sectorAdapter);
                 }
             });

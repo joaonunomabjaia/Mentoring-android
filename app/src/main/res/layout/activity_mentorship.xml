@@ -13,6 +13,7 @@
         <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
         <import type="android.view.View"/>
         <import type="mz.org.csaude.mentoring.model.evaluationType.EvaluationType"/>
+        <import type="mz.org.csaude.mentoring.model.evaluationLocation.EvaluationLocation"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -191,41 +192,67 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:text="@string/evaluation_location"
+                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}"
+                            style="@style/input_labels" />
+
+                        <RadioGroup
+                            android:id="@+id/rg_evaluation_location"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}">
+
+                            <RadioButton
+                                android:id="@+id/rb_community"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/community"
+                                android:checked='@{viewModel.communityLocation}'
+                                android:onClick='@{() -> viewModel.setEvaluationLocation(EvaluationLocation.COMMUNITY)}'
+                                android:enabled="@{viewModel.currentStep.applicationstepCreate}"
+                                android:textColor="@color/input_labels" />
+
+                            <RadioButton
+                                android:id="@+id/rb_health_facility"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/health_facility"
+                                android:checked='@{viewModel.healthFacilityLocation}'
+                                android:onClick='@{() -> viewModel.setEvaluationLocation(EvaluationLocation.HEALTH_FACILITY)}'
+                                android:enabled="@{viewModel.currentStep.applicationstepCreate}"
+                                android:textColor="@color/input_labels" />
+                        </RadioGroup>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:text="@string/sector"
+                            android:visibility="@{viewModel.healthFacilityLocation ? View.VISIBLE : View.GONE}"
                             style="@style/input_labels"/>
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_sector"
                             android:layout_width="fill_parent"
                             style="@style/bottom_spinner_style"
+                            android:visibility="@{viewModel.healthFacilityLocation ? View.VISIBLE : View.GONE}"
                             android:layout_height="wrap_content"
                             bind:selectedOpt="@={viewModel.selectedSector}"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:visibility="@{viewModel.healthFacilityLocation ? View.VISIBLE : View.GONE}"
                             android:text="@string/door"
                             style="@style/input_labels"/>
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/spn_door"
                             android:layout_width="fill_parent"
                             style="@style/bottom_spinner_style"
+                            android:visibility="@{viewModel.healthFacilityLocation ? View.VISIBLE : View.GONE}"
                             android:layout_height="wrap_content"
                             bind:selectedOpt="@={viewModel.selectedDoor}"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/evaluation_location"
-                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}"
-                            style="@style/input_labels"/>
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_evaluation_location"
-                            android:enabled="@{viewModel.currentStep.applicationstepCreate}"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            android:visibility="@{viewModel.selectLocation ? View.VISIBLE : View.GONE}"
-                            bind:selectedOpt="@={viewModel.selectedEvaluationLocation}"/>
 
                         <TextView
                             android:layout_width="match_parent"
@@ -260,6 +287,7 @@
                                     android:layout_height="wrap_content"
                                     android:checked="@{viewModel.consultaEvaluation}"
                                     android:onClick='@{()->viewModel.setEvaluationType(EvaluationType.CONSULTA)}'
+                                    android:textColor="@color/input_labels"
                                     android:text="@string/consulta" />
 
                                 <RadioButton
@@ -270,6 +298,7 @@
                                     android:layout_height="wrap_content"
                                     android:checked="@{viewModel.fichaEvaluation}"
                                     android:onClick='@{()->viewModel.setEvaluationType(EvaluationType.FICHA)}'
+                                    android:textColor="@color/input_labels"
                                     android:text="@string/ficha" />
                             </RadioGroup>
                         </LinearLayout>
@@ -351,6 +380,7 @@
                             android:checked="@{viewModel.demostrationMade}"
                             android:onClick="@{() -> viewModel.changeDemostrationStatus()}"
                             android:text="@string/demostration_needed"
+                            android:textColor="@color/input_labels"
                             android:padding="8dp" />
 
                         <TextView
