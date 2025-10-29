@@ -1,0 +1,5 @@
+<resources>
+    <item name="tag_selected_opt_suppress" type="id"/>
+    <item name="tag_selected_opt_value" type="id"/>
+    <item name="tag_open_state" type="id"/>
+</resources>

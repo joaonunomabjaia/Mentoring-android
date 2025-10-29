@@ -295,6 +295,39 @@
     <string name="community">Comunidade</string>
     <string name="error_evaluation_location">Não possivel encontrar o parâmetro comunidade, sincronize os metadados.</string>
     <string name="app_name_checkPoint">Checkpoint</string>
+    <string name="sem_mentorandos_neste_estagio">Sem Mentorandos Neste Estágio</string>
+    <string name="mentorandos">Mentorandos</string>
+    <string name="tab_estagios">Estágios</string>
+    <string name="tab_lista">Lista</string>
+    <string name="expand">Expandir/Colapsar</string>
+    <string name="edit">Editar</string>
+    <string name="aguardam_sessao_zero">Sessão zero</string>
+    <string name="inicio_de_ronda">Ronda/Ciclo</string>
+    <string name="sessao_semestral">Semestral</string>
+    <string name="todos">Todos</string>
+    <string name="voice_search">Pesquisar</string>
+    <string name="more_options">Acções</string>
+    <string name="call">Ligar</string>
+    <string name="no_phone_available">Sem contacto</string>
 
 
+    <string name="saving_tutored">A guardar mentorando…</string>
+    <string name="tutored_data_saved_success">Mentorando guardado com sucesso!</string>
+    <string name="try_again">Tentar novamente</string>
+    <string name="continue_label">Continuar</string>
+    <string name="success">Sucesso</string>
+    <string name="error">Erro</string>
+    <string name="skip_zero_session_label">Isentar da sessão zero</string>
+    <string name="skip_zero_session_hint">Não será necessária a sessão zero para este mentorando.</string>
+
+    <string name="speak_now">Fale agora…</string>
+    <string name="voice_search_not_available">Reconhecimento de voz não disponível neste dispositivo.</string>
+    <string name="mic_permission_denied">Permissão do microfone negada.</string>
+    <string name="clear">Limpar</string>
+    <string name="details">Detalhes</string>
+    <string name="delete">Apagar</string>
+    <string name="date">Período</string>
+    <string name="terminado">Terminado</string>
+    <string name="em_curso">Em curso</string>
+    <string name="sem_rondas">Nenhum cliclo/ronda para visualizar</string>
 </resources>

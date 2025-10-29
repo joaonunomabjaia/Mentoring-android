@@ -1,20 +1,15 @@
 package mz.org.csaude.mentoring.dto.tutored;
 
-
-
-
-
+import com.google.gson.annotations.SerializedName;
 
 import mz.org.csaude.mentoring.base.dto.BaseEntityDTO;
 import mz.org.csaude.mentoring.dto.employee.EmployeeDTO;
+import mz.org.csaude.mentoring.model.tutored.FlowHistory;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
 /**
  * @author Jose Julai Ritsure
  */
-
-
-
 public class TutoredDTO extends BaseEntityDTO {
 
     private EmployeeDTO employeeDTO;
@@ -22,6 +17,10 @@ public class TutoredDTO extends BaseEntityDTO {
     private boolean zeroEvaluationDone;
 
     private double zeroEvaluationScore;
+
+    // NEW: JSON-backed object (stored as TEXT in DB via TypeConverter)
+    @SerializedName("flowHistoryMenteeAuxDTO")
+    private FlowHistory flowHistoryMenteeAuxDTO;
 
     public TutoredDTO() {
     }
@@ -31,6 +30,7 @@ public class TutoredDTO extends BaseEntityDTO {
         setZeroEvaluationScore(tutored.getZeroEvaluationScore());
         setZeroEvaluationDone(tutored.isZeroEvaluationDone());
         this.setEmployeeDTO(new EmployeeDTO(tutored.getEmployee()));
+        this.setFlowHistoryMenteeAuxDTO(tutored.getFlowHistory()); // <-- map from entity
     }
 
     public EmployeeDTO getEmployeeDTO() {
@@ -57,6 +57,15 @@ public class TutoredDTO extends BaseEntityDTO {
         this.zeroEvaluationScore = zeroEvaluationScore;
     }
 
+    // NEW getters/setters
+    public FlowHistory getFlowHistoryMenteeAuxDTO() {
+        return flowHistoryMenteeAuxDTO;
+    }
+
+    public void setFlowHistoryMenteeAuxDTO(FlowHistory flowHistoryMenteeAuxDTO) {
+        this.flowHistoryMenteeAuxDTO = flowHistoryMenteeAuxDTO;
+    }
+
     public Tutored getMentee() {
         Tutored tutored = new Tutored();
         tutored.setUuid(this.getUuid());
@@ -67,9 +76,14 @@ public class TutoredDTO extends BaseEntityDTO {
         tutored.setLifeCycleStatus(this.getLifeCycleStatus());
         tutored.setCreatedByUuid(this.getCreatedByuuid());
         tutored.setUpdatedByUuid(this.getUpdatedByuuid());
-        if(this.getEmployeeDTO()!=null) {
+
+        if (this.getEmployeeDTO() != null) {
             tutored.setEmployee(this.getEmployeeDTO().getEmployee());
         }
+
+        // <-- map to entity
+        tutored.setFlowHistory(this.getFlowHistoryMenteeAuxDTO());
+
         return tutored;
     }
 }

@@ -1,144 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable
-            name="ronda"
-            type="mz.org.csaude.mentoring.model.ronda.Ronda" />
-        <variable
-            name="viewModel"
-            type="mz.org.csaude.mentoring.viewmodel.ronda.RondaSearchVM" />
-
+        <variable name="ronda" type="mz.org.csaude.mentoring.model.ronda.Ronda" />
+        <variable name="viewModel" type="mz.org.csaude.mentoring.viewmodel.ronda.RondaSearchVM" />
         <import type="mz.org.csaude.mentoring.util.Utilities"/>
-        <import type="mz.org.csaude.mentoring.util.SyncSatus"/>
-        <import type="mz.org.csaude.mentoring.util.RondaStatus"/>
         <import type="android.view.View"/>
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
     </data>
-    <LinearLayout
+
+    <!-- Raiz para swipe (fundo + frente) -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/ronda_item_back"
-        android:padding="15dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/ronda_name"
+        <!-- Fundo para ações de swipe -->
+        <!-- Fundo para ações de swipe -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/view_background"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{ronda.description}"
-            android:drawableLeft="@drawable/baseline_folder_24"
-            android:textSize="13dp"
-            android:drawablePadding="8dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:gravity="center_vertical"
-            android:textStyle="bold"/>
+            android:layout_height="match_parent"
+            android:background="?attr/colorSurfaceVariant">
 
-        <TextView
-            android:id="@+id/ronda_period"
+            <!-- LADO ESQUERDO: DELETE -->
+            <FrameLayout
+                android:id="@+id/bg_left"
+                android:layout_width="88dp"
+                android:layout_height="match_parent"
+                android:background="@color/swipe_delete_bg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <ImageButton
+                    android:id="@+id/bg_left_btn"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/remove"
+                    android:src="@drawable/ic_remove"
+                    app:tint="@android:color/white"/>
+            </FrameLayout>
+
+            <!-- LADO DIREITO: EDIT -->
+            <FrameLayout
+                android:id="@+id/bg_right"
+                android:layout_width="88dp"
+                android:layout_height="match_parent"
+                android:background="@color/swipe_edit_bg"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <ImageButton
+                    android:id="@+id/bg_right_btn"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/edit"
+                    android:src="@drawable/baseline_edit_square_24"
+                    app:tint="@android:color/white"/>
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <!-- Frente: Card M3 sem elevação -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/view_foreground"
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_5dp"
-            android:text="@{ronda.getRondaPeriod()}"
-            android:drawableLeft="@drawable/baseline_calendar_month_24"
-            android:textSize="@dimen/dimen_12dp"
-            android:textColor="?attr/textColorPrimary"
-            android:drawablePadding="8dp"
-            android:gravity="center_vertical"
-            />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/ronda_heathfacility"
-                android:layout_width="0dp"
+            app:cardUseCompatPadding="false"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:contentPadding="0dp"
+            bind:cardCornerRadius="@dimen/dimen_0dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:rippleColor="?attr/colorPrimary">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_marginTop="@dimen/dimen_5dp"
-                android:text="@{ronda.healthFacility.description}"
-                android:drawableLeft="@drawable/baseline_local_hospital_24"
-                android:textSize="@dimen/dimen_12dp"
-                android:textColor="?attr/textColorPrimary"
-                android:drawablePadding="8dp"
-                android:gravity="center_vertical"
-                />
-            <TextView
-                android:id="@+id/ronda_status"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginTop="@dimen/dimen_5dp"
-                android:text="@{ronda.rondaExecutionStatus}"
-                android:textSize="@dimen/dimen_12dp"
-                android:textColor="?attr/textColorPrimary"
-                android:gravity="center_vertical"
-                android:textStyle="bold"/>
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_marginTop="@dimen/dimen_5dp"
-            android:layout_height="1dp"
-            android:background="@color/spinner_back_color"/>
+                android:minHeight="72dp"
+                android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/dimen_5dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-            <ImageButton
-                android:id="@+id/details"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_open_in_new_24"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageButton
-                android:id="@+id/print"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:layout_marginHorizontal="@dimen/dimen_20dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/ic_print"
-                android:visibility="@{ronda.closed &amp;&amp; !ronda.rondaZero ? View.VISIBLE : View.GONE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageButton
-                android:id="@+id/edit"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:layout_marginHorizontal="@dimen/dimen_20dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_edit_square_24"
-                android:visibility="@{ronda.closed ? View.GONE : View.VISIBLE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageButton
-                android:id="@+id/delete"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_delete_forever_24"
-                android:visibility="@{ronda.closed ? View.GONE : View.VISIBLE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageView
-                android:id="@+id/sync"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_cloud_done_24"
-                android:visibility="@{ronda.syncStatus == SyncSatus.PENDING ? View.GONE : View.VISIBLE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
+                <ImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="3dp"
+                    android:src="@drawable/play_lesson_32dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-        </LinearLayout>
-    </LinearLayout>
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ronda_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text='@{ronda.description}'
+                    android:textSize="16sp"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor='?attr/colorOnSurface'
+                    android:fontFamily="@font/roboto_medium"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/ronda_status_card"
+                    android:layout_marginStart="12dp"
+                    app:layout_constrainedWidth="true" />
+
+                <!-- PILL CARD FOR STATUS -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/ronda_status_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/ronda_desc"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    app:layout_constraintBottom_toBottomOf="@id/ronda_desc"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="@dimen/dimen_4dp"
+                    app:cardUseCompatPadding="false"
+                    app:strokeWidth="0dp"
+                    app:cardElevation="0dp"
+                    app:contentPadding="0dp"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Pill"
+                    app:cardBackgroundColor='@{ronda.closed ? @color/status_closed_bg : @color/status_open_bg}'>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingVertical="4dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/status_icon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="6dp"
+                            android:src='@{ronda.closed ? @drawable/baseline_check_24 : @drawable/baseline_schedule_24}'
+                            app:tint='@{ronda.closed ? @color/status_closed_fg : @color/status_open_fg}'/>
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/ronda_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:layout_gravity="center_vertical"
+                            android:text='@{ronda.rondaExecutionStatus}'
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/roboto_medium"
+                            android:textColor='@{ronda.closed ? @color/status_closed_fg : @color/status_open_fg}'/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ronda_hf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="13sp"
+                    android:text='@{ronda.healthFacility.description}'
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor='?attr/colorOnSurfaceVariant'
+                    app:layout_constraintTop_toBottomOf="@id/ronda_desc"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    android:layout_marginStart="12dp" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ronda_mentees"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:text='@{ronda.getRondaPeriod()}'
+                    android:textColor='?attr/colorOnSurface'
+                    android:layout_marginTop="4dp"
+                    android:drawablePadding="6dp"
+                    app:layout_constraintTop_toBottomOf="@id/ronda_hf"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/ronda_period"
+                    android:layout_marginStart="12dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ronda_period"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text='@{Utilities.concatStrings("Mentorandos: ", Utilities.parseIntToString(ronda.rondaMentees.size()), "")}'
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:gravity="end"
+                    android:textColor='?attr/colorOnSurfaceVariant'
+                    app:layout_constraintTop_toBottomOf="@id/ronda_hf"
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintStart_toEndOf="@id/ronda_mentees"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Botão more (⋮) -->
+                <ImageButton
+                    android:id="@+id/btn_more"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/more_options"
+                    android:src="@drawable/ic_more_vert_24"
+                    app:tint='?attr/colorOnSurface'
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </FrameLayout>
 </layout>

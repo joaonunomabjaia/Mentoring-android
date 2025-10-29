@@ -65,32 +65,6 @@ public abstract class GenericFragment extends Fragment implements GenericActivit
 
     }
 
-    protected void displayDataOnRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context, int orientation) {
-        if (recyclerView != null && adapter != null) {
-            // Set up Layout Manager
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, orientation, false);
-            recyclerView.setLayoutManager(layoutManager);
-
-            // Set Item Animator
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-            // Add space between items (e.g., 16dp space)
-            int spacingInPixels = context.getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
-            SpacingItemDecoration itemDecoration = new SpacingItemDecoration(spacingInPixels);
-            recyclerView.addItemDecoration(itemDecoration);
-
-            // Improve performance for fixed-size lists
-            recyclerView.setHasFixedSize(true);
-
-            // Set the adapter
-            recyclerView.setAdapter(adapter);
-        } else {
-            Log.e("RecyclerViewSetup", "RecyclerView or Adapter is null");
-        }
-    }
-
-
-
     public BaseViewModel getRelatedViewModel() {
         return relatedViewModel;
     }

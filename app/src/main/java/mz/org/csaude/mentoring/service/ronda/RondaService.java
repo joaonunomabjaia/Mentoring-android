@@ -31,4 +31,6 @@ public interface RondaService extends BaseService<Ronda> {
     void tryToCloseRonda(Ronda ronda, Date endDate);
 
     void closeRonda(Ronda ronda);
+
+    List<Ronda> search(RondaType typeEntity, String query, Tutor currMentor);
 }

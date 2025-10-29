@@ -15,145 +15,138 @@
         <import type="android.view.View"/>
     </data>
 
+    <!-- Raiz para swipe (fundo + frente) -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <!-- Background (Edit/Delete buttons) -->
-    <LinearLayout
-        android:id="@+id/view_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="end"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@drawable/tutored_item_front">
+        <!-- Fundo para ações de swipe (ex.: apagar) -->
+        <LinearLayout
+            android:id="@+id/view_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:background="?attr/colorSurfaceVariant">
+            <!-- Se quiser, coloque aqui ícones/textos “Apagar”, etc. -->
+        </LinearLayout>
 
-    </LinearLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/view_foreground"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/tutored_item_back"
-        android:padding="@dimen/dimen_10dp">
-
-        <!-- Profile Image -->
-        <ImageView
-            android:id="@+id/profile_image"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:padding="3dp"
-            bind:srcCompat="@drawable/ic_person_24"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.15" />
-
-        <!-- Full Name -->
-        <TextView
-            android:id="@+id/full_name_text"
-            android:layout_width="0dp"
+        <!-- Frente: Card M3 unelevated (Filled Card, elevation 0) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/view_foreground"
+            style="@style/Widget.Material3.CardView.Filled"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{tutored.employee.fullName}"
-            android:textColor="?attr/textColorPrimary"
-            android:textSize="14dp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/profile_image"
-            app:layout_constraintEnd_toStartOf="@id/icons_container" />
+            app:cardUseCompatPadding="false"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:contentPadding="0dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:rippleColor="?attr/colorPrimary">
 
-        <!-- Professional Category -->
-        <TextView
-            android:id="@+id/professionalCategoryId"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_6dp"
-            android:gravity="center_vertical"
-            android:textColor="?attr/textColorPrimary"
-            android:text="@{tutored.employee.professionalCategory.description}"
-            app:layout_constraintTop_toBottomOf="@id/full_name_text"
-            app:layout_constraintStart_toEndOf="@id/profile_image"
-            app:layout_constraintEnd_toStartOf="@id/icons_container" />
-
-        <!-- Phone Number -->
-        <TextView
-            android:id="@+id/phone_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@{tutored.employee.phoneNumber}"
-            android:textColor="?attr/textColorPrimary"
-            android:drawablePadding="@dimen/dimen_5dp"
-            bind:drawableLeftCompat="@drawable/baseline_call_24"
-            app:layout_constraintTop_toBottomOf="@id/professionalCategoryId"
-            app:layout_constraintStart_toEndOf="@id/profile_image"
-            app:layout_constraintEnd_toStartOf="@id/icons_container" />
-
-        <!-- NUIT -->
-        <TextView
-            android:id="@+id/nuit_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text='@{Utilities.concatStrings("NUIT", Utilities.parseLongToString(tutored.employee.nuit), ": ")}'
-            android:textColor="?attr/textColorPrimary"
-            app:layout_constraintTop_toBottomOf="@id/phone_text"
-            app:layout_constraintStart_toEndOf="@id/profile_image"
-            app:layout_constraintEnd_toStartOf="@id/icons_container" />
-
-        <!-- Right Icon Container -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/icons_container"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/dimen_5dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.15">
-
-            <!-- Selected Icon -->
-            <ImageView
-                android:layout_width="wrap_content"
+            <!-- Conteúdo do card -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_done"
-                android:visibility='@{tutored.selected ? View.VISIBLE : View.GONE}'
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:minHeight="72dp"
+                android:padding="16dp">
 
-            <!-- Delete Button -->
-            <ImageButton
-                android:id="@+id/btn_remove_selected"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_delete"
-                android:visibility='@{tutored.listType.equals("SELECTION_LIST") ? View.VISIBLE : View.GONE}'
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                <!-- Avatar/Ícone -->
+                <ImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="3dp"
+                    bind:srcCompat="@drawable/ic_person_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-            <ImageButton
-                android:id="@+id/btn_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_edit"
-                android:background="@null"
-                android:onClick="@{()-> viewModel.initMenteeEdition(tutored)}"
-                android:contentDescription="Edit" />
-            <!-- Cloud Sync Status -->
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_cloud_done_24"
-                android:visibility='@{tutored.listType.equals("NORMAL") ? View.VISIBLE : View.GONE}'
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Nome (bold) -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/full_name_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text='@{tutored.employee.fullName}'
+                    android:textSize="18sp"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor='?attr/colorOnSurface'
+                    android:fontFamily="@font/roboto_medium"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    app:layout_constraintHorizontal_bias="0"
+                    android:layout_marginStart="12dp" />
+
+                <!-- Categoria Profissional -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/professionalCategoryId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text='@{tutored.employee.professionalCategory.description}'
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor='?attr/colorOnSurfaceVariant'
+                    app:layout_constraintTop_toBottomOf="@id/full_name_text"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    android:layout_marginStart="12dp" />
+
+                <!-- Phone (left of the row) -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/phone_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text='@{tutored.employee.phoneNumber}'
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor='?attr/colorOnSurface'
+                    android:drawablePadding="6dp"
+                    app:drawableStartCompat='@drawable/baseline_call_24'
+                    app:layout_constraintTop_toBottomOf="@id/professionalCategoryId"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintEnd_toStartOf="@id/nuit_text"
+                    app:layout_constraintHorizontal_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- NUIT (right of the row) -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/nuit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text='@{Utilities.concatStrings("NUIT: ", Utilities.parseLongToString(tutored.employee.nuit), "")}'
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor='?attr/colorOnSurfaceVariant'
+                    app:layout_constraintTop_toBottomOf="@id/professionalCategoryId"
+                    app:layout_constraintStart_toEndOf="@id/phone_text"
+                    app:layout_constraintEnd_toStartOf="@id/btn_more"
+                    app:layout_constraintHorizontal_weight="1"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+
+                <!-- Ações/estado (lado direito) -->
+                <!-- Actions (3 dots) -->
+                <ImageButton
+                    android:id="@+id/btn_more"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/more_options"
+                    android:src="@drawable/ic_more_vert_24"
+                    app:tint='?attr/colorOnSurface'
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </FrameLayout>
 </layout>

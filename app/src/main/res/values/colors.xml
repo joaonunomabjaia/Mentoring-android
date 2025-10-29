@@ -9,11 +9,15 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="colorPrimary">#20B5DA</color>
+    <color name="colorPrimaryLight">#DEF1FB</color>
     <color name="colorPrimaryDark">#023373</color>
     <color name="colorAccent">#87B5F3</color>
     <color name="background_layout">#0288d1</color>
     <color name="list_icon">#DBDBDC</color>
 
+
+
+    <color name="green">#4CAF50</color>
     <color name="button_light_back">#309ED1</color>
     <color name="button_dark_back">#247CA6</color>
     <color name="button_stroke">#85D5FB</color>
@@ -22,12 +26,15 @@
     <color name="input_labels">#5B5A5A</color>
     <color name="light_grey">#E0E0E0</color>
 
+    <color name="card_back">#EEF7FF</color>
+
     <color name="input_border">#1D6B8F</color>
 
     <color name="spinner_back_color">#DFEAF7</color>
 
     <color name="logo">#01226D</color>
     <color name="orange">#FF9800</color>
+    <color name="amber">#FFC107</color>
 
     <!-- Light mode colors -->
     <color name="background_light">#FFFFFF</color>
@@ -43,5 +50,31 @@
     <color name="loading_message_color">#e91e63</color>
     <color name="resource_color">#e9f1f7</color>
 
+    <color name="list_header_bg">#EAF3FF</color>
+    <color name="errorColor">#E53935</color>
+    <color name="softBlue">#E6EEF7</color>
+
+    <color name="search_text">#FFFFFF</color>
+    <color name="search_hint">#FFFFFF</color>
+    <color name="search_icon">#FFFFFF</color>
+
+    <color name="nav_bg">#101318</color>
+
+
+    <color name="onSurfaceVariant_fallback">#73777F</color>
+    <color name="primaryContainer_fallback">#E8DEF8</color>
+    <color name="ronda_grad_start">#5A8DF3</color>
+    <color name="ronda_grad_end">#3C6DE6</color>
+
+    <color name="status_in_progress_bg">#33FFA000</color>  <!-- âmbar/transp. -->
+    <color name="status_done_bg">#3328A745</color>         <!-- verde/transp. -->
+
+    <color name="swipe_edit_bg">#388E3C</color>
+    <color name="swipe_delete_bg">#D32F2F</color>
+
+    <color name="status_open_bg">#E6EAF1</color>          <!-- light grey/blue -->
+    <color name="status_open_fg">#364152</color>          <!-- dark on light -->
+    <color name="status_closed_bg">#2E7D32</color>        <!-- green -->
+    <color name="status_closed_fg">#FFFFFF</color>        <!-- white text/icon -->
 
 </resources>

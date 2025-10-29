@@ -1,6 +1,10 @@
 package mz.org.csaude.mentoring.base.databasehelper;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
@@ -100,7 +104,7 @@ import mz.org.csaude.mentoring.util.Converters;
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
                 Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class, EvaluationLocation.class
         },
-        version = 4,
+        version = 5,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -147,6 +151,15 @@ public abstract class MentoringDatabase extends RoomDatabase {
     public abstract FormSectionDAO getFormSectionDAO();
     public abstract EvaluationLocationDAO getEvaluationLocationDAO();
 
+    // Migration 4 -> 5: add flow_history column to Tutored
+    private static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE " + Tutored.COLUMN_TABLE_NAME + " ADD COLUMN "
+                    + Tutored.COLUMN_FLOW_HISTORY + " TEXT");
+        }
+    };
+
     public static MentoringDatabase getInstance(Context context, String passphrase) {
         if (INSTANCE == null) {
             synchronized (MentoringDatabase.class) {
@@ -154,9 +167,13 @@ public abstract class MentoringDatabase extends RoomDatabase {
                     byte[] passphraseBytes = SQLiteDatabase.getBytes(passphrase.toCharArray());
                     SupportFactory factory = new SupportFactory(passphraseBytes);
 
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), MentoringDatabase.class, "mentoring.db")
+                    INSTANCE = Room.databaseBuilder(
+                                    context.getApplicationContext(),
+                                    MentoringDatabase.class,
+                                    "mentoring.db"
+                            )
                             .openHelperFactory(factory)
-                            .fallbackToDestructiveMigration()
+                            .addMigrations(MIGRATION_4_5)
                             .build();
                 }
             }

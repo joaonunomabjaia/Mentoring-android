@@ -34,4 +34,5 @@
     <dimen name="text_size_question">13sp</dimen>
     <dimen name="dimen_16dp">16dp</dimen>
     <dimen name="dimen_24dp">24dp</dimen>
+    <dimen name="dimen_72dp">72dp</dimen>
 </resources>

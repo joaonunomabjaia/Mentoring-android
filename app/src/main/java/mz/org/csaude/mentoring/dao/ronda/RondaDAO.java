@@ -68,4 +68,20 @@ public interface RondaDAO {
 
     @Query("DELETE FROM ronda WHERE id = :id")
     void delete(Integer id);
+
+    @Query("SELECT r.* FROM ronda r " +
+            "JOIN ronda_type rt ON r.ronda_type_id = rt.id " +
+            "WHERE rt.code = :code " +
+            "AND r.life_cycle_status = :lifecycle " +
+            "AND EXISTS ( " +
+            "  SELECT 1 FROM ronda_mentor rm " +
+            "  WHERE rm.ronda_id = r.id AND rm.mentor_id = :currMentorId " +
+            ") " +
+            "AND ( " +
+            "  :query IS NULL OR TRIM(:query) = '' " +
+            "  OR r.description LIKE '%' || :query || '%' COLLATE NOCASE " +
+            ") " +
+            "ORDER BY r.id")
+    List<Ronda> search(String code, String query, String lifecycle, Integer currMentorId);
+
 }

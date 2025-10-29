@@ -2,6 +2,7 @@ package mz.org.csaude.mentoring.adapter.recyclerview.generic;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -88,5 +89,12 @@ public abstract class AbstractRecycleViewAdapter<T extends BaseModel> extends Re
 
     public boolean isLoading() {
         return isLoading;
+    }
+
+    /** Troca a lista exibida sem recriar o adapter */
+    public void submitList(@NonNull List<T> items) {
+        this.records.clear();
+        this.records.addAll(items);
+        notifyDataSetChanged();
     }
 }

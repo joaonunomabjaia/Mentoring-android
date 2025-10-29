@@ -61,6 +61,7 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
 
     protected List<?> processedRecs;
 
+    protected String query = "";
 
     private AbstractRecycleViewAdapter<T> adapter;
 
@@ -510,4 +511,21 @@ public abstract class SearchVM<T extends BaseModel> extends BaseViewModel implem
     public List<?> getProcessedRecs() {
         return processedRecs;
     }
+
+    public void setSearchResults(List<T> results) {
+        if (results == null) results = new ArrayList<>();
+        this.searchResults.clear();
+        this.searchResults.addAll(results);
+        // Caso tua UI leia allDisplyedRecords, sincroniza também:
+        this.allDisplyedRecords.clear();
+        this.allDisplyedRecords.addAll(results);
+        notifyChange();
+    }
+
+    public void setQuery(String query) {
+        this.query = query == null ? "" : query.trim();
+        // post-filter current list quickly for UX, or re-run server search if needed
+        initSearch();
+    }
+    public String getQuery() { return query; }
 }

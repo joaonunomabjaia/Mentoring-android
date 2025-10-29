@@ -6,6 +6,7 @@ import androidx.room.Transaction;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -294,6 +295,24 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<Ronda> search(RondaType rondaType, String query, Tutor currMentor) {
+        List<Ronda> rondas = this.rondaDAO.search(rondaType.getCode(), query, String.valueOf(LifeCycleStatus.ACTIVE), currMentor.getId());
+        for (Ronda ronda: rondas) {
+
+            try {
+                ronda.setRondaMentors(this.rondaMentorDAO.getRondaMentors(ronda.getId()));
+                ronda.setRondaMentees(this.rondaMenteeDAO.getAllOfRonda(ronda.getId()));
+                //ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
+                ronda.setRondaType(rondaType);
+                ronda.setHealthFacility(getApplication().getHealthFacilityService().getById(ronda.getHealthFacilityId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return rondas;
     }
 
 }

@@ -1,10 +1,15 @@
 package mz.org.csaude.mentoring.adapter.tutored;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -17,8 +22,9 @@ import mz.org.csaude.mentoring.adapter.recyclerview.generic.AbstractRecycleViewA
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.databinding.TutoredListItemBinding;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment;
-import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
+import mz.org.csaude.mentoring.view.mentorship.CreateMentorshipActivity;
+import mz.org.csaude.mentoring.view.tutored.TutoredActivity;
+import mz.org.csaude.mentoring.viewmodel.ronda.RondaVM;
 
 public class TutoredAdapter extends AbstractRecycleViewAdapter<Tutored> {
 
@@ -55,21 +61,59 @@ public class TutoredAdapter extends AbstractRecycleViewAdapter<Tutored> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Tutored tutored = records.get(position);
+        Tutored t = super.records.get(position);
         TutoredViewHolder vh = (TutoredViewHolder) holder;
-        vh.binding.setTutored(tutored);
-        vh.binding.setViewModel(((TutoredFragment)actionListener).getRelatedViewModel());
 
-        vh.binding.btnEdit.setOnClickListener(v -> {
-            setIgnoreCloseSwipe(true); // impede que o scroll feche
-            actionListener.onEdit(tutored);
+        vh.binding.setTutored(t);
+
+        // Overflow (3 dots) popup menu
+        vh.binding.btnMore.setOnClickListener(v -> {
+            PopupMenu menu = new PopupMenu(v.getContext(), v);
+            menu.getMenuInflater().inflate(R.menu.menu_tutored_item, menu.getMenu());
+
+            // Show/Hide "Remove" depending on your list type rule
+            boolean showRemove = "SELECTION_LIST".equals(t.getListType());
+            menu.getMenu().findItem(R.id.action_remove).setVisible(showRemove);
+
+            menu.setOnMenuItemClickListener(item -> handleMenuClick(item, v, t, vh.getBindingAdapterPosition()));
+            menu.show();
         });
 
-        vh.binding.btnEdit.setOnTouchListener((v, event) -> {
-            // intercepta o toque para que não feche o item ao clicar
-            v.getParent().requestDisallowInterceptTouchEvent(true);
-            return false;
-        });
+        // We no longer use the legacy inline buttons:
+        // - btnRemoveSelected
+        // - btnEdit
+        // Ensure they are gone in the layout or ignored.
+    }
+
+    private boolean handleMenuClick(MenuItem item, View anchor, Tutored t, int pos) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_call) {
+            String phone = (t.getEmployee() != null) ? t.getEmployee().getPhoneNumber() : null;
+            if (phone == null || phone.isEmpty()) {
+                Toast.makeText(anchor.getContext(), R.string.no_phone_available, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            Intent dial = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
+            anchor.getContext().startActivity(dial);
+            return true;
+
+        } else if (id == R.id.action_edit) {
+            // Reuse your existing behavior used on row click
+            if (activity instanceof CreateMentorshipActivity) {
+                ((CreateMentorshipActivity) activity).onLongItemClick(anchor, pos);
+            } else if (activity instanceof TutoredActivity) {
+                actionListener.onEdit(t);
+            }
+            return true;
+
+        } else if (id == R.id.action_remove) {
+            if (activity.getRelatedViewModel() instanceof RondaVM) {
+                ((RondaVM) activity.getRelatedViewModel()).removeFromSelected(t);
+            }
+            return true;
+        }
+        return false;
     }
 
 
