@@ -1,9 +1,12 @@
 package mz.org.csaude.mentoring.adapter.radio;
 
+import android.content.res.ColorStateList;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingListener;
 
@@ -39,9 +42,22 @@ public class BindingAdapters {
         });
     }
 
-    @BindingAdapter("app:srcCompat")
-    public static void setImageResource(ImageView imageView, int resId) {
-        imageView.setImageResource(resId);
+    @BindingAdapter("srcCompat")
+    public static void setSrcCompat(ImageView view, @DrawableRes Integer resId) {
+        if (resId != null && resId != 0) {
+            view.setImageResource(resId);
+        } else {
+            view.setImageDrawable(null);
+        }
+    }
+
+    @BindingAdapter("tint")
+    public static void setImageTint(ImageView view, @ColorInt Integer colorInt) {
+        if (colorInt == null) {
+            view.setImageTintList(null);
+        } else {
+            view.setImageTintList(ColorStateList.valueOf(colorInt));
+        }
     }
 
 }

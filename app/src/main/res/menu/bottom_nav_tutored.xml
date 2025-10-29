@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_await_zero"
+        android:icon="@drawable/ic_time"
+    android:title="@string/aguardam_sessao_zero" />
+
+    <item
+        android:id="@+id/nav_start_round"
+        android:icon="@drawable/baseline_flag_24"
+    android:title="@string/inicio_de_ronda" />
+
+    <item
+        android:id="@+id/nav_semestral"
+        android:icon="@drawable/baseline_calendar_month_24"
+    android:title="@string/sessao_semestral" />
+
+    <item
+        android:id="@+id/nav_all"
+        android:icon="@drawable/outline_checklist"
+    android:title="@string/todos" />
+
+</menu>

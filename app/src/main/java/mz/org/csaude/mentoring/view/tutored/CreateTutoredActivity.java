@@ -3,7 +3,9 @@ package mz.org.csaude.mentoring.view.tutored;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -17,86 +19,93 @@ import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.databinding.ActivityCreateTutoredBinding;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.location.Province;
-import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
+import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
 
-/**
- * @author Jose Julai Ritsure
- */
 public class CreateTutoredActivity extends BaseActivity implements IDialogListener {
-    private ActivityCreateTutoredBinding activityCreateTutoredBinding;
+
+    private ActivityCreateTutoredBinding binding;
+
+    // Adapters para os dropdowns expostos (MaterialAutoCompleteTextView)
     private ListableSpinnerAdapter provinceAdapter;
     private ListableSpinnerAdapter districtAdapter;
     private ListableSpinnerAdapter healthfacilityAdapter;
     private ListableSpinnerAdapter professionalCategoryAdapter;
-
     private ListableSpinnerAdapter ngoAdapter;
     private ListableSpinnerAdapter menteeLaborfoAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 🔄 Recupera o ViewModel e faz setup inicial
+        // ViewModel + DataBinding
         getRelatedViewModel().preInit();
-        activityCreateTutoredBinding = DataBindingUtil.setContentView(this, R.layout.activity_create_tutored);
-        activityCreateTutoredBinding.setViewModel(getRelatedViewModel());
-        getRelatedViewModel().setInitialDataVisible(true);
-        setUpToolbar();
-        initAdapters();
-        activityCreateTutoredBinding.setLifecycleOwner(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_tutored);
+        binding.setViewModel(getRelatedViewModel());
+        binding.setLifecycleOwner(this);
 
-        // ✅ Recupera o "relatedRecord" da Intent, se houver
+        // Toolbar
+        setSupportActionBar(binding.toolbar.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle(getString(R.string.tutored_title));
+        }
+
+        // Estado inicial (secção aberta/fechada)
+        getRelatedViewModel().setInitialDataVisible(true);
+
+        // Prepara adapters async
+        initAdapters();
+
+        // Se veio para editar
         if (getIntent() != null && getIntent().getExtras() != null) {
             Tutored relatedTutored = (Tutored) getIntent().getExtras().get("relatedRecord");
-
             if (relatedTutored != null) {
                 getApplicationStep().changeToEdit();
                 getRelatedViewModel().setTutored(relatedTutored);
             }
-            //activityCreateTutoredBinding.executePendingBindings();
         }
+
+        // Listeners dos cabeçalhos para expand/colapse (se preferires só via binding, pode remover)
+        setSectionToggleListeners();
+
+        // Listener do vínculo laboral para mostrar/ocultar ONG imediatamente
+        setMenteeLaborListener();
     }
 
-
-    private void setUpToolbar() {
-        setSupportActionBar(activityCreateTutoredBinding.toolbar.toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle(getString(R.string.tutored_title));
-    }
-
-    private void switchLayout(){
-        getRelatedViewModel().setInitialDataVisible(!getRelatedViewModel().isInitialDataVisible());
-
-    }
-
-    private void initAdapters(){
+    private void initAdapters() {
         getRelatedViewModel().getExecutorService().execute(() -> {
             try {
                 List<Province> provinces = getRelatedViewModel().getAllProvince();
                 List<ProfessionalCategory> professionalCategories = getRelatedViewModel().getAllProfessionalCategys();
                 List<SimpleValue> menteeLabors = getRelatedViewModel().getMenteeLabors();
-                getRelatedViewModel().getPartnersList();
-                getRelatedViewModel().getCreateTutoredActivity().runOnUiThread(() -> {
+                getRelatedViewModel().getPartnersList(); // carrega lista de parceiros no VM
+
+                runOnUiThread(() -> {
+                    // Province
                     provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-                    activityCreateTutoredBinding.spnProvince.setAdapter(provinceAdapter);
-                    activityCreateTutoredBinding.setProvinceAdapter(provinceAdapter);
+                    binding.actProvince.setAdapter(provinceAdapter);
+                    binding.setProvinceAdapter(provinceAdapter);
 
+                    // Professional Category
                     professionalCategoryAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, professionalCategories);
-                    activityCreateTutoredBinding.spnProfessionalCategory.setAdapter(professionalCategoryAdapter);
-                    activityCreateTutoredBinding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
+                    binding.actProfessionalCategory.setAdapter(professionalCategoryAdapter);
+                    binding.setProfessionalCategoryAdapter(professionalCategoryAdapter);
 
+                    // Mentee Labor (SNS/ONG)
                     menteeLaborfoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, menteeLabors);
-                    activityCreateTutoredBinding.spnMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
-                    activityCreateTutoredBinding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
+                    binding.actMenteeLaborInfo.setAdapter(menteeLaborfoAdapter);
+                    binding.setMenteeLaborfoAdapter(menteeLaborfoAdapter);
 
+                    // ONG (partners)
                     ngoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getAllPartners());
-                    activityCreateTutoredBinding.setNgoAdapter(ngoAdapter);
+                    binding.actNgo.setAdapter(ngoAdapter);
+                    binding.setNgoAdapter(ngoAdapter);
                 });
 
             } catch (SQLException e) {
@@ -105,90 +114,100 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         });
     }
 
+    /** Atualiza adapter de Distrito quando a Província muda */
+    public void reloadDistrcitAdapter() {
+        districtAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
+        binding.actDistrict.setAdapter(districtAdapter);
+        binding.setDistrictAdapter(districtAdapter);
+    }
+
+    /** Atualiza adapter de Unidade Sanitária quando o Distrito muda */
+    public void reloadHealthFacility() {
+        healthfacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
+        binding.actHealthfacility.setAdapter(healthfacilityAdapter);
+        binding.setHealthfacilityAdapter(healthfacilityAdapter);
+    }
+
+    /** Cabeçalhos dos cards para expandir/colapsar as seções */
+    private void setSectionToggleListeners() {
+        binding.identificationData.setOnClickListener(this::changeFormSectionVisibility);
+        binding.laboralData.setOnClickListener(this::changeFormSectionVisibility);
+        binding.healtUnit.setOnClickListener(this::changeFormSectionVisibility);
+
+        // Botões de seta também
+        binding.btnIdentificationData.setOnClickListener(this::changeFormSectionVisibility);
+        binding.btnLaboralData.setOnClickListener(this::changeFormSectionVisibility);
+        binding.btnHealtUnit.setOnClickListener(this::changeFormSectionVisibility);
+    }
+
+    /** Mostra ONG quando vínculo = "ONG" (UX imediato além do binding reativo) */
+    private void setMenteeLaborListener() {
+        binding.actMenteeLaborInfo.setOnItemClickListener((parent, view, position, id) -> {
+            Object sel = parent.getItemAtPosition(position);
+            if (sel != null && "ONG".equalsIgnoreCase(sel.toString())) {
+                binding.actNgo.setVisibility(View.VISIBLE);
+                getRelatedViewModel().setONGEmployee(true);
+            } else {
+                binding.actNgo.setVisibility(View.GONE);
+                getRelatedViewModel().setONGEmployee(false);
+            }
+        });
+    }
+
+    /** Alterna a visibilidade das seções (usa Utilities.expand/collapse) com rotação 180° do ícone. */
+    public void changeFormSectionVisibility(View view) {
+        if (view.equals(binding.laboralData) || view.equals(binding.btnLaboralData)) {
+            toggleSection(binding.laboralLyt, binding.btnLaboralData);
+        } else if (view.equals(binding.healtUnit) || view.equals(binding.btnHealtUnit)) {
+            toggleSection(binding.healtUnitLyt, binding.btnHealtUnit);
+        } else if (view.equals(binding.identificationData) || view.equals(binding.btnIdentificationData)) {
+            toggleSection(binding.identificationDataLyt, binding.btnIdentificationData);
+        }
+    }
+
+    /** Alterna a seção e anima o ícone para 0° (fechado) ou 180° (aberto). */
+    private void toggleSection(View body, View iconView) {
+        boolean expanding = body.getVisibility() != View.VISIBLE;
+
+        if (expanding) {
+            Utilities.expand(body);
+        } else {
+            Utilities.collapse(body);
+        }
+
+        // Rotação suave do ícone (ImageButton / ImageView)
+        float target = expanding ? 180f : 0f;
+        iconView.animate()
+                .rotation(target)
+                .setDuration(180L)
+                .start();
+    }
+
+
+    // ======== Boilerplate ========
+
     @Override
     public BaseViewModel initViewModel() {
         return new ViewModelProvider(this).get(TutoredVM.class);
     }
 
     @Override
-    public void doOnConfirmed() {
-
-    }
+    public void doOnConfirmed() { }
 
     @Override
-    public void doOnDeny() {
-    }
+    public void doOnDeny() { }
 
     @Override
     public TutoredVM getRelatedViewModel() {
         return (TutoredVM) super.getRelatedViewModel();
     }
 
-    public void reloadDistrcitAdapter() {
-        districtAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
-        activityCreateTutoredBinding.spnDistrict.setAdapter(districtAdapter);
-        activityCreateTutoredBinding.setDistrictAdapter(districtAdapter);
-    }
-
-    public void reloadHealthFacility(){
-        healthfacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
-        activityCreateTutoredBinding.spnHealthfacility.setAdapter(healthfacilityAdapter);
-        activityCreateTutoredBinding.setHealthfacilityAdapter(healthfacilityAdapter);
-
-    }
-
-    public void changeFormSectionVisibility(View view){
-
-        if(view.equals(activityCreateTutoredBinding.laboralData)){
-            if(activityCreateTutoredBinding.laboralLyt.getVisibility() == View.VISIBLE){
-                activityCreateTutoredBinding.btnLaboralData.setImageResource(R.drawable.sharp_arrow_drop_up_24);
-                switchLayout();
-                Utilities.collapse(activityCreateTutoredBinding.laboralLyt);
-            } else {
-                switchLayout();
-                Utilities.expand(activityCreateTutoredBinding.laboralLyt);
-                activityCreateTutoredBinding.btnLaboralData.setImageResource(R.drawable.baseline_arrow_drop_down_24);
-            }
-
-        } else if(view.equals(activityCreateTutoredBinding.healtUnit)){
-            if(activityCreateTutoredBinding.healtUnitLyt.getVisibility() == View.VISIBLE){
-                activityCreateTutoredBinding.btnHealtUnit.setImageResource(R.drawable.sharp_arrow_drop_up_24);
-                switchLayout();
-                Utilities.collapse(activityCreateTutoredBinding.healtUnitLyt);
-            } else {
-                switchLayout();
-                Utilities.expand(activityCreateTutoredBinding.healtUnitLyt);
-                activityCreateTutoredBinding.btnHealtUnit.setImageResource(R.drawable.baseline_arrow_drop_down_24);
-            }
-
-        }  else if(view.equals(activityCreateTutoredBinding.identificationData)){
-            if(activityCreateTutoredBinding.identificationDataLyt.getVisibility() == View.VISIBLE){
-                switchLayout();
-                Utilities.collapse(activityCreateTutoredBinding.identificationDataLyt);
-                activityCreateTutoredBinding.btnIdentificationData.setImageResource(R.drawable.sharp_arrow_drop_up_24);
-            } else {
-                switchLayout();
-                Utilities.expand(activityCreateTutoredBinding.identificationDataLyt);
-                activityCreateTutoredBinding.btnIdentificationData.setImageResource(R.drawable.baseline_arrow_drop_down_24);
-            }
-        } else if(view.equals(activityCreateTutoredBinding.spnMenteeLaborInfo)){
-            if (activityCreateTutoredBinding.spnMenteeLaborInfo.getSelectedItem() == "ONG"){
-                activityCreateTutoredBinding.spnNgo.setVisibility(View.VISIBLE);
-            }else{
-                activityCreateTutoredBinding.spnNgo.setVisibility(View.GONE);
-            }
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // Handle the back button click
-                this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            this.getRelatedViewModel().getRelatedActivity().nextActivityFinishingCurrent(TutoredActivity.class);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 }

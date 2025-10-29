@@ -185,7 +185,7 @@ public class Employee extends BaseModel implements Listble {
 
     public void setProfessionalCategory(ProfessionalCategory professionalCategory) {
         this.professionalCategory = professionalCategory;
-        this.professionalCategoryId = professionalCategory.getId();
+       if (professionalCategory != null) this.professionalCategoryId = professionalCategory.getId();
     }
 
     public Integer getTrainingYear() {
@@ -218,7 +218,7 @@ public class Employee extends BaseModel implements Listble {
 
     public void setPartner(Partner partner) {
         this.partner = partner;
-        this.partnerId = partner.getId();
+        if (partner != null) this.partnerId = partner.getId();
     }
 
     public List<Location> getLocations() {

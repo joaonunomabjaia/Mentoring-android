@@ -25,6 +25,7 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.ronda.RondaSummary;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
+import mz.org.csaude.mentoring.model.rondatype.RondaTypeCode;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.session.SessionSummary;
 import mz.org.csaude.mentoring.util.PDFGenerator;
@@ -35,13 +36,16 @@ import mz.org.csaude.mentoring.view.ronda.RondaActivity;
 import mz.org.csaude.mentoring.view.session.SessionListActivity;
 
 public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, ServerStatusListener {
+
+    // Legacy entity (kept for intents/compat)
     private RondaType rondaType;
 
     private String title;
-
     private Ronda selectedRonda;
-
     private Dialog progress;
+
+    // Enum-first flow for logic/UI
+    private RondaTypeCode rondaTypeCode = RondaTypeCode.MENTORIA_INTERNA;
 
     public RondaSearchVM(@NonNull Application application) {
         super(application);
@@ -53,37 +57,58 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     @Override
-    public void preInit() {
-    }
+    public void preInit() { }
 
+    // --- Create / Navigation ---
     public void createNewRonda() {
         Map<String, Object> params = new HashMap<>();
+
+        // If caller didn't set the entity, resolve from enum now
+        if (rondaType == null) {
+            try {
+                rondaType = getApplication().getRondaTypeService()
+                        .getRondaTypeByCode(rondaTypeCode.code());
+            } catch (SQLException ignored) { }
+        }
+
         params.put("rondaType", rondaType);
         params.put("title", title);
         getApplication().getApplicationStep().changetocreate();
         getRelatedActivity().nextActivityFinishingCurrent(CreateRondaActivity.class, params);
     }
 
-    public RondaType getRondaType() {
-        return rondaType;
+    // --- Title ---
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    // --- RondaType (entity + enum) ---
+    public RondaType getRondaType() { return rondaType; }
+
+    /** Called when another screen passes the entity in the Intent */
+    public void setRondaType(RondaType entity) {
+        this.rondaType = entity;
+        this.rondaTypeCode = (entity == null)
+                ? RondaTypeCode.MENTORIA_INTERNA
+                : RondaTypeCode.fromCode(entity.getCode());
     }
 
-    public void setRondaType(RondaType rondaType) {
-        this.rondaType = rondaType;
+    /** Called by bottom-nav changes */
+    public void setRondaType(RondaTypeCode code) {
+        this.rondaTypeCode = (code == null) ? RondaTypeCode.MENTORIA_INTERNA : code;
+        // keep entity lazy; resolve when needed
+        this.rondaType = null;
     }
 
-    public String getTitle() {
-        return title;
-    }
+    public RondaTypeCode getRondaTypeCode() { return rondaTypeCode; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
+    // --- Search ---
     @Override
     public List<Ronda> doSearch(long offset, long limit) throws SQLException {
-        return getApplication().getRondaService().getAllByRondaType(this.rondaType, getApplication().getCurrMentor());
+        RondaType typeEntity = getApplication().getRondaTypeService().getRondaTypeByCode(rondaTypeCode.code());
+        this.rondaType = typeEntity;
+        return getApplication().getRondaService().search(typeEntity, getQuery(), getApplication().getCurrMentor());
     }
+
 
     @Override
     public void displaySearchResults() {
@@ -115,7 +140,6 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         }
     }
 
-
     public void printRondaSummary(Ronda ronda) {
         this.selectedRonda = ronda;
         getRelatedActivity().checkStoragePermission();
@@ -128,17 +152,14 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
             @Override
             protected void onPreExecute() {
-                // Show the progress dialog before starting the background task
-                progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+                progress = Utilities.showLoadingDialog(getRelatedActivity(),
+                        getRelatedActivity().getString(R.string.processando));
             }
 
             @Override
             protected Boolean doInBackground(Void... voids) {
                 try {
-                    // Generate Ronda summaries
                     List<RondaSummary> rondaSummaryList = generateRondaSummaries(selectedRonda);
-
-                    // Create the Ronda summary PDF
                     return PDFGenerator.createRondaSummary(getRelatedActivity(), rondaSummaryList);
                 } catch (SQLException e) {
                     Log.e("printRondaReport", "Exception: ", e);
@@ -148,17 +169,14 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
             @Override
             protected void onPostExecute(Boolean printSuccessful) {
-                // Dismiss the progress dialog and show the result message
                 dismissProgress(progress);
                 showPrintResultMessage(printSuccessful, progress);
             }
         }.execute();
     }
 
-
     private List<RondaSummary> generateRondaSummaries(Ronda selectedRonda) throws SQLException {
         List<RondaSummary> rondaSummaryList = new ArrayList<>();
-
         Ronda ronda = getApplication().getRondaService().getFullyLoadedRonda(selectedRonda);
 
         for (RondaMentee mentee : ronda.getRondaMentees()) {
@@ -171,8 +189,6 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
             List<Session> sessions = getSessionsForMentee(ronda, mentee);
             rondaSummary.setSummaryDetails(generateSessionSummaries(sessions));
-
-            // Assign session scores dynamically
             assignSessionScores(rondaSummary);
 
             rondaSummaryList.add(rondaSummary);
@@ -195,7 +211,8 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         Map<Integer, List<SessionSummary>> summaryDetails = new HashMap<>();
         int i = 1;
         for (Session session : sessions) {
-            summaryDetails.put(i, getApplication().getSessionService().generateSessionSummary(session, null, false));
+            summaryDetails.put(i, getApplication().getSessionService()
+                    .generateSessionSummary(session, null, false));
             i++;
         }
         return summaryDetails;
@@ -213,18 +230,10 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
 
     private void setSessionScore(RondaSummary rondaSummary, int sessionNumber, double score) {
         switch (sessionNumber) {
-            case 1:
-                rondaSummary.setSession1(score);
-                break;
-            case 2:
-                rondaSummary.setSession2(score);
-                break;
-            case 3:
-                rondaSummary.setSession3(score);
-                break;
-            case 4:
-                rondaSummary.setSession4(score);
-                break;
+            case 1: rondaSummary.setSession1(score); break;
+            case 2: rondaSummary.setSession2(score); break;
+            case 3: rondaSummary.setSession3(score); break;
+            case 4: rondaSummary.setSession4(score); break;
         }
     }
 
@@ -236,37 +245,30 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         Utilities.displayAlertDialog(getRelatedActivity(), message).show();
     }
 
-
     private double determineSessionScore(List<SessionSummary> sessionSummaries) {
         int yesCount = 0;
         int noCount = 0;
         for (SessionSummary sessionSummary : sessionSummaries){
-            yesCount = yesCount + sessionSummary.getSimCount();
-            noCount = noCount + sessionSummary.getNaoCount();
+            yesCount += sessionSummary.getSimCount();
+            noCount += sessionSummary.getNaoCount();
         }
-        return (double) yesCount / (yesCount + noCount) *100;
+        return (double) yesCount / (yesCount + noCount) * 100;
     }
 
     public void edit(Ronda ronda) {
-        // Perform the database query in a background thread
         getExecutorService().execute(() -> {
             try {
-                // Fetch sessions in the background thread
                 ronda.setSessions(getApplication().getSessionService().getAllOfRonda(ronda));
-
-                // Check if the Ronda has sessions and update the UI on the main thread
                 runOnMainThread(() -> {
                     if (Utilities.listHasElements(ronda.getSessions())) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.ronda_edit_error_msg)).show();
+                        Utilities.displayAlertDialog(getRelatedActivity(),
+                                getRelatedActivity().getString(R.string.ronda_edit_error_msg)).show();
                         return;
                     }
-
-                    // Proceed to edit if there are no sessions
                     navigateToEditRonda(ronda);
                 });
 
             } catch (SQLException e) {
-                // Handle SQL exceptions on the main thread
                 runOnMainThread(() -> {
                     Log.e("Ronda Search VM", "Exception: " + e.getMessage());
                     String errorMessage = getRelatedActivity().getString(R.string.ronda_session_error);
@@ -277,18 +279,15 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
     }
 
     private void navigateToEditRonda(Ronda ronda) {
-        // Prepare the parameters for the next activity
         Map<String, Object> params = new HashMap<>();
         params.put("ronda", ronda);
-        params.put("title", ronda.isRondaZero() ? getRelatedActivity().getString(R.string.ronda_zero) : getRelatedActivity().getString(R.string.ronda_mentoria));
+        params.put("title", ronda.isRondaZero()
+                ? getRelatedActivity().getString(R.string.ronda_zero)
+                : getRelatedActivity().getString(R.string.ronda_mentoria));
 
-        // Change the application step to "edit"
         getApplication().getApplicationStep().changeToEdit();
-
-        // Navigate to the CreateRondaActivity
         getRelatedActivity().nextActivityFinishingCurrent(CreateRondaActivity.class, params);
     }
-
 
     public void delete(Ronda ronda) {
         this.selectedRonda = ronda;
@@ -306,7 +305,9 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
                     }
 
                     String confirmationMessage = getRelatedActivity().getString(R.string.ronda_delete_confirmation);
-                    Utilities.displayConfirmationDialog(getRelatedActivity(), confirmationMessage, getRelatedActivity().getString(R.string.yes), getRelatedActivity().getString(R.string.no), this).show();
+                    Utilities.displayConfirmationDialog(getRelatedActivity(), confirmationMessage,
+                            getRelatedActivity().getString(R.string.yes),
+                            getRelatedActivity().getString(R.string.no), this).show();
                 });
 
             } catch (SQLException e) {
@@ -319,25 +320,21 @@ public class RondaSearchVM extends SearchVM<Ronda> implements IDialogListener, S
         });
     }
 
-
     @Override
     public void doOnConfirmed() {
-        this.progress = Utilities.showLoadingDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.processando));
+        this.progress = Utilities.showLoadingDialog(getRelatedActivity(),
+                getRelatedActivity().getString(R.string.processando));
         getApplication().getApplicationStep().changeToRemove();
         getApplication().isServerOnline(this);
     }
 
     @Override
-    public void doOnDeny() {
-
-    }
+    public void doOnDeny() { }
 
     @Override
     public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
-
         if (isOnline) {
             if (isSlow) {
-                // Show warning: Server is slow
                 showSlowConnectionWarning(getRelatedActivity());
             }
             if (getApplication().getApplicationStep().isApplicationStepRemove()) {

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_tutored"
+    app:startDestination="@id/nav_all">
+
+    <fragment
+        android:id="@+id/nav_await_zero"
+        android:name="mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment"
+        android:label="@string/aguardam_sessao_zero">
+        <argument
+            android:name="stage"
+            app:argType="string"
+            android:defaultValue="AWAIT_ZERO" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_start_round"
+        android:name="mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment"
+        android:label="@string/inicio_de_ronda">
+        <argument
+            android:name="stage"
+            app:argType="string"
+            android:defaultValue="START_ROUND" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_semestral"
+        android:name="mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment"
+        android:label="@string/sessao_semestral">
+        <argument
+            android:name="stage"
+            app:argType="string"
+            android:defaultValue="SEMESTRAL" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_all"
+        android:name="mz.org.csaude.mentoring.view.tutored.fragment.TutoredFragment"
+        android:label="@string/todos">
+        <argument
+            android:name="stage"
+            app:argType="string"
+            android:defaultValue="ALL" />
+    </fragment>
+
+</navigation>

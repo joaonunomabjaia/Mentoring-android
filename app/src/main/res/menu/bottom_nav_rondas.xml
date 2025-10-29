@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_zero"
+        android:title="@string/ronda_zero"
+        android:icon="@drawable/ic_monitor_heart" />
+    <item
+        android:id="@+id/nav_ciclo"
+        android:title="@string/ronda_mentoria"
+        android:icon="@drawable/ic_cicle" />
+    <item
+        android:id="@+id/nav_semestral"
+        android:title="@string/sessao_semestral"
+        android:icon="@drawable/ic_calendar" />
+</menu>

@@ -4,14 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:bind="http://schemas.android.com/apk/res-auto"
     tools:context=".view.tutored.CreateTutoredActivity">
+
     <data>
         <variable
             name="viewModel"
-            type="mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM"/>
+            type="mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM" />
+
         <variable
             name="viewModelProvince"
             type="mz.org.csaude.mentoring.viewmodel.location.ProvinceVM" />
 
+        <!-- Adapters -->
         <variable
             name="professionalCategoryAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
@@ -31,357 +34,533 @@
             name="ngoAdapter"
             type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
 
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
-        <import type="android.view.View"/>
-        <import type="mz.org.csaude.mentoring.model.tutored.Tutored"/>
-        <import type="mz.org.csaude.mentoring.util.Utilities"/>
+        <import type="android.view.View" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
+        android:background="@color/white"
         android:layout_height="match_parent">
+
+        <!-- AppBar / Toolbar -->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:elevation="4dp">
 
-            <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/app_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
-            android:padding="@dimen/dimen_15dp">
+        <!-- Container que alterna FORM <-> CARD de estado -->
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="@color/white"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <ScrollView
+            <!-- FORM: visível quando NÃO está a salvar -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/form_scroll"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:padding="@dimen/dimen_10dp"
+                android:backgroundTint="@color/white"
+                android:visibility='@{viewModel.savingCardVisible ? View.GONE : View.VISIBLE}'>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
                     android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/identification_data"
+                    <!-- ============ CARD: Identificação ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_identificacao"
+                        style="@style/Mentor.M3.Card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:layout_marginBottom="@dimen/dimen_12dp">
 
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="@string/identification_data_label"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
 
-                        <ImageButton
-                            android:id="@+id/btn_identification_data"
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
+                            <!-- Cabeçalho (accordion) -->
+                            <LinearLayout
+                                android:id="@+id/identification_data"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:onClick='@{(v)->viewModel.changeInitialDataViewStatus(v)}'>
 
-                    <LinearLayout
-                        android:id="@+id/identification_data_lyt"
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textColor="@color/background_dark"
+                                    android:text="@string/identification_data_label"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge" />
+
+                                <ImageButton
+                                    android:id="@+id/btn_identification_data"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
+
+                            <!-- Corpo -->
+                            <LinearLayout
+                                android:id="@+id/identification_data_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/tutored_name_label">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/tutored_name"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:text='@={viewModel.name}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/tutored_surname_label">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/tutored_surname"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:text='@={viewModel.surname}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/tutored_phone_number_label"
+                                    app:startIconDrawable="@drawable/baseline_call_24">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/tutored_phone_number"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="phone"
+                                        android:maxLength="9"
+                                        android:text='@={viewModel.phoneNumber}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/tutored_email_label"
+                                    app:startIconDrawable="@drawable/baseline_alternate_email_24">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/tutored_email"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="textEmailAddress"
+                                        android:text='@={viewModel.email}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/tutored_nuit_label">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/tutored_nuit"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:maxLength="9"
+                                        android:text='@={viewModel.nuit}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- ============ CARD: Informações Laborais ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_laboral"
+                        style="@style/Mentor.M3.Card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
+                        android:layout_marginBottom="@dimen/dimen_12dp">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/tutored_name_label"
-                            style="@style/input_labels" />
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
 
-                        <EditText
-                            android:id="@+id/tutored_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/fields_background"
-                            android:text="@={viewModel.name}"
-                            style="@style/bottom_border_edit_text_style"/>
+                            <!-- Cabeçalho -->
+                            <LinearLayout
+                                android:id="@+id/laboral_data"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:onClick='@{(v)->viewModel.changeInitialDataViewStatus(v)}'>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tutored_surname_label"
-                            style="@style/input_labels" />
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textColor="@color/background_dark"
+                                    android:text="@string/labor_information_label"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge" />
 
-                        <EditText
-                            android:id="@+id/tutored_surname"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/fields_background"
-                            android:text="@={viewModel.surname}"
-                            style="@style/bottom_border_edit_text_style"/>
+                                <ImageButton
+                                    android:id="@+id/btn_laboral_data"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tutored_phone_number_label"
-                            style="@style/input_labels" />
+                            <!-- Corpo -->
+                            <LinearLayout
+                                android:id="@+id/laboral_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
 
-                        <EditText
-                            android:id="@+id/tutored_phone_number"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="phone"
-                            android:background="@drawable/fields_background"
-                            android:maxLength="9"
-                            android:text="@={viewModel.phoneNumber}"
-                            style="@style/bottom_border_edit_text_style"/>
+                                <!-- Categoria Profissional -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/professional_category"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_professional_category"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{professionalCategoryAdapter}'
+                                        bind:selectedOpt='@={viewModel.professionalCategory}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tutored_email_label"
-                            style="@style/input_labels" />
+                                <!-- Vínculo laboral -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/vinculo_laboral"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_mentee_labor_info"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{menteeLaborfoAdapter}'
+                                        bind:selectedOpt='@={viewModel.menteeLabor}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <EditText
-                            android:id="@+id/tutored_email"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress"
-                            android:background="@drawable/fields_background"
-                            android:text="@={viewModel.email}"
-                            style="@style/bottom_border_edit_text_style"/>
+                                <!-- ONG (condicional) -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/ngo_name_label"
+                                    app:endIconMode="dropdown_menu"
+                                    android:visibility='@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}'>
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_ngo"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{ngoAdapter}'
+                                        bind:selectedOpt='@={viewModel.selectedNgo}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tutored_nuit_label"
-                            style="@style/input_labels" />
+                                <!-- Ano de formação -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/training_year_label">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/training_year"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:maxLength="4"
+                                        android:text='@={viewModel.trainingYear}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <EditText
-                            android:id="@+id/tutored_nuit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:background="@drawable/fields_background"
-                            android:text="@={viewModel.nuit}"
-                            android:maxLength="9"
-                            style="@style/bottom_border_edit_text_style"/>
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/skip_zero_session_label"
+                                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                                    android:layout_marginTop="@dimen/dimen_12dp"/>
 
-                    </LinearLayout>
+                                <!-- Isenção da Sessão Zero -->
+                                <RadioGroup
+                                    android:id="@+id/rg_skip_zero_session"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="@dimen/dimen_12dp"
+                                    android:visibility="visible">
 
-                    <LinearLayout
-                        android:id="@+id/laboral_data"
+                                    <com.google.android.material.radiobutton.MaterialRadioButton
+                                        android:id="@+id/rb_skip_yes"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/yes"
+                                        android:checked='@{viewModel.skipZeroSession == true}'
+                                        android:onClick='@{() -> viewModel.setSkipZeroSession(true)}'
+                                        android:textColor='@color/input_labels' />
+
+                                    <com.google.android.material.radiobutton.MaterialRadioButton
+                                        android:id="@+id/rb_skip_no"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/no"
+                                        android:checked='@{viewModel.skipZeroSession == false}'
+                                        android:onClick='@{() -> viewModel.setSkipZeroSession(false)}'
+                                        android:textColor='@color/input_labels' />
+                                </RadioGroup>
+
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- ============ CARD: Unidade Sanitária ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_unidade"
+                        style="@style/Mentor.M3.Card"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_10dp"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="@string/labor_information_label"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:id="@+id/btn_laboral_data"
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/laboral_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/professional_category"
-                            style="@style/input_labels" />
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
 
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_professional_category"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            app:adapter="@{professionalCategoryAdapter}"
-                            bind:selectedOpt="@={viewModel.professionalCategory}" />
+                            <!-- Cabeçalho -->
+                            <LinearLayout
+                                android:id="@+id/healt_unit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:onClick='@{(v)->viewModel.changeInitialDataViewStatus(v)}'>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/vinculo_laboral"
-                            style="@style/input_labels" />
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textColor="@color/background_dark"
+                                    android:text="@string/health_unit_label"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge" />
 
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_mentee_labor_info"
-                            style="@style/bottom_spinner_style"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            bind:selectedOpt="@={viewModel.menteeLabor}" />
+                                <ImageButton
+                                    android:id="@+id/btn_healt_unit"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
-                            android:text="@string/ngo_name_label"
-                            style="@style/input_labels" />
+                            <!-- Corpo -->
+                            <LinearLayout
+                                android:id="@+id/healt_unit_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
 
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_ngo"
-                            style="@style/bottom_spinner_style"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:visibility="@{viewModel.ONGEmployee ? View.VISIBLE : View.GONE}"
-                            app:adapter="@{ngoAdapter}"
-                            bind:selectedOpt="@={viewModel.selectedNgo}" />
+                                <!-- Província -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/province_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_province"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{provinceAdapter}'
+                                        bind:selectedOpt='@={viewModel.province}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/training_year_label"
-                            style="@style/input_labels" />
+                                <!-- Distrito -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/district_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_district"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{districtAdapter}'
+                                        bind:selectedOpt='@={viewModel.district}' />
+                                </com.google.android.material.textfield.TextInputLayout>
 
-                        <EditText
-                            android:id="@+id/training_year"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:maxLength="4"
-                            android:inputType="number"
-                            android:text="@={viewModel.trainingYear}"
-                            android:background="@drawable/fields_background"
-                            style="@style/bottom_border_edit_text_style"/>
+                                <!-- Unidade Sanitária -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/health_facility_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_healthfacility"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="none"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        android:longClickable="false"
+                                        android:clickable="true"
+                                        app:adapter='@{healthfacilityAdapter}'
+                                        bind:selectedOpt='@={viewModel.healthFacility}' />
+                                </com.google.android.material.textfield.TextInputLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/healt_unit"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_10dp"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="@string/health_unit_label"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:id="@+id/btn_healt_unit"
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/healt_unit_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/province_label"
-                            style="@style/input_labels" />
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_province"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            style="@style/bottom_spinner_style"
-                            app:adapter="@{provinceAdapter}"
-                            bind:selectedOpt="@={viewModel.province}" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/district_label"
-                            style="@style/input_labels" />
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_district"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            style="@style/bottom_spinner_style"
-                            app:adapter="@{districtAdapter}"
-                            bind:selectedOpt="@={viewModel.district}" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/health_facility_label"
-                            style="@style/input_labels" />
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_healthfacility"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            style="@style/bottom_spinner_style"
-                            app:adapter="@{healthfacilityAdapter}"
-                            bind:selectedOpt="@={viewModel.healthFacility}" />
-
-                    </LinearLayout>
-
-                    <Button
+                    <!-- Botão Salvar -->
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/save_tutored"
-                        android:layout_width="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_15dp"
+                        style="@style/Mentor.M3.Button"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/button_shape"
+                        android:layout_marginTop="@dimen/dimen_16dp"
                         android:text="@string/submit"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:onClick="@{() -> viewModel.save()}" />
-
+                        android:onClick='@{() -> viewModel.save()}' />
                 </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- CARD DE ESTADO -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/save_state_card"
+                style="@style/Mentor.M3.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_margin="@dimen/dimen_18dp"
+                android:padding="@dimen/dimen_24dp"
+                android:visibility='@{viewModel.savingCardVisible ? View.VISIBLE : View.GONE}'>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="@dimen/dimen_8dp">
+
+                    <!-- CIRCULAR M3 - INDETERMINATE -->
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/progress"
+                        style="@style/Widget.Material3.CircularProgressIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:indicatorSize="64dp"
+                        android:indeterminate="true"
+                        android:visibility='@{viewModel.savingRunning ? View.VISIBLE : View.GONE}' />
+
+                    <!-- SUCESSO / ERRO (como já estava) -->
+                    <ImageView
+                        android:id="@+id/icon_success"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/baseline_check_circle_24"
+                        android:visibility='@{viewModel.savingSuccess ? View.VISIBLE : View.GONE}'
+                        app:tint="?attr/colorPrimary" />
+
+                    <ImageView
+                        android:id="@+id/icon_error"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/baseline_error_24"
+                        android:visibility='@{viewModel.savingError ? View.VISIBLE : View.GONE}'
+                        app:tint="?attr/colorError" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/save_msg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dimen_12dp"
+                        android:text='@{viewModel.savingMessage}'
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:gravity="center" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/save_action_btn"
+                        style="@style/Mentor.M3.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dimen_16dp"
+                        android:text='@{viewModel.savingSuccess ? @string/continue_label : @string/try_again}'
+                        android:visibility='@{viewModel.savingRunning ? View.GONE : View.VISIBLE}'
+                        android:onClick='@{() -> viewModel.onSaveCardPrimaryAction()}' />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </FrameLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

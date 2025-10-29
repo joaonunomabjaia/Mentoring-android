@@ -3,43 +3,65 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <!-- TutoredStagesVM estende TutoredVM, então manter TutoredVM é OK -->
         <variable
             name="viewModel"
             type="mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout2"
+        <!-- SEARCH BAR (Material 3) -->
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/searchBar"
+            style="@style/Widget.Material3.SearchBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            android:hint="@string/search"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"
+            app:menu="@menu/menu_search_bar" />
 
-            <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
-        </com.google.android.material.appbar.AppBarLayout>
+        <!-- SEARCH VIEW (overlay ancorado à SearchBar) -->
+        <com.google.android.material.search.SearchView
+            android:id="@+id/searchView"
+            style="@style/Widget.Material3.SearchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_anchor="@id/searchBar" />
 
-        <LinearLayout
-            android:id="@+id/linearLayout4"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2">
+        <!-- CONTEÚDO -->
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_tutored"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="84dp"
+            android:layout_marginBottom="80dp"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_tutored" />
 
-            <!-- Container where the fragment will be added dynamically -->
-            <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+        <!-- BOTTOM NAV (4 estágios) -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            style="@style/Widget.Material3.BottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_nav_tutored"
+            app:labelVisibilityMode="labeled"
 
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            app:itemIconTint="@color/nav_item_tint"
+            app:itemTextColor="@color/nav_item_tint"
+            app:itemRippleColor="@color/nav_ripple"
+            app:backgroundTint="?attr/colorSurface"
+
+            app:itemActiveIndicatorStyle="@style/Widget_Nav_ActiveIndicator"/>
+
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

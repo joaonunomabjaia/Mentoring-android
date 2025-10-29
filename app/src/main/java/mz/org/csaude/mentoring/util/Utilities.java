@@ -9,10 +9,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +27,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -711,5 +718,22 @@ public class Utilities {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+    public static ColorStateList colorStateList(Context ctx, int colorOrRes) {
+        try {
+            // Se for um @ColorRes válido, isso funciona
+            return AppCompatResources.getColorStateList(ctx, colorOrRes);
+        } catch (Resources.NotFoundException e) {
+            // Caso contrário, trate como @ColorInt (ex.: 0x33FFA000)
+            return ColorStateList.valueOf(colorOrRes);
+        }
+    }
+
+    // Se quiser manter versões explícitas:
+    public static ColorStateList colorStateListRes(Context ctx, @ColorRes int res) {
+        return AppCompatResources.getColorStateList(ctx, res);
+    }
+    public static ColorStateList colorStateListInt(@ColorInt int color) {
+        return ColorStateList.valueOf(color);
     }
 }

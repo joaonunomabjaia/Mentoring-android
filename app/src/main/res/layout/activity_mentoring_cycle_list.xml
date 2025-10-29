@@ -1,72 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:fitsSystemWindows="true">
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
-        <variable
-            name="viewModel" type="mz.org.csaude.mentoring.viewmodel.ronda.RondaSearchVM" />
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
-        <import type="android.view.View"/>
+        <variable name="viewModel"
+            type="mz.org.csaude.mentoring.viewmodel.ronda.RondaSearchVM" />
+        <import type="android.view.View" />
+        <import type="mz.org.csaude.mentoring.util.Utilities" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
         tools:context=".view.ronda.RondaActivity">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout2"
+        <!-- SEARCH BAR -->
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/searchBar"
+            style="@style/Widget.Material3.SearchBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"
+            android:hint="@string/search"
+            app:menu="@menu/menu_ronda_search_bar"
+            app:navigationIcon="@drawable/ic_search" />
 
-            <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
-        </com.google.android.material.appbar.AppBarLayout>
+        <!-- SEARCH VIEW anchored to the bar -->
+        <com.google.android.material.search.SearchView
+            android:id="@+id/searchView"
+            style="@style/Widget.Material3.SearchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="16dp"
+            app:layout_anchor="@id/searchBar" />
 
-        <LinearLayout
-            android:id="@+id/linearLayout4"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:padding="@dimen/dimen_5dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2">
-            <ScrollView
+        <!-- CONTENT CARD -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/rcvCard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="84dp"
+            android:layout_marginBottom="80dp"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_10dp"
+            android:visibility='@{Utilities.listHasElements(viewModel.searchResults) ? View.VISIBLE : View.GONE}'
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:strokeColor="@android:color/transparent"
+            app:cardPreventCornerOverlap="false">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvRondas"
                 android:layout_width="match_parent"
-                android:padding="@dimen/dimen_4dp"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:layoutAnimation="@anim/layout_pop_in_bottom" />
+        </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" >
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rcv_rondas"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="vertical"/>
-                </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-
+        <!-- EMPTY STATE -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/empty_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sem_rondas"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:layout_gravity="center"
+            android:visibility='@{Utilities.listHasElements(viewModel.searchResults) ? View.GONE : View.VISIBLE}' />
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
             android:contentDescription="@string/submit"
-            android:onClick="@{()->viewModel.createNewRonda()}"
-            android:src="@drawable/baseline_add_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:onClick='@{()->viewModel.createNewRonda()}'
+            android:src='@drawable/baseline_add_24'
+            app:backgroundTint="?attr/colorPrimary"
+            app:tint="?attr/colorOnPrimaryContainer"
+            app:rippleColor="?attr/colorPrimary"
+            app:layout_anchor="@id/bottom_nav"
+            app:layout_anchorGravity="top|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:translationY="-16dp" />
 
+        <!-- BOTTOM NAV -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            style="@style/Widget.Material3.BottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_nav_rondas"
+            app:itemIconTint="@color/nav_item_tint"
+            app:itemTextColor="@color/nav_item_tint"
+            app:itemRippleColor="@color/nav_ripple"
+            app:backgroundTint="?attr/colorSurface"
+            app:labelVisibilityMode="labeled" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

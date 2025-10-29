@@ -5,12 +5,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,6 +26,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -135,60 +139,73 @@ public class CreateRondaActivity extends BaseActivity {
     }
 
     private void setupSelectMenteesDialog() {
-        // Infla o layout com DataBinding
-        DialogSelectMenteesBinding binding = DialogSelectMenteesBinding.inflate(getLayoutInflater());
+        // Infla o layout do diálogo com DataBinding
+        DialogSelectMenteesBinding binding =
+                DialogSelectMenteesBinding.inflate(getLayoutInflater());
         binding.setViewModel(getRelatedViewModel());
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
-        builder.setView(binding.getRoot());
-        AlertDialog dialog = builder.create();
+        // Cria um Dialog “puro” usando o overlay do Material3 para herdar tipografia/cores
+        final Dialog dialog = new Dialog(this, R.style.CustomAlertDialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(binding.getRoot());
+        dialog.setCancelable(true);
 
+        // Ajustes visuais opcionais (fundo arredondado/transparente + largura)
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+        }
+
+        // Referências de views
         EditText searchInput = binding.searchInput;
         RecyclerView recyclerMentees = binding.recyclerMentees;
         Button btnCancel = binding.btnCancel;
         Button btnAdd = binding.btnAdd;
 
-        // Lista de mentees disponíveis e já selecionados
+        // Lista de mentees e adapter com filtro
         List<Tutored> mentees = getRelatedViewModel().getrondaMenteeList();
-        // Adapter com filtro
-        TutoredSelectionAdapter adapter = new TutoredSelectionAdapter(binding.recyclerMentees, mentees, this, getRelatedViewModel());
+        TutoredSelectionAdapter adapter =
+                new TutoredSelectionAdapter(recyclerMentees, mentees, this, getRelatedViewModel());
+
         recyclerMentees.setLayoutManager(new LinearLayoutManager(this));
         recyclerMentees.setAdapter(adapter);
+        recyclerMentees.setHasFixedSize(true);
 
-        // Filtro de busca em tempo real
+        // Filtro em tempo real
         searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 adapter.filter(s.toString());
             }
-            @Override public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) { }
         });
 
-        // Ação do botão "Adicionar"
+        // Botão "Terminar" (confirma seleção)
         btnAdd.setOnClickListener(v -> {
             displaySelectedMentees();
             if (Utilities.listHasElements(getRelatedViewModel().getSelectedMentees())) {
-                for (Tutored tutored : getRelatedViewModel().getSelectedMentees()) {
-                    if (tutored.isSelected()) {
-                        tutored.setItemSelected(false);
-                    }
+                for (Tutored t : getRelatedViewModel().getSelectedMentees()) {
+                    if (t.isSelected()) t.setItemSelected(false);
                 }
             }
             dialog.dismiss();
         });
 
-        // Ação do botão "Cancelar"
+        // Botão "Cancelar" (descarta os marcados no diálogo)
         btnCancel.setOnClickListener(v -> {
             List<Tutored> toRemove = new ArrayList<>();
             if (Utilities.listHasElements(getRelatedViewModel().getSelectedMentees())) {
-                for (Tutored tutored : getRelatedViewModel().getSelectedMentees()) {
-                    if (tutored.isSelected()) {
-                        tutored.setItemSelected(false);
-                        toRemove.add(tutored);
+                for (Tutored t : getRelatedViewModel().getSelectedMentees()) {
+                    if (t.isSelected()) {
+                        t.setItemSelected(false);
+                        toRemove.add(t);
                     }
                 }
                 getRelatedViewModel().removeAll(toRemove);
-                displaySelectedMentees(); // Atualiza o RecyclerView principal
+                displaySelectedMentees(); // atualiza lista principal
             }
             dialog.dismiss();
         });
@@ -256,7 +273,7 @@ public class CreateRondaActivity extends BaseActivity {
             rcvSelectedMentees.addItemDecoration(new SpacingItemDecoration(spacingInPixels));
             rcvSelectedMentees.setHasFixedSize(true);
 
-            tutoredAdapter = new TutoredAdapter(rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this);
+            tutoredAdapter = new TutoredAdapter(rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this, null);
             rcvSelectedMentees.setAdapter(tutoredAdapter);
         }
     }
