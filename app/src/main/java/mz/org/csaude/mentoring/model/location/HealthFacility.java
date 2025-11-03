@@ -94,4 +94,9 @@ public class HealthFacility extends BaseModel implements Listble {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return this.getDescription();
+    }
 }

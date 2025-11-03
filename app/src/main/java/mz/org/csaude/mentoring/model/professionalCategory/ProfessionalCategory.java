@@ -60,4 +60,9 @@ public class ProfessionalCategory extends BaseModel implements Listble {
     public String getCode() {
         return this.code;
     }
+
+    @Override
+    public String toString() {
+        return this.getCode();
+    }
 }
