@@ -3,7 +3,6 @@ package mz.org.csaude.mentoring.view.tutored;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -21,7 +20,6 @@ import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.model.location.Province;
 import mz.org.csaude.mentoring.model.professionalCategory.ProfessionalCategory;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
-import mz.org.csaude.mentoring.model.partner.Partner;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.tutored.TutoredVM;
@@ -67,7 +65,9 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
             Tutored relatedTutored = (Tutored) getIntent().getExtras().get("relatedRecord");
             if (relatedTutored != null) {
                 getApplicationStep().changeToEdit();
-                getRelatedViewModel().setTutored(relatedTutored);
+//                getRelatedViewModel().setTutored(relatedTutored);
+                // Só armazenamos o objecto, mas não chamamos setTutored ainda
+                getRelatedViewModel().setPendingTutored(relatedTutored);
             }
         }
 
@@ -82,7 +82,7 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
         getRelatedViewModel().getExecutorService().execute(() -> {
             try {
                 List<Province> provinces = getRelatedViewModel().getAllProvince();
-                List<ProfessionalCategory> professionalCategories = getRelatedViewModel().getAllProfessionalCategys();
+                List<ProfessionalCategory> professionalCategories = getRelatedViewModel().getAllProfessionalCategies();
                 List<SimpleValue> menteeLabors = getRelatedViewModel().getMenteeLabors();
                 getRelatedViewModel().getPartnersList(); // carrega lista de parceiros no VM
 
@@ -106,6 +106,34 @@ public class CreateTutoredActivity extends BaseActivity implements IDialogListen
                     ngoAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getAllPartners());
                     binding.actNgo.setAdapter(ngoAdapter);
                     binding.setNgoAdapter(ngoAdapter);
+
+                    if (getRelatedViewModel().hasPendingTutored()) {
+                        getRelatedViewModel().applyPendingTutored();
+                    }
+
+                    ProfessionalCategory selectedCategory =
+                            (ProfessionalCategory) getRelatedViewModel().getProfessionalCategory();
+
+                    if (selectedCategory != null
+                            && professionalCategoryAdapter != null
+                            && professionalCategoryAdapter.getCount() > 0) {
+
+                        for (int i = 0; i < professionalCategoryAdapter.getCount(); i++) {
+                            ProfessionalCategory item =
+                                    (ProfessionalCategory) professionalCategoryAdapter.getItem(i);
+
+                            if (item != null && item.getId() != null
+                                    && item.getId().equals(selectedCategory.getId())) {
+
+                                // Define o texto correspondente no campo de seleção
+                                binding.actProfessionalCategory.setText(item.toString(), false);
+
+                                // Atualiza a referência no ViewModel
+                                getRelatedViewModel().setProfessionalCategory(item);
+                                break;
+                            }
+                        }
+                    }
                 });
 
             } catch (SQLException e) {

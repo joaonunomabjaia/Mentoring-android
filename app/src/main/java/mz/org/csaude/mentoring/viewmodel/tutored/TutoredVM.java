@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
@@ -64,6 +63,8 @@ public class TutoredVM extends SearchVM<Tutored>
     private List<District> districts;
     private List<HealthFacility> healthFacilities;
 
+    private List<ProfessionalCategory> professionalCategories;
+
     private List<SimpleValue> menteeLabors;
     private SimpleValue selectedMenteeLabor;
     private boolean ONGEmployee;
@@ -94,6 +95,7 @@ public class TutoredVM extends SearchVM<Tutored>
         this.districts = new ArrayList<>();
         this.healthFacilities = new ArrayList<>();
         this.menteeLabors = new ArrayList<>();
+        this.professionalCategories = new ArrayList<>();
         this.location = new Location();
 
         loadMeteeLabors();
@@ -217,7 +219,7 @@ public class TutoredVM extends SearchVM<Tutored>
         this.tutored.getEmployee().setNuit(Long.parseLong(nuit));
     }
 
-    public List<ProfessionalCategory> getAllProfessionalCategys() throws SQLException{
+    public List<ProfessionalCategory> getAllProfessionalCategies() throws SQLException{
         return getApplication().getProfessionalCategoryService().getAll();
     }
 
@@ -302,6 +304,8 @@ public class TutoredVM extends SearchVM<Tutored>
     }
 
     private void doSave(){
+        Log.d("TutoredVM", "isEditMode=" + getCurrentStep().isApplicationStepEdit());
+
         runOnMainThread(() -> setSaveUiState(SaveUiState.RUNNING, getRelatedActivity().getString(R.string.saving_tutored)));
 
         getExecutorService().execute(() -> {
@@ -317,7 +321,13 @@ public class TutoredVM extends SearchVM<Tutored>
                     tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
                     tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
                 } else {
-                    tutored.getEmployee().setLocations(new ArrayList<>());
+//                    tutored.getEmployee().setLocations(new ArrayList<>());
+                    if (Utilities.listHasElements(tutored.getEmployee().getLocations())) {
+                        tutored.getEmployee().getLocations().set(0, location);
+                    } else {
+                        tutored.getEmployee().addLocation(location);
+                    }
+
                 }
 
                 location.setProvince((Province) getProvince());
@@ -395,31 +405,106 @@ public class TutoredVM extends SearchVM<Tutored>
     @Bindable public Tutored getTutored() { return this.tutored; }
 
     public void setTutored(Tutored tutored) {
-        getExecutorService().execute(()->{
+        getExecutorService().execute(() -> {
             this.tutored = tutored;
-            try {
-                this.tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
-            } catch (SQLException e) { throw new RuntimeException(e); }
 
-            runOnMainThread(()->{
-                if (this.tutored.getEmployee() != null && Utilities.listHasElements(this.tutored.getEmployee().getLocations())) {
+            try {
+                // Carrega o Employee completo
+                Employee employee = getApplication().getEmployeeService().getById(tutored.getEmployeeId());
+
+                if (employee != null) {
+                    this.tutored.setEmployee(employee);
+
+                    // Garante que a categoria profissional é carregada
+                    if (employee.getProfessionalCategory() == null && employee.getProfessionalCategoryId() != null) {
+                        ProfessionalCategory category = getApplication()
+                                .getProfessionalCategoryService()
+                                .getById(employee.getProfessionalCategoryId());
+                        employee.setProfessionalCategory(category);
+                    }
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Erro ao carregar o funcionário do Tutored", e);
+            }
+
+            runOnMainThread(() -> {
+                if (this.tutored.getEmployee() != null &&
+                        Utilities.listHasElements(this.tutored.getEmployee().getLocations())) {
                     this.location = this.tutored.getEmployee().getLocations().get(0);
                 }
 
-                if (!this.tutored.getEmployee().getPartner().isMISAU()) {
-                    setONGEmployee(true);
-                    Optional<SimpleValue> snsLabor = this.menteeLabors.stream()
-                            .filter(labor -> "ONG".equals(labor.getDescription()))
-                            .findFirst();
-                    snsLabor.ifPresent(this::setMenteeLabor);
-                } else {
-                    setONGEmployee(false);
-                    Optional<SimpleValue> snsLabor = this.menteeLabors.stream()
-                            .filter(labor -> "SNS".equals(labor.getDescription()))
-                            .findFirst();
-                    snsLabor.ifPresent(this::setMenteeLabor);
+                // === AUTO-SELEÇÃO DE LOCALIZAÇÃO AO EDITAR ===
+                if (location != null) {
+                    getExecutorService().execute(() -> {
+                        try {
+                            // Buscar instâncias completas
+                            if (location.getProvince() == null && location.getProvinceId() != null) {
+                                Province province = getApplication().getProvinceService().getById(location.getProvinceId());
+                                location.setProvince(province);
+                            }
+
+                            if (location.getDistrict() == null && location.getDistrictId() != null) {
+                                District district = getApplication().getDistrictService().getById(location.getDistrictId());
+                                location.setDistrict(district);
+                            }
+
+                            if (location.getHealthFacility() == null && location.getHealthFacilityId() != null) {
+                                HealthFacility hf = getApplication().getHealthFacilityService().getById(location.getHealthFacilityId());
+                                location.setHealthFacility(hf);
+                            }
+
+                            runOnMainThread(() -> {
+                                // Recarrega os spinners dependentes
+                                if (location.getProvince() != null) {
+                                    getCreateTutoredActivity().reloadDistrcitAdapter();
+                                }
+                                if (location.getDistrict() != null) {
+                                    getCreateTutoredActivity().reloadHealthFacility();
+                                }
+
+                                // Atualiza bindings do formulário
+                                notifyPropertyChanged(BR.province);
+                                notifyPropertyChanged(BR.district);
+                                notifyPropertyChanged(BR.healthFacility);
+                            });
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
 
+                // Define tipo de funcionário (ONG ou SNS)
+                if (this.tutored.getEmployee() != null &&
+                        this.tutored.getEmployee().getPartner() != null) {
+
+                    if (!this.tutored.getEmployee().getPartner().isMISAU()) {
+                        setONGEmployee(true);
+                        menteeLabors.stream()
+                                .filter(labor -> "ONG".equalsIgnoreCase(labor.getDescription()))
+                                .findFirst()
+                                .ifPresent(this::setMenteeLabor);
+                    } else {
+                        setONGEmployee(false);
+                        menteeLabors.stream()
+                                .filter(labor -> "SNS".equalsIgnoreCase(labor.getDescription()))
+                                .findFirst()
+                                .ifPresent(this::setMenteeLabor);
+                    }
+                }
+
+                // Recarrega dependências de localização
+                if (location != null) {
+                    if (location.getProvince() != null) {
+                        getCreateTutoredActivity().reloadDistrcitAdapter();
+                    }
+                    if (location.getDistrict() != null) {
+                        getCreateTutoredActivity().reloadHealthFacility();
+                    }
+                }
+
+                // Atualiza bindings
                 notifyPropertyChanged(BR.name);
                 notifyPropertyChanged(BR.surname);
                 notifyPropertyChanged(BR.nuit);
@@ -431,6 +516,19 @@ public class TutoredVM extends SearchVM<Tutored>
             });
         });
     }
+
+
+    private Tutored pendingTutored;
+
+    public void setPendingTutored(Tutored t) { this.pendingTutored = t; }
+    public boolean hasPendingTutored() { return this.pendingTutored != null; }
+    public void applyPendingTutored() {
+        if (pendingTutored != null) {
+            setTutored(pendingTutored);
+            pendingTutored = null;
+        }
+    }
+
 
     public Location getLocation() { return location; }
     public void setLocation(Location location) { this.location = location; }
@@ -515,7 +613,12 @@ public class TutoredVM extends SearchVM<Tutored>
     public CreateTutoredActivity getCreateTutoredActivity() { return (CreateTutoredActivity) super.getRelatedActivity(); }
     @Override public BaseActivity getRelatedActivity() { return super.getRelatedActivity(); }
 
-    public void createNewTutored() { getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class); }
+//    public void createNewTutored() { getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class); }
+
+    public void createNewTutored() {
+        getCurrentStep().changetocreate(); // <-- ADICIONA ESTA LINHA
+        getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class);
+    }
 
     public List getAllPartners() { return this.partners; }
     public void getPartnersList() {
