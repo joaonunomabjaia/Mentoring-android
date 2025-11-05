@@ -57,4 +57,9 @@ public class Province extends BaseModel implements Listble {
     public void setDesignation(String designation) {
         this.designation = designation;
     }
+
+    @Override
+    public String toString() {
+        return this.getDesignation();
+    }
 }
