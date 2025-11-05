@@ -29,7 +29,9 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistory;
 import mz.org.csaude.mentoring.model.tutored.EnumFlowHistoryProgressStatus;
+import mz.org.csaude.mentoring.model.tutored.FlowHistory;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
@@ -76,7 +78,12 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
                 r.setRondaMentees(rondaMenteeDAO.getAllOfRonda(ronda.getId()));
                 for (RondaMentee rondaMentee: r.getRondaMentees()) {
                     Tutored t = this.tutoredDao.queryForId(rondaMentee.getMenteeId());
-                    t.getFlowHistory().setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                    for (FlowHistory flowHistory: t.getFlowHistory()) {
+                        if (flowHistory.getEstagio().code().equals(EnumFlowHistory.RONDA_CICLO.code())) {
+                            flowHistory.setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                        }
+                    }
+
                     tutoredDao.update(t);
                 }
             } else {
@@ -249,7 +256,11 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
             this.rondaMentorDAO.deleteByRonda(record.getId());
             for (RondaMentee rm : record.getRondaMentees()) {
                 rm.setTutored(tutoredDao.queryForId(rm.getMenteeId()));
-                rm.getTutored().getFlowHistory().setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                for (FlowHistory flowHistory: rm.getTutored().getFlowHistory()) {
+                    if (flowHistory.getEstagio().code().equals(EnumFlowHistory.RONDA_CICLO.code())) {
+                        flowHistory.setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                    }
+                }
                 tutoredDao.update(rm.getTutored());
             }
             this.rondaMenteeDAO.deleteByRonda(record.getId());

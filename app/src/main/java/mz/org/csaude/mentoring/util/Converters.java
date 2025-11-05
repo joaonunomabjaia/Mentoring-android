@@ -4,6 +4,7 @@ import androidx.room.TypeConverter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.Date;
 import java.util.List;
@@ -17,14 +18,14 @@ public class Converters {
     // ----- NEW: List<FlowHistory> <-> String (JSON array) -----
     @TypeConverter
     public static String fromFlowHistoryList(List<FlowHistory> list) {
-        return list == null ? null : gson.toJson(list, FLOW_HISTORY_LIST_TYPE);
+        if (list == null) return null;
+        return gson.toJson(list, new TypeToken<List<FlowHistory>>(){}.getType());
     }
 
     @TypeConverter
     public static List<FlowHistory> toFlowHistoryList(String value) {
-        return (value == null || value.isEmpty())
-                ? null
-                : gson.fromJson(value, FLOW_HISTORY_LIST_TYPE);
+        if (value == null || value.isEmpty()) return null;
+        return gson.fromJson(value, new TypeToken<List<FlowHistory>>(){}.getType());
     }
 
     @TypeConverter
