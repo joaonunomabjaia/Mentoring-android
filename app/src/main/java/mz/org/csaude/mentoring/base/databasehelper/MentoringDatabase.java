@@ -104,7 +104,7 @@ import mz.org.csaude.mentoring.util.Converters;
                 ProfessionalCategory.class, Employee.class, Location.class, EvaluationType.class, ResponseType.class,
                 Resource.class, SessionRecommendedResource.class, FormSection.class, Section.class, EvaluationLocation.class
         },
-        version = 5,
+        version = 6,
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -160,6 +160,23 @@ public abstract class MentoringDatabase extends RoomDatabase {
         }
     };
 
+    // Example: MIGRATION_3_4
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            // Wrap single JSON object into an array, but don't touch if it's already an array or null/blank
+            db.execSQL(
+                    "UPDATE tutored " +
+                            "SET flow_history = CASE " +
+                            "  WHEN flow_history IS NULL OR TRIM(flow_history) = '' THEN NULL " +
+                            "  WHEN substr(TRIM(flow_history), 1, 1) = '[' THEN flow_history " +
+                            "  ELSE '[' || flow_history || ']' " +
+                            "END"
+            );
+        }
+    };
+
+
     public static MentoringDatabase getInstance(Context context, String passphrase) {
         if (INSTANCE == null) {
             synchronized (MentoringDatabase.class) {
@@ -174,6 +191,7 @@ public abstract class MentoringDatabase extends RoomDatabase {
                             )
                             .openHelperFactory(factory)
                             .addMigrations(MIGRATION_4_5)
+                            .addMigrations(MIGRATION_5_6)
                             .build();
                 }
             }

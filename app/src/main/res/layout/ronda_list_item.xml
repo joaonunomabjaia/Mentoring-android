@@ -204,7 +204,7 @@
                     android:id="@+id/ronda_period"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text='@{Utilities.concatStrings("Mentorandos: ", Utilities.parseIntToString(ronda.rondaMentees.size()), "")}'
+                    android:text='@{Utilities.concatStrings("Ment: ", Utilities.parseIntToString(ronda.rondaMentees.size()), "")}'
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:gravity="end"
                     android:textColor='?attr/colorOnSurfaceVariant'

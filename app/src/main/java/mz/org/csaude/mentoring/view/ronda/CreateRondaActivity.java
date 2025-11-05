@@ -7,27 +7,24 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -49,142 +46,240 @@ import mz.org.csaude.mentoring.model.ronda.Ronda;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.util.DateUtilities;
-import mz.org.csaude.mentoring.util.RondaTypeEnum;
 import mz.org.csaude.mentoring.util.SimpleValue;
 import mz.org.csaude.mentoring.util.SpacingItemDecoration;
 import mz.org.csaude.mentoring.util.Utilities;
 import mz.org.csaude.mentoring.viewmodel.ronda.RondaVM;
-import mz.org.csaude.mentoring.adapter.spinner.CustomSearchSpinnerView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
 public class CreateRondaActivity extends BaseActivity {
 
-    private ActivityRondaBinding rondaBinding;
-    private ListableSpinnerAdapter districtAdapter;
-    private ListableSpinnerAdapter provinceAdapter;
-    private ListableSpinnerAdapter healthFacilityAdapter;
+    private ActivityRondaBinding binding;
+
+    // Dropdown adapters (M3)
     private ListableSpinnerAdapter mentorTypeAdapter;
+    private ListableSpinnerAdapter provinceAdapter;
+    private ListableSpinnerAdapter districtAdapter;
+    private ListableSpinnerAdapter healthFacilityAdapter;
+
     private RecyclerView rcvSelectedMentees;
     private TutoredAdapter tutoredAdapter;
+
     private String title;
     private RondaType rondaTypeOption;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        rondaBinding = DataBindingUtil.setContentView(this, R.layout.activity_ronda);
-        rondaBinding.setViewModel(getRelatedViewModel());
+        // ViewBinding + VM
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_ronda);
+        binding.setViewModel(getRelatedViewModel());
+        binding.setLifecycleOwner(this);
 
-        rcvSelectedMentees = rondaBinding.rcvSelectedMentees;
-        setSupportActionBar(rondaBinding.toolbar.toolbar);
+        int primary = MaterialColors.getColor(binding.appBarLayout,
+                com.google.android.material.R.attr.colorPrimary);
+        getWindow().setStatusBarColor(primary);
 
+        // Set icon color (dark icons if background is light)
+        boolean isLight = MaterialColors.isColorLight(primary);
+        new WindowInsetsControllerCompat(getWindow(), binding.getRoot())
+                .setAppearanceLightStatusBars(isLight);
+
+        // Push AppBar below the status bar (notification area)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarLayout, (v, insets) -> {
+            Insets sb = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(v.getPaddingLeft(), sb.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+
+        // Keep your scrolling content above the gesture/navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(binding.contentContainer, (v, insets) -> {
+            Insets nb = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), nb.bottom);
+            return insets;
+        });
+
+        // Toolbar
+        setSupportActionBar(binding.toolbar.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        Intent intent = getIntent();
+        rcvSelectedMentees = binding.rcvSelectedMentees;
 
-        // Executa carregamento inicial em background
-        getRelatedViewModel().getExecutorService().execute(() -> {
-            initAdapters();
-
-            if (intent != null && intent.getExtras() != null) {
-                title = intent.getStringExtra("title");
-
-                if (getApplicationStep().isApplicationstepCreate()) {
-                    rondaTypeOption = (RondaType) intent.getSerializableExtra("rondaType");
-                    getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
-                } else {
-                    Ronda ronda = (Ronda) intent.getSerializableExtra("ronda");
-                    getRelatedViewModel().setRonda(ronda);
-                    getRelatedViewModel().initRondaEdition();
-                }
-            }
-
-            runOnUiThread(() -> {
-                getSupportActionBar().setTitle(title);
-            });
-        });
-
+        // Inicial
+        initStateFromIntent();
+        initAdapters();
+        setSectionToggleListeners();
         setupDatePicker();
     }
 
+    private void initStateFromIntent() {
+        Intent intent = getIntent();
+        if (intent == null || intent.getExtras() == null) return;
+
+        title = intent.getStringExtra("title");
+        if (getSupportActionBar() != null) getSupportActionBar().setTitle(title);
+
+        if (getApplicationStep().isApplicationstepCreate()) {
+            rondaTypeOption = (RondaType) intent.getSerializableExtra("rondaType");
+            getRelatedViewModel().getRonda().setRondaType(rondaTypeOption);
+        } else {
+            Ronda ronda = (Ronda) intent.getSerializableExtra("ronda");
+            getRelatedViewModel().setRonda(ronda);
+            getRelatedViewModel().initRondaEdition();
+        }
+    }
+
+    private void initAdapters() {
+        // Mentor type (static)
+        List<SimpleValue> mentorTypes = new ArrayList<>();
+        mentorTypes.add(new SimpleValue(1, getString(R.string.interno)));
+        mentorTypes.add(new SimpleValue(2, getString(R.string.externo)));
+        mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
+        binding.setMentorTypeAdapter(mentorTypeAdapter);
+        binding.actMentorType.setAdapter(mentorTypeAdapter);
+
+        // Province/District/US (carrega em background como no Tutored)
+        getRelatedViewModel().getExecutorService().execute(() -> {
+            try {
+                List<Province> provinces = getRelatedViewModel().getAllProvince();
+                runOnUiThread(() -> {
+                    provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
+                    binding.setProvinceAdapter(provinceAdapter);
+                    binding.actProvince.setAdapter(provinceAdapter);
+                });
+            } catch (SQLException e) {
+                runOnUiThread(() -> Utilities.displayAlertDialog(this, getString(R.string.error_loading)));
+            }
+        });
+    }
+
+    /** Chamado pelo VM quando a província muda */
+    public void reloadDistrictAdapter() {
+        districtAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
+        binding.setDistrictAdapter(districtAdapter);
+        binding.actDistrict.setAdapter(districtAdapter);
+    }
+
+    /** Chamado pelo VM quando o distrito muda */
+    public void reloadHealthFacility() {
+        healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
+        binding.setHealthFacilityAdapter(healthFacilityAdapter);
+        binding.actHealthfacility.setAdapter(healthFacilityAdapter);
+    }
+
+    // CreateRondaActivity.java
+    public void changeFormSectionVisibility(View view) {
+        int id = view.getId();
+
+        if (id == R.id.initial_data || id == R.id.btn_show_collapse) {
+            toggleSection(binding.initialDataLyt, binding.btnShowCollapse);
+            return;
+        }
+
+        if (id == R.id.healt_unit || id == R.id.btn_healt_unit) {
+            toggleSection(binding.healtUnitLyt, binding.btnHealtUnit);
+            return;
+        }
+
+        if (id == R.id.mentees_lyt || id == R.id.btn_mentees) {
+            toggleSection(binding.menteeDataLyt, binding.btnMentees);
+        }
+    }
+
+    private void toggleSection(View body, View iconView) {
+        boolean expanding = body.getVisibility() != View.VISIBLE;
+
+        if (expanding) {
+            Utilities.expand(body);
+        } else {
+            Utilities.collapse(body);
+        }
+
+        // Rotação suave do ícone (0° fechado, 180° aberto)
+        if (iconView != null) {
+            iconView.animate()
+                    .rotation(expanding ? 180f : 0f)
+                    .setDuration(180L)
+                    .start();
+        }
+    }
+
+
+    private void setSectionToggleListeners() {
+        binding.initialData.setOnClickListener(getRelatedViewModel()::changeInitialDataViewStatus);
+        binding.btnShowCollapse.setOnClickListener(getRelatedViewModel()::changeInitialDataViewStatus);
+
+        binding.healtUnit.setOnClickListener(getRelatedViewModel()::changeInitialDataViewStatus);
+        binding.btnHealtUnit.setOnClickListener(getRelatedViewModel()::changeInitialDataViewStatus);
+
+        binding.menteesLyt.setOnClickListener(getRelatedViewModel()::openCollapse);
+        binding.btnMentees.setOnClickListener(getRelatedViewModel()::openCollapse);
+
+        // Botão selecionar mentees
+        binding.btnPickMentees.setOnClickListener(v -> openSearchMenteesDialog());
+    }
+
     private void setupDatePicker() {
-        rondaBinding.rondaStartDate.setOnClickListener(view -> {
-            final Calendar c = Calendar.getInstance();
-            int mYear = c.get(Calendar.YEAR);
-            int mMonth = c.get(Calendar.MONTH);
-            int mDay = c.get(Calendar.DAY_OF_MONTH);
+        binding.rondaStartDate.setOnClickListener(v -> {
+            // (Opcional) Restringir datas futuras
+            CalendarConstraints constraints = new CalendarConstraints.Builder()
+                    .setEnd(MaterialDatePicker.todayInUtcMilliseconds())
+                    .build();
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(CreateRondaActivity.this, R.style.CustomDatePickerDialogTheme,
-                    (view1, year, monthOfYear, dayOfMonth) ->
-                            getRelatedViewModel().setStartDate(DateUtilities.createDate(
-                                    dayOfMonth + "-" + (monthOfYear + 1) + "-" + year,
-                                    DateUtilities.DATE_FORMAT)),
-                    mYear, mMonth, mDay);
-            datePickerDialog.show();
-            Button positiveButton = datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            Button negativeButton = datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+            MaterialDatePicker<Long> picker = MaterialDatePicker.Builder
+                    .datePicker()
+                    .setTitleText(R.string.select_date) // "Selecionar data"
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .setCalendarConstraints(constraints)
+                    .setTheme(R.style.ThemeOverlay_App_DatePicker) // se quiser um overlay
+                    .build();
 
-            if (positiveButton != null) positiveButton.setTextColor(Color.BLACK);
-            if (negativeButton != null) negativeButton.setTextColor(Color.BLACK);
+            picker.addOnPositiveButtonClickListener(utcMillis -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(utcMillis);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                getRelatedViewModel().setStartDate(cal.getTime());
+            });
+
+            picker.show(getSupportFragmentManager(), "ronda_start_date");
         });
     }
 
     public void openSearchMenteesDialog() {
-        setupSelectMenteesDialog();
-    }
+        DialogSelectMenteesBinding dlgBinding = DialogSelectMenteesBinding.inflate(getLayoutInflater());
+        dlgBinding.setViewModel(getRelatedViewModel());
 
-    private void setupSelectMenteesDialog() {
-        // Infla o layout do diálogo com DataBinding
-        DialogSelectMenteesBinding binding =
-                DialogSelectMenteesBinding.inflate(getLayoutInflater());
-        binding.setViewModel(getRelatedViewModel());
-
-        // Cria um Dialog “puro” usando o overlay do Material3 para herdar tipografia/cores
         final Dialog dialog = new Dialog(this, R.style.CustomAlertDialog);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(binding.getRoot());
+        dialog.setContentView(dlgBinding.getRoot());
         dialog.setCancelable(true);
 
-        // Ajustes visuais opcionais (fundo arredondado/transparente + largura)
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        // Referências de views
-        EditText searchInput = binding.searchInput;
-        RecyclerView recyclerMentees = binding.recyclerMentees;
-        Button btnCancel = binding.btnCancel;
-        Button btnAdd = binding.btnAdd;
+        RecyclerView recycler = dlgBinding.recyclerMentees;
+        TutoredSelectionAdapter adapter = new TutoredSelectionAdapter(recycler, getRelatedViewModel().getrondaMenteeList(), this, getRelatedViewModel());
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setAdapter(adapter);
+        recycler.setHasFixedSize(true);
 
-        // Lista de mentees e adapter com filtro
-        List<Tutored> mentees = getRelatedViewModel().getrondaMenteeList();
-        TutoredSelectionAdapter adapter =
-                new TutoredSelectionAdapter(recyclerMentees, mentees, this, getRelatedViewModel());
+        // Busca
+        dlgBinding.searchInput.addTextChangedListener(Utilities.simpleFilterTextWatcher(adapter::filter));
 
-        recyclerMentees.setLayoutManager(new LinearLayoutManager(this));
-        recyclerMentees.setAdapter(adapter);
-        recyclerMentees.setHasFixedSize(true);
-
-        // Filtro em tempo real
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s.toString());
-            }
-            @Override public void afterTextChanged(Editable s) { }
-        });
-
-        // Botão "Terminar" (confirma seleção)
-        btnAdd.setOnClickListener(v -> {
+        // Confirmar
+        dlgBinding.btnAdd.setOnClickListener(v -> {
             displaySelectedMentees();
             if (Utilities.listHasElements(getRelatedViewModel().getSelectedMentees())) {
                 for (Tutored t : getRelatedViewModel().getSelectedMentees()) {
@@ -194,8 +289,8 @@ public class CreateRondaActivity extends BaseActivity {
             dialog.dismiss();
         });
 
-        // Botão "Cancelar" (descarta os marcados no diálogo)
-        btnCancel.setOnClickListener(v -> {
+        // Cancelar -> limpa os marcados no diálogo
+        dlgBinding.btnCancel.setOnClickListener(v -> {
             List<Tutored> toRemove = new ArrayList<>();
             if (Utilities.listHasElements(getRelatedViewModel().getSelectedMentees())) {
                 for (Tutored t : getRelatedViewModel().getSelectedMentees()) {
@@ -205,7 +300,7 @@ public class CreateRondaActivity extends BaseActivity {
                     }
                 }
                 getRelatedViewModel().removeAll(toRemove);
-                displaySelectedMentees(); // atualiza lista principal
+                displaySelectedMentees();
             }
             dialog.dismiss();
         });
@@ -213,71 +308,22 @@ public class CreateRondaActivity extends BaseActivity {
         dialog.show();
     }
 
-
-
-    private void initAdapters() {
-        runOnUiThread(this::setupMentorTypeAdapter);
-        try {
-            List<Province> provinces = getRelatedViewModel().getAllProvince();
-            runOnUiThread(() -> {
-                provinceAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, provinces);
-                rondaBinding.spnProvince.setAdapter(provinceAdapter);
-                rondaBinding.setProvinceAdapter(provinceAdapter);
-            });
-        } catch (SQLException e) {
-            runOnUiThread(() -> handleSQLException(e));
-        }
-    }
-
-    private void setupMentorTypeAdapter() {
-        List<SimpleValue> mentorTypes = getMentorTypes();
-        mentorTypeAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, mentorTypes);
-        rondaBinding.spnMentorType.setAdapter(mentorTypeAdapter);
-    }
-
-    private List<SimpleValue> getMentorTypes() {
-        List<SimpleValue> mentorTypes = new ArrayList<>();
-        mentorTypes.add(new SimpleValue(1, getString(R.string.interno)));
-        mentorTypes.add(new SimpleValue(2, getString(R.string.externo)));
-        return mentorTypes;
-    }
-
-    private void handleSQLException(SQLException e) {
-        Log.e("Database Error", "Error while initializing adapters: ", e);
-    }
-
-    public void reloadDistrictAdapter() {
-        runOnUiThread(() -> {
-            districtAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getDistricts());
-            rondaBinding.spnDistrict.setAdapter(districtAdapter);
-            rondaBinding.setDistrictAdapter(districtAdapter);
-        });
-    }
-
-    public void reloadHealthFacility() {
-        runOnUiThread(() -> {
-            healthFacilityAdapter = new ListableSpinnerAdapter(this, R.layout.simple_auto_complete_item, getRelatedViewModel().getHealthFacilities());
-            rondaBinding.spnHealthFacility.setAdapter(healthFacilityAdapter);
-            rondaBinding.setHealthFacilityAdapter(healthFacilityAdapter);
-        });
-    }
-
     public void displaySelectedMentees() {
         if (tutoredAdapter != null) {
             tutoredAdapter.notifyDataSetChanged();
-        } else {
-            rcvSelectedMentees.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-            rcvSelectedMentees.setItemAnimator(new DefaultItemAnimator());
-
-            int spacingInPixels = getApplicationContext().getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
-            rcvSelectedMentees.addItemDecoration(new SpacingItemDecoration(spacingInPixels));
-            rcvSelectedMentees.setHasFixedSize(true);
-
-            tutoredAdapter = new TutoredAdapter(rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this, null);
-            rcvSelectedMentees.setAdapter(tutoredAdapter);
+            return;
         }
+        binding.rcvSelectedMentees.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        binding.rcvSelectedMentees.setItemAnimator(new DefaultItemAnimator());
+        int spacing = getResources().getDimensionPixelSize(R.dimen.recycler_item_spacing);
+        binding.rcvSelectedMentees.addItemDecoration(new SpacingItemDecoration(spacing));
+        binding.rcvSelectedMentees.setHasFixedSize(true);
+
+        tutoredAdapter = new TutoredAdapter(binding.rcvSelectedMentees, getRelatedViewModel().getSelectedMentees(), this, null);
+        binding.rcvSelectedMentees.setAdapter(tutoredAdapter);
     }
 
+    // ======== Boilerplate ========
     @Override
     public BaseViewModel initViewModel() {
         return new ViewModelProvider(this).get(RondaVM.class);
@@ -299,18 +345,4 @@ public class CreateRondaActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    public void changeFormSectionVisibility(View view) {
-        if (view.equals(rondaBinding.initialData)) {
-            if (rondaBinding.initialDataLyt.getVisibility() == View.VISIBLE) {
-                rondaBinding.btnShowCollapse.setImageResource(R.drawable.sharp_arrow_drop_up_24);
-                Utilities.collapse(rondaBinding.initialDataLyt);
-            } else {
-                Utilities.expand(rondaBinding.initialDataLyt);
-                rondaBinding.btnShowCollapse.setImageResource(R.drawable.baseline_arrow_drop_down_24);
-            }
-        }
-    }
-
-
 }

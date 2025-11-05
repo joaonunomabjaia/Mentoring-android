@@ -211,7 +211,7 @@
     <string name="current_password">Senha Atual</string>
     <string name="new_password">Nova Senha</string>
     <string name="confirm_password">Confirmar Nova Senha</string>
-    <string name="rounds">Rondas/Ciclos de Mentoria</string>
+    <string name="rounds">Rondas/Ciclos</string>
     <string name="zero_sessions">Sessões Zero</string>
     <string name="mentees">Mentorandos</string>
     <string name="ea_resources">Recursos de EA</string>
@@ -329,4 +329,10 @@
     <string name="terminado">Terminado</string>
     <string name="em_curso">Em curso</string>
     <string name="sem_rondas">Nenhum cliclo/ronda para visualizar</string>
+
+    <string name="select_mentees">Selecionar mentorandos</string>
+    <string name="error_loading">Ocorreu um erro durante o carregamento de dados.</string>
+    <string name="select_date">Selecionar data</string>
+    <string name="download">Baixar</string>
+    <string name="sem_registos">Nenhum recurso disponível para visualizar.</string>
 </resources>

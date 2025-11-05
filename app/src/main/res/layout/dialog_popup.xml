@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/popup_background">
 
-    <TextView
+    <!-- Título -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/alertTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,56 +18,64 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
+    <!-- Mensagem -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/alertMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/alertTitle"
         android:layout_marginTop="@dimen/margin_medium"
         android:layout_marginHorizontal="@dimen/margin_medium"
-        android:textColor="?attr/textColorPrimary"
+        android:textColor="?attr/colorOnSurface"
         android:text="@string/confirm_message"
         android:textSize="16sp" />
 
-    <EditText
-        android:id="@+id/endTime"
+    <!-- Hora de fim (Material TextInput) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/endTimeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/alertMessage"
         android:layout_marginTop="@dimen/margin_small"
-        android:hint="@string/end_time_hint"
-        android:focusableInTouchMode="false"
-        android:drawableLeft="@drawable/ic_time"
         android:layout_marginHorizontal="@dimen/margin_medium"
-        style="@style/bottom_border_edit_text_style"
-        android:inputType="time" />
+        android:hint="@string/end_time_hint"
+        app:boxBackgroundMode="filled"
+        app:startIconDrawable="@drawable/ic_time">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/endTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="time"
+            android:focusableInTouchMode="false"
+            android:textColor="?attr/colorOnSurface" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Botões -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/endTime"
+        android:layout_below="@id/endTimeLayout"
         android:layout_marginVertical="@dimen/margin_medium"
-        android:orientation="horizontal"
         android:layout_marginHorizontal="@dimen/margin_medium"
+        android:orientation="horizontal"
         android:gravity="center_horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/cancelButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/cancel"
-            android:backgroundTint="@android:color/holo_red_light"
-            android:textColor="@android:color/white" />
+            style="?attr/materialButtonOutlinedStyle"
+            android:text="@string/cancel" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/confirmButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/Mentor.M3.Button"
             android:text="@string/confirm"
-            android:backgroundTint="@android:color/holo_blue_light"
-            android:textColor="@android:color/white"
             android:layout_marginStart="@dimen/margin_small" />
     </LinearLayout>
 
