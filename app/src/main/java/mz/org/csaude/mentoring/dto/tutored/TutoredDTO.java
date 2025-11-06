@@ -25,15 +25,7 @@ public class TutoredDTO extends BaseEntityDTO {
      * NEW: preferred list field for flow history (array in JSON)
      */
     @SerializedName("flowHistoryMenteeAuxDTO")
-    private List<FlowHistory> flowHistoryMenteeAuxDTOList;
-
-    /**
-     * Legacy single object field (kept for backward compatibility with older payloads).
-     * If present, we will wrap it into a one-element list.
-     */
-    @SerializedName("flowHistoryMenteeAuxDTO")
-    @Deprecated
-    private FlowHistory flowHistoryMenteeAuxDTO;
+    private List<FlowHistory> flowHistoryMenteeAuxDTO;
 
     public TutoredDTO() {
     }
@@ -46,9 +38,9 @@ public class TutoredDTO extends BaseEntityDTO {
 
         // Map entity -> DTO list (preferred)
         if (tutored.getFlowHistory() != null && !tutored.getFlowHistory().isEmpty()) {
-            this.flowHistoryMenteeAuxDTOList = new ArrayList<>(tutored.getFlowHistory());
+            this.flowHistoryMenteeAuxDTO = new ArrayList<>(tutored.getFlowHistory());
         } else {
-            this.flowHistoryMenteeAuxDTOList = null;
+            this.flowHistoryMenteeAuxDTO = null;
         }
 
         // No need to populate the legacy single field on output, but you may set it if required:
@@ -81,22 +73,11 @@ public class TutoredDTO extends BaseEntityDTO {
     }
 
     // -------- NEW / PREFERRED LIST ACCESSORS --------
-    public List<FlowHistory> getFlowHistoryMenteeAuxDTOList() {
-        return flowHistoryMenteeAuxDTOList;
-    }
-
-    public void setFlowHistoryMenteeAuxDTOList(List<FlowHistory> flowHistoryMenteeAuxDTOList) {
-        this.flowHistoryMenteeAuxDTOList = flowHistoryMenteeAuxDTOList;
-    }
-
-    // -------- LEGACY SINGLE FIELD (DEPRECATED) --------
-    @Deprecated
-    public FlowHistory getFlowHistoryMenteeAuxDTO() {
+    public List<FlowHistory> getFlowHistoryMenteeAuxDTO() {
         return flowHistoryMenteeAuxDTO;
     }
 
-    @Deprecated
-    public void setFlowHistoryMenteeAuxDTO(FlowHistory flowHistoryMenteeAuxDTO) {
+    public void setFlowHistoryMenteeAuxDTO(List<FlowHistory> flowHistoryMenteeAuxDTO) {
         this.flowHistoryMenteeAuxDTO = flowHistoryMenteeAuxDTO;
     }
 
@@ -119,13 +100,7 @@ public class TutoredDTO extends BaseEntityDTO {
         }
 
         // Preferred: list
-        List<FlowHistory> list = this.flowHistoryMenteeAuxDTOList;
-
-        // Backward compat: if list is null/empty but legacy single exists, wrap it
-        if ((list == null || list.isEmpty()) && this.flowHistoryMenteeAuxDTO != null) {
-            list = new ArrayList<>();
-            list.add(this.flowHistoryMenteeAuxDTO);
-        }
+        List<FlowHistory> list = this.flowHistoryMenteeAuxDTO;
 
         tutored.setFlowHistory(list);
         return tutored;
