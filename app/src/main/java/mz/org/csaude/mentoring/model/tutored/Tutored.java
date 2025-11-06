@@ -71,25 +71,17 @@ public class Tutored extends BaseModel {
 
         // Map DTO → List<FlowHistory>
         // Prefer a list on the DTO; if only a single aux exists, wrap it.
-        if (tutoredDTO.getFlowHistoryMenteeAuxDTOList() != null &&
-                !tutoredDTO.getFlowHistoryMenteeAuxDTOList().isEmpty()) {
+        if (tutoredDTO.getFlowHistoryMenteeAuxDTO() != null &&
+                !tutoredDTO.getFlowHistoryMenteeAuxDTO().isEmpty()) {
 
             this.flowHistory = new ArrayList<>();
-            for (var fh : tutoredDTO.getFlowHistoryMenteeAuxDTOList()) {
+            for (var fh : tutoredDTO.getFlowHistoryMenteeAuxDTO()) {
                 this.flowHistory.add(new FlowHistory(
                         fh.getEstagio(),
                         fh.getEstado(),
                         fh.getClassificacao()
                 ));
             }
-        } else if (tutoredDTO.getFlowHistoryMenteeAuxDTO() != null) {
-            var fh = tutoredDTO.getFlowHistoryMenteeAuxDTO();
-            this.flowHistory = new ArrayList<>();
-            this.flowHistory.add(new FlowHistory(
-                    fh.getEstagio(),
-                    fh.getEstado(),
-                    fh.getClassificacao()
-            ));
         } else {
             this.flowHistory = null;
         }
