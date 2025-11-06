@@ -7,6 +7,8 @@ import mz.org.csaude.mentoring.base.service.BaseService;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistory;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistoryProgressStatus;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 
 public interface TutoredService extends BaseService<Tutored> {
@@ -29,4 +31,5 @@ public interface TutoredService extends BaseService<Tutored> {
 
     List<Tutored> getAllPagenated(List<Location> locations, long offset, long limit);
 
+    List<Tutored> getByFlowHistory(EnumFlowHistory enumFlowHistory, EnumFlowHistoryProgressStatus enumFlowHistoryProgressStatus, HealthFacility healthFacility);
 }

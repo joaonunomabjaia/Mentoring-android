@@ -15,6 +15,8 @@ import mz.org.csaude.mentoring.dao.tutored.TutoredDao;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
 import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.ronda.Ronda;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistory;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistoryProgressStatus;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.service.employee.EmployeeService;
 import mz.org.csaude.mentoring.service.employee.EmployeeServiceImpl;
@@ -170,4 +172,22 @@ public class TutoredServiceImpl extends BaseServiceImpl<Tutored> implements Tuto
         return tutoreds;
     }
 
+    @Override
+    public List<Tutored> getByFlowHistory(EnumFlowHistory flow,
+                                          EnumFlowHistoryProgressStatus status,
+                                          HealthFacility hf) {
+        final String flowCode   = (flow   == null) ? null : flow.code();
+        final String statusCode = (status == null) ? null : status.code();
+        final Integer hfId      = (hf     == null) ? null : hf.getId();
+
+        List<Tutored> tutoreds = tutoredDao.findByFlowHistory(flowCode, statusCode, hfId);
+        for (Tutored tutored : tutoreds) {
+            try {
+                tutored.setEmployee(getApplication().getEmployeeService().getById(tutored.getEmployeeId()));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return tutoreds;
+    }
 }

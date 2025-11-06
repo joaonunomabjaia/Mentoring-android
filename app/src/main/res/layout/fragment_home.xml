@@ -77,20 +77,6 @@
                     android:paddingBottom="12dp"
                     android:onClick="@{()-> viewModel.goToMentoringRounds()}" />
 
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_zero_sessions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Mentor.M3.Button"
-                    android:text="@string/zero_sessions"
-                    app:icon="@drawable/ic_monitor_heart"
-                    app:iconPadding="8dp"
-                    app:iconGravity="textStart"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:onClick="@{()-> viewModel.goToBaseSessions()}" />
-
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_mentees"
                     android:layout_width="match_parent"
@@ -102,6 +88,7 @@
                     app:iconGravity="textStart"
                     android:paddingTop="12dp"
                     android:paddingBottom="12dp"
+                    android:layout_marginVertical="@dimen/dimen_10dp"
                     android:onClick="@{()-> viewModel.goToMentees()}" />
 
                 <com.google.android.material.button.MaterialButton

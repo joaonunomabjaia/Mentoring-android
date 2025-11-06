@@ -20,6 +20,7 @@ import mz.org.csaude.mentoring.adapter.recyclerview.listable.Listble;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.dto.ronda.RondaDTO;
 import mz.org.csaude.mentoring.model.location.HealthFacility;
+import mz.org.csaude.mentoring.model.rondatype.EnumRondaType;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.session.Session;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
@@ -221,8 +222,19 @@ public class Ronda extends BaseModel implements Listble {
 
     @JsonIgnore
     public boolean isRondaZero() {
-        return this.rondaType.getCode().equals("SESSAO_ZERO");
+        return rondaType != null && rondaType.enumType() == EnumRondaType.SESSAO_ZERO;
     }
+
+    @JsonIgnore
+    public boolean isRondaMentoria() {
+        return rondaType != null && rondaType.enumType() == EnumRondaType.RONDA_MENTORIA;
+    }
+
+    @JsonIgnore
+    public boolean isRondaSemestral() {
+        return rondaType != null && rondaType.enumType() == EnumRondaType.RONDA_SEMESTRAL;
+    }
+
 
     public void addSession(Session session) {
         if (this.sessions == null) this.sessions = new ArrayList<>();

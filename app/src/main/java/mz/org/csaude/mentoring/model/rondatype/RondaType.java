@@ -49,4 +49,21 @@ public class RondaType extends BaseModel {
     public void setCode(String code) {
         this.code = code;
     }
+
+    public EnumRondaType enumType() {
+        return EnumRondaType.fromCode(this.code);
+    }
+
+    /** Convenience factories if you ever need to create from enum. */
+    public static RondaType of(EnumRondaType e) {
+        RondaType rt = new RondaType();
+        rt.setCode(e.code());
+        rt.setDescription(e.defaultTitle());
+        return rt;
+    }
+
+    public boolean isSessaoZero()     { return enumType() == EnumRondaType.SESSAO_ZERO; }
+    public boolean isRondaMentoria()  { return enumType() == EnumRondaType.RONDA_MENTORIA; }
+    public boolean isRondaSemestral() { return enumType() == EnumRondaType.RONDA_SEMESTRAL; }
+
 }

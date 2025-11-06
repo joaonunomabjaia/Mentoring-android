@@ -18,33 +18,32 @@ import java.util.List;
 import mz.org.csaude.mentoring.BR;
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.searchparams.AbstractSearchParams;
-import mz.org.csaude.mentoring.base.viewModel.BaseViewModel;
 import mz.org.csaude.mentoring.base.viewModel.SearchVM;
 import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.listner.rest.ServerStatusListener;
 import mz.org.csaude.mentoring.model.resourceea.Node;
 import mz.org.csaude.mentoring.model.resourceea.Resource;
-import mz.org.csaude.mentoring.service.resource.ResourceService;
 import mz.org.csaude.mentoring.util.Utilities;
 
-
-public class ResourceVM extends SearchVM<Resource> implements ServerStatusListener, RestResponseListener<Resource>{
+public class ResourceVM extends SearchVM<Resource>
+        implements ServerStatusListener, RestResponseListener<Resource> {
 
     private String searchText;
     private List<Node> nodeList;
 
     private boolean hivChecked;
+    private boolean tbChecked;
 
     private Node selectedNode;
-    private boolean tbChecked;
 
     public ResourceVM(@NonNull Application application) {
         super(application);
     }
 
+    // === UX: M3 empty-state handles "no records", so don't show dialog ===
     @Override
     protected void doOnNoRecordFound() {
-        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.no_record_found)).show();
+        // Just delegate to activity to update the UI (empty-state text will appear)
         getRelatedActivity().displaySearchResults();
     }
 
@@ -54,6 +53,7 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
         setTbChecked(true);
     }
 
+    // === Bindable: search text from SearchView ===
     @Bindable
     public String getSearchText() {
         return searchText;
@@ -62,62 +62,105 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
     public void setSearchText(String searchText) {
         this.searchText = searchText;
         notifyPropertyChanged(BR.searchText);
+        // Debounce + triggering is done by the Activity; no auto-search here.
     }
+
     @Override
     public List<Resource> doSearch(long offset, long limit) throws SQLException {
+        // Full payload; we'll filter in displaySearchResults() to keep behavior consistent.
         return getApplication().getResourceService().getAll();
     }
 
     @Override
     public void displaySearchResults() {
-        try {
-            JSONArray jsonArray = new JSONArray(getSearchResults().get(0).getResource());
+        // Parse the first (and only) resource JSON payload if available.
+        if (!Utilities.listHasElements(getSearchResults())) {
+            // no data; show empty state
+            ensureNodeListCleared();
+            getRelatedActivity().displaySearchResults();
+            return;
+        }
 
-            List<JSONObject> filteredChildren = getApplication().getResourceService().getChildrenWithNameAndDescription(jsonArray, null, null, null);
-            if (this.nodeList == null) {
-                this.nodeList = new ArrayList<>();
-            } else {
-                this.nodeList.clear();
-            }
+        String payload = getSearchResults().get(0).getResource();
+        if (!Utilities.stringHasValue(payload)) {
+            ensureNodeListCleared();
+            getRelatedActivity().displaySearchResults();
+            return;
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(payload);
+
+            List<JSONObject> filteredChildren =
+                    getApplication().getResourceService()
+                            .getChildrenWithNameAndDescription(jsonArray, null, null, null);
+
+            if (this.nodeList == null) this.nodeList = new ArrayList<>();
+            else this.nodeList.clear();
 
             List<Node> nodes = getApplication().getResourceService().convertToNodeList(filteredChildren);
 
             if (Utilities.listHasElements(nodes)) {
-                if (Utilities.stringHasValue(getSearchText())) {
-                    for (Node node : nodes) {
-                        if (node.getName().contains(getSearchText())) {
-                            this.nodeList.add(node);
-                        }
+                final String q = Utilities.stringHasValue(getSearchText())
+                        ? getSearchText().trim().toLowerCase()
+                        : null;
+
+                // 1) text filter (case-insensitive)
+                for (Node node : nodes) {
+                    if (q == null) {
+                        this.nodeList.add(node);
+                        continue;
                     }
-                } else {
-                    this.nodeList.addAll(nodes);
+                    String name = node.getName() == null ? "" : node.getName();
+                    if (name.toLowerCase().contains(q)) {
+                        this.nodeList.add(node);
+                    }
                 }
 
+                // 2) chip filters (HIV/TB) — remove items from the working list accordingly
                 if (!isHivChecked() || !isTbChecked()) {
                     Iterator<Node> iterator = this.nodeList.iterator();
                     while (iterator.hasNext()) {
                         Node node = iterator.next();
-                        String programLower = node.getProgram().toLowerCase();
-                        if ((!isHivChecked() && programLower.contains("hiv")) ||
-                                (!isTbChecked() && programLower.contains("tb"))) {
+                        String program = node.getProgram();
+                        String programLower = program == null ? "" : program.toLowerCase();
+
+                        boolean isHiv = programLower.contains("hiv");
+                        boolean isTb  = programLower.contains("tb");
+
+                        // If HIV chip is off, remove HIV items
+                        if (!isHivChecked() && isHiv) {
+                            iterator.remove();
+                            continue;
+                        }
+                        // If TB chip is off, remove TB items
+                        if (!isTbChecked() && isTb) {
                             iterator.remove();
                         }
                     }
                 }
             }
 
+            // If nothing left, defer to empty-state; no dialog popups
             if (!Utilities.listHasElements(this.nodeList)) {
                 doOnNoRecordFound();
                 return;
             }
 
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            // In case of invalid payload, show empty-state
+            ensureNodeListCleared();
         }
+
         getRelatedActivity().displaySearchResults();
     }
 
+    private void ensureNodeListCleared() {
+        if (this.nodeList == null) this.nodeList = new ArrayList<>();
+        else this.nodeList.clear();
+    }
 
+    // === Bindables for chips ===
     @Bindable
     public boolean isHivChecked() {
         return hivChecked;
@@ -125,6 +168,7 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
 
     public void setHivChecked(boolean hivChecked) {
         this.hivChecked = hivChecked;
+        notifyPropertyChanged(BR.hivChecked);
     }
 
     @Bindable
@@ -137,23 +181,27 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
         notifyPropertyChanged(BR.tbChecked);
     }
 
-    public void changeHivChecked(){
+    // Toggle helpers (called by Chip onClick) — refresh results immediately
+    public void changeHivChecked() {
         setHivChecked(!isHivChecked());
+        initSearch(); // re-run with new filter
     }
 
-    public void changeTBChecked(){
+    public void changeTBChecked() {
         setTbChecked(!isTbChecked());
+        initSearch(); // re-run with new filter
     }
 
     @Override
     public AbstractSearchParams<Resource> initSearchParams() {
-        return null;
+        return null; // not used; SearchVM will call doSearch directly
     }
 
     public List<Node> getNodeList() {
         return nodeList;
     }
 
+    // === Download flow ===
     public void downloadResource() {
         getApplication().isServerOnline(this);
     }
@@ -162,23 +210,26 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
     public void onServerStatusChecked(boolean isOnline, boolean isSlow) {
         if (isOnline) {
             if (isSlow) {
-                // Show warning: Server is slow
                 showSlowConnectionWarning(getRelatedActivity());
             }
-            getApplication().getResourceRestService().downloadFile(selectedNode.getName(), this);
+            getApplication().getResourceRestService().downloadFile(
+                    selectedNode != null ? selectedNode.getName() : null, this);
         } else {
-            Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.server_unavailable)).show();
+            Utilities.displayAlertDialog(getRelatedActivity(),
+                    getRelatedActivity().getString(R.string.server_unavailable)).show();
         }
     }
 
     @Override
     public void doOnRestSucessResponse(String flag) {
-        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.download_success)).show();
+        Utilities.displayAlertDialog(getRelatedActivity(),
+                getRelatedActivity().getString(R.string.download_success)).show();
     }
 
     @Override
     public void doOnRestErrorResponse(String errormsg) {
-        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.download_failed)).show();
+        Utilities.displayAlertDialog(getRelatedActivity(),
+                getRelatedActivity().getString(R.string.download_failed)).show();
     }
 
     public void setSelectNode(Node node) {
@@ -190,7 +241,10 @@ public class ResourceVM extends SearchVM<Resource> implements ServerStatusListen
     }
 
     public void downloadResourceToUri(Uri uri) {
-        getApplication().getResourceRestService().downloadFileToUri(selectedNode.getName(), uri, this);
+        getApplication().getResourceRestService().downloadFileToUri(
+                selectedNode != null ? selectedNode.getName() : null,
+                uri,
+                this
+        );
     }
-
 }
