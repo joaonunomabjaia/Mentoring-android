@@ -338,6 +338,7 @@ public class TutoredVM extends SearchVM<Tutored>
 
                 List<FlowHistory> histories = tutored.getFlowHistory();
                 if (histories == null) histories = new ArrayList<>();
+                histories.clear();
                 histories.add(zeroStage);
                 tutored.setFlowHistory(histories);
                 // === END UPDATED ===
@@ -412,6 +413,23 @@ public class TutoredVM extends SearchVM<Tutored>
                 e.printStackTrace();
                 throw new RuntimeException("Erro ao carregar o funcionário do Tutored", e);
             }
+
+            // LÓGICA DE DEFINIÇÃO DE SKIPZEROSESSION
+            boolean skipZero = false;
+            if (tutored.getFlowHistory() != null && !tutored.getFlowHistory().isEmpty()) {
+                for (FlowHistory history : tutored.getFlowHistory()) {
+                    if (history.getEstado() == EnumFlowHistoryProgressStatus.ISENTO && history.getEstagio() == EnumFlowHistory.SESSAO_ZERO) {
+                        skipZero = true;
+                        break; // já encontramos, podemos parar
+                    }
+                }
+            }
+
+            boolean finalSkipZero = skipZero;
+            runOnMainThread(() -> {
+                setSkipZeroSession(finalSkipZero); // 🔥 Atualiza a flag observável
+            });
+
 
             runOnMainThread(() -> {
                 if (this.tutored.getEmployee() != null &&
@@ -497,6 +515,7 @@ public class TutoredVM extends SearchVM<Tutored>
                 notifyPropertyChanged(BR.phoneNumber);
                 notifyPropertyChanged(BR.email);
                 notifyPropertyChanged(BR.selectedNgo);
+
             });
         });
     }
@@ -504,7 +523,9 @@ public class TutoredVM extends SearchVM<Tutored>
 
     private Tutored pendingTutored;
 
-    public void setPendingTutored(Tutored t) { this.pendingTutored = t; }
+    public void setPendingTutored(Tutored t) {
+        this.pendingTutored = t;
+    }
     public boolean hasPendingTutored() { return this.pendingTutored != null; }
     public void applyPendingTutored() {
         if (pendingTutored != null) {
