@@ -97,4 +97,18 @@ public interface TutoredDao {
     List<Tutored> getTutoredsPaginated(List<Integer> healthFacilityIds, int limit, int offset);
 
 
+    @Query("SELECT DISTINCT t.* " +
+            "FROM tutored t " +
+            "JOIN employee e ON e.id = t.employee_id " +
+            "JOIN location l ON e.id = l.employee_id " +
+            "WHERE t.life_cycle_status = 'ACTIVE' " +
+            "AND t.flow_history IS NOT NULL " +
+            // Match `"estagio":"<flowCode>"`
+            "AND INSTR(t.flow_history, '\"estagio\":\"' || :flowCode || '\"') > 0 " +
+            // Match `"estado":"<statusCode>"`
+            "AND INSTR(t.flow_history, '\"estado\":\"' || :statusCode || '\"') > 0 " +
+            "AND l.health_facility_id = :hfId " +
+            "ORDER BY e.surname COLLATE NOCASE, e.name COLLATE NOCASE")
+    List<Tutored> findByFlowHistory(String flowCode, String statusCode, Integer hfId);
+
 }

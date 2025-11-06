@@ -29,6 +29,10 @@ import mz.org.csaude.mentoring.model.ronda.RondaMentee;
 import mz.org.csaude.mentoring.model.ronda.RondaMentor;
 import mz.org.csaude.mentoring.model.rondatype.RondaType;
 import mz.org.csaude.mentoring.model.tutor.Tutor;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistory;
+import mz.org.csaude.mentoring.model.tutored.EnumFlowHistoryProgressStatus;
+import mz.org.csaude.mentoring.model.tutored.FlowHistory;
+import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
 import mz.org.csaude.mentoring.util.LifeCycleStatus;
 import mz.org.csaude.mentoring.util.SyncSatus;
@@ -71,6 +75,17 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
             if(r!=null) {
                 ronda.setId(r.getId());
                 this.rondaDAO.update(ronda);
+                r.setRondaMentees(rondaMenteeDAO.getAllOfRonda(ronda.getId()));
+                for (RondaMentee rondaMentee: r.getRondaMentees()) {
+                    Tutored t = this.tutoredDao.queryForId(rondaMentee.getMenteeId());
+                    for (FlowHistory flowHistory: t.getFlowHistory()) {
+                        if (flowHistory.getEstagio().code().equals(EnumFlowHistory.RONDA_CICLO.code())) {
+                            flowHistory.setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                        }
+                    }
+
+                    tutoredDao.update(t);
+                }
             } else {
                 this.rondaDAO.insert(ronda);
                 ronda.setId(this.rondaDAO.getByUuid(ronda.getUuid()).getId());
@@ -88,10 +103,14 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
                 this.rondaMentorDAO.insert(rondaMentor);
             }
             for (RondaMentee rondaMentee: ronda.getRondaMentees()) {
+                Tutored t = this.tutoredDao.getByUuid(rondaMentee.getTutored().getUuid());
+                t.setFlowHistory(rondaMentee.getTutored().getFlowHistory());
+                tutoredDao.update(t);
+
                 rondaMentee.setRonda(ronda);
                 rondaMentee.setSyncStatus(ronda.getSyncStatus());
                 rondaMentee.setStartDate(ronda.getStartDate());
-                rondaMentee.setTutored(this.tutoredDao.getByUuid(rondaMentee.getTutored().getUuid()));
+                rondaMentee.setTutored(t);
 
                 this.rondaMenteeDAO.insert(rondaMentee);
             }
@@ -235,6 +254,15 @@ public class RondaServiceImpl extends BaseServiceImpl<Ronda> implements RondaSer
     @Transaction
     public int delete(Ronda record) throws SQLException {
             this.rondaMentorDAO.deleteByRonda(record.getId());
+            for (RondaMentee rm : record.getRondaMentees()) {
+                rm.setTutored(tutoredDao.queryForId(rm.getMenteeId()));
+                for (FlowHistory flowHistory: rm.getTutored().getFlowHistory()) {
+                    if (flowHistory.getEstagio().code().equals(EnumFlowHistory.RONDA_CICLO.code())) {
+                        flowHistory.setEstado(EnumFlowHistoryProgressStatus.AGUARDA_INICIO);
+                    }
+                }
+                tutoredDao.update(rm.getTutored());
+            }
             this.rondaMenteeDAO.deleteByRonda(record.getId());
             this.rondaDAO.delete(record);
         return record.getId();

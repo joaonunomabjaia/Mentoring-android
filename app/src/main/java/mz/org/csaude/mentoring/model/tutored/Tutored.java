@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import mz.org.csaude.mentoring.base.model.BaseModel;
@@ -25,13 +27,13 @@ public class Tutored extends BaseModel {
     public static final String COLUMN_EMPLOYEE = "employee_id";
     public static final String COLUMN_ZERO_EVALUATION_STATUS = "zero_evaluation_status";
     public static final String COLUMN_ZERO_EVALUATION_SCORE = "zero_evaluation_score";
-    public static final String COLUMN_FLOW_HISTORY = "flow_history";
+    public static final String COLUMN_FLOW_HISTORY = "flow_history"; // JSON array
 
     @NonNull
     @ColumnInfo(name = COLUMN_EMPLOYEE)
     private Integer employeeId;
 
-    @Ignore // Room will ignore this field since it's not stored directly in the Tutored table.
+    @Ignore
     private Employee employee;
 
     @ColumnInfo(name = COLUMN_ZERO_EVALUATION_STATUS)
@@ -40,17 +42,17 @@ public class Tutored extends BaseModel {
     @ColumnInfo(name = COLUMN_ZERO_EVALUATION_SCORE)
     private double zeroEvaluationScore;
 
+    // >>> changed from FlowHistory to List<FlowHistory>
     @ColumnInfo(name = COLUMN_FLOW_HISTORY)
-    private FlowHistory flowHistory;
+    private List<FlowHistory> flowHistory; // stored as JSON array via TypeConverter
 
-    public Tutored() {
-    }
+    public Tutored() {}
 
     public Tutored(Integer employeeId) {
         this.employeeId = employeeId;
     }
 
-    @Ignore // This constructor should be ignored by Room because it involves complex object initialization.
+    @Ignore
     public Tutored(Employee employee) {
         this.employeeId = employee.getId();
         this.employee = employee;
@@ -67,60 +69,55 @@ public class Tutored extends BaseModel {
             this.employeeId = this.employee.getId();
         }
 
-        // Map FlowHistoryDTO -> FlowHistory
-        if (tutoredDTO.getFlowHistoryMenteeAuxDTO() != null) {
+        // Map DTO → List<FlowHistory>
+        // Prefer a list on the DTO; if only a single aux exists, wrap it.
+        if (tutoredDTO.getFlowHistoryMenteeAuxDTOList() != null &&
+                !tutoredDTO.getFlowHistoryMenteeAuxDTOList().isEmpty()) {
+
+            this.flowHistory = new ArrayList<>();
+            for (var fh : tutoredDTO.getFlowHistoryMenteeAuxDTOList()) {
+                this.flowHistory.add(new FlowHistory(
+                        fh.getEstagio(),
+                        fh.getEstado(),
+                        fh.getClassificacao()
+                ));
+            }
+        } else if (tutoredDTO.getFlowHistoryMenteeAuxDTO() != null) {
             var fh = tutoredDTO.getFlowHistoryMenteeAuxDTO();
-            this.flowHistory = new FlowHistory(
+            this.flowHistory = new ArrayList<>();
+            this.flowHistory.add(new FlowHistory(
                     fh.getEstagio(),
                     fh.getEstado(),
                     fh.getClassificacao()
-            );
+            ));
         } else {
             this.flowHistory = null;
         }
     }
 
-
     @Override
     public String validade() {
         return employee.validade();
     }
-    // Getters and Setters
 
-    public Integer getEmployeeId() {
-        return employeeId;
-    }
+    // Getters/Setters
+    public Integer getEmployeeId() { return employeeId; }
+    public void setEmployeeId(Integer employeeId) { this.employeeId = employeeId; }
 
-    public void setEmployeeId(Integer employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public Employee getEmployee() {
-        return employee;
-    }
-
+    public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) {
         this.employee = employee;
-        if (employee != null) {
-            this.employeeId = employee.getId();
-        }
+        if (employee != null) this.employeeId = employee.getId();
     }
 
-    public boolean isZeroEvaluationDone() {
-        return zeroEvaluationDone;
-    }
+    public boolean isZeroEvaluationDone() { return zeroEvaluationDone; }
+    public void setZeroEvaluationDone(boolean zeroEvaluationDone) { this.zeroEvaluationDone = zeroEvaluationDone; }
 
-    public void setZeroEvaluationDone(boolean zeroEvaluationDone) {
-        this.zeroEvaluationDone = zeroEvaluationDone;
-    }
+    public double getZeroEvaluationScore() { return zeroEvaluationScore; }
+    public void setZeroEvaluationScore(double zeroEvaluationScore) { this.zeroEvaluationScore = zeroEvaluationScore; }
 
-    public double getZeroEvaluationScore() {
-        return zeroEvaluationScore;
-    }
-
-    public void setZeroEvaluationScore(double zeroEvaluationScore) {
-        this.zeroEvaluationScore = zeroEvaluationScore;
-    }
+    public List<FlowHistory> getFlowHistory() { return flowHistory; }
+    public void setFlowHistory(List<FlowHistory> flowHistory) { this.flowHistory = flowHistory; }
 
     @Override
     public String getDescription() {
@@ -129,7 +126,7 @@ public class Tutored extends BaseModel {
 
     @Override
     public String toString() {
-        return this.getEmployee().getFullName(); // ou outro campo desejado
+        return this.getEmployee() != null ? this.getEmployee().getFullName() : super.toString();
     }
 
     @Override
@@ -140,9 +137,6 @@ public class Tutored extends BaseModel {
         Tutored tutored = (Tutored) o;
         return Objects.equals(employeeId, tutored.employeeId);
     }
-
-    public FlowHistory getFlowHistory() { return flowHistory; }
-    public void setFlowHistory(FlowHistory flowHistory) { this.flowHistory = flowHistory; }
 
     @Override
     public int hashCode() {

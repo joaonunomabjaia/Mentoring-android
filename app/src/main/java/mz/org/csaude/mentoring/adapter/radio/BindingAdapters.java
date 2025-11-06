@@ -1,6 +1,10 @@
 package mz.org.csaude.mentoring.adapter.radio;
 
+import static mz.org.csaude.mentoring.util.Utilities.iconFor;
+
 import android.content.res.ColorStateList;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -9,6 +13,11 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingListener;
+
+import com.google.android.material.button.MaterialButton;
+
+import mz.org.csaude.mentoring.model.resourceea.Node;
+import mz.org.csaude.mentoring.view.session.SessionEAResourceActivity;
 
 public class BindingAdapters {
 
@@ -59,5 +68,17 @@ public class BindingAdapters {
             view.setImageTintList(ColorStateList.valueOf(colorInt));
         }
     }
+
+    @BindingAdapter("nodeIcon")
+    public static void setNodeIcon(View view, Node node) {
+        boolean inEA = view.getContext() instanceof SessionEAResourceActivity;
+        int resId = iconFor(node, inEA);
+        if (view instanceof MaterialButton) {
+            ((MaterialButton) view).setIconResource(resId);
+        } else if (view instanceof ImageButton) {
+            ((ImageButton) view).setImageResource(resId);
+        }
+    }
+
 
 }

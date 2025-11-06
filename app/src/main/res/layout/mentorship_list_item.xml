@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
@@ -10,7 +11,6 @@
             name="viewModel"
             type="mz.org.csaude.mentoring.viewmodel.mentorship.AbstractSearchMentorshipVM" />
         <import type="mz.org.csaude.mentoring.util.SyncSatus"/>
-
         <import type="mz.org.csaude.mentoring.util.Utilities"/>
         <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
         <import type="android.view.View"/>
@@ -29,104 +29,115 @@
             android:layout_weight="7"
             android:orientation="vertical">
 
-            <TextView
+            <!-- Form name -->
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@{mentorship.form.name}"
                 android:padding="@dimen/dimen_4dp"
-                android:textSize="@dimen/dimen_12dp"
-                android:textColor="?attr/textColorPrimary"
-                android:textStyle="bold" />
-            <TextView
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface" />
+
+            <!-- Mentee full name (only for Ronda Zero) -->
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{mentorship.tutored.employee.fullName}"
                 android:padding="@dimen/dimen_4dp"
-                android:drawableLeft="@drawable/ic_person"
-                android:textColor="@color/colorPrimaryDark"
+                app:drawableStartCompat="@drawable/ic_person"
+                android:textColor="?attr/colorOnSurface"
                 android:visibility="@{mentorship.session.ronda.rondaZero ? View.VISIBLE : View.GONE}"
                 android:layout_marginBottom="@dimen/dimen_5dp"
                 android:layout_gravity="center_vertical|start"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:drawablePadding="8dp"
                 android:textStyle="bold" />
-            <TextView
+
+            <!-- Evaluation type -->
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/dimen_4dp"
                 android:text="@{mentorship.evaluationTypeDescription}"
-                android:textSize="@dimen/dimen_12dp"
-                android:textColor="?attr/textColorPrimary"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurface"
                 android:textStyle="bold" />
+
+            <!-- Location & Date -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <TextView
+
+                <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
                     android:text="@{mentorship.session.ronda.healthFacility.description}"
                     android:padding="@dimen/dimen_4dp"
-                    android:drawableLeft="@drawable/baseline_local_hospital_24"
-                    android:textSize="@dimen/dimen_12dp"
-                    android:textColor="?attr/textColorPrimary"
+                    app:drawableStartCompat="@drawable/baseline_local_hospital_24"
+                    android:textSize="12sp"
+                    android:textColor="?attr/colorOnSurface"
                     android:gravity="center_vertical"
                     android:drawablePadding="8dp"
                     android:textStyle="bold" />
-                <TextView
+
+                <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:drawablePadding="8dp"
-                    android:textColor="?attr/textColorPrimary"
+                    android:textColor="?attr/colorOnSurface"
                     android:gravity="center_vertical"
-                    android:drawableStart="@drawable/ic_calendar"
-                    android:text="@{DateUtilities.formatToDDMMYYYY(mentorship.startDate)}"
-                   />
+                    app:drawableStartCompat="@drawable/ic_calendar"
+                    android:text="@{DateUtilities.formatToDDMMYYYY(mentorship.startDate)}" />
             </LinearLayout>
+
+            <!-- Actions -->
             <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/dimen_5dp"
-            android:gravity="end"
-            android:orientation="horizontal">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/dimen_5dp"
+                android:gravity="end"
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/edit"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:layout_marginHorizontal="@dimen/dimen_20dp"
-                android:onClick="@{()-> viewModel.edit(mentorship)}"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_edit_square_24"
-                android:visibility="@{(!mentorship.completed &amp;&amp; mentorship.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageButton
-                android:id="@+id/delete"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_delete_forever_24"
-                android:onClick="@{()-> viewModel.delete(mentorship)}"
-                android:visibility="@{(!mentorship.completed &amp;&amp; mentorship.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
-            <ImageView
-                android:id="@+id/sync"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="end"
-                android:scaleType="fitXY"
-                android:src="@drawable/baseline_cloud_done_24"
-                android:visibility="@{mentorship.pending ? View.GONE : View.VISIBLE}"
-                android:layout_marginRight="@dimen/dimen_2dp"/>
+                <ImageButton
+                    android:id="@+id/edit"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="end"
+                    android:layout_marginHorizontal="@dimen/dimen_20dp"
+                    android:onClick="@{()-> viewModel.edit(mentorship)}"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/baseline_edit_square_24"
+                    android:visibility="@{(!mentorship.completed &amp;&amp; mentorship.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
+                    android:layout_marginRight="@dimen/dimen_2dp"/>
 
-        </LinearLayout>
+                <ImageButton
+                    android:id="@+id/delete"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="end"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/baseline_delete_forever_24"
+                    android:onClick="@{()-> viewModel.delete(mentorship)}"
+                    android:visibility="@{(!mentorship.completed &amp;&amp; mentorship.syncStatus == SyncSatus.PENDING) ? View.VISIBLE : View.GONE}"
+                    android:layout_marginRight="@dimen/dimen_2dp"/>
+
+                <ImageView
+                    android:id="@+id/sync"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="end"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/baseline_cloud_done_24"
+                    android:visibility="@{mentorship.pending ? View.GONE : View.VISIBLE}"
+                    android:layout_marginRight="@dimen/dimen_2dp"/>
+            </LinearLayout>
 
         </LinearLayout>
 

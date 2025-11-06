@@ -1,265 +1,364 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:fitsSystemWindows="true"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    tools:context=".view.ronda.CreateRondaActivity">
 
     <data>
         <variable name="viewModel" type="mz.org.csaude.mentoring.viewmodel.ronda.RondaVM" />
-        <variable name="provinceAdapter"    type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
-        <variable name="districtAdapter"    type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
-        <variable name="healthFacilityAdapter"    type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
-        <variable name="mentorTypeAdapter"    type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter"/>
-        <import type="mz.org.csaude.mentoring.util.DateUtilities"/>
-        <import type="mz.org.csaude.mentoring.util.Utilities"/>
-        <import type="android.view.View"/>
+
+        <!-- Adapters (MaterialAutoCompleteTextView) -->
+        <variable name="mentorTypeAdapter" type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
+        <variable name="provinceAdapter"   type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
+        <variable name="districtAdapter"   type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
+        <variable name="healthFacilityAdapter" type="mz.org.csaude.mentoring.adapter.spinner.listble.ListableSpinnerAdapter" />
+
+        <import type="android.view.View" />
+        <import type="mz.org.csaude.mentoring.util.DateUtilities" />
+        <import type="mz.org.csaude.mentoring.util.Utilities" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.ronda.RondaActivity">
+        android:background="@color/white">
 
+        <!-- AppBar / Toolbar -->
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout2"
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:elevation="4dp">
 
-            <include android:id="@+id/toolbar" layout="@layout/app_toolbar" />
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/app_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
-            android:id="@+id/linearLayout4"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:padding="@dimen/dimen_5dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarLayout2">
+        <!-- Content container toggles: form vs save status -->
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <ScrollView
+            <!-- FORM -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/form_scroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:padding="@dimen/dimen_10dp"
+                android:visibility='@{viewModel.savingCardVisible ? View.GONE : View.VISIBLE}'>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/initial_data"
+                    <!-- ============ CARD: Dados da Ronda ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_ronda"
+                        style="@style/Mentor.M3.Card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:layout_marginBottom="@dimen/dimen_6dp"
-                        android:onClick="@{(view) -> viewModel.changeInitialDataViewStatus(view)}"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="@string/start_round_initial_data"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:id="@+id/btn_show_collapse"
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/initial_data_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/dimen_4dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/mentor_type"
-                            style="@style/input_labels"/>
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_mentor_type"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            bind:selectedOpt="@={viewModel.mentorType}"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/start_date"
-                            style="@style/input_labels"/>
-
-                        <EditText
-                            android:id="@+id/ronda_start_date"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:focusableInTouchMode="false"
-                            android:drawableLeft="@drawable/ic_calendar"
-                            android:text="@{DateUtilities.formatToDDMMYYYY(viewModel.startDate)}"
-                            android:enabled="@{!viewModel.currentStep.applicationStepDisplay}"
-                            style="@style/bottom_border_edit_text_style"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/province"
-                            style="@style/input_labels"/>
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_province"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            app:adapter="@{provinceAdapter}"
-                            bind:selectedOpt="@={viewModel.selectedProvince}"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/district"
-                            style="@style/input_labels"/>
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_district"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            app:adapter="@{districtAdapter}"
-                            bind:selectedOpt="@={viewModel.selectedDistrict}"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/health_facility"
-                            style="@style/input_labels"/>
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/spn_health_facility"
-                            android:layout_width="fill_parent"
-                            style="@style/bottom_spinner_style"
-                            android:layout_height="wrap_content"
-                            app:adapter="@{healthFacilityAdapter}"
-                            bind:selectedOpt="@={viewModel.healthFacility}"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/mentees_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/shape_normal"
-                        android:padding="3dp"
-                        android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="8"
-                            android:text="@string/start_round_mentees"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:gravity="center_vertical|left"
-                            android:paddingLeft="@dimen/dimen_10dp"/>
-
-                        <ImageButton
-                            android:layout_width="@dimen/dimen_0dp"
-                            android:layout_height="match_parent"
-                            android:onClick="@{(view) -> viewModel.openCollapse(view)}"
-                            android:background="@color/background_layout"
-                            android:src="@drawable/baseline_expand_circle_down_24"
-                            android:layout_marginRight="@dimen/dimen_2dp"
-                            android:layout_weight="1"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/mentee_data_lyt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/dimen_4dp">
-
-                        <ImageButton
-                            android:id="@+id/imv_add_selected_mentee"
-                            android:layout_width="90dp"
-                            android:layout_height="60dp"
-                            app:srcCompat="@drawable/c_person_search"
-                            android:visibility="@{viewModel.currentStep.applicationStepDisplay ? View.GONE : View.VISIBLE}"
-                            android:clickable="@{!viewModel.currentStep.applicationStepDisplay}"
-                            android:onClick="@{() -> viewModel.searchMentees()}"
-                            android:layout_margin="@dimen/dimen_10dp"
-                            android:background="@drawable/button_shape"
-                            android:layout_gravity="center"/>
+                        android:layout_marginBottom="@dimen/dimen_12dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
 
-                            <TextView
-                                android:layout_width="0dp"
+                            <!-- Cabeçalho -->
+                            <LinearLayout
+                                android:id="@+id/initial_data"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/selected_mentees_list"
-                                android:layout_weight="2"
-                                style="@style/input_labels"/>
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:onClick='@{(v)->viewModel.changeInitialDataViewStatus(v)}'>
 
-                            <TextView
-                                android:layout_width="0dp"
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/start_round_initial_data"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textColor="@color/background_dark"/>
+
+                                <ImageButton
+                                    android:id="@+id/btn_show_collapse"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
+
+                            <!-- Corpo -->
+                            <LinearLayout
+                                android:id="@+id/initial_data_lyt"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textAlignment="viewEnd"
-                                android:text="@{Utilities.parseIntToString(viewModel.selectedMentees.size())}"
-                                android:layout_weight="1"
-                                style="@style/input_labels"
-                                android:textColor="@color/red"
-                                android:textSize="15sp"/>
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
+
+                                <!-- Tipo de Mentor (dropdown) -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/mentor_type"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_mentor_type"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        app:adapter='@{mentorTypeAdapter}'
+                                        bind:selectedOpt='@={viewModel.mentorType}'/>
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <!-- Data de início -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/start_date"
+                                    app:startIconDrawable="@drawable/ic_calendar">
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        android:id="@+id/ronda_start_date"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:focusable="false"
+                                        android:clickable="true"
+                                        android:text='@{DateUtilities.formatToDDMMYYYY(viewModel.startDate)}'/>
+                                </com.google.android.material.textfield.TextInputLayout>
+                            </LinearLayout>
                         </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rcv_selected_mentees"
+                    <!-- ============ CARD: Localização ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_localizacao"
+                        style="@style/Mentor.M3.Card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/dimen_12dp">
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/dimen_4dp"
-                            android:padding="@dimen/dimen_4dp"
-                            android:background="@drawable/shape_ronda_mentee_back"
-                            android:scrollbars="vertical"/>
-                    </LinearLayout>
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
 
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_marginTop="@dimen/dimen_15dp"
-                        android:layout_marginBottom="@dimen/dimen_15dp"
+                            <LinearLayout
+                                android:id="@+id/healt_unit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:onClick='@{(v)->viewModel.changeInitialDataViewStatus(v)}'>
+
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/health_unit_label"
+                                    android:textAppearance ="?attr/textAppearanceTitleLarge"
+                                    android:textColor="@color/background_dark"/>
+
+                                <ImageButton
+                                    android:id="@+id/btn_healt_unit"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/healt_unit_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
+
+                                <!-- Província -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/province_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_province"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        app:adapter='@{provinceAdapter}'
+                                        bind:selectedOpt='@={viewModel.selectedProvince}'/>
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <!-- Distrito -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/district_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_district"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        app:adapter='@{districtAdapter}'
+                                        bind:selectedOpt='@={viewModel.selectedDistrict}'/>
+                                </com.google.android.material.textfield.TextInputLayout>
+
+                                <!-- US -->
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/Mentor.M3.TextInput.Dropdown.Outlined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:hint="@string/health_facility_label"
+                                    app:endIconMode="dropdown_menu">
+                                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                        android:id="@+id/act_healthfacility"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:focusable="false"
+                                        android:cursorVisible="false"
+                                        app:adapter='@{healthFacilityAdapter}'
+                                        bind:selectedOpt='@={viewModel.healthFacility}'/>
+                                </com.google.android.material.textfield.TextInputLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- ============ CARD: Participantes (Mentees) ============ -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_participantes"
+                        style="@style/Mentor.M3.Card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/dimen_16dp">
+
+                            <LinearLayout
+                                android:id="@+id/mentees_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:onClick='@{(v)->viewModel.openCollapse(v)}'>
+
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/start_round_mentees"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textColor="@color/background_dark"/>
+
+                                <ImageButton
+                                    android:id="@+id/btn_mentees"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:contentDescription="@string/expand"
+                                    android:src="@drawable/baseline_expand_more_24" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/mentee_data_lyt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="@dimen/dimen_8dp">
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btn_pick_mentees"
+                                    style="@style/Mentor.M3.Button"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/select_mentees"
+                                    android:layout_gravity="center"
+                                    android:onClick='@{() -> viewModel.searchMentees()}'
+                                    app:icon="@drawable/c_person_search" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:orientation="horizontal">
+
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/selected_mentees_list"
+                                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text='@{Utilities.parseIntToString(viewModel.selectedMentees.size())}'
+                                        android:textColor="@color/red"
+                                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"/>
+                                </LinearLayout>
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/rcv_selected_mentees"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/dimen_8dp"
+                                    android:padding="@dimen/dimen_8dp"
+                                    android:background="@drawable/shape_ronda_mentee_back"
+                                    android:scrollbars="vertical"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- SALVAR -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_save_ronda"
+                        style="@style/Mentor.M3.Button"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingHorizontal="@dimen/dimen_30dp"
-                        android:background="@drawable/button_shape"
+                        android:layout_marginTop="@dimen/dimen_16dp"
                         android:text="@string/submit"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:onClick="@{() -> viewModel.save()}"/>
+                        android:onClick='@{() -> viewModel.save()}' />
                 </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.core.widget.NestedScrollView>
+
+            <!-- CARD DE ESTADO (igual ao Tutored) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/save_state_card"
+                style="@style/Mentor.M3.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_margin="@dimen/dimen_18dp"
+                android:padding="@dimen/dimen_24dp"
+                android:visibility='@{viewModel.savingCardVisible ? View.VISIBLE : View.GONE}'>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </FrameLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

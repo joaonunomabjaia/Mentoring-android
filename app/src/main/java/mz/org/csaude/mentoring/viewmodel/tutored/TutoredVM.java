@@ -148,11 +148,17 @@ public class TutoredVM extends SearchVM<Tutored>
         });
     }
 
+    // Put anywhere in the class (e.g., near matchesStage)
+    private FlowHistory latestFlow(Tutored t) {
+        if (t == null || t.getFlowHistory() == null || t.getFlowHistory().isEmpty()) return null;
+        return t.getFlowHistory().get(t.getFlowHistory().size() - 1);
+    }
+
     protected boolean matchesStage(Tutored t, StageFilter filter) {
         if (filter == null || filter == StageFilter.ALL) return true;
-
         if (t == null) return false;
-        FlowHistory fh = t.getFlowHistory();
+
+        FlowHistory fh = latestFlow(t);
         if (fh == null || fh.getEstagio() == null || fh.getEstado() == null) return false;
 
         final EnumFlowHistoryProgressStatus NEED = EnumFlowHistoryProgressStatus.AGUARDA_INICIO;
@@ -169,6 +175,7 @@ public class TutoredVM extends SearchVM<Tutored>
                 return true;
         }
     }
+
 
     /** TODO: implemente a regra real de classificação. */
     protected StageFilter classifyStage(Tutored t) {
@@ -330,28 +337,21 @@ public class TutoredVM extends SearchVM<Tutored>
                 location.setLifeCycleStatus(LifeCycleStatus.ACTIVE);
                 tutored.getEmployee().addLocation(location);
 
-                // === NEW: set flowHistory based on skipZeroSession ===
+                // === UPDATED: flowHistory as LIST (append) ===
                 boolean skip = Boolean.TRUE.equals(skipZeroSession.getValue());
-                if (skip) {
-                    // estagio = SESSAO_ZERO, estado = ISENTO, classificação = null
-                    tutored.setFlowHistory(
-                            new FlowHistory(
-                                    EnumFlowHistory.SESSAO_ZERO,
-                                    EnumFlowHistoryProgressStatus.ISENTO,
-                                    null
-                            )
-                    );
-                } else {
-                    // estagio = SESSAO_ZERO, estado = AGUARDA_INICIO, classificação = null
-                    tutored.setFlowHistory(
-                            new FlowHistory(
-                                    EnumFlowHistory.SESSAO_ZERO,
-                                    EnumFlowHistoryProgressStatus.AGUARDA_INICIO,
-                                    null
-                            )
-                    );
-                }
-                // === END NEW ===
+
+                FlowHistory zeroStage = new FlowHistory(
+                        EnumFlowHistory.SESSAO_ZERO,
+                        skip ? EnumFlowHistoryProgressStatus.ISENTO
+                                : EnumFlowHistoryProgressStatus.AGUARDA_INICIO,
+                        null
+                );
+
+                List<FlowHistory> histories = tutored.getFlowHistory();
+                if (histories == null) histories = new ArrayList<>();
+                histories.add(zeroStage);
+                tutored.setFlowHistory(histories);
+                // === END UPDATED ===
 
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
@@ -369,6 +369,7 @@ public class TutoredVM extends SearchVM<Tutored>
             }
         });
     }
+
 
 
     @Override

@@ -143,20 +143,19 @@ public class UserRestService extends BaseRestService implements UserSyncService 
 
         Call<UserDTO> call = syncDataService.getByuuid(getSessionManager().getActiveUser());
 
-        call.enqueue(new Callback<UserDTO>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if (response.code() == 200) {
                     UserDTO data = response.body();
-                    getServiceExecutor().execute(()-> {
+                    getServiceExecutor().execute(() -> {
                         try {
                             User userOnServer = new User(data);
                             User userOnDB = getApplication().getUserService().getByuuid(userOnServer.getUuid());
                             if (userOnDB == null) {
                                 userOnServer.setSyncStatus(SyncSatus.SENT);
                                 getApplication().getUserService().savedOrUpdateUser(userOnServer);
-                            } else
-                            if (DateUtilities.isDateAfterIgnoringTime(userOnServer.getUpdatedAt(), userOnDB.getUpdatedAt())) {
+                            } else if (DateUtilities.isDateAfterIgnoringTime(userOnServer.getUpdatedAt(), userOnDB.getUpdatedAt())) {
                                 userOnServer.setId(userOnDB.getId());
                                 getApplication().getUserService().savedOrUpdateUser(userOnServer);
                             }

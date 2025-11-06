@@ -14,6 +14,10 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -55,6 +59,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,6 +71,7 @@ import mz.org.csaude.mentoring.base.activity.BaseActivity;
 import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.listner.dialog.IDialogListener;
 import mz.org.csaude.mentoring.listner.dialog.IListbleDialogListener;
+import mz.org.csaude.mentoring.model.resourceea.Node;
 
 public class Utilities {
 
@@ -736,4 +742,63 @@ public class Utilities {
     public static ColorStateList colorStateListInt(@ColorInt int color) {
         return ColorStateList.valueOf(color);
     }
+
+    /**
+     * Minimal helper: calls `onTextChange.accept(text)` on every keystroke.
+     */
+    public static TextWatcher simpleFilterTextWatcher(final Consumer<String> onTextChange) {
+        return new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (onTextChange != null) onTextChange.accept(s == null ? "" : s.toString().trim());
+            }
+            @Override public void afterTextChanged(Editable s) { }
+        };
+    }
+
+    /**
+     * Debounced version (defaults to 250ms). Useful to avoid filtering on every keystroke.
+     */
+    public static TextWatcher debouncedFilterTextWatcher(final Consumer<String> onTextChange) {
+        return debouncedFilterTextWatcher(onTextChange, 250);
+    }
+
+    public static TextWatcher debouncedFilterTextWatcher(final Consumer<String> onTextChange, long delayMs) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final Runnable[] pending = new Runnable[1];
+
+        return new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (pending[0] != null) handler.removeCallbacks(pending[0]);
+                final String text = (s == null) ? "" : s.toString().trim();
+                pending[0] = () -> { if (onTextChange != null) onTextChange.accept(text); };
+                handler.postDelayed(pending[0], Math.max(0, delayMs));
+            }
+
+            @Override public void afterTextChanged(Editable s) { }
+        };
+    }
+
+    public static int iconFor(Node node, boolean inEASelection) {
+        if (inEASelection) return R.drawable.ic_done;
+        if (node == null) return R.drawable.ic_arrow_circle_down;
+
+        if (node.isLink()) return R.drawable.ic_link;
+
+        /*String name = node.getName() != null ? node.getName().toLowerCase() : "";
+        if (name.endsWith(".pdf")) return R.drawable.ic_pdf;
+        if (name.endsWith(".doc") || name.endsWith(".docx")) return R.drawable.ic_doc;
+        if (name.endsWith(".xls") || name.endsWith(".xlsx")) return R.drawable.ic_xls;
+        if (name.endsWith(".ppt") || name.endsWith(".pptx")) return R.drawable.ic_ppt;
+        if (name.endsWith(".zip") || name.endsWith(".rar") || name.endsWith(".7z")) return R.drawable.ic_zip;
+        if (name.endsWith(".mp4") || name.endsWith(".mov") || name.endsWith(".mkv")) return R.drawable.ic_video;
+        if (name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".m4a")) return R.drawable.ic_audio;
+        if (name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")) return R.drawable.ic_image;*/
+
+        // fallback
+        return R.drawable.ic_arrow_circle_down;
+    }
+
 }

@@ -421,4 +421,9 @@
         <item name="android:textColorHint">?attr/colorOnSurfaceVariant</item>
     </style>
 
+    <style name="ThemeOverlay.App.DatePicker" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <!-- Example customizations -->
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.Material3.Corner.Medium</item>
+    </style>
+
 </resources>
