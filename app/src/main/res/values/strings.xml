@@ -214,6 +214,7 @@
     <string name="rounds">Rondas/Ciclos de Mentoria</string>
     <string name="zero_sessions">Sessões Zero</string>
     <string name="mentees">Mentorandos</string>
+    <string name="mentees_ronda_sessao">Provedores/Rondas/Sessões</string>
     <string name="ea_resources">Recursos de EA</string>
     <string name="enable_auto_sync">Habilitar Sincronização Automática</string>
     <string name="sync_interval">Intervalo de Sincronização (Horas)</string>
@@ -243,6 +244,7 @@
     <string name="meus_dados">Meus Dados</string>
     <string name="mentor">Mentor</string>
     <string name="sair">Sair</string>
+    <string name="home">Inicio</string>
 
     <string name="evaluation_end">Fim da Avaliação</string>
     <string name="demostration_needed">Houve necessidade de demonstração</string>

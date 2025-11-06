@@ -228,6 +228,7 @@ public class TutoredVM extends SearchVM<Tutored>
     public void setSkipZeroSession(boolean value) {
         if (!Boolean.valueOf(value).equals(skipZeroSession.getValue())) {
             skipZeroSession.setValue(value);
+            notifyChange();
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -110,6 +111,15 @@ public class RondaActivity extends BaseActivity {
 
         // Load inicial
         getRelatedViewModel().initSearch();
+
+        mentoringCycleListBinding.bottomNav.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_home) {
+                finish();
+                return true;
+            } else {
+                return true;
+            }
+        });
     }
 
     private void setupSearch(SearchBar searchBar, SearchView searchView) {

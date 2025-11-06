@@ -23,11 +23,13 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import mz.org.csaude.mentoring.R;
 import mz.org.csaude.mentoring.base.activity.BaseActivity;
@@ -40,7 +42,6 @@ public class TutoredActivity extends BaseActivity {
 
     private ActivityTutoredBinding binding;
     private NavController navController;
-
     private ActivityResultLauncher<Intent> voiceLauncher;
     private ActivityResultLauncher<String> micPermissionLauncher;
 
@@ -79,7 +80,21 @@ public class TutoredActivity extends BaseActivity {
             et.setText(existing);
             et.setSelection(existing.length());
         }
+
+        binding.bottomNav.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_home) {
+                finish();
+                return true;
+            } else {
+                NavigationUI.onNavDestinationSelected(item, navController);
+                return true;
+            }
+        });
+
     }
+
+
+
 
     private void setupSearch(SearchBar searchBar, SearchView searchView) {
         // Vincula o SearchView ao SearchBar
@@ -263,8 +278,14 @@ public class TutoredActivity extends BaseActivity {
         return (TutoredStagesVM) super.getRelatedViewModel();
     }
 
+//    @Override
+//    public boolean onSupportNavigateUp() {
+//        return (navController != null && navController.navigateUp()) || super.onSupportNavigateUp();
+//    }
+
     @Override
     public boolean onSupportNavigateUp() {
-        return (navController != null && navController.navigateUp()) || super.onSupportNavigateUp();
+        finish(); // volta à Home ou Activity anterior
+        return true;
     }
 }
