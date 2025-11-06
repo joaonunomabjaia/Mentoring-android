@@ -176,16 +176,6 @@ public class TutoredVM extends SearchVM<Tutored>
         }
     }
 
-
-    /** TODO: implemente a regra real de classificação. */
-    protected StageFilter classifyStage(Tutored t) {
-        // Exemplo (troque pelos teus campos reais):
-        // if (!t.hasZeroSession()) return StageFilter.AWAIT_ZERO;
-        // if (t.isAtRoundStartWindow()) return StageFilter.START_ROUND;
-        // if (t.isAtSemestralWindow()) return StageFilter.SEMESTRAL;
-        return StageFilter.ALL;
-    }
-
     // ====== fluxo de busca base ======
     @Override
     protected void doOnNoRecordFound() { this.displaySearchResults(); }
@@ -321,13 +311,11 @@ public class TutoredVM extends SearchVM<Tutored>
                     tutored.getEmployee().setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
                     tutored.setCreatedByUuid(getApplication().getAuthenticatedUser().getUuid());
                 } else {
-//                    tutored.getEmployee().setLocations(new ArrayList<>());
                     if (Utilities.listHasElements(tutored.getEmployee().getLocations())) {
                         tutored.getEmployee().getLocations().set(0, location);
                     } else {
                         tutored.getEmployee().addLocation(location);
                     }
-
                 }
 
                 location.setProvince((Province) getProvince());
@@ -352,7 +340,6 @@ public class TutoredVM extends SearchVM<Tutored>
                 histories.add(zeroStage);
                 tutored.setFlowHistory(histories);
                 // === END UPDATED ===
-
                 String error = this.tutored.validade();
                 if (Utilities.stringHasValue(error)) {
                     runOnMainThread(() -> setSaveUiState(SaveUiState.ERROR, error));
@@ -369,8 +356,6 @@ public class TutoredVM extends SearchVM<Tutored>
             }
         });
     }
-
-
 
     @Override
     public void doOnResponse(String flag, List<Tutored> objects) {
@@ -393,12 +378,10 @@ public class TutoredVM extends SearchVM<Tutored>
         }
     }
 
-
     @Override
     public void doOnRestErrorResponse(String errorMsg) {
         runOnMainThread(() -> setSaveUiState(SaveUiState.ERROR, errorMsg));
     }
-
 
     public void save(){ this.doSave(); }
 
@@ -613,8 +596,6 @@ public class TutoredVM extends SearchVM<Tutored>
     public CreateTutoredActivity getCreateTutoredActivity() { return (CreateTutoredActivity) super.getRelatedActivity(); }
     @Override public BaseActivity getRelatedActivity() { return super.getRelatedActivity(); }
 
-//    public void createNewTutored() { getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class); }
-
     public void createNewTutored() {
         getCurrentStep().changetocreate(); // <-- ADICIONA ESTA LINHA
         getRelatedActivity().nextActivityFinishingCurrent(CreateTutoredActivity.class);
@@ -626,17 +607,6 @@ public class TutoredVM extends SearchVM<Tutored>
             try { setPartners(getApplication().getPartnerService().getAll()); }
             catch (SQLException e) { throw new RuntimeException(e); }
         });
-    }
-
-    public void initMenteeUpload() {
-        OneTimeWorkRequest request = WorkerScheduleExecutor.getInstance(getApplication()).uploadMentees();
-        getApplication().saveDefaultLastSyncDate(DateUtilities.getCurrentDate());
-        WorkerScheduleExecutor.getInstance(getApplication()).getWorkManager().getWorkInfoByIdLiveData(request.getId())
-                .observe(getRelatedActivity(), workInfo -> {
-                    if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        Utilities.displayAlertDialog(getRelatedActivity(), getRelatedActivity().getString(R.string.tutored_data_upload_success)).show();
-                    }
-                });
     }
 
     public void edit(Tutored tutored) {

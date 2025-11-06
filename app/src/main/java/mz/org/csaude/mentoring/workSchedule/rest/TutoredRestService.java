@@ -2,13 +2,11 @@ package mz.org.csaude.mentoring.workSchedule.rest;
 
 import android.app.Application;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import mz.org.csaude.mentoring.base.model.BaseModel;
 import mz.org.csaude.mentoring.base.service.BaseRestService;
 import mz.org.csaude.mentoring.base.service.SuccessResponse;
 import mz.org.csaude.mentoring.common.HttpStatus;
@@ -27,8 +24,6 @@ import mz.org.csaude.mentoring.listner.rest.RestResponseListener;
 import mz.org.csaude.mentoring.model.location.Location;
 import mz.org.csaude.mentoring.model.tutored.Tutored;
 import mz.org.csaude.mentoring.model.user.User;
-import mz.org.csaude.mentoring.service.tutored.TutoredService;
-import mz.org.csaude.mentoring.service.tutored.TutoredServiceImpl;
 import mz.org.csaude.mentoring.util.SyncSatus;
 import mz.org.csaude.mentoring.util.Utilities;
 import okhttp3.ResponseBody;
@@ -153,7 +148,7 @@ public class TutoredRestService extends BaseRestService {
                 TutoredDTO data = response.body();
                 if (response.code() == 201) {
                     getServiceExecutor().execute(()-> {
-                        tutored.setFlowHistory(data.getFlowHistoryMenteeAuxDTOList());
+                        tutored.setFlowHistory(data.getFlowHistoryMenteeAuxDTO());
                         try {
                             getApplication().getTutoredService().savedOrUpdateTutored(tutored);
 
